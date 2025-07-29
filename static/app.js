@@ -143,39 +143,81 @@ function addModuleRow(tabDiv, type) {
   const moduleSelect = document.createElement('select');
   moduleSelect.className = 'form-input module-select';
 
+  // Заполняем категории (оставшиеся)
   const usedCategories = Array.from(tabDiv.querySelectorAll('.category-select')).map(s => s.value);
+  const availableCategories = Object.keys(currentModules).filter(cat => !usedCategories.includes(cat));
 
-  for (const category in currentModules) {
-    if (!usedCategories.includes(category)) {
-      const opt = document.createElement('option');
-      opt.value = category;
-      opt.textContent = category;
-      categorySelect.appendChild(opt);
-    }
+  if (availableCategories.length === 0) {
+    alert("Все категории уже добавлены");
+    return;
   }
 
-  categorySelect.addEventListener('change', update);
-  moduleSelect.addEventListener('change', update);
+  availableCategories.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat;
+    opt.textContent = cat;
+    categorySelect.appendChild(opt);
+  });
 
   row.appendChild(categorySelect);
   row.appendChild(moduleSelect);
   tabDiv.querySelector('.mod-selects').appendChild(row);
-  categorySelect.dispatchEvent(new Event('change'));
 
-  function update() {
-    const selected = Array.from(tabDiv.querySelectorAll('.module-select')).map(s => s.value);
+  // === Обновляет модули в moduleSelect
+  function updateModuleOptions() {
     const category = categorySelect.value;
     const mods = currentModules[category] || [];
+    const selected = Array.from(tabDiv.querySelectorAll('.module-select')).map(s => s.value);
+
     moduleSelect.innerHTML = '';
     mods.forEach(mod => {
-      if (selected.includes(mod.en)) return;
+      if (selected.includes(mod.en) && moduleSelect.value !== mod.en) return; // оставить текущий
       const opt = document.createElement('option');
       opt.value = mod.en;
       opt.textContent = mod.en;
       moduleSelect.appendChild(opt);
     });
+
+    if (!moduleSelect.value && moduleSelect.options.length > 0) {
+      moduleSelect.value = moduleSelect.options[0].value;
+    }
   }
+
+  // === Обновляет все moduleSelect'ы
+  function updateAllModules() {
+    tabDiv.querySelectorAll('.mod-row').forEach(r => {
+      const catSel = r.querySelector('.category-select');
+      const modSel = r.querySelector('.module-select');
+      const category = catSel.value;
+      const mods = currentModules[category] || [];
+      const selected = Array.from(tabDiv.querySelectorAll('.module-select')).map(s => s.value);
+      const currentValue = modSel.value;
+
+      modSel.innerHTML = '';
+      mods.forEach(mod => {
+        if (selected.includes(mod.en) && mod.en !== currentValue) return;
+        const opt = document.createElement('option');
+        opt.value = mod.en;
+        opt.textContent = mod.en;
+        modSel.appendChild(opt);
+      });
+
+      modSel.value = currentValue;
+    });
+  }
+
+  categorySelect.addEventListener('change', () => {
+    updateModuleOptions();
+    updateAllModules();
+  });
+
+  moduleSelect.addEventListener('change', () => {
+    updateAllModules();
+  });
+
+  categorySelect.dispatchEvent(new Event('change'));
 }
+
 
 // === Отправка сборки ===
 document.getElementById('submit-build').addEventListener('click', async () => {
