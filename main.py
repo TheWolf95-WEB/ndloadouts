@@ -2,12 +2,13 @@ from fastapi import FastAPI, Request, Body, BackgroundTasks
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from dotenv import load_dotenv
+from dotenv import load_dotenv, set_key, dotenv_values
 import json
 import os
 import hmac
 import hashlib
 import subprocess
+from pathlib import Path
 from urllib.parse import parse_qs
 
 from database import init_db, get_all_builds, add_build, delete_build_by_id
@@ -106,6 +107,42 @@ def delete_build(build_id: str):
     try:
         delete_build_by_id(build_id)
         return {"status": "ok"}
+    except Exception as e:
+        return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
+
+
+# добавления админа
+
+@app.post("/api/assign-admin")
+async def assign_admin(data: dict = Body(...)):
+    init_data = data.get("initData", "")
+    parsed = parse_qs(init_data)
+    user_data = parsed.get("user", [None])[0]
+
+    if not user_data:
+        return JSONResponse({"error": "No user info"}, status_code=400)
+
+    try:
+        user_json = json.loads(user_data)
+        user_id = str(user_json.get("id"))
+
+        if not user_id.isdigit():
+            return JSONResponse({"status": "error", "detail": "Invalid user ID"}, status_code=400)
+
+        env_path = Path(".env")
+        env_vars = dotenv_values(env_path)
+        current_admins = env_vars.get("ADMIN_IDS", "")
+        admin_set = set(filter(None, map(str.strip, current_admins.split(","))))
+
+        if user_id in admin_set:
+            return JSONResponse({"status": "ok", "message": "Already an admin"})
+
+        admin_set.add(user_id)
+        new_value = ",".join(sorted(admin_set, key=int))
+        set_key(env_path, "ADMIN_IDS", new_value)
+
+        return JSONResponse({"status": "ok", "message": "Admin added"})
+
     except Exception as e:
         return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
 
