@@ -457,8 +457,6 @@ async function loadBuilds() {
     }
   });
 
-  });
-}
 
 
 
