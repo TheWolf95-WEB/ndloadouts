@@ -4,6 +4,7 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.filters import CommandStart
 from dotenv import load_dotenv
+from aiogram.enums.parse_mode import ParseMode
 from aiogram.client.default import DefaultBotProperties
 
 load_dotenv(dotenv_path="/opt/ndloadouts/.env")
@@ -17,7 +18,7 @@ if not BOT_TOKEN or not WEBAPP_URL:
 
 bot = Bot(
     token=BOT_TOKEN,
-    default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+    default=DefaultBotProperties(parse_mode="HTML") 
 )
 dp = Dispatcher()
 
