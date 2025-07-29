@@ -1,3 +1,16 @@
+const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
+
+window.addEventListener('DOMContentLoaded', () => {
+  const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
+
+  if (isTelegram) {
+    document.getElementById('tg-app').style.display = 'block';
+    Telegram.WebApp.expand();
+  } else {
+    document.getElementById('browser-app').style.display = 'block';
+  }
+});
+
 
 // переходы по страницам 
 function showScreen(id) {
