@@ -371,17 +371,17 @@ async function loadBuilds() {
     wrapper.className = "build-card";
     
     wrapper.innerHTML = `
-      <details class="build-card">
-        <summary class="build-summary">
+      <details>
+        <summary>
           <div class="build-header">
-            <div class="build-title-wrap">
+            <div class="build-header-top">
               <h3 class="build-title">${build.title}</h3>
-              <div class="build-meta">
-                ${[build.top1, build.top2, build.top3].map((mod, i) =>
-                  mod ? `<span class="top-tag" style="background:${topColors[i]}">#${i + 1} ${mod}</span>` : ''
-                ).join('')}
-                <span class="weapon-type">${weaponTypeLabels[build.weapon_type] || build.weapon_type}</span>
-              </div>
+              <span class="weapon-type">${weaponTypeLabels[build.weapon_type] || build.weapon_type}</span>
+            </div>
+            <div class="top-tags">
+              ${[build.top1, build.top2, build.top3].map((mod, i) =>
+                mod ? `<span class="top-tag" style="background:${topColors[i]}">#${i + 1} ${mod}</span>` : ''
+              ).join('')}
             </div>
           </div>
         </summary>
@@ -395,23 +395,18 @@ async function loadBuilds() {
         <div class="tab-content">
           ${build.tabs.map((tab, i) => `
             <div class="tab-panel" style="${i === 0 ? '' : 'display:none;'}">
-              <div class="mod-grid">
-                ${tab.items.map(item => {
-                  const ru = moduleNameMap[item] || item;
-                  const category = getCategoryByModule(item, build.weapon_type);
-                  return `
-                    <div class="mod-item">
-                      <div class="mod-slot">${category}</div>
-                      <div class="mod-name">${ru}</div>
-                    </div>
-                  `;
-                }).join('')}
-              </div>
+              ${tab.items.map(item => `
+                <div class="mod-block">
+                  <span class="mod-category">${getCategoryByModule(item, build.weapon_type)}</span>
+                  <span class="mod-name">${moduleNameMap[item] || item}</span>
+                </div>
+              `).join('')}
             </div>
           `).join('')}
         </div>
       </details>
     `;
+
 
 
     // табы
