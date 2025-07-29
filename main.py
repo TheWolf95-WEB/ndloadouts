@@ -115,35 +115,20 @@ def delete_build(build_id: str):
 
 @app.post("/api/assign-admin")
 async def assign_admin(data: dict = Body(...)):
-    init_data = data.get("initData", "")
-    parsed = parse_qs(init_data)
-    user_data = parsed.get("user", [None])[0]
+    user_id = str(data.get("userId", "")).strip()
+    if not user_id.isdigit():
+        return JSONResponse({"status": "error", "message": "Некорректный ID"}, status_code=400)
 
-    if not user_data:
-        return JSONResponse({"error": "No user info"}, status_code=400)
+    env_path = Path(".env")
+    env_vars = dotenv_values(env_path)
+    current_admins = env_vars.get("ADMIN_IDS", "")
+    admin_set = set(filter(None, map(str.strip, current_admins.split(","))))
 
-    try:
-        user_json = json.loads(user_data)
-        user_id = str(user_json.get("id"))
+    if user_id in admin_set:
+        return JSONResponse({"status": "ok", "message": "Этот пользователь уже админ."})
 
-        if not user_id.isdigit():
-            return JSONResponse({"status": "error", "detail": "Invalid user ID"}, status_code=400)
+    admin_set.add(user_id)
+    new_value = ",".join(sorted(admin_set))
+    set_key(env_path, "ADMIN_IDS", new_value)
 
-        env_path = Path(".env")
-        env_vars = dotenv_values(env_path)
-        current_admins = env_vars.get("ADMIN_IDS", "")
-        admin_set = set(filter(None, map(str.strip, current_admins.split(","))))
-
-        if user_id in admin_set:
-            return JSONResponse({"status": "ok", "message": "Already an admin"})
-
-        admin_set.add(user_id)
-        new_value = ",".join(sorted(admin_set, key=int))
-        set_key(env_path, "ADMIN_IDS", new_value)
-
-        return JSONResponse({"status": "ok", "message": "Admin added"})
-
-    except Exception as e:
-        return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
-
-
+    return JSONResponse({"status": "ok", "message": f"Пользователь {user_id} добавлен в админы."})
