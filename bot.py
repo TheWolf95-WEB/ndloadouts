@@ -5,7 +5,7 @@ from aiogram.enums.parse_mode import ParseMode
 from aiogram.filters import CommandStart
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path="/opt/ndloadouts/.env")
 
 BOT_TOKEN = os.getenv("TOKEN")
 WEBAPP_URL = os.getenv("WEBAPP_URL")
