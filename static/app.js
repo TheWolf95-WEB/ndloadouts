@@ -21,12 +21,18 @@ function showScreen(id) {
   // Показываем кнопки ролей только на главном экране
   if (id === 'screen-main') {
     roleButtons?.style.display = 'block';
-    checkAdmin(); // ← вызываем реальную проверку
+    checkAdmin(); // покажем админ-кнопку, если надо
   } else {
     roleButtons?.style.display = 'none';
-    addBtn?.style.display = 'none'; // точно скрываем вне главного
+    addBtn?.style.display = 'none';
   }
+}
 
+function checkAdmin() {
+  if (!user || !addBtn) return;
+  const isAdmin = ADMIN_IDS.includes(user.id);
+  addBtn.style.display = isAdmin ? 'inline-block' : 'none';
+}
 
 
 
@@ -79,34 +85,17 @@ if (user && userInfo) {
   userInfo.style.display = 'none'; // скрываем блок, если нет данных пользователя
 }
 
-function checkAdmin() {
-  if (!user || !userInfo || !addBtn) return;
-
-  const isAdmin = ADMIN_IDS.includes(user.id);
-
-  if (isAdmin) {
-    addBtn.style.display = 'inline-block';
-  } else {
-    addBtn.style.display = 'none';
-  }
-}
-
-
-
 
 // === ПОВЕДЕНИЕ КНОПОК ===
 showBuildsBtn?.addEventListener('click', async () => {
-  if (buildForm) buildForm.style.display = 'none';
-  if (buildsList) buildsList.style.display = 'block';
-  if (roleButtons) roleButtons.style.display = 'none';
   await loadBuilds();
+  showScreen('screen-builds');
 });
 
 addBtn?.addEventListener('click', () => {
-  if (buildForm) buildForm.style.display = 'block';
-  if (buildsList) buildsList.style.display = 'none';
-  if (roleButtons) roleButtons.style.display = 'none';
+  showScreen('screen-form');
 });
+
 
 // === Загрузка типов оружия ===
 const weaponTypeLabels = {}; // type.key → type.label
