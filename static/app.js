@@ -38,28 +38,35 @@ async function checkAdminStatus() {
     const data = await res.json();
 
     const editBtn = document.getElementById('edit-builds-btn');
-    const assignBtn = document.getElementById('assign-admin-btn'); // 👈
+    const assignBtn = document.getElementById('assign-admin-btn');
 
+    // Для всех админов (главных и доп)
     if (data.is_admin) {
       if (addBtn) addBtn.style.display = 'inline-block';
       if (editBtn) editBtn.style.display = 'inline-block';
-      if (assignBtn) assignBtn.style.display = 'inline-block'; // 👈
       if (userInfo) userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
     } else {
       if (addBtn) addBtn.style.display = 'none';
       if (editBtn) editBtn.style.display = 'none';
-      if (assignBtn) assignBtn.style.display = 'none'; // 👈
+    }
+
+    // Только для главного
+    if (data.is_super_admin) {
+      if (assignBtn) assignBtn.style.display = 'inline-block';
+    } else {
+      if (assignBtn) assignBtn.style.display = 'none';
     }
 
   } catch (e) {
     console.error("Ошибка при проверке прав администратора:", e);
     if (addBtn) addBtn.style.display = 'none';
     const editBtn = document.getElementById('edit-builds-btn');
-    const assignBtn = document.getElementById('assign-admin-btn'); // 👈
+    const assignBtn = document.getElementById('assign-admin-btn');
     if (editBtn) editBtn.style.display = 'none';
-    if (assignBtn) assignBtn.style.display = 'none'; // 👈
+    if (assignBtn) assignBtn.style.display = 'none';
   }
 }
+
 
 
 
