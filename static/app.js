@@ -414,6 +414,42 @@ async function loadBuildsTable() {
   }
 }
 
+// Назначить админа
+const assignAdminBtn = document.getElementById('assign-admin-btn');
+const assignAdminForm = document.getElementById('assign-admin-form');
+const confirmAssignAdmin = document.getElementById('confirm-assign-admin');
+
+if (assignAdminBtn && assignAdminForm) {
+  assignAdminBtn.addEventListener('click', () => {
+    assignAdminForm.style.display = 'block';
+  });
+}
+
+if (confirmAssignAdmin) {
+  confirmAssignAdmin.addEventListener('click', async () => {
+    const newId = document.getElementById('new-admin-id').value.trim();
+    if (!newId || isNaN(newId)) {
+      alert("Введите корректный Telegram ID");
+      return;
+    }
+
+    const res = await fetch('/api/assign-admin-id', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: newId })
+    });
+
+    const data = await res.json();
+    if (data.status === 'ok') {
+      alert("✅ Пользователь назначен админом");
+      assignAdminForm.style.display = 'none';
+    } else {
+      alert("Ошибка: " + (data.detail || data.message));
+    }
+  });
+}
+
+
 
 // === Init ===
 loadWeaponTypes();
