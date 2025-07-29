@@ -26,26 +26,31 @@ if (user && userInfo) {
 }
 
 
-async function fetchAdminIds() {
-  try {
-    const res = await fetch('/api/me', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        initData: tg.initData
-      })
-    });
+@app.post("/api/me")
+async def get_me(data: dict = Body(...)):
+    init_data = data.get("initData", "")
+    parsed = parse_qs(init_data)
 
-    const data = await res.json();
-    ADMIN_IDS = data.admin_ids || [];
+    user_data = parsed.get("user", [None])[0]
+    if not user_data:
+        return JSONResponse({"error": "No user info"}, status_code=400)
 
-    checkAdmin(); // вызываем проверку после загрузки
-  } catch (e) {
-    console.error('Не удалось загрузить admin_ids:', e);
-  }
-}
+    try:
+        user_json = json.loads(user_data)
+        user_id = str(user_json.get("id"))
+        admin_ids = os.getenv("ADMIN_IDS", "").split(",")
+        is_admin = user_id in admin_ids
+
+        return JSONResponse({
+            "user_id": user_id,
+            "first_name": user_json.get("first_name"),
+            "username": user_json.get("username"),
+            "is_admin": is_admin,
+            "admin_ids": admin_ids
+        })
+    except Exception as e:
+        return JSONResponse({"error": "Invalid user data", "detail": str(e)}, status_code=400)
+
 
 
 function checkAdmin() {
