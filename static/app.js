@@ -1,5 +1,5 @@
 window.addEventListener('DOMContentLoaded', () => {
-  const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
+  const isTelegram = typeof window.Telegram !== 'undefined' && window.Telegram.WebApp;
 
   if (isTelegram) {
     document.getElementById('tg-app').style.display = 'block';
@@ -8,12 +8,19 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('browser-app').style.display = 'block';
   }
 
-  // Для браузера — показать сборки
+  // Кнопка для браузера — показать сборки
   document.getElementById('show-builds-browser')?.addEventListener('click', async () => {
-    await loadBuilds?.();
-    document.getElementById('browser-app').innerHTML += document.getElementById('builds-list')?.outerHTML || '';
+    if (typeof loadBuilds === 'function') {
+      await loadBuilds();
+    }
+
+    const buildsList = document.getElementById('builds-list');
+    if (buildsList) {
+      document.getElementById('browser-app').appendChild(buildsList.cloneNode(true));
+    }
   });
 });
+
 
 
 // переходы по страницам 
