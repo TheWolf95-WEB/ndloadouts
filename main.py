@@ -68,3 +68,6 @@ def get_weapon_types():
     with open("data/types.json", "r", encoding="utf-8") as f:
         types = json.load(f)
     return JSONResponse(types)
+
+
+# === проверка1 
