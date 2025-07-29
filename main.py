@@ -89,16 +89,20 @@ async def get_me(data: dict = Body(...)):
     try:
         user_json = json.loads(user_data)
         user_id = str(user_json.get("id"))
-        admin_ids = os.getenv("ADMIN_IDS", "").split(",")
+
+        admin_ids = set(map(str.strip, os.getenv("ADMIN_IDS", "").split(",")))
+        admin_dop = set(map(str.strip, os.getenv("ADMIN_DOP", "").split(",")))
 
         return JSONResponse({
             "user_id": user_id,
             "first_name": user_json.get("first_name"),
-            "is_admin": user_id in admin_ids,
-            "admin_ids": admin_ids
+            "is_admin": user_id in admin_ids or user_id in admin_dop,
+            "is_super_admin": user_id in admin_ids,  # 👈 вот это важно
+            "admin_ids": list(admin_ids)
         })
     except Exception as e:
         return JSONResponse({"error": "Invalid user data", "detail": str(e)}, status_code=400)
+
 
 
 # функция удаления сборки
