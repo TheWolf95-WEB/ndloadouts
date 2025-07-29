@@ -423,3 +423,12 @@ document.getElementById('back-to-main').addEventListener('click', () => {
     addBtn.style.display = 'inline-block';
   }
 });
+
+
+// const tg = window.Telegram.WebApp;
+
+document.getElementById('help-btn')?.addEventListener('click', () => {
+  // Замените your_tg_username на ваш Telegram‑ник
+  const url = 'https://t.me/ndzone_admin';
+  tg.openLink(url);
+});
