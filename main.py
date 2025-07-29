@@ -209,3 +209,6 @@ async def remove_admin(data: dict = Body(...)):
     set_key(env_path, "ADMIN_DOP", ",".join(sorted(admin_dop)))
 
     return JSONResponse({"status": "ok", "message": f"Пользователь {target_id} удалён из админов."})
+
+
+# 1
