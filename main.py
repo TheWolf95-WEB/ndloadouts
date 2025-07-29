@@ -113,6 +113,8 @@ def delete_build(build_id: str):
 
 # добавления админа
 
+import requests  # вверху файла
+
 @app.post("/api/assign-admin")
 async def assign_admin(data: dict = Body(...)):
     user_id = str(data.get("userId", "")).strip()
@@ -130,5 +132,24 @@ async def assign_admin(data: dict = Body(...)):
     admin_set.add(user_id)
     new_value = ",".join(sorted(admin_set))
     set_key(env_path, "ADMIN_IDS", new_value)
+
+    # === Уведомление через Telegram
+    bot_token = os.getenv("TOKEN")  # <-- Используем твой TOKEN
+    if bot_token:
+        try:
+            message = (
+                "👋 <b>Привет!</b>\n"
+                "Вы были <b>назначены администратором</b> в ND Loadouts.\n"
+                "Теперь у вас есть доступ к добавлению и редактированию сборок."
+            )
+            url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+            payload = {
+                "chat_id": user_id,
+                "text": message,
+                "parse_mode": "HTML"
+            }
+            requests.post(url, json=payload, timeout=5)
+        except Exception as e:
+            print(f"[!] Ошибка отправки уведомления: {e}")
 
     return JSONResponse({"status": "ok", "message": f"Пользователь {user_id} добавлен в админы."})
