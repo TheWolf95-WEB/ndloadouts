@@ -366,62 +366,47 @@ async function loadBuildsTable() {
       return;
     }
 
-    let html = `
-      <table class="builds-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Название</th>
-            <th>Тип</th>
-            <th>Вкладки</th>
-            <th>Действия</th>
-          </tr>
-        </thead>
-        <tbody>
-    `;
+    let html = '';
 
     builds.forEach((build, index) => {
       html += `
-        <tr>
-          <td>${index + 1}</td>
-          <td>${build.title}</td>
-          <td>${weaponTypeLabels[build.weapon_type] || build.weapon_type}</td>
-          <td>${build.tabs.length}</td>
-          <td>
+        <div class="build-card">
+          <div><strong>#${index + 1}</strong></div>
+          <div><strong>Название:</strong> ${build.title}</div>
+          <div><strong>Тип:</strong> ${weaponTypeLabels[build.weapon_type] || build.weapon_type}</div>
+          <div><strong>Вкладки:</strong> ${build.tabs.length}</div>
+          <div class="build-actions">
             <button class="btn btn-sm edit-btn" data-id="${build.id}">✏</button>
             <button class="btn btn-sm delete-btn" data-id="${build.id}">🗑</button>
-          </td>
-        </tr>
+          </div>
+        </div>
       `;
     });
 
-    html += `</tbody></table>`;
     tableWrapper.innerHTML = html;
 
-    // Обработчики кнопок
+    // Обработчики удаления
     tableWrapper.querySelectorAll('.delete-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.dataset.id;
         if (confirm('Удалить сборку?')) {
           const res = await fetch(`/api/builds/${id}`, { method: 'DELETE' });
           const data = await res.json();
-          
+
           if (res.ok && data.status === "ok") {
             await loadBuildsTable(); // перезагрузка
           } else {
             alert("Не удалось удалить сборку. " + (data.detail || ""));
           }
-
         }
       });
     });
 
-
+    // Обработчики редактирования (заглушка)
     tableWrapper.querySelectorAll('.edit-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
+      btn.addEventListener('click', () => {
         const id = btn.dataset.id;
-        alert(`Форма редактирования сборки ${id} пока не реализована`);
-        // Здесь можешь реализовать редактирование
+        alert(`Редактирование сборки ${id} пока не реализовано`);
       });
     });
 
