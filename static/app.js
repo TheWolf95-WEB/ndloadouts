@@ -333,6 +333,20 @@ document.getElementById('submit-build').addEventListener('click', async () => {
 });
 
 
+function getCategoryByModule(moduleKey, weaponType) {
+  const mods = modulesByType[weaponType];
+  if (!mods) return '';
+
+  for (const category in mods) {
+    if (mods[category].some(mod => mod.en === moduleKey)) {
+      return category;
+    }
+  }
+  return '';
+}
+
+
+
 // === Загрузка и вывод сборок ===
 async function loadBuilds() {
   const res = await fetch("/api/builds");
