@@ -379,8 +379,10 @@ async function loadBuilds() {
         <div class="loadout__meta">
           <div class="loadout__tops">
             ${[build.top1, build.top2, build.top3].map((mod, i) =>
-              mod ? `<span class="loadout__top" style="background:${topColors[i]}">#${i + 1} ${mod}</span>` : ''
-            ).join('')}
+              mod
+                ? `<span class="loadout__top" style="background:${topColors[i]}">#${i + 1} ${moduleNameMap[mod] || mod}</span>`
+                : ""
+            ).join("")}
           </div>
           <div class="loadout__type">${weaponTypeRu}</div>
         </div>
@@ -423,7 +425,7 @@ async function loadBuilds() {
     buildsList.appendChild(wrapper);
   });
 
-  // Вкладки (табы)
+  // Обработка вкладок (табы)
   document.querySelectorAll('.loadout__tab').forEach(button => {
     button.addEventListener('click', () => {
       const parent = button.closest('.loadout');
@@ -454,22 +456,6 @@ async function loadBuilds() {
   });
 }
 
-
-    // табы
-    setTimeout(() => {
-      const buttons = wrapper.querySelectorAll(".tab-btn");
-      const panels = wrapper.querySelectorAll(".tab-panel");
-      buttons.forEach((btn, i) => {
-        btn.addEventListener("click", () => {
-          panels.forEach(p => p.style.display = "none");
-          panels[i].style.display = "block";
-        });
-      });
-    }, 0);
-
-    buildsList.appendChild(wrapper);
-  });
-}
 
 
 // === При старте загружаем только типы оружия
