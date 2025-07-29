@@ -80,7 +80,7 @@ if (user && userInfo) {
   userInfo.innerHTML = `<p>Привет, ${user.first_name}!</p>`;
   fetchAdminIds(); // загружаем ID админов
 }
-}
+
 
 // === Загрузка типов оружия ===
 const weaponTypeLabels = {}; // type.key → type.label
