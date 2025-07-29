@@ -431,7 +431,7 @@ async function loadBuilds() {
       </div>
     `;
 
-
+                    })};
 
 // табы (исправлено под loadout__tab / loadout__tab-content)
 setTimeout(() => {
@@ -481,4 +481,3 @@ document.getElementById('back-to-main').addEventListener('click', () => {
     
 // === При старте загружаем только типы оружия
 loadWeaponTypes();
-
