@@ -414,7 +414,7 @@ loadWeaponTypes();
 // Кнопка Помощь или идеи
 document.getElementById('help-btn')?.addEventListener('click', () => {
   // Замените your_tg_username на ваш Telegram‑ник
-  const url = 'https://t.me/ndzone_admin';
+  const url = '@ndzone_admin';
   tg.openLink(url);
 });
 
