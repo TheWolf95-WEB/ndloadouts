@@ -4,7 +4,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   const user = tg?.initDataUnsafe?.user;
 
   if (user) {
-    document.getElementById('user-info').innerHTML = <p>Привет, ${user.first_name}!</p>;
+    document.getElementById('user-info').innerHTML = `<p>Привет, ${user.first_name}!</p>`;
     tg.expand();
     await fetchAdminIds(); // загрузим админов
   } else {
@@ -375,73 +375,54 @@ async function loadBuilds() {
     wrapper.className = "build-card";
 
     wrapper.innerHTML = 
-      <div class="loadout">
-        <div class="loadout__head">
-          <h2 class="loadout__title">${build.title}</h2>
-          <div class="loadout__tags">
-            ${[build.top1, build.top2, build.top3].map((mod, i) =>
-              mod ? <span class="tag tag-${i + 1}">#${i + 1} ${mod}</span> : ''
-            ).join('')}
-          </div>
-        </div>
-    
-        <div class="loadout__type">Тип оружия: <b>${build.weapon_type}</b></div>
-    
-        <div class="loadout__content" style="max-height: none;">
-          <div class="loadout__inner">
-            <div class="loadout__tabs">
-              <div class="loadout__tab-buttons">
-                ${build.tabs.map((tab, index) => 
-                  <button class="loadout__tab ${index === 0 ? 'is-active' : ''}" data-tab="tab-${build.id}-${index}">
-                    ${tab.label}
-                  </button>
-                ).join('')}
-              </div>
-    
-              <div class="loadout__tab-contents">
-                ${build.tabs.map((tab, index) => 
-                  <div class="loadout__tab-content ${index === 0 ? 'is-active' : ''}" data-tab-content="tab-${build.id}-${index}">
-                    <div class="loadout__modules">
-                      ${tab.items.map(item => {
-                        const ru = moduleNameMap[item] || item;
-                        return 
-                          <div class="loadout__module">
-                            <span class="loadout__module-slot">${getCategoryByModule(item, build.weapon_type)}</span>
-                            <span class="loadout__module-name">${ru}</span>
-                          </div>
-                        ;
-                      }).join('')}
-                    </div>
-                  </div>
-                ).join('')}
-              </div>
+      <details>
+        <summary>
+          <div class="build-header">
+            <h3>${build.title}</h3>
+            <div class="top-tags">
+              ${[build.top1, build.top2, build.top3].map((mod, i) =>
+                mod ? <span class="top-tag" style="background:${topColors[i]}">${mod}</span> : ''
+              ).join('')}
             </div>
           </div>
+        </summary>
+
+        <p><b>Тип оружия:</b> ${build.weapon_type}</p>
+
+        <div class="tab-buttons">
+          ${build.tabs.map((tab, i) =>
+            <button class="tab-btn" data-index="${i}">${tab.label}</button>
+          ).join('')}
         </div>
-      </div>
+
+        <div class="tab-content">
+          ${build.tabs.map((tab, i) => 
+            <div class="tab-panel" style="${i === 0 ? '' : 'display:none;'}">
+              ${tab.items.map(item => 
+                <div class="mod-block">${moduleNameMap[item] || item}</div>
+              ).join('')}
+            </div>
+          ).join('')}
+        </div>
+      </details>
     ;
 
+    // табы
+    setTimeout(() => {
+      const buttons = wrapper.querySelectorAll(".tab-btn");
+      const panels = wrapper.querySelectorAll(".tab-panel");
+      buttons.forEach((btn, i) => {
+        btn.addEventListener("click", () => {
+          panels.forEach(p => p.style.display = "none");
+          panels[i].style.display = "block";
+        });
+      });
+    }, 0);
 
-
-// табы (исправлено под loadout__tab / loadout__tab-content)
-setTimeout(() => {
-  const tabButtons = wrapper.querySelectorAll(".loadout__tab");
-  const tabContents = wrapper.querySelectorAll(".loadout__tab-content");
-
-  tabButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const tab = btn.dataset.tab;
-
-      // Убираем активные классы
-      tabButtons.forEach(b => b.classList.remove("is-active"));
-      tabContents.forEach(c => c.classList.remove("is-active"));
-
-      // Назначаем активный
-      btn.classList.add("is-active");
-      wrapper.querySelector([data-tab-content="${tab}"])?.classList.add("is-active");
-    });
+    buildsList.appendChild(wrapper);
   });
-}, 0);
+}
+
 
 // === При старте загружаем только типы оружия
 loadWeaponTypes();
