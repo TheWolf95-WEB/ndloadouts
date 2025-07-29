@@ -35,17 +35,20 @@ async def send_welcome(message: types.Message):
     text = (
         f"🪂 Высадка подтверждена, {name}!\n\n"
         "🔻 Жми на кнопку ниже, чтобы собрать свою мету и ворваться в топ-1!\n\n"
-        "💬 Нашёл баг, есть идея или хочешь добавить сборку? — [Пиши в штаб])"
+        "💬 Нашёл баг, есть идея или хочешь добавить сборку? — [Пиши в штаб]"
     )
 
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="🔗 Открыть сборки", web_app=WebAppInfo(url=WEBAPP_URL))],
-            [InlineKeyboardButton(text="💬 Штаб", url="https://t.me/ndzone_admin")]
+            [
+                InlineKeyboardButton(text="🔗 Открыть сборки", web_app=WebAppInfo(url=WEBAPP_URL)),
+                InlineKeyboardButton(text="💬 Штаб", url="https://t.me/ndzone_admin")
+            ]
         ]
     )
 
     await message.answer(text, reply_markup=keyboard, parse_mode="Markdown")
+
 
 
 
