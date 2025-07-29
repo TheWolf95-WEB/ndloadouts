@@ -53,10 +53,6 @@ document.getElementById('back-to-main')?.addEventListener('click', () => showScr
 document.getElementById('back-from-builds')?.addEventListener('click', () => showScreen('screen-main'));
 
 
-
-
-
-const tg = window.Telegram.WebApp;
 tg.expand();
 
 let ADMIN_IDS = [];
