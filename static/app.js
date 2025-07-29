@@ -46,15 +46,16 @@ let ADMIN_IDS = [];
 
 async function fetchAdminIds() {
   try {
-    const res = await fetch('/api/me');
+    const initData = tg.initData; // получаем из Telegram
+    const res = await fetch('/api/me?initData=' + encodeURIComponent(initData));
     const data = await res.json();
+
     ADMIN_IDS = data.admin_ids || [];
-    checkAdmin(); // вызываем проверку доступа
+    checkAdmin(); // запускаем проверку роли
   } catch (e) {
     console.error('Не удалось загрузить admin_ids:', e);
   }
 }
-
 
 const user = tg.initDataUnsafe?.user;
 const userInfo = document.getElementById('user-info');
