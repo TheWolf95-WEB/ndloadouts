@@ -466,19 +466,10 @@ loadWeaponTypes();
 
 
 // === Обработчик кнопки "Назад" ===
-document.getElementById('back-to-main').addEventListener('click', () => {
-  buildForm.style.display = 'none';
-  buildsList.style.display = 'none';
-  
-  // Всегда показываем кнопки ролей (назад на стартовый экран)
-  roleButtons.style.display = 'block';
-
-  // Проверка: если пользователь админ — показать кнопку добавления
-  const isAdmin = ADMIN_IDS.includes(user.id);
-  if (isAdmin) {
-    addBtn.style.display = 'inline-block';
-  }
+document.getElementById('back-to-main')?.addEventListener('click', () => {
+  showScreen('screen-main');
 });
+
 
 
 // const tg = window.Telegram.WebApp;
