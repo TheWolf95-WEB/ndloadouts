@@ -419,3 +419,8 @@ select:disabled {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+@media (max-width: 550px) {
+  .loadout__module {
+    width: 100%;
+  }
