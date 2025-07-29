@@ -402,13 +402,6 @@ async function loadBuildsTable() {
       });
     });
 
-    // Обработчики редактирования (заглушка)
-    tableWrapper.querySelectorAll('.edit-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const id = btn.dataset.id;
-        alert(`Редактирование сборки ${id} пока не реализовано`);
-      });
-    });
 
   } catch (e) {
     console.error('Ошибка загрузки сборок:', e);
