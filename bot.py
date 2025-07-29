@@ -5,7 +5,7 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.client.default import DefaultBotProperties
 from aiogram.filters import CommandStart
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+from aiogram.types import  Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 
 # Загрузка переменных окружения из .env
 load_dotenv(dotenv_path="/opt/ndloadouts/.env")
@@ -34,10 +34,10 @@ async def send_welcome(message: types.Message):
 
     text = (
         f"🎯 На связи, {name}!\n\n"
-        "Ты попал в штаб Warzone — здесь только топовые сборки.\n\n"
-        "🔻 Жми на кнопку ниже, чтобы выбрать пушку, собрать билд и выйти на охоту ⬇️\n\n"
-        "💬 Есть идеи, баги или хочешь предложить своё? — [Пиши в командный центр](https://t.me/ndzone_admin)\n\n"
-        "🔫 Время — пули, не трать его зря. Погнали!"
+        "Ты в штабе Warzone — здесь собираются лучшие бойцы и метовые билды.\n\n"
+        "🔻 Жми на кнопку ниже, чтобы выбрать пушку, собрать свой лоад-аут и быть готовым к дропу в горячую зону ⬇️\n\n"
+        "💬 Нашёл баг, есть идея или хочешь добавить сборку? — [Пиши в штаб](https://t.me/ndzone_admin)\n\n"
+        "🏆 Только один может выжить. Готов к дропу — бери лучшее снаряжение и летим!"
     )
 
     keyboard = InlineKeyboardMarkup(
@@ -47,6 +47,7 @@ async def send_welcome(message: types.Message):
     )
 
     await message.answer(text, reply_markup=keyboard, parse_mode="Markdown")
+
 
 
 # Точка входа
