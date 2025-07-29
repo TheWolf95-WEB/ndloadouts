@@ -4,6 +4,7 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.filters import CommandStart
 from dotenv import load_dotenv
+from aiogram.client.default import DefaultBotProperties
 
 load_dotenv(dotenv_path="/opt/ndloadouts/.env")
 
@@ -14,7 +15,10 @@ WEBAPP_URL = os.getenv("WEBAPP_URL")
 if not BOT_TOKEN or not WEBAPP_URL:
     raise ValueError("❌ BOT_TOKEN и WEBAPP_URL должны быть заданы в .env")
 
-bot = Bot(token=BOT_TOKEN, parse_mode=ParseMode.HTML)
+bot = Bot(
+    token=BOT_TOKEN,
+    default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+)
 dp = Dispatcher()
 
 @dp.message(CommandStart())
