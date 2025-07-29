@@ -4,7 +4,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   const user = tg?.initDataUnsafe?.user;
 
   if (user) {
-    document.getElementById('user-info').innerHTML = `<p>Привет, ${user.first_name}!</p>`;
+    document.getElementById('user-info').innerHTML = <p>Привет, ${user.first_name}!</p>;
     tg.expand();
     await fetchAdminIds(); // загрузим админов
   } else {
@@ -14,16 +14,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-// Функция getCategoryByModule()
-function getCategoryByModule(moduleEn, weaponType) {
-  const mods = modulesByType[weaponType] || {};
-  for (const category in mods) {
-    if (mods[category].some(mod => mod.en === moduleEn)) {
-      return category;
-    }
-  }
-  return "-";
-}
 
 
 // переходы по страницам 
@@ -96,7 +86,7 @@ const tabsContainer = document.getElementById('tabs-container');
 const modulesByType = {};
 
 if (user) {
-  userInfo.innerHTML = `<p>Привет, ${user.first_name}!</p>`;
+  userInfo.innerHTML = <p>Привет, ${user.first_name}!</p>;
   fetchAdminIds(); // загружаем ID админов
 } else {
   userInfo.innerHTML = 'Ошибка: не удалось получить данные пользователя.';
@@ -105,10 +95,10 @@ if (user) {
 function checkAdmin() {
   const isAdmin = ADMIN_IDS.includes(String(user.id));
   if (isAdmin) {
-    userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
+    userInfo.innerHTML += <p>Вы вошли как админ ✅</p>;
     addBtn.style.display = 'inline-block';
   } else {
-    userInfo.innerHTML += `<p>Пользователь 👤</p>`;
+    userInfo.innerHTML += <p>Пользователь 👤</p>;
   }
 }
 
@@ -153,7 +143,7 @@ const moduleNameMap = {};
 
 async function loadModules(type) {
   if (modulesByType[type]) return;
-  const res = await fetch(`/data/modules-${type}.json`);
+  const res = await fetch(/data/modules-${type}.json);
   const mods = await res.json();
   modulesByType[type] = mods;
 
@@ -181,14 +171,14 @@ document.getElementById('add-tab').addEventListener('click', () => {
   tabDiv.className = 'tab-block';
 
   // HTML вкладки
-    tabDiv.innerHTML = `
+    tabDiv.innerHTML = 
     <input type="text" class="form-input tab-label" placeholder="Название вкладки" style="margin-bottom: 10px;">
     <div class="mod-selects"></div>
     <div class="tab-actions">
         <button type="button" class="btn add-mod">+ модуль</button>
         <button type="button" class="btn delete-tab">🗑 Удалить вкладку</button>
     </div>
-    `;
+    ;
 
 
   // добавляем в DOM
@@ -384,13 +374,13 @@ async function loadBuilds() {
     const wrapper = document.createElement("div");
     wrapper.className = "build-card";
 
-    wrapper.innerHTML = `
+    wrapper.innerHTML = 
       <div class="loadout">
         <div class="loadout__head">
           <h2 class="loadout__title">${build.title}</h2>
           <div class="loadout__tags">
             ${[build.top1, build.top2, build.top3].map((mod, i) =>
-              mod ? `<span class="tag tag-${i + 1}">#${i + 1} ${mod}</span>` : ''
+              mod ? <span class="tag tag-${i + 1}">#${i + 1} ${mod}</span> : ''
             ).join('')}
           </div>
         </div>
@@ -401,37 +391,37 @@ async function loadBuilds() {
           <div class="loadout__inner">
             <div class="loadout__tabs">
               <div class="loadout__tab-buttons">
-                ${build.tabs.map((tab, index) => `
+                ${build.tabs.map((tab, index) => 
                   <button class="loadout__tab ${index === 0 ? 'is-active' : ''}" data-tab="tab-${build.id}-${index}">
                     ${tab.label}
                   </button>
-                `).join('')}
+                ).join('')}
               </div>
     
               <div class="loadout__tab-contents">
-                ${build.tabs.map((tab, index) => `
+                ${build.tabs.map((tab, index) => 
                   <div class="loadout__tab-content ${index === 0 ? 'is-active' : ''}" data-tab-content="tab-${build.id}-${index}">
                     <div class="loadout__modules">
                       ${tab.items.map(item => {
                         const ru = moduleNameMap[item] || item;
-                        return `
+                        return 
                           <div class="loadout__module">
                             <span class="loadout__module-slot">${getCategoryByModule(item, build.weapon_type)}</span>
                             <span class="loadout__module-name">${ru}</span>
                           </div>
-                        `;
+                        ;
                       }).join('')}
                     </div>
                   </div>
-                `).join('')}
+                ).join('')}
               </div>
             </div>
           </div>
         </div>
       </div>
-    `;
+    ;
 
-                    })};
+
 
 // табы (исправлено под loadout__tab / loadout__tab-content)
 setTimeout(() => {
@@ -448,10 +438,13 @@ setTimeout(() => {
 
       // Назначаем активный
       btn.classList.add("is-active");
-      wrapper.querySelector(`[data-tab-content="${tab}"]`)?.classList.add("is-active");
+      wrapper.querySelector([data-tab-content="${tab}"])?.classList.add("is-active");
     });
   });
 }, 0);
+
+// === При старте загружаем только типы оружия
+loadWeaponTypes();
 
 
 // Кнопка Помощь или идеи
@@ -476,8 +469,3 @@ document.getElementById('back-to-main').addEventListener('click', () => {
     addBtn.style.display = 'inline-block';
   }
 });
-
-
-    
-// === При старте загружаем только типы оружия
-loadWeaponTypes();
