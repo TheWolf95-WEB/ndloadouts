@@ -7,6 +7,7 @@ import json
 import os
 import hmac
 import hashlib
+import requests 
 import subprocess
 from pathlib import Path
 from urllib.parse import parse_qs
@@ -113,30 +114,37 @@ def delete_build(build_id: str):
 
 # добавления админа
 
-import requests  # вверху файла
-
 @app.post("/api/assign-admin")
 async def assign_admin(data: dict = Body(...)):
+    requester_id = str(data.get("requesterId", "")).strip()
     user_id = str(data.get("userId", "")).strip()
-    if not user_id.isdigit():
+
+    if not requester_id.isdigit() or not user_id.isdigit():
         return JSONResponse({"status": "error", "message": "Некорректный ID"}, status_code=400)
 
     env_path = Path(".env")
     env_vars = dotenv_values(env_path)
-    current_admins = env_vars.get("ADMIN_IDS", "")
-    admin_set = set(filter(None, map(str.strip, current_admins.split(","))))
 
-    if user_id in admin_set:
-        return JSONResponse({"status": "ok", "message": "Этот пользователь уже админ."})
+    admin_ids = set(map(str.strip, env_vars.get("ADMIN_IDS", "").split(",")))
+    admin_dop = set(filter(None, map(str.strip, env_vars.get("ADMIN_DOP", "").split(","))))
 
-    admin_set.add(user_id)
-    new_value = ",".join(sorted(admin_set))
-    set_key(env_path, "ADMIN_IDS", new_value)
+    # Только главный админ может назначать
+    if requester_id not in admin_ids:
+        return JSONResponse({"status": "error", "message": "Недостаточно прав"}, status_code=403)
+
+    # Уже админ
+    if user_id in admin_ids or user_id in admin_dop:
+        return JSONResponse({"status": "ok", "message": "Пользователь уже админ."})
+
+    # Добавление в ADMIN_DOP
+    admin_dop.add(user_id)
+    set_key(env_path, "ADMIN_DOP", ",".join(sorted(admin_dop)))
 
     # === Уведомление через Telegram
-    bot_token = os.getenv("TOKEN")  # <-- Используем твой TOKEN
+    bot_token = os.getenv("TOKEN")
     if bot_token:
         try:
+            import requests
             message = (
                 "👋 <b>Привет!</b>\n"
                 "Вы были <b>назначены администратором</b> в ND Loadouts.\n"
