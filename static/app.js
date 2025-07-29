@@ -79,8 +79,7 @@ if (user && userInfo) {
   userInfo.style.display = 'block';
   userInfo.innerHTML = `<p>Привет, ${user.first_name}!</p>`;
   fetchAdminIds(); // загружаем ID админов
-} else if (userInfo) {
-  userInfo.style.display = 'none'; // скрываем блок, если нет данных пользователя
+}
 }
 
 // === Загрузка типов оружия ===
