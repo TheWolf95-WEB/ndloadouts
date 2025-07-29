@@ -62,7 +62,7 @@ function showScreen(id) {
       setTimeout(() => screen.style.display = 'none', 300);
     }
   });
-  roleButtons.style.display = (id === 'screen-main') ? 'block' : 'none';
+  roleButtons.style.display = (id === 'screen-main') ? 'flex' : 'none';
   checkAdmin();
 }
 
