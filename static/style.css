@@ -342,3 +342,45 @@ select:disabled {
 .mod-name {
   text-align: right;
 }
+
+
+/* Декстоп версия */
+
+body.browser-mode {
+  background: #11131a;
+  color: #ddd;
+  font-family: "Segoe UI", sans-serif;
+  padding: 20px;
+  text-align: center;
+}
+
+body.browser-mode h1 {
+  font-size: 22px;
+  color: #fff;
+  margin-bottom: 10px;
+}
+
+body.browser-mode .subtitle {
+  color: #aaa;
+  font-size: 14px;
+  margin-bottom: 30px;
+}
+
+body.browser-mode .btn {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  margin: 10px auto;
+  background-color: #2c2f38;
+  color: #f1f1f1;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+body.browser-mode .btn:hover {
+  background-color: #3b3f4a;
+}
