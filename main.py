@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
+from fastapi import BackgroundTasks
 import json
 import os
 
@@ -47,3 +48,9 @@ def get_weapon_types():
     with open("data/types.json", "r", encoding="utf-8") as f:
         types = json.load(f)
     return JSONResponse(types)
+
+
+@app.post("/webhook")
+async def webhook(request: Request, background_tasks: BackgroundTasks):
+    background_tasks.add_task(os.system, "/opt/ndloadouts/deploy.sh")
+    return {"status": "ok"}
