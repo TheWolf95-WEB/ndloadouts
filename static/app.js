@@ -1,25 +1,16 @@
 window.addEventListener('DOMContentLoaded', () => {
-  const isTelegram = typeof window.Telegram !== 'undefined' && window.Telegram.WebApp;
+  const tg = window.Telegram?.WebApp;
 
-  if (isTelegram) {
+  const isTelegramApp = tg && tg.initDataUnsafe?.user?.id;
+
+  if (isTelegramApp) {
     document.getElementById('tg-app').style.display = 'block';
-    Telegram.WebApp.expand();
+    tg.expand();
   } else {
     document.getElementById('browser-app').style.display = 'block';
   }
-
-  // Кнопка для браузера — показать сборки
-  document.getElementById('show-builds-browser')?.addEventListener('click', async () => {
-    if (typeof loadBuilds === 'function') {
-      await loadBuilds();
-    }
-
-    const buildsList = document.getElementById('builds-list');
-    if (buildsList) {
-      document.getElementById('browser-app').appendChild(buildsList.cloneNode(true));
-    }
-  });
 });
+
 
 
 
