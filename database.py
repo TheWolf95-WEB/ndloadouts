@@ -43,6 +43,7 @@ def get_all_builds():
         })
     return builds
 
+# Добавление сборки
 def add_build(data):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -58,5 +59,14 @@ def add_build(data):
         json.dumps(data["tabs"]),
         data.get("image")
     ))
+    conn.commit()
+    conn.close()
+
+
+# Удаление сборки
+def delete_build_by_id(build_id: str):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM builds WHERE id = ?", (build_id,))
     conn.commit()
     conn.close()
