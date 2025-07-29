@@ -424,3 +424,13 @@ select:disabled {
   .loadout__module {
     width: 100%;
   }
+
+  .loadout__module-slot{
+    font-size: 0.8rem;
+  }
+
+  .loadout__module-name {
+      font-size: 0.9rem;
+  }
+
+}
