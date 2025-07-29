@@ -1,10 +1,21 @@
 # Python
 venv/
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.pyd
 
-# Env
+# Env variables
 .env
+.env.*
 
-# FastAPI
+# FastAPI / Uvicorn / SQLite
 *.sqlite3
+*.log
+
+# IDEs / Editors
+.vscode/
+.idea/
+
+# MacOS / System
+.DS_Store
