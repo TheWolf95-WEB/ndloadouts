@@ -423,13 +423,11 @@ async function loadBuildsTable() {
 
 // Назначить админа
 
-
 // Переход на экран
 document.getElementById('assign-admin-btn')?.addEventListener('click', () => {
   showScreen('screen-assign-admin');
   loadAdminList(user.id); // ✅ загружаем список админов
 });
-
 
 // Назад с экрана назначения
 document.getElementById('back-from-assign')?.addEventListener('click', () => {
@@ -442,20 +440,32 @@ document.getElementById('submit-admin-id')?.addEventListener('click', async () =
   const status = document.getElementById('assign-admin-status');
   const userId = input.value.trim();
 
-  if (!userId || isNaN(userId)) {
-    status.textContent = 'Введите корректный Telegram ID.';
+  // ✅ проверка на числовой ID от 6 до 15 цифр
+  if (!/^\d{6,15}$/.test(userId)) {
+    status.textContent = 'Введите корректный числовой Telegram ID.';
     return;
   }
 
-  const res = await fetch('/api/assign-admin', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId: userId, requesterId: user.id })
-  });
+  try {
+    const res = await fetch('/api/assign-admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, requesterId: user.id })
+    });
 
-  const data = await res.json();
-  status.textContent = data.message || 'Что-то пошло не так...';
+    const data = await res.json();
+    status.textContent = data.message || 'Что-то пошло не так...';
+
+    if (data.status === 'ok') {
+      input.value = '';
+      await loadAdminList(user.id); // 🔁 обновить список
+    }
+  } catch (err) {
+    status.textContent = 'Ошибка отправки запроса.';
+    console.error(err);
+  }
 });
+
 
 // загрузка и удаление админов
 
