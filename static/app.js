@@ -376,9 +376,9 @@ async function loadBuilds() {
           <div class="build-header">
             <div class="build-header-top">
               <h3 class="build-title">${build.title}</h3>
-              <span class="weapon-type">${weaponTypeLabels[build.weapon_type] || build.weapon_type}</span>
             </div>
             <div class="top-tags">
+              <span class="weapon-type">${weaponTypeLabels[build.weapon_type] || build.weapon_type}</span>
               ${[build.top1, build.top2, build.top3].map((mod, i) =>
                 mod ? `<span class="top-tag" style="background:${topColors[i]}">#${i + 1} ${mod}</span>` : ''
               ).join('')}
