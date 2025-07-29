@@ -8,7 +8,7 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <div class="container">
+  <div id="tg-app" class="container" style="display: none;">
 
     <div id="browser-header" style="display:none">
       <h1>🔥 Сборки Warzone</h1>
@@ -81,6 +81,20 @@
     </div>
 
   </div>
+
+  <!-- Упрощённый интерфейс для браузера -->
+<div id="browser-app" class="container" style="display: none;">
+  <div id="browser-header">
+    <h1>🔥 Сборки Warzone</h1>
+    <p class="subtitle">Открой через Telegram для полного функционала</p>
+  </div>
+  <div class="form-section">
+    <button id="show-builds-browser" class="btn">👁 Посмотреть сборки</button>
+    <a class="btn" href="https://t.me/ndzone_admin" target="_blank">💡 Помощь или идеи</a>
+  </div>
+</div>
+
+  
 
   <script src="/static/app.js"></script>
 </body>
