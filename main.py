@@ -69,4 +69,34 @@ def get_weapon_types():
         types = json.load(f)
     return JSONResponse(types)
 
+from fastapi import Query
+from urllib.parse import parse_qs
+from starlette.requests import Request
+
+# === /api/me — Получение информации о пользователе
+@app.get("/api/me")
+async def get_me(request: Request):
+    init_data = request.query_params.get("initData", "")
+    parsed = parse_qs(init_data)
+    
+    user_data = parsed.get("user", [None])[0]
+    if not user_data:
+        return JSONResponse({"error": "No user info"}, status_code=400)
+
+    try:
+        user_json = json.loads(user_data)
+        user_id = str(user_json.get("id"))
+        admin_ids = os.getenv("ADMIN_IDS", "").split(",")
+        is_admin = user_id in admin_ids
+
+        return JSONResponse({
+            "user_id": user_id,
+            "first_name": user_json.get("first_name"),
+            "username": user_json.get("username"),
+            "is_admin": is_admin,
+            "admin_ids": admin_ids
+        })
+    except Exception as e:
+        return JSONResponse({"error": "Invalid user data", "detail": str(e)}, status_code=400)
+
 
