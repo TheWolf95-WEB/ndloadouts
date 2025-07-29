@@ -69,7 +69,4 @@ def get_weapon_types():
         types = json.load(f)
     return JSONResponse(types)
 
-# ПРоверка
-# ПРоверка
-# ПРоверка
-# Проверка
+
