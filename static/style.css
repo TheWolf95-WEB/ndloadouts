@@ -19,8 +19,10 @@ h1 {
   text-align: center;
 }
 
+
+
 .container {
-  max-width: 600px;
+  max-width: 1440px;
   margin: 0 auto;
 }
 
