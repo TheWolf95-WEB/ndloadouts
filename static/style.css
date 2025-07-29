@@ -242,109 +242,81 @@ select:disabled {
 
 /* вывод сборок */
 
-.build-card {
-  background: #121212;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border-radius: 10px;
+.build-full {
+  background: #1a1a1a;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  color: #fff;
 }
 
-.build-header {
-  margin-bottom: 10px;
+.build-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .build-title {
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-weight: bold;
+  margin: 0;
 }
 
 .build-tags {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 4px;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.tag {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #000;
+  background: #ccc;
+}
+
+.tag-1 { background: #FFD700; }
+.tag-2 { background: #FF8C00; }
+.tag-3 { background: #B0B0B0; }
+
+.build-type {
+  margin-top: 10px;
+  font-size: 0.95rem;
+  color: #bbb;
+}
+
+.build-tab {
+  margin-top: 20px;
+}
+
+.build-tab h3 {
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.build-mods {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.mod-item {
+  background: #2a2a2a;
+  padding: 8px 12px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
   font-size: 0.85rem;
 }
 
-.top-tag {
-  padding: 4px 8px;
-  border-radius: 5px;
-  color: #000;
-  font-weight: bold;
-}
-
-.weapon-type {
-  background: #333;
-  color: #ccc;
-  padding: 4px 8px;
-  border-radius: 5px;
-}
-
-.tab-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 10px;
-}
-
-.tab-btn {
-  padding: 5px 10px;
-  background: #1e1e1e;
-  border: none;
-  color: #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.tab-btn.active {
-  background: #444;
-  color: #fff;
-  font-weight: bold;
-}
-
-.tab-panel {
-  margin-top: 10px;
-}
-
-.mod-line {
-  display: flex;
-  justify-content: space-between;
-  background: #202020;
-  border-radius: 6px;
-  padding: 6px 10px;
-  margin-bottom: 6px;
-}
-
-.mod-cat {
-  color: #888;
-  font-size: 0.9rem;
-}
-
-.mod-name {
-  color: #fff;
-  font-weight: bold;
-}
-
-
-.mod-block {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px;
-  background: #222;
-  border: 1px solid #444;
-  margin-bottom: 5px;
-  border-radius: 6px;
-  font-weight: bold;
-}
-
 .mod-category {
-  opacity: 0.6;
+  color: #888;
+  font-size: 0.75rem;
 }
 
 .mod-name {
-  text-align: right;
+  font-weight: bold;
 }
-
-
-/* Декстоп версия */
-
