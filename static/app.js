@@ -38,23 +38,29 @@ async function checkAdminStatus() {
     const data = await res.json();
 
     const editBtn = document.getElementById('edit-builds-btn');
+    const assignBtn = document.getElementById('assign-admin-btn');
 
     if (data.is_admin) {
       if (addBtn) addBtn.style.display = 'inline-block';
       if (editBtn) editBtn.style.display = 'inline-block';
+      if (assignBtn) assignBtn.style.display = 'inline-block'; // 👈 показать кнопку
       if (userInfo) userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
     } else {
       if (addBtn) addBtn.style.display = 'none';
       if (editBtn) editBtn.style.display = 'none';
+      if (assignBtn) assignBtn.style.display = 'none'; // 👈 скрыть для обычных
     }
 
   } catch (e) {
     console.error("Ошибка при проверке прав администратора:", e);
     if (addBtn) addBtn.style.display = 'none';
     const editBtn = document.getElementById('edit-builds-btn');
+    const assignBtn = document.getElementById('assign-admin-btn');
     if (editBtn) editBtn.style.display = 'none';
+    if (assignBtn) assignBtn.style.display = 'none';
   }
 }
+
 
 
 function showScreen(id) {
