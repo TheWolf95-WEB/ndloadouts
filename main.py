@@ -100,3 +100,4 @@ async def get_me(request: Request):
         return JSONResponse({"error": "Invalid user data", "detail": str(e)}, status_code=400)
 
 
+# проверка
