@@ -21,16 +21,12 @@ function showScreen(id) {
   // Показываем кнопки ролей только на главном экране
   if (id === 'screen-main') {
     roleButtons?.style.display = 'block';
-    const isAdmin = user && ADMIN_IDS.includes(user.id);
-    if (isAdmin) {
-      addBtn?.style.display = 'inline-block';
-    } else {
-      addBtn?.style.display = 'none';
-    }
+    checkAdmin(); // ← вызываем реальную проверку
   } else {
     roleButtons?.style.display = 'none';
+    addBtn?.style.display = 'none'; // точно скрываем вне главного
   }
-}
+
 
 
 
@@ -84,14 +80,17 @@ if (user && userInfo) {
 }
 
 function checkAdmin() {
-  if (!user || !userInfo) return;
+  if (!user || !userInfo || !addBtn) return;
 
   const isAdmin = ADMIN_IDS.includes(user.id);
+
   if (isAdmin) {
-    userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
     addBtn.style.display = 'inline-block';
-  } 
+  } else {
+    addBtn.style.display = 'none';
   }
+}
+
 
 
 
