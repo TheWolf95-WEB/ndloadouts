@@ -5,23 +5,31 @@ function showScreen(id) {
 
   allScreens.forEach(screen => {
     if (screen.id === id) {
-      // Сначала показать без анимации
       screen.style.display = 'block';
       screen.classList.remove('active');
-
-      // Добавляем анимацию на след. кадр (гарантированно плавно)
       requestAnimationFrame(() => {
         screen.classList.add('active');
-        // Можно добавить: screen.scrollIntoView({ behavior: "smooth" });
       });
     } else {
       screen.classList.remove('active');
-      // Убираем после завершения transition (через 300мс)
       setTimeout(() => {
         screen.style.display = 'none';
       }, 300);
     }
   });
+
+  // Показываем кнопки ролей только на главном экране
+  if (id === 'screen-main') {
+    roleButtons?.style.display = 'block';
+    const isAdmin = user && ADMIN_IDS.includes(user.id);
+    if (isAdmin) {
+      addBtn?.style.display = 'inline-block';
+    } else {
+      addBtn?.style.display = 'none';
+    }
+  } else {
+    roleButtons?.style.display = 'none';
+  }
 }
 
 
