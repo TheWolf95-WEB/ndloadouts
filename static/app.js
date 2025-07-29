@@ -403,8 +403,15 @@ async function loadBuildsTable() {
       btn.addEventListener('click', async () => {
         const id = btn.dataset.id;
         if (confirm('Удалить сборку?')) {
-          await fetch(`/api/builds/${id}`, { method: 'DELETE' });
-          await loadBuildsTable(); // перезагрузка таблицы
+          const res = await fetch(`/api/builds/${id}`, { method: 'DELETE' });
+          const data = await res.json();
+          
+          if (res.ok && data.status === "ok") {
+            await loadBuildsTable(); // перезагрузка
+          } else {
+            alert("Не удалось удалить сборку. " + (data.detail || ""));
+          }
+
         }
       });
     });
