@@ -404,10 +404,11 @@ async function loadBuildsTable() {
         const id = btn.dataset.id;
         if (confirm('Удалить сборку?')) {
           await fetch(`/api/builds/${id}`, { method: 'DELETE' });
-          await loadBuildsTable(); // перезагрузка
+          await loadBuildsTable(); // перезагрузка таблицы
         }
       });
     });
+
 
     tableWrapper.querySelectorAll('.edit-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
