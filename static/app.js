@@ -59,7 +59,7 @@ async function fetchAdminIds() {
 const user = tg.initDataUnsafe?.user;
 const userInfo = document.getElementById('user-info');
 const buildsList = document.getElementById('builds-list');
-const buildForm = document.getElementById('build-form');
+const buildForm = document.getElementById('screen-form');
 const addBtn = document.getElementById('add-build-btn');
 const showBuildsBtn = document.getElementById('show-builds-btn');
 const roleButtons = document.getElementById('role-buttons');
