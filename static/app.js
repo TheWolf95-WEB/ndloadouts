@@ -38,26 +38,21 @@ async function checkAdminStatus() {
     const data = await res.json();
 
     const editBtn = document.getElementById('edit-builds-btn');
-    const assignBtn = document.getElementById('assign-admin-btn');
 
     if (data.is_admin) {
       if (addBtn) addBtn.style.display = 'inline-block';
       if (editBtn) editBtn.style.display = 'inline-block';
-      if (assignBtn) assignBtn.style.display = 'inline-block'; // 👈 показать кнопку
       if (userInfo) userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
     } else {
       if (addBtn) addBtn.style.display = 'none';
       if (editBtn) editBtn.style.display = 'none';
-      if (assignBtn) assignBtn.style.display = 'none'; // 👈 скрыть для обычных
     }
 
   } catch (e) {
     console.error("Ошибка при проверке прав администратора:", e);
     if (addBtn) addBtn.style.display = 'none';
     const editBtn = document.getElementById('edit-builds-btn');
-    const assignBtn = document.getElementById('assign-admin-btn');
     if (editBtn) editBtn.style.display = 'none';
-    if (assignBtn) assignBtn.style.display = 'none';
   }
 }
 
@@ -415,39 +410,43 @@ async function loadBuildsTable() {
 }
 
 // Назначить админа
-const assignAdminBtn = document.getElementById('assign-admin-btn');
-const assignAdminForm = document.getElementById('assign-admin-form');
-const confirmAssignAdmin = document.getElementById('confirm-assign-admin');
-
-if (assignAdminBtn && assignAdminForm) {
-  assignAdminBtn.addEventListener('click', () => {
-    assignAdminForm.style.display = 'block';
-  });
+// Показ кнопки "Назначить админа" только для админов
+if (data.is_admin) {
+  if (document.getElementById('assign-admin-btn'))
+    document.getElementById('assign-admin-btn').style.display = 'inline-block';
 }
 
-if (confirmAssignAdmin) {
-  confirmAssignAdmin.addEventListener('click', async () => {
-    const newId = document.getElementById('new-admin-id').value.trim();
-    if (!newId || isNaN(newId)) {
-      alert("Введите корректный Telegram ID");
-      return;
-    }
+// Переход на экран
+document.getElementById('assign-admin-btn')?.addEventListener('click', () => {
+  showScreen('screen-assign-admin');
+});
 
-    const res = await fetch('/api/assign-admin-id', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: newId })
-    });
+// Назад с экрана назначения
+document.getElementById('back-from-assign')?.addEventListener('click', () => {
+  showScreen('screen-main');
+});
 
-    const data = await res.json();
-    if (data.status === 'ok') {
-      alert("✅ Пользователь назначен админом");
-      assignAdminForm.style.display = 'none';
-    } else {
-      alert("Ошибка: " + (data.detail || data.message));
-    }
+// Обработка формы назначения админа
+document.getElementById('submit-admin-id')?.addEventListener('click', async () => {
+  const input = document.getElementById('new-admin-id');
+  const status = document.getElementById('assign-admin-status');
+  const userId = input.value.trim();
+
+  if (!userId || isNaN(userId)) {
+    status.textContent = 'Введите корректный Telegram ID.';
+    return;
+  }
+
+  const res = await fetch('/api/assign-admin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ userId: userId })
   });
-}
+
+  const data = await res.json();
+  status.textContent = data.message || 'Что-то пошло не так...';
+});
+
 
 
 
