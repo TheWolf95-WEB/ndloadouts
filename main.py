@@ -10,7 +10,7 @@ import hashlib
 import subprocess
 from urllib.parse import parse_qs
 
-from database import init_db, get_all_builds, add_build
+from database import init_db, get_all_builds, add_build, delete_build_by_id
 
 # Загрузка .env
 load_dotenv()
