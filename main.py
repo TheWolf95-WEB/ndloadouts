@@ -70,3 +70,5 @@ def get_weapon_types():
     return JSONResponse(types)
 
 # Проверка
+
+# Проверка
