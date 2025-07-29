@@ -430,64 +430,31 @@ select:disabled {
 
 /* стили для красивой таблицы */
 
-.table-wrapper {
-  width: 100%;
-  overflow-x: auto;
-  padding-bottom: 10px;
-}
-
-/* У самой таблицы минимальная ширина, чтобы при узком экране появился горизонтальный скролл */
-.builds-table {
-  min-width: 600px;
-  width: 100%;
-  border-collapse: collapse;
-  border-radius: 6px;
-  overflow: hidden;
+.build-card {
   background-color: #1e1f26;
-  color: #ffffff;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+  color: #fff;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
   font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-
-.builds-table thead {
-  background-color: #2b2d35;
-  font-weight: bold;
-  text-align: left;
+.build-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
 }
 
-.builds-table th,
-.builds-table td {
-  padding: 12px 16px;
-  border-bottom: 1px solid #3a3b45;
-}
-
-.builds-table tr:last-child td {
-  border-bottom: none;
-}
-
-.builds-table tr:hover {
-  background-color: #2a2b33;
-}
-
-.builds-table .btn-sm {
-  margin-right: 6px;
-  padding: 4px 8px;
-  font-size: 13px;
+.btn.btn-sm {
+  padding: 6px 10px;
+  font-size: 14px;
   border-radius: 4px;
-  background-color: #3b82f6;
-  border: none;
-  color: white;
-  cursor: pointer;
-  transition: background 0.2s ease;
 }
 
-.builds-table .btn-sm.delete-btn {
-  background-color: #ef4444;
-}
-
-.builds-table .btn-sm:hover {
-  filter: brightness(1.1);
-}
 
 
 @media (max-width: 550px) {
