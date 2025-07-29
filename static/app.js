@@ -444,17 +444,19 @@ async function loadBuilds() {
   });
 
   // Анимация открытия/закрытия
-  document.querySelectorAll('.js-loadout-toggle').forEach(header => {
-    header.addEventListener('click', () => {
-      const loadout = header.closest('.js-loadout');
-      const content = loadout.querySelector('.loadout__content');
-      loadout.classList.toggle('is-open');
-      if (loadout.classList.contains('is-open')) {
-        content.style.maxHeight = content.scrollHeight + 'px';
-      } else {
-        content.style.maxHeight = '0';
-      }
-    });
+  header.addEventListener('click', () => {
+    const loadout = header.closest('.js-loadout');
+    const content = loadout.querySelector('.loadout__content');
+  
+    loadout.classList.toggle('is-open');
+  
+    if (loadout.classList.contains('is-open')) {
+      content.style.maxHeight = content.scrollHeight + 'px';
+    } else {
+      content.style.maxHeight = '0';
+    }
+  });
+
   });
 }
 
