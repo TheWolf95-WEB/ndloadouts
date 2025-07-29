@@ -1,32 +1,3 @@
-const tg = window.Telegram?.WebApp;
-const isWebApp = !!tg?.initData;
-
-// Псевдо-заголовок и приветствие
-const userInfo = document.getElementById('user-info');
-const roleButtons = document.getElementById('role-buttons');
-
-if (!isWebApp) {
-  // Убираем приветствие и роли
-  userInfo.style.display = 'none';
-
-  // Упрощаем внешний вид (например, меняем фон или убираем лишнее)
-  document.body.classList.add('browser-mode');
-
-  // Показываем только нужные кнопки
-  roleButtons.style.display = 'block';
-
-  // Скрываем кнопку "Добавить сборку"
-  document.getElementById('add-build-btn')?.remove();
-} else {
-  // Telegram WebApp
-  tg.expand();
-  fetchAdminIds(); // запрашиваем данные о пользователе
-}
-
-if (!isWebApp) {
-  document.getElementById('browser-header').style.display = 'block';
-}
-
 
 // переходы по страницам 
 function showScreen(id) {
