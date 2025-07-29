@@ -1,7 +1,7 @@
-fastapi
-uvicorn[standard]
 aiofiles
+aiogram==3.*
+fastapi
 httpx
 jinja2
-aiogram==3.*
 python-dotenv
+uvicorn[standard]
