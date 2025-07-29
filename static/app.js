@@ -35,17 +35,15 @@ function checkAdmin() {
 }
 
 
-
-// Примеры использования:
-document.getElementById('add-build-btn')?.addEventListener('click', () => showScreen('screen-form'));
-document.getElementById('show-builds-btn')?.addEventListener('click', async () => {
+// === ПОВЕДЕНИЕ КНОПОК ===
+showBuildsBtn?.addEventListener('click', async () => {
   await loadBuilds();
   showScreen('screen-builds');
 });
-document.getElementById('back-to-main')?.addEventListener('click', () => showScreen('screen-main'));
-document.getElementById('back-from-builds')?.addEventListener('click', () => showScreen('screen-main'));
 
-
+addBtn?.addEventListener('click', () => {
+  showScreen('screen-form');
+});
 
 
 
@@ -84,18 +82,6 @@ if (user && userInfo) {
 } else if (userInfo) {
   userInfo.style.display = 'none'; // скрываем блок, если нет данных пользователя
 }
-
-
-// === ПОВЕДЕНИЕ КНОПОК ===
-showBuildsBtn?.addEventListener('click', async () => {
-  await loadBuilds();
-  showScreen('screen-builds');
-});
-
-addBtn?.addEventListener('click', () => {
-  showScreen('screen-form');
-});
-
 
 // === Загрузка типов оружия ===
 const weaponTypeLabels = {}; // type.key → type.label
