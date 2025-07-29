@@ -355,8 +355,6 @@ async function loadBuilds() {
   builds.forEach(build => {
     const wrapper = document.createElement("div");
     wrapper.className = "build-card";
-
-    const weaponTypeRu = weaponTypeMap[build.weapon_type] || build.weapon_type;
     
     wrapper.innerHTML = `
       <details>
