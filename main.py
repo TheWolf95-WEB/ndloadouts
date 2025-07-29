@@ -112,6 +112,22 @@ def delete_build(build_id: str):
         return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
 
 
+
+# Эндпоинт получения всех админов:
+
+@app.get("/api/admins")
+async def get_admins():
+    env_path = Path(".env")
+    env_vars = dotenv_values(env_path)
+
+    return {
+        "main_admins": list(filter(None, env_vars.get("ADMIN_IDS", "").split(","))),
+        "dop_admins": list(filter(None, env_vars.get("ADMIN_DOP", "").split(",")))
+    }
+
+
+
+
 # добавления админа
 
 @app.post("/api/assign-admin")
@@ -119,7 +135,61 @@ async def assign_admin(data: dict = Body(...)):
     requester_id = str(data.get("requesterId", "")).strip()
     user_id = str(data.get("userId", "")).strip()
 
+    # Проверка корректности ID
     if not requester_id.isdigit() or not user_id.isdigit():
+        return JSONResponse({"status": "error", "message": "Некорректный ID"}, status_code=400)
+
+    env_path = Path(".env")
+    env_vars = dotenv_values(env_path)
+
+    admin_ids = set(filter(None, map(str.strip, env_vars.get("ADMIN_IDS", "").split(","))))
+    admin_dop = set(filter(None, map(str.strip, env_vars.get("ADMIN_DOP", "").split(","))))
+
+    # Разрешить только главному админу
+    if requester_id not in admin_ids:
+        return JSONResponse({"status": "error", "message": "Недостаточно прав"}, status_code=403)
+
+    # Уже админ (главный или доп)
+    if user_id in admin_ids or user_id in admin_dop:
+        return JSONResponse({"status": "ok", "message": "Пользователь уже админ."})
+
+    # Добавить пользователя в ADMIN_DOP
+    admin_dop.add(user_id)
+    new_value = ",".join(sorted(admin_dop))
+    set_key(env_path, "ADMIN_DOP", new_value)
+
+    # Отправка уведомления через Telegram
+    bot_token = os.getenv("TOKEN")
+    if bot_token:
+        try:
+            message = (
+                "👋 <b>Привет!</b>\n"
+                "Вы были <b>назначены администратором</b> в ND Loadouts.\n"
+                "Теперь у вас есть доступ к добавлению и редактированию сборок."
+            )
+            requests.post(
+                f"https://api.telegram.org/bot{bot_token}/sendMessage",
+                json={
+                    "chat_id": user_id,
+                    "text": message,
+                    "parse_mode": "HTML"
+                },
+                timeout=5
+            )
+        except Exception as e:
+            print(f"[!] Ошибка отправки уведомления: {e}")
+
+    return JSONResponse({"status": "ok", "message": f"Пользователь {user_id} назначен админом."})
+
+
+# Эндпоинт удаления доп-админа:
+
+@app.post("/api/remove-admin")
+async def remove_admin(data: dict = Body(...)):
+    requester_id = str(data.get("requesterId", "")).strip()
+    target_id = str(data.get("userId", "")).strip()
+
+    if not requester_id.isdigit() or not target_id.isdigit():
         return JSONResponse({"status": "error", "message": "Некорректный ID"}, status_code=400)
 
     env_path = Path(".env")
@@ -128,36 +198,14 @@ async def assign_admin(data: dict = Body(...)):
     admin_ids = set(map(str.strip, env_vars.get("ADMIN_IDS", "").split(",")))
     admin_dop = set(filter(None, map(str.strip, env_vars.get("ADMIN_DOP", "").split(","))))
 
-    # Только главный админ может назначать
+    # Только супер админ может удалять
     if requester_id not in admin_ids:
         return JSONResponse({"status": "error", "message": "Недостаточно прав"}, status_code=403)
 
-    # Уже админ
-    if user_id in admin_ids or user_id in admin_dop:
-        return JSONResponse({"status": "ok", "message": "Пользователь уже админ."})
+    if target_id not in admin_dop:
+        return JSONResponse({"status": "error", "message": "Пользователь не является доп. админом"}, status_code=404)
 
-    # Добавление в ADMIN_DOP
-    admin_dop.add(user_id)
+    admin_dop.remove(target_id)
     set_key(env_path, "ADMIN_DOP", ",".join(sorted(admin_dop)))
 
-    # === Уведомление через Telegram
-    bot_token = os.getenv("TOKEN")
-    if bot_token:
-        try:
-            import requests
-            message = (
-                "👋 <b>Привет!</b>\n"
-                "Вы были <b>назначены администратором</b> в ND Loadouts.\n"
-                "Теперь у вас есть доступ к добавлению и редактированию сборок."
-            )
-            url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-            payload = {
-                "chat_id": user_id,
-                "text": message,
-                "parse_mode": "HTML"
-            }
-            requests.post(url, json=payload, timeout=5)
-        except Exception as e:
-            print(f"[!] Ошибка отправки уведомления: {e}")
-
-    return JSONResponse({"status": "ok", "message": f"Пользователь {user_id} добавлен в админы."})
+    return JSONResponse({"status": "ok", "message": f"Пользователь {target_id} удалён из админов."})
