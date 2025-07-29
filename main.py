@@ -102,11 +102,11 @@ async def get_me(data: dict = Body(...)):
 # функция удаления сборки
 
 @app.delete("/api/builds/{build_id}")
-async def delete_build(build_id: str):
+def delete_build(build_id: str):
     try:
-        # Удали из БД (реализуем в database.py)
         delete_build_by_id(build_id)
-        return JSONResponse({"status": "ok"})
+        return {"status": "ok"}
     except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=500)
+        return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
+
 
