@@ -84,6 +84,15 @@ document.getElementById('back-from-builds')?.addEventListener('click', () => sho
 document.getElementById('help-btn')?.addEventListener('click', () => {
   tg.openLink('https://t.me/ndzone_admin');
 });
+document.getElementById('edit-builds-btn')?.addEventListener('click', async () => {
+  await loadBuildsTable();
+  showScreen('screen-edit-builds');
+});
+
+document.getElementById('back-from-edit')?.addEventListener('click', () => {
+  showScreen('screen-main');
+});
+
 
 // === Загрузка типов оружия ===
 async function loadWeaponTypes() {
@@ -343,6 +352,76 @@ async function loadBuilds() {
     });
   });
 }
+
+// JS — функция для загрузки и отрисовки таблицы
+
+async function loadBuildsTable() {
+  try {
+    const res = await fetch('/api/builds');
+    const builds = await res.json();
+    const tableWrapper = document.getElementById('edit-builds-table');
+
+    if (!builds.length) {
+      tableWrapper.innerHTML = "<p>Сборок пока нет.</p>";
+      return;
+    }
+
+    let html = `
+      <table class="builds-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Название</th>
+            <th>Тип</th>
+            <th>Вкладки</th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    builds.forEach((build, index) => {
+      html += `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${build.title}</td>
+          <td>${weaponTypeLabels[build.weapon_type] || build.weapon_type}</td>
+          <td>${build.tabs.length}</td>
+          <td>
+            <button class="btn btn-sm edit-btn" data-id="${build.id}">✏</button>
+            <button class="btn btn-sm delete-btn" data-id="${build.id}">🗑</button>
+          </td>
+        </tr>
+      `;
+    });
+
+    html += `</tbody></table>`;
+    tableWrapper.innerHTML = html;
+
+    // Обработчики кнопок
+    tableWrapper.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        if (confirm('Удалить сборку?')) {
+          await fetch(`/api/builds/${id}`, { method: 'DELETE' });
+          await loadBuildsTable(); // перезагрузка
+        }
+      });
+    });
+
+    tableWrapper.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        alert(`Форма редактирования сборки ${id} пока не реализована`);
+        // Здесь можешь реализовать редактирование
+      });
+    });
+
+  } catch (e) {
+    console.error('Ошибка загрузки сборок:', e);
+  }
+}
+
 
 // === Init ===
 loadWeaponTypes();
