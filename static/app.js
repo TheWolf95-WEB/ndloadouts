@@ -23,6 +23,11 @@ if (!isWebApp) {
   fetchAdminIds(); // запрашиваем данные о пользователе
 }
 
+if (!isWebApp) {
+  document.getElementById('browser-header').style.display = 'block';
+}
+
+
 // переходы по страницам 
 function showScreen(id) {
   const allScreens = document.querySelectorAll('.screen');
