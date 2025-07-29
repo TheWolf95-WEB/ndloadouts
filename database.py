@@ -2,7 +2,7 @@ import sqlite3
 import json
 from pathlib import Path
 
-DB_PATH = Path("data/builds.db")
+DB_PATH = Path("/opt/ndloadouts_storage/builds.db")
 DB_PATH.parent.mkdir(exist_ok=True)
 
 def init_db():
