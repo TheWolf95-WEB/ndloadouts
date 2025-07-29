@@ -459,7 +459,7 @@ document.querySelectorAll('.js-loadout-toggle').forEach(header => {
   });
 });
 
-
+}
 
 // === При старте загружаем только типы оружия
 loadWeaponTypes();
