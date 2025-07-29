@@ -25,16 +25,28 @@ if (user && userInfo) {
   userInfo.innerHTML = 'Ошибка: не удалось получить данные пользователя';
 }
 
+
 async function fetchAdminIds() {
   try {
-    const res = await fetch('/api/me');
+    const res = await fetch('/api/me', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        initData: tg.initData
+      })
+    });
+
     const data = await res.json();
     ADMIN_IDS = data.admin_ids || [];
-    checkAdmin();
+
+    checkAdmin(); // вызываем проверку после загрузки
   } catch (e) {
-    console.error('Ошибка загрузки admin_ids:', e);
+    console.error('Не удалось загрузить admin_ids:', e);
   }
 }
+
 
 function checkAdmin() {
   const isAdmin = ADMIN_IDS.includes(user?.id);
