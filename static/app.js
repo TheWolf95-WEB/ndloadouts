@@ -357,18 +357,18 @@ async function loadBuilds() {
     wrapper.className = "build-card";
     
     wrapper.innerHTML = `
-      <details>
-        <summary>
+      <details class="build-card">
+        <summary class="build-summary">
           <div class="build-header">
             <div class="build-title-wrap">
               <h3 class="build-title">${build.title}</h3>
-              <div class="top-tags">
+              <div class="build-meta">
                 ${[build.top1, build.top2, build.top3].map((mod, i) =>
                   mod ? `<span class="top-tag" style="background:${topColors[i]}">#${i + 1} ${mod}</span>` : ''
                 ).join('')}
+                <span class="weapon-type">${weaponTypeLabels[build.weapon_type] || build.weapon_type}</span>
               </div>
             </div>
-             <div class="build-type"><b>${weaponTypeLabels[build.weapon_type] || build.weapon_type}</b></div>
           </div>
         </summary>
     
@@ -381,9 +381,18 @@ async function loadBuilds() {
         <div class="tab-content">
           ${build.tabs.map((tab, i) => `
             <div class="tab-panel" style="${i === 0 ? '' : 'display:none;'}">
-              ${tab.items.map(item => `
-                <div class="mod-block">${moduleNameMap[item] || item}</div>
-              `).join('')}
+              <div class="mod-grid">
+                ${tab.items.map(item => {
+                  const ru = moduleNameMap[item] || item;
+                  const category = getCategoryByModule(item, build.weapon_type);
+                  return `
+                    <div class="mod-item">
+                      <div class="mod-slot">${category}</div>
+                      <div class="mod-name">${ru}</div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
             </div>
           `).join('')}
         </div>
