@@ -20,10 +20,14 @@ function showScreen(id) {
 
   // Показываем кнопки ролей только на главном экране
   if (id === 'screen-main') {
-    roleButtons?.style.display = 'block';
+    if (roleButtons) {
+      roleButtons.style.display = 'block';
+    }
     checkAdmin(); // покажем админ-кнопку, если надо
   } else {
-    roleButtons?.style.display = 'none';
+    if (roleButtons) {
+      roleButtons.style.display = 'none';
+    }
     addBtn?.style.display = 'none';
   }
 }
