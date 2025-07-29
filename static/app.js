@@ -46,16 +46,16 @@ let ADMIN_IDS = [];
 
 async function fetchAdminIds() {
   try {
-    const initData = tg.initData; // получаем из Telegram
+    const initData = tg.initData;
     const res = await fetch('/api/me?initData=' + encodeURIComponent(initData));
     const data = await res.json();
-
     ADMIN_IDS = data.admin_ids || [];
-    checkAdmin(); // запускаем проверку роли
+    checkAdmin();
   } catch (e) {
     console.error('Не удалось загрузить admin_ids:', e);
   }
 }
+
 
 const user = tg.initDataUnsafe?.user;
 const userInfo = document.getElementById('user-info');
@@ -76,7 +76,7 @@ if (user) {
 }
 
 function checkAdmin() {
-  const isAdmin = ADMIN_IDS.includes(user.id);
+  const isAdmin = ADMIN_IDS.includes(String(user.id));
   if (isAdmin) {
     userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
     addBtn.style.display = 'inline-block';
@@ -84,6 +84,7 @@ function checkAdmin() {
     userInfo.innerHTML += `<p>Пользователь 👤</p>`;
   }
 }
+
 
 
 // === ПОВЕДЕНИЕ КНОПОК ===
