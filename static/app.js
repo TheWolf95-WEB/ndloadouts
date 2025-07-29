@@ -67,22 +67,24 @@ const weaponTypeSelect = document.getElementById('weapon_type');
 const tabsContainer = document.getElementById('tabs-container');
 const modulesByType = {};
 
-if (user) {
+if (user && userInfo) {
+  userInfo.style.display = 'block';
   userInfo.innerHTML = `<p>Привет, ${user.first_name}!</p>`;
   fetchAdminIds(); // загружаем ID админов
-} else {
-  userInfo.innerHTML = 'Ошибка: не удалось получить данные пользователя.';
+} else if (userInfo) {
+  userInfo.style.display = 'none'; // скрываем блок, если нет данных пользователя
 }
 
 function checkAdmin() {
+  if (!user || !userInfo) return;
+
   const isAdmin = ADMIN_IDS.includes(user.id);
   if (isAdmin) {
     userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
     addBtn.style.display = 'inline-block';
-  } else {
-    userInfo.innerHTML += `<p>Пользователь 👤</p>`;
+  } 
   }
-}
+
 
 
 // === ПОВЕДЕНИЕ КНОПОК ===
