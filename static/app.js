@@ -423,22 +423,25 @@ async function loadBuilds() {
 
 
 
-    // табы
-    setTimeout(() => {
-      const buttons = wrapper.querySelectorAll(".tab-btn");
-      const panels = wrapper.querySelectorAll(".tab-panel");
-      buttons.forEach((btn, i) => {
-        btn.addEventListener("click", () => {
-          panels.forEach(p => p.style.display = "none");
-          panels[i].style.display = "block";
-        });
-      });
-    }, 0);
+// табы (исправлено под loadout__tab / loadout__tab-content)
+setTimeout(() => {
+  const tabButtons = wrapper.querySelectorAll(".loadout__tab");
+  const tabContents = wrapper.querySelectorAll(".loadout__tab-content");
 
-    buildsList.appendChild(wrapper);
+  tabButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tab = btn.dataset.tab;
+
+      // Убираем активные классы
+      tabButtons.forEach(b => b.classList.remove("is-active"));
+      tabContents.forEach(c => c.classList.remove("is-active"));
+
+      // Назначаем активный
+      btn.classList.add("is-active");
+      wrapper.querySelector(`[data-tab-content="${tab}"]`)?.classList.add("is-active");
+    });
   });
-}
-
+}, 0);
 
 // === При старте загружаем только типы оружия
 loadWeaponTypes();
