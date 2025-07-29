@@ -455,6 +455,40 @@ document.getElementById('submit-admin-id')?.addEventListener('click', async () =
   status.textContent = data.message || 'Что-то пошло не так...';
 });
 
+// загрузка и удаление админов
+
+async function loadAdminList(requesterId) {
+  const res = await fetch('/api/admins');
+  const data = await res.json();
+  const listEl = document.getElementById('admin-list');
+  listEl.innerHTML = '';
+
+  data.dop_admins.forEach(userId => {
+    const li = document.createElement('li');
+    li.innerHTML = `${userId} <button class="btn btn-sm" data-id="${userId}">Удалить</button>`;
+    listEl.appendChild(li);
+
+    li.querySelector('button').addEventListener('click', async () => {
+      if (!confirm(`Удалить ${userId} из админов?`)) return;
+
+      const res = await fetch('/api/remove-admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, requesterId })
+      });
+
+      const result = await res.json();
+      alert(result.message || 'Готово');
+      await loadAdminList(requesterId);
+    });
+  });
+
+  if (data.main_admins.length) {
+    const label = document.createElement('p');
+    label.textContent = `Супер админ: ${data.main_admins.join(", ")}`;
+    listEl.prepend(label);
+  }
+}
 
 
 
