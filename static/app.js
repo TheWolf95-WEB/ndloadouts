@@ -14,6 +14,16 @@ window.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+// Функция getCategoryByModule()
+function getCategoryByModule(moduleEn, weaponType) {
+  const mods = modulesByType[weaponType] || {};
+  for (const category in mods) {
+    if (mods[category].some(mod => mod.en === moduleEn)) {
+      return category;
+    }
+  }
+  return "-";
+}
 
 
 // переходы по страницам 
@@ -443,9 +453,6 @@ setTimeout(() => {
   });
 }, 0);
 
-// === При старте загружаем только типы оружия
-loadWeaponTypes();
-
 
 // Кнопка Помощь или идеи
 document.getElementById('help-btn')?.addEventListener('click', () => {
@@ -469,3 +476,9 @@ document.getElementById('back-to-main').addEventListener('click', () => {
     addBtn.style.display = 'inline-block';
   }
 });
+
+
+    
+// === При старте загружаем только типы оружия
+loadWeaponTypes();
+
