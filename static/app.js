@@ -1,9 +1,6 @@
-// === Telegram WebApp + сборки: основной JS ===
-
 const tg = window.Telegram.WebApp;
 tg.expand();
 
-let ADMIN_IDS = [];
 const user = tg.initDataUnsafe?.user;
 
 const userInfo = document.getElementById('user-info');
@@ -14,55 +11,48 @@ const showBuildsBtn = document.getElementById('show-builds-btn');
 const roleButtons = document.getElementById('role-buttons');
 const weaponTypeSelect = document.getElementById('weapon_type');
 const tabsContainer = document.getElementById('tabs-container');
-const modulesByType = {};
-const weaponTypeLabels = {}; // key -> label
-const moduleNameMap = {}; // en -> ru
 
+const modulesByType = {};
+const weaponTypeLabels = {};
+const moduleNameMap = {};
+
+let ADMIN_IDS = [];
+
+// === Приветствие и загрузка админов ===
 if (user && userInfo) {
   userInfo.innerHTML = `<p>Привет, ${user.first_name}!</p>`;
-  fetchAdminIds();
+  fetchAdminInfo(); // Загружаем информацию о правах
 } else if (userInfo) {
   userInfo.innerHTML = 'Ошибка: не удалось получить данные пользователя';
+  addBtn.style.display = 'none';
 }
 
+// === Получение инфы о правах из /api/me ===
+async function fetchAdminInfo() {
+  try {
+    const res = await fetch('/api/me', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData: tg.initData })
+    });
 
-@app.post("/api/me")
-async def get_me(data: dict = Body(...)):
-    init_data = data.get("initData", "")
-    parsed = parse_qs(init_data)
+    const data = await res.json();
 
-    user_data = parsed.get("user", [None])[0]
-    if not user_data:
-        return JSONResponse({"error": "No user info"}, status_code=400)
+    if (data.is_admin) {
+      addBtn.style.display = 'inline-block';
+      userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
+    } else {
+      addBtn.style.display = 'none';
+      // Не показываем "Пользователь 👤", если уже было "Привет"
+    }
 
-    try:
-        user_json = json.loads(user_data)
-        user_id = str(user_json.get("id"))
-        admin_ids = os.getenv("ADMIN_IDS", "").split(",")
-        is_admin = user_id in admin_ids
-
-        return JSONResponse({
-            "user_id": user_id,
-            "first_name": user_json.get("first_name"),
-            "username": user_json.get("username"),
-            "is_admin": is_admin,
-            "admin_ids": admin_ids
-        })
-    except Exception as e:
-        return JSONResponse({"error": "Invalid user data", "detail": str(e)}, status_code=400)
-
-
-
-function checkAdmin() {
-  const isAdmin = ADMIN_IDS.includes(user?.id);
-  if (isAdmin) {
-    userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
-    addBtn.style.display = 'inline-block';
-  } else {
-    userInfo.innerHTML += `<p>Пользователь 👤</p>`;
+    ADMIN_IDS = data.admin_ids || [];
+  } catch (e) {
+    console.error('Ошибка при получении прав администратора:', e);
     addBtn.style.display = 'none';
   }
 }
+
 
 function showScreen(id) {
   const allScreens = document.querySelectorAll('.screen');
