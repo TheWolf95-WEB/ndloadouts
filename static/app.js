@@ -1,5 +1,3 @@
-const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
-
 window.addEventListener('DOMContentLoaded', () => {
   const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
 
@@ -9,6 +7,12 @@ window.addEventListener('DOMContentLoaded', () => {
   } else {
     document.getElementById('browser-app').style.display = 'block';
   }
+
+  // Для браузера — показать сборки
+  document.getElementById('show-builds-browser')?.addEventListener('click', async () => {
+    await loadBuilds?.();
+    document.getElementById('browser-app').innerHTML += document.getElementById('builds-list')?.outerHTML || '';
+  });
 });
 
 
