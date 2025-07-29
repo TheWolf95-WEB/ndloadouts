@@ -100,23 +100,24 @@ showBuildsBtn?.addEventListener('click', async () => {
 });
 
 // === Загрузка типов оружия ===
+const weaponTypeLabels = {}; // type.key → type.label
+
 async function loadWeaponTypes() {
-
   const res = await fetch('/api/types');
-
   const types = await res.json();
 
   types.forEach(type => {
     const opt = document.createElement('option');
-    opt.value = type.key; // ✅ используем key
+    opt.value = type.key;
     opt.textContent = type.label;
+    weaponTypeLabels[type.key] = type.label; // сохраняем
     weaponTypeSelect.appendChild(opt);
   });
 
-  // ⏳ Ждём, пока всё вставилось — тогда подгружаем модули по умолчанию
   const defaultType = weaponTypeSelect.value;
   await loadModules(defaultType);
 }
+
 
 
 // === Загрузка модулей по типу ===
@@ -355,27 +356,30 @@ async function loadBuilds() {
     const wrapper = document.createElement("div");
     wrapper.className = "build-card";
 
+    const weaponTypeRu = weaponTypeMap[build.weapon_type] || build.weapon_type;
+    
     wrapper.innerHTML = `
       <details>
         <summary>
           <div class="build-header">
-            <h3>${build.title}</h3>
-            <div class="top-tags">
-              ${[build.top1, build.top2, build.top3].map((mod, i) =>
-                mod ? `<span class="top-tag" style="background:${topColors[i]}">${mod}</span>` : ''
-              ).join('')}
+            <div class="build-title-wrap">
+              <h3 class="build-title">${build.title}</h3>
+              <div class="top-tags">
+                ${[build.top1, build.top2, build.top3].map((mod, i) =>
+                  mod ? `<span class="top-tag" style="background:${topColors[i]}">#${i + 1} ${mod}</span>` : ''
+                ).join('')}
+              </div>
             </div>
+             <div class="build-type"><b>${weaponTypeLabels[build.weapon_type] || build.weapon_type}</b></div>
           </div>
         </summary>
-
-        <p><b>Тип оружия:</b> ${build.weapon_type}</p>
-
+    
         <div class="tab-buttons">
           ${build.tabs.map((tab, i) =>
             `<button class="tab-btn" data-index="${i}">${tab.label}</button>`
           ).join('')}
         </div>
-
+    
         <div class="tab-content">
           ${build.tabs.map((tab, i) => `
             <div class="tab-panel" style="${i === 0 ? '' : 'display:none;'}">
@@ -387,6 +391,7 @@ async function loadBuilds() {
         </div>
       </details>
     `;
+
 
     // табы
     setTimeout(() => {
