@@ -244,176 +244,98 @@ select:disabled {
 
 /* СБОРКИ */
 
-.loadout__header {
-  display: flex;
-  padding: 20px;
+.build-card {
   border-radius: 8px;
-  flex-direction:column;
-  background: #171D25;
-  color: #ccc;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  background: #121212;
+  margin-bottom: 20px;
+  overflow: hidden;
+  border: 1px solid #2a2a2a;
 }
 
-
-.loadout__header--top{
-    display: flex;
-    justify-content: space-between;
-    gap: 20px;
-    align-items: center;
-    width:100%;
-}
-
-.loadout__toggle-icon {
-  background: transparent;
-  border: none;
-  color: #fff;
-  font-size: 1.2rem;
+.build-summary {
+  padding: 16px;
   cursor: pointer;
+  background: #1a1a1a;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.loadout__title {
-  flex: 1;
-  font-size: 1.5rem;
+.build-title {
+  font-size: 20px;
+  font-weight: 600;
   color: #fff;
   margin: 0;
 }
 
-
-.loadout__tab-content {
-  display: none;
-}
-.loadout__tab-content.is-active {
-  display: block;
-}
-
-
-.loadout__meta {
+.build-meta {
   display: flex;
-  align-items: center;
-  margin-top: 10px;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
+  align-items: center;
 }
 
-.loadout__tops {
+.top-tag {
+  color: #000;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.weapon-type {
+  background: #2e2e2e;
+  color: #aaa;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.tab-buttons {
   display: flex;
   gap: 8px;
+  padding: 10px 16px;
+  background: #1f1f1f;
+  border-top: 1px solid #2a2a2a;
 }
 
-.loadout__top {
-  padding: 5px 10px;
+.tab-btn {
+  background: #333;
+  color: #eee;
+  padding: 6px 10px;
+  border: none;
   border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #000;
-  text-transform: uppercase;
+  cursor: pointer;
 }
 
-.loadout__top--gold {
-  background: linear-gradient(90deg, #ffe259, #ffa751);
+.tab-btn:hover {
+  background: #444;
 }
 
-.loadout__top--orange {
-  background: linear-gradient(90deg, #ff9966, #ff5e62);
+.tab-panel {
+  padding: 16px;
+  background: #181818;
+  border-top: 1px solid #2a2a2a;
 }
 
-.loadout__top--silver {
-  background: linear-gradient(90deg, #bdc3c7, #2c3e50);
+.mod-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
-.loadout__type {
-  padding: 5px 10px;
-  background: #2d2d2d;
-  border-radius: 4px;
-  color: #17a51c;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-
-
-.loadout{
-    transition: 0.3s ease;
-      background: #171D25;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-}
-
-.loadout:hover {
-  transform: translateY(-5px);
-}
-
-
-.loadout__tab{
-        color: #fff;
-    padding: 5px 15px;
-    border-radius: 20px 4px 20px 4px;
-    font-size: 14px;
-    letter-spacing: 0.5px;
-    display: inline-block;
-    position: relative;
-    background: transparent;
-    border: 1px solid rgba(23, 165, 28, 0.5);
-    transition: 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
-    cursor: pointer;
-    
-  transform: scale(1);
-}
-
-.loadout__tab:active {
-  transform: scale(0.95); /* "вжимание" при клике */
-}
-
-.loadout__inner {
-  padding: 20px;
-}
-
-
-.loadout__toggle-icon i {
-  transition: transform 0.3s ease;
-}
-
-.loadout.is-open .loadout__toggle-icon i {
-  transform: rotate(180deg);
-}
-
-
-.loadout__thumb {
-  width: 200px;
-  height: auto;
-}
-
-.loadout__modules {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  margin-top: 20px;
-}
-
-.loadout__module {
-  width: calc(50% - 10px);
-  background: #1B2838;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-  padding: 12px 16px;
+.mod-item {
+  background: #222;
   border-radius: 6px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  padding: 10px;
+}
+
+.mod-slot {
+  color: #888;
+  font-size: 13px;
+}
+
+.mod-name {
+  font-weight: bold;
   color: #fff;
-  box-sizing: border-box;
-}
-
-.loadout__module-slot {
-  font-size: 1rem;
-  color: #666;
-  margin-right: 10px;
-  white-space: nowrap;
-}
-
-.loadout__module-name {
-  font-size: 1.2rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
