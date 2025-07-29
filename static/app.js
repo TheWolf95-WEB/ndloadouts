@@ -427,7 +427,9 @@ async function loadBuildsTable() {
 // Переход на экран
 document.getElementById('assign-admin-btn')?.addEventListener('click', () => {
   showScreen('screen-assign-admin');
+  loadAdminList(user.id); // ✅ загружаем список админов
 });
+
 
 // Назад с экрана назначения
 document.getElementById('back-from-assign')?.addEventListener('click', () => {
@@ -448,7 +450,7 @@ document.getElementById('submit-admin-id')?.addEventListener('click', async () =
   const res = await fetch('/api/assign-admin', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ userId: userId })
+    body: JSON.stringify({ userId: userId, requesterId: user.id })
   });
 
   const data = await res.json();
