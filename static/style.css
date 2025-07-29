@@ -430,7 +430,15 @@ select:disabled {
 
 /* стили для красивой таблицы */
 
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+/* У самой таблицы минимальная ширина, чтобы при узком экране появился горизонтальный скролл */
 .builds-table {
+  min-width: 600px;
   width: 100%;
   border-collapse: collapse;
   border-radius: 6px;
@@ -439,6 +447,7 @@ select:disabled {
   color: #ffffff;
   font-size: 14px;
 }
+
 
 .builds-table thead {
   background-color: #2b2d35;
