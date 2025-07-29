@@ -375,35 +375,52 @@ async function loadBuilds() {
     wrapper.className = "build-card";
 
     wrapper.innerHTML = `
-      <div class="build-full">
-        <div class="build-header-row">
-          <h2 class="build-title">${build.title}</h2>
-          <div class="build-tags">
+      <div class="loadout">
+        <div class="loadout__head">
+          <h2 class="loadout__title">${build.title}</h2>
+          <div class="loadout__tags">
             ${[build.top1, build.top2, build.top3].map((mod, i) =>
               mod ? `<span class="tag tag-${i + 1}">#${i + 1} ${mod}</span>` : ''
             ).join('')}
           </div>
         </div>
     
-        <div class="build-type">Тип оружия: <b>${build.weapon_type}</b></div>
+        <div class="loadout__type">Тип оружия: <b>${build.weapon_type}</b></div>
     
-        <div class="build-tabs">
-          ${build.tabs.map((tab, i) => `
-            <div class="build-tab">
-              <h3>${tab.label}</h3>
-              <div class="build-mods">
-                ${tab.items.map(mod => `
-                  <div class="mod-item">
-                    <span class="mod-category">${Object.keys(moduleNameMap).find(k => moduleNameMap[k] === mod) || ''}</span>
-                    <span class="mod-name">${mod}</span>
+        <div class="loadout__content" style="max-height: none;">
+          <div class="loadout__inner">
+            <div class="loadout__tabs">
+              <div class="loadout__tab-buttons">
+                ${build.tabs.map((tab, index) => `
+                  <button class="loadout__tab ${index === 0 ? 'is-active' : ''}" data-tab="tab-${build.id}-${index}">
+                    ${tab.label}
+                  </button>
+                `).join('')}
+              </div>
+    
+              <div class="loadout__tab-contents">
+                ${build.tabs.map((tab, index) => `
+                  <div class="loadout__tab-content ${index === 0 ? 'is-active' : ''}" data-tab-content="tab-${build.id}-${index}">
+                    <div class="loadout__modules">
+                      ${tab.items.map(item => {
+                        const ru = moduleNameMap[item] || item;
+                        return `
+                          <div class="loadout__module">
+                            <span class="loadout__module-slot">${getCategoryByModule(item, build.weapon_type)}</span>
+                            <span class="loadout__module-name">${ru}</span>
+                          </div>
+                        `;
+                      }).join('')}
+                    </div>
                   </div>
                 `).join('')}
               </div>
             </div>
-          `).join('')}
+          </div>
         </div>
       </div>
     `;
+
 
 
     // табы
