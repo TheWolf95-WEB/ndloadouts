@@ -1,16 +1,18 @@
-window.addEventListener('DOMContentLoaded', () => {
-  const tg = window.Telegram?.WebApp;
+window.addEventListener('DOMContentLoaded', async () => {
+  const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
+  const tg = isTelegram ? Telegram.WebApp : null;
+  const user = tg?.initDataUnsafe?.user;
 
-  const isTelegramApp = tg && tg.initDataUnsafe?.user?.id;
-
-  if (isTelegramApp) {
-    document.getElementById('tg-app').style.display = 'block';
+  if (user) {
+    document.getElementById('user-info').innerHTML = `<p>Привет, ${user.first_name}!</p>`;
     tg.expand();
+    await fetchAdminIds(); // загрузим админов
   } else {
-    document.getElementById('browser-app').style.display = 'block';
+    document.getElementById('user-info').style.display = 'none';
+    document.getElementById('add-build-btn').style.display = 'none';
+    document.getElementById('show-builds-btn')?.click(); // показываем сборки
   }
 });
-
 
 
 
