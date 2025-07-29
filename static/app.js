@@ -1,22 +1,5 @@
-window.addEventListener('DOMContentLoaded', async () => {
-  const isTelegram = typeof Telegram !== 'undefined' && Telegram.WebApp;
-  const tg = isTelegram ? Telegram.WebApp : null;
-  const user = tg?.initDataUnsafe?.user;
-
-  if (user) {
-    document.getElementById('user-info').innerHTML = `<p>Привет, ${user.first_name}!</p>`;
-    tg.expand();
-    await fetchAdminIds(); // загрузим админов
-  } else {
-    document.getElementById('user-info').style.display = 'none';
-    document.getElementById('add-build-btn').style.display = 'none';
-    document.getElementById('show-builds-btn')?.click(); // показываем сборки
-  }
-});
-
-
-
 // переходы по страницам 
+
 function showScreen(id) {
   const allScreens = document.querySelectorAll('.screen');
 
@@ -53,17 +36,20 @@ document.getElementById('back-to-main')?.addEventListener('click', () => showScr
 document.getElementById('back-from-builds')?.addEventListener('click', () => showScreen('screen-main'));
 
 
+
+
+
+const tg = window.Telegram.WebApp;
 tg.expand();
 
 let ADMIN_IDS = [];
 
 async function fetchAdminIds() {
   try {
-    const initData = tg.initData;
-    const res = await fetch('/api/me?initData=' + encodeURIComponent(initData));
+    const res = await fetch('/api/me');
     const data = await res.json();
     ADMIN_IDS = data.admin_ids || [];
-    checkAdmin();
+    checkAdmin(); // вызываем проверку доступа
   } catch (e) {
     console.error('Не удалось загрузить admin_ids:', e);
   }
@@ -82,22 +68,21 @@ const tabsContainer = document.getElementById('tabs-container');
 const modulesByType = {};
 
 if (user) {
-  userInfo.innerHTML = <p>Привет, ${user.first_name}!</p>;
+  userInfo.innerHTML = `<p>Привет, ${user.first_name}!</p>`;
   fetchAdminIds(); // загружаем ID админов
 } else {
   userInfo.innerHTML = 'Ошибка: не удалось получить данные пользователя.';
 }
 
 function checkAdmin() {
-  const isAdmin = ADMIN_IDS.includes(String(user.id));
+  const isAdmin = ADMIN_IDS.includes(user.id);
   if (isAdmin) {
-    userInfo.innerHTML += <p>Вы вошли как админ ✅</p>;
+    userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
     addBtn.style.display = 'inline-block';
   } else {
-    userInfo.innerHTML += <p>Пользователь 👤</p>;
+    userInfo.innerHTML += `<p>Пользователь 👤</p>`;
   }
 }
-
 
 
 // === ПОВЕДЕНИЕ КНОПОК ===
@@ -139,7 +124,7 @@ const moduleNameMap = {};
 
 async function loadModules(type) {
   if (modulesByType[type]) return;
-  const res = await fetch(/data/modules-${type}.json);
+  const res = await fetch(`/data/modules-${type}.json`);
   const mods = await res.json();
   modulesByType[type] = mods;
 
@@ -167,14 +152,14 @@ document.getElementById('add-tab').addEventListener('click', () => {
   tabDiv.className = 'tab-block';
 
   // HTML вкладки
-    tabDiv.innerHTML = 
+    tabDiv.innerHTML = `
     <input type="text" class="form-input tab-label" placeholder="Название вкладки" style="margin-bottom: 10px;">
     <div class="mod-selects"></div>
     <div class="tab-actions">
         <button type="button" class="btn add-mod">+ модуль</button>
         <button type="button" class="btn delete-tab">🗑 Удалить вкладку</button>
     </div>
-    ;
+    `;
 
 
   // добавляем в DOM
@@ -370,14 +355,14 @@ async function loadBuilds() {
     const wrapper = document.createElement("div");
     wrapper.className = "build-card";
 
-    wrapper.innerHTML = 
+    wrapper.innerHTML = `
       <details>
         <summary>
           <div class="build-header">
             <h3>${build.title}</h3>
             <div class="top-tags">
               ${[build.top1, build.top2, build.top3].map((mod, i) =>
-                mod ? <span class="top-tag" style="background:${topColors[i]}">${mod}</span> : ''
+                mod ? `<span class="top-tag" style="background:${topColors[i]}">${mod}</span>` : ''
               ).join('')}
             </div>
           </div>
@@ -387,21 +372,21 @@ async function loadBuilds() {
 
         <div class="tab-buttons">
           ${build.tabs.map((tab, i) =>
-            <button class="tab-btn" data-index="${i}">${tab.label}</button>
+            `<button class="tab-btn" data-index="${i}">${tab.label}</button>`
           ).join('')}
         </div>
 
         <div class="tab-content">
-          ${build.tabs.map((tab, i) => 
+          ${build.tabs.map((tab, i) => `
             <div class="tab-panel" style="${i === 0 ? '' : 'display:none;'}">
-              ${tab.items.map(item => 
+              ${tab.items.map(item => `
                 <div class="mod-block">${moduleNameMap[item] || item}</div>
-              ).join('')}
+              `).join('')}
             </div>
-          ).join('')}
+          `).join('')}
         </div>
       </details>
-    ;
+    `;
 
     // табы
     setTimeout(() => {
@@ -422,14 +407,6 @@ async function loadBuilds() {
 
 // === При старте загружаем только типы оружия
 loadWeaponTypes();
-
-
-// Кнопка Помощь или идеи
-document.getElementById('help-btn')?.addEventListener('click', () => {
-  // Замените your_tg_username на ваш Telegram‑ник
-  const url = 'https://t.me/ndzone_admin';
-  tg.openLink(url);
-});
 
 
 // === Обработчик кнопки "Назад" ===
