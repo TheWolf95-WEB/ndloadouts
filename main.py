@@ -3,9 +3,10 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
-from fastapi import BackgroundTasks
 import json
 import os
+import hmac
+import hashlib
 
 from database import init_db, get_all_builds, add_build
 
@@ -14,6 +15,22 @@ load_dotenv()
 WEBAPP_URL = os.getenv("WEBAPP_URL")
 
 app = FastAPI()
+
+GITHUB_SECRET = os.getenv("WEBHOOK_SECRET", "")
+
+@app.post("/webhook")
+async def webhook(request: Request, background_tasks: BackgroundTasks):
+    body = await request.body()
+    signature = request.headers.get("X-Hub-Signature-256")
+
+    if not signature or not hmac.compare_digest(
+        signature,
+        "sha256=" + hmac.new(GITHUB_SECRET.encode(), body, hashlib.sha256).hexdigest()
+    ):
+        return JSONResponse(status_code=403, content={"error": "Invalid signature"})
+
+    background_tasks.add_task(os.system, "/opt/ndloadouts/deploy.sh")
+    return {"status": "ok"}
 
 # Подключаем статические файлы
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -50,7 +67,3 @@ def get_weapon_types():
     return JSONResponse(types)
 
 
-@app.post("/webhook")
-async def webhook(request: Request, background_tasks: BackgroundTasks):
-    background_tasks.add_task(os.system, "/opt/ndloadouts/deploy.sh")
-    return {"status": "ok"}
