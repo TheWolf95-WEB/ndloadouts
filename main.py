@@ -9,7 +9,6 @@ import hmac
 import hashlib
 import subprocess
 from urllib.parse import parse_qs
-import sqlite3
 
 from database import init_db, get_all_builds, add_build
 
