@@ -351,7 +351,6 @@ function getCategoryByModule(moduleKey, weaponType) {
 async function loadBuilds() {
   const res = await fetch("/api/builds");
   const builds = await res.json();
-  const topColors = ["#FFD700", "#FF8C00", "#B0B0B0"];
   buildsList.innerHTML = "";
 
   if (builds.length === 0) {
@@ -359,54 +358,101 @@ async function loadBuilds() {
     return;
   }
 
-  
-
-  // Загружаем модули для всех типов оружия, которые встречаются в сборках
+  const topColors = ["#FFD700", "#FF8C00", "#B0B0B0"];
   const uniqueTypes = [...new Set(builds.map(b => b.weapon_type))];
   await Promise.all(uniqueTypes.map(type => loadModules(type)));
 
-  // Теперь moduleNameMap точно заполнен
-  builds.forEach(build => {
+  builds.forEach((build, buildIndex) => {
     const wrapper = document.createElement("div");
-    wrapper.className = "build-card";
-    
+    wrapper.className = "loadout js-loadout is-open";
+
+    const weaponTypeRu = weaponTypeLabels[build.weapon_type] || build.weapon_type;
+
     wrapper.innerHTML = `
-      <details>
-        <summary>
-          <div class="build-header">
-            <div class="build-header-top">
-              <h3 class="build-title">${build.title}</h3>
-            </div>
-            <div class="top-tags">
-              <span class="weapon-type">${weaponTypeLabels[build.weapon_type] || build.weapon_type}</span>
-              ${[build.top1, build.top2, build.top3].map((mod, i) =>
-                mod ? `<span class="top-tag" style="background:${topColors[i]}">#${i + 1} ${mod}</span>` : ''
-              ).join('')}
-            </div>
-          </div>
-        </summary>
-    
-        <div class="tab-buttons">
-          ${build.tabs.map((tab, i) =>
-            `<button class="tab-btn" data-index="${i}">${tab.label}</button>`
-          ).join('')}
+      <div class="loadout__header js-loadout-toggle">
+        <div class="loadout__header--top">
+          <button class="loadout__toggle-icon" type="button">
+            <i class="fa-solid fa-chevron-down"></i>
+          </button>
+          <h3 class="loadout__title">${build.title}</h3>
         </div>
-    
-        <div class="tab-content">
-          ${build.tabs.map((tab, i) => `
-            <div class="tab-panel" style="${i === 0 ? '' : 'display:none;'}">
-              ${tab.items.map(item => `
-                <div class="mod-block">
-                  <span class="mod-category">${getCategoryByModule(item, build.weapon_type)}</span>
-                  <span class="mod-name">${moduleNameMap[item] || item}</span>
+        <div class="loadout__meta">
+          <div class="loadout__tops">
+            ${[build.top1, build.top2, build.top3].map((mod, i) =>
+              mod ? `<span class="loadout__top" style="background:${topColors[i]}">#${i + 1} ${mod}</span>` : ''
+            ).join('')}
+          </div>
+          <div class="loadout__type">${weaponTypeRu}</div>
+        </div>
+      </div>
+
+      <div class="loadout__content" style="max-height: none; overflow: hidden;">
+        <div class="loadout__inner">
+          <div class="loadout__tabs">
+            <div class="loadout__tab-buttons">
+              ${build.tabs.map((tab, index) => `
+                <button class="loadout__tab ${index === 0 ? 'is-active' : ''}" data-tab="tab-${buildIndex}-${index}">
+                  ${tab.label}
+                </button>
+              `).join('')}
+            </div>
+
+            <div class="loadout__tab-contents">
+              ${build.tabs.map((tab, index) => `
+                <div class="loadout__tab-content ${index === 0 ? 'is-active' : ''}" data-tab-content="tab-${buildIndex}-${index}">
+                  <div class="loadout__modules">
+                    ${tab.items.map(item => {
+                      const ru = moduleNameMap[item] || item;
+                      const slot = getCategoryByModule(item, build.weapon_type) || "";
+                      return `
+                        <div class="loadout__module">
+                          <span class="loadout__module-slot">${slot}</span>
+                          <span class="loadout__module-name">${ru}</span>
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
                 </div>
               `).join('')}
             </div>
-          `).join('')}
+          </div>
         </div>
-      </details>
+      </div>
     `;
 
+    buildsList.appendChild(wrapper);
+  });
+
+  // Вкладки (табы)
+  document.querySelectorAll('.loadout__tab').forEach(button => {
+    button.addEventListener('click', () => {
+      const parent = button.closest('.loadout');
+      const tabButtons = parent.querySelectorAll('.loadout__tab');
+      const tabContents = parent.querySelectorAll('.loadout__tab-content');
+      const tab = button.dataset.tab;
+
+      tabButtons.forEach(btn => btn.classList.remove('is-active'));
+      tabContents.forEach(content => content.classList.remove('is-active'));
+
+      button.classList.add('is-active');
+      parent.querySelector(`[data-tab-content="${tab}"]`)?.classList.add('is-active');
+    });
+  });
+
+  // Анимация открытия/закрытия
+  document.querySelectorAll('.js-loadout-toggle').forEach(header => {
+    header.addEventListener('click', () => {
+      const loadout = header.closest('.js-loadout');
+      const content = loadout.querySelector('.loadout__content');
+      loadout.classList.toggle('is-open');
+      if (loadout.classList.contains('is-open')) {
+        content.style.maxHeight = content.scrollHeight + 'px';
+      } else {
+        content.style.maxHeight = '0';
+      }
+    });
+  });
+}
 
 
     // табы
