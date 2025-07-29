@@ -88,17 +88,17 @@ function checkAdmin() {
 
 
 // === ПОВЕДЕНИЕ КНОПОК ===
-addBtn?.addEventListener('click', () => {
-  buildForm.style.display = 'block';
-  buildsList.style.display = 'none';
-  roleButtons.style.display = 'none';
+showBuildsBtn?.addEventListener('click', async () => {
+  if (buildForm) buildForm.style.display = 'none';
+  if (buildsList) buildsList.style.display = 'block';
+  if (roleButtons) roleButtons.style.display = 'none';
+  await loadBuilds();
 });
 
-showBuildsBtn?.addEventListener('click', async () => {
-  buildForm.style.display = 'none';
-  buildsList.style.display = 'block';
-  roleButtons.style.display = 'none';
-  await loadBuilds(); // загружаем сборки вручную
+addBtn?.addEventListener('click', () => {
+  if (buildForm) buildForm.style.display = 'block';
+  if (buildsList) buildsList.style.display = 'none';
+  if (roleButtons) roleButtons.style.display = 'none';
 });
 
 // === Загрузка типов оружия ===
