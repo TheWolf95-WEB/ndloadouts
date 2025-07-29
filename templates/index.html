@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Сборки Warzone</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <div class="container">
+
+    <!-- 👋 Главный экран -->
+    <div id="screen-main" class="screen active">
+      <p class="subtext">
+        Все лучшие сборки прямо у вас под рукой.<br><br>
+        Выбирай, настраивай и делись с друзьями.
+        Никакой воды — только оружие и модификации.
+      </p>
+
+      <div id="user-info" class="user-info-block"></div>
+
+      <h1>🔥 Сборки Warzone</h1>
+
+      <div id="role-buttons" class="form-section">
+        <button id="add-build-btn" class="btn" style="display: none;">➕ Добавить сборку</button>
+        <button id="show-builds-btn" class="btn">👁 Посмотреть сборки</button>
+      </div>
+
+      <div class="footer-note">B06 | ND | Warzone</div>
+    </div>
+
+    <!-- ➕ Экран добавления сборки -->
+    <div id="screen-form" class="screen" style="display: none;">
+      <h2>🛠 Добавить новую сборку</h2>
+
+      <div class="form-section">
+        <label>Название сборки:</label>
+        <input type="text" id="title" class="form-input">
+      </div>
+
+      <div class="form-section">
+        <label>Тип оружия:</label>
+        <select id="weapon_type" class="form-input"></select>
+      </div>
+
+      <div class="form-section">
+        <label>ТОП модули:</label>
+        <input type="text" id="top1" placeholder="🥇 Топ 1" class="form-input">
+        <input type="text" id="top2" placeholder="🥈 Топ 2" class="form-input">
+        <input type="text" id="top3" placeholder="🥉 Топ 3" class="form-input">
+      </div>
+
+      <div class="form-section">
+        <label>Вкладки (модули):</label>
+        <div id="tabs-container"></div>
+        <button type="button" id="add-tab" class="btn">➕ Добавить вкладку</button>
+      </div>
+
+      <div class="form-section btn-group">
+        <button id="submit-build" class="btn">✅ Сохранить сборку</button>
+        <button id="back-to-main" class="btn btn-back">⬅ Назад</button>
+      </div>
+    </div>
+
+    <!-- 📋 Экран со сборками -->
+    <div id="screen-builds" class="screen">
+      <h2>📦 Все сборки</h2>
+      <div id="builds-list">
+        <p>Загрузка сборок...</p>
+      </div>
+      <div class="form-section">
+        <button id="back-from-builds" class="btn btn-back">⬅ Назад</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

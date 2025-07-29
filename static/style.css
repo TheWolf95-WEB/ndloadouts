@@ -1,0 +1,344 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #0f111a;
+  font-family: 'Rubik', 'Segoe UI', sans-serif;
+  color: #ffffff;
+  padding: 16px;
+  margin: 0;
+}
+
+h1 {
+  font-size: 1.8rem;
+  color: #ffffff;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.subtext {
+  font-size: 1.2rem;
+  color: #aaa;
+  margin-bottom: 16px;
+  font-style: italic;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.user-info-block {
+  background: #1f2937;
+  color: #ddd;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  font-size: 0.95rem;
+}
+
+.form-section {
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-block {
+  background-color: #1c1f2a;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.95rem;
+  color: #ccc;
+}
+
+.form-input,
+select {
+  width: 100%;
+  padding: 11px 14px;
+  background-color: #0f111a;
+  border: 1px solid #2a2e3b;
+  color: #fff;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  height: 44px;
+}
+
+select:disabled {
+  color: #888;
+}
+
+.tab-block {
+  background-color: #1c1f2a;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.mod-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.mod-row select {
+  flex: 1 1 45%;
+  min-width: 100px;
+}
+
+.btn {
+  background: #1f2937;
+  width: 100%;
+  color: #fff;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background 0.2s;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.btn:hover {
+  background-color: #15566b;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn.delete-tab {
+  background-color: #402222;
+}
+
+.btn.delete-tab:hover {
+  background-color: #612626;
+}
+
+.btn-back {
+  background-color: #2d2d2d;
+  color: #fff;
+}
+
+.top-tag {
+  padding: 5px 10px;
+  border-radius: 5px;
+  margin-right: 5px;
+  font-size: 13px;
+}
+
+.tab-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.tab-btn {
+  background-color: #202532;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.tab-btn:hover {
+  background-color: #2c3442;
+}
+
+.tab-panel {
+  padding: 12px;
+  background: #141821;
+  border-radius: 8px;
+}
+
+.mod-block {
+  background: #22242d;
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin: 5px 0;
+  font-size: 0.95rem;
+}
+
+#tabs-container .form-input,
+#tabs-container select {
+  margin-bottom: 0;
+}
+
+#submit-build {
+  margin-top: 20px;
+}
+
+.tab-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.tab-actions .delete-tab {
+  background-color: #402222;
+}
+
+.tab-actions .delete-tab:hover {
+  background-color: #612626;
+}
+
+#screen-main {
+  position: relative;
+  min-height: 92vh;
+  padding-bottom: 50px; /* чтобы контент не прилипал к низу */
+  box-sizing: border-box;
+}
+
+.footer-note {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 1rem;
+  color: #aaa;
+  opacity: 0.5;
+}
+
+
+
+/* анимация перехода */
+
+.screen {
+  opacity: 0;
+  transform: translateY(10px); /* чуть меньше — плавнее */
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  display: none;
+}
+
+.screen.active {
+  display: block; /* останется, но будет изначально */
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+
+/* вывод сборок */
+
+.build-card {
+  background: #121212;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 10px;
+}
+
+.build-header {
+  margin-bottom: 10px;
+}
+
+.build-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.build-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 0.85rem;
+}
+
+.top-tag {
+  padding: 4px 8px;
+  border-radius: 5px;
+  color: #000;
+  font-weight: bold;
+}
+
+.weapon-type {
+  background: #333;
+  color: #ccc;
+  padding: 4px 8px;
+  border-radius: 5px;
+}
+
+.tab-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.tab-btn {
+  padding: 5px 10px;
+  background: #1e1e1e;
+  border: none;
+  color: #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.tab-btn.active {
+  background: #444;
+  color: #fff;
+  font-weight: bold;
+}
+
+.tab-panel {
+  margin-top: 10px;
+}
+
+.mod-line {
+  display: flex;
+  justify-content: space-between;
+  background: #202020;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-bottom: 6px;
+}
+
+.mod-cat {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.mod-name {
+  color: #fff;
+  font-weight: bold;
+}
+
+
+.mod-block {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background: #222;
+  border: 1px solid #444;
+  margin-bottom: 5px;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+.mod-category {
+  opacity: 0.6;
+}
+
+.mod-name {
+  text-align: right;
+}

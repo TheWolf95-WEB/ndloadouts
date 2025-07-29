@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+aiofiles
+httpx
+jinja2
+aiogram==3.*
+python-dotenv
