@@ -21,14 +21,13 @@ let ADMIN_IDS = [];
 // === Приветствие и загрузка админов ===
 if (user && userInfo) {
   userInfo.innerHTML = `<p>Привет, ${user.first_name}!</p>`;
-  fetchAdminInfo(); // Загружаем информацию о правах
-} else if (userInfo) {
-  userInfo.innerHTML = 'Ошибка: не удалось получить данные пользователя';
-  addBtn.style.display = 'none';
+  checkAdminStatus(); // Проверяем админа
+} else {
+  userInfo.innerHTML = 'Ошибка: не удалось получить данные пользователя.';
+  if (addBtn) addBtn.style.display = 'none';
 }
 
-// === Получение инфы о правах из /api/me ===
-async function fetchAdminInfo() {
+async function checkAdminStatus() {
   try {
     const res = await fetch('/api/me', {
       method: 'POST',
@@ -39,17 +38,14 @@ async function fetchAdminInfo() {
     const data = await res.json();
 
     if (data.is_admin) {
-      addBtn.style.display = 'inline-block';
+      if (addBtn) addBtn.style.display = 'inline-block';
       userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
     } else {
-      addBtn.style.display = 'none';
-      // Не показываем "Пользователь 👤", если уже было "Привет"
+      if (addBtn) addBtn.style.display = 'none';
     }
-
-    ADMIN_IDS = data.admin_ids || [];
   } catch (e) {
-    console.error('Ошибка при получении прав администратора:', e);
-    addBtn.style.display = 'none';
+    console.error("Ошибка при проверке прав администратора:", e);
+    if (addBtn) addBtn.style.display = 'none';
   }
 }
 
