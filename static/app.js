@@ -1,53 +1,39 @@
-// переходы по страницам 
-
 function showScreen(id) {
   const allScreens = document.querySelectorAll('.screen');
 
   allScreens.forEach(screen => {
     if (screen.id === id) {
+      // Сначала показать без анимации
       screen.style.display = 'block';
       screen.classList.remove('active');
+
+      // Добавляем анимацию на след. кадр (гарантированно плавно)
       requestAnimationFrame(() => {
         screen.classList.add('active');
+        // Можно добавить: screen.scrollIntoView({ behavior: "smooth" });
       });
     } else {
       screen.classList.remove('active');
+      // Убираем после завершения transition (через 300мс)
       setTimeout(() => {
         screen.style.display = 'none';
       }, 300);
     }
   });
-
-  // Показываем кнопки ролей только на главном экране
-  if (id === 'screen-main') {
-    if (roleButtons) {
-      roleButtons.style.display = 'block';
-    }
-    checkAdmin(); // покажем админ-кнопку, если надо
-  } else {
-    if (roleButtons) {
-      roleButtons.style.display = 'none';
-    }
-    addBtn?.style.display = 'none';
-  }
-}
-
-function checkAdmin() {
-  if (!user || !addBtn) return;
-  const isAdmin = ADMIN_IDS.includes(user.id);
-  addBtn.style.display = isAdmin ? 'inline-block' : 'none';
 }
 
 
-// === ПОВЕДЕНИЕ КНОПОК ===
-showBuildsBtn?.addEventListener('click', async () => {
+
+// Примеры использования:
+document.getElementById('add-build-btn')?.addEventListener('click', () => showScreen('screen-form'));
+document.getElementById('show-builds-btn')?.addEventListener('click', async () => {
   await loadBuilds();
   showScreen('screen-builds');
 });
+document.getElementById('back-to-main')?.addEventListener('click', () => showScreen('screen-main'));
+document.getElementById('back-from-builds')?.addEventListener('click', () => showScreen('screen-main'));
 
-addBtn?.addEventListener('click', () => {
-  showScreen('screen-form');
-});
+
 
 
 
@@ -71,7 +57,7 @@ async function fetchAdminIds() {
 const user = tg.initDataUnsafe?.user;
 const userInfo = document.getElementById('user-info');
 const buildsList = document.getElementById('builds-list');
-const buildForm = document.getElementById('screen-form');
+const buildForm = document.getElementById('build-form');
 const addBtn = document.getElementById('add-build-btn');
 const showBuildsBtn = document.getElementById('show-builds-btn');
 const roleButtons = document.getElementById('role-buttons');
@@ -79,12 +65,37 @@ const weaponTypeSelect = document.getElementById('weapon_type');
 const tabsContainer = document.getElementById('tabs-container');
 const modulesByType = {};
 
-if (user && userInfo) {
-  userInfo.style.display = 'block';
-  userInfo.innerHTML = `<p>Привет, ${user.first_name}!</p>`;
+if (user) {
+  userInfo.innerHTML = <p>Привет, ${user.first_name}!</p>;
   fetchAdminIds(); // загружаем ID админов
+} else {
+  userInfo.innerHTML = 'Ошибка: не удалось получить данные пользователя.';
 }
 
+function checkAdmin() {
+  const isAdmin = ADMIN_IDS.includes(user.id);
+  if (isAdmin) {
+    userInfo.innerHTML += <p>Вы вошли как админ ✅</p>;
+    addBtn.style.display = 'inline-block';
+  } else {
+    userInfo.innerHTML += <p>Пользователь 👤</p>;
+  }
+}
+
+
+// === ПОВЕДЕНИЕ КНОПОК ===
+addBtn?.addEventListener('click', () => {
+  buildForm.style.display = 'block';
+  buildsList.style.display = 'none';
+  roleButtons.style.display = 'none';
+});
+
+showBuildsBtn?.addEventListener('click', async () => {
+  buildForm.style.display = 'none';
+  buildsList.style.display = 'block';
+  roleButtons.style.display = 'none';
+  await loadBuilds(); // загружаем сборки вручную
+});
 
 // === Загрузка типов оружия ===
 const weaponTypeLabels = {}; // type.key → type.label
@@ -112,7 +123,7 @@ const moduleNameMap = {};
 
 async function loadModules(type) {
   if (modulesByType[type]) return;
-  const res = await fetch(`/data/modules-${type}.json`);
+  const res = await fetch(/data/modules-${type}.json);
   const mods = await res.json();
   modulesByType[type] = mods;
 
@@ -140,14 +151,14 @@ document.getElementById('add-tab').addEventListener('click', () => {
   tabDiv.className = 'tab-block';
 
   // HTML вкладки
-    tabDiv.innerHTML = `
+    tabDiv.innerHTML = 
     <input type="text" class="form-input tab-label" placeholder="Название вкладки" style="margin-bottom: 10px;">
     <div class="mod-selects"></div>
     <div class="tab-actions">
         <button type="button" class="btn add-mod">+ модуль</button>
         <button type="button" class="btn delete-tab">🗑 Удалить вкладку</button>
     </div>
-    `;
+    ;
 
 
   // добавляем в DOM
@@ -355,7 +366,7 @@ async function loadBuilds() {
 
     const weaponTypeRu = weaponTypeLabels[build.weapon_type] || build.weapon_type;
 
-    wrapper.innerHTML = `
+    wrapper.innerHTML = 
       <div class="loadout__header js-loadout-toggle">
         <div class="loadout__header--top">
           <button class="loadout__toggle-icon" type="button">
@@ -366,10 +377,8 @@ async function loadBuilds() {
         <div class="loadout__meta">
           <div class="loadout__tops">
             ${[build.top1, build.top2, build.top3].map((mod, i) =>
-              mod
-                ? `<span class="loadout__top" style="background:${topColors[i]}">#${i + 1} ${moduleNameMap[mod] || mod}</span>`
-                : ""
-            ).join("")}
+              mod ? <span class="loadout__top" style="background:${topColors[i]}">#${i + 1} ${mod}</span> : ''
+            ).join('')}
           </div>
           <div class="loadout__type">${weaponTypeRu}</div>
         </div>
@@ -379,40 +388,40 @@ async function loadBuilds() {
         <div class="loadout__inner">
           <div class="loadout__tabs">
             <div class="loadout__tab-buttons">
-              ${build.tabs.map((tab, index) => `
+              ${build.tabs.map((tab, index) => 
                 <button class="loadout__tab ${index === 0 ? 'is-active' : ''}" data-tab="tab-${buildIndex}-${index}">
                   ${tab.label}
                 </button>
-              `).join('')}
+              ).join('')}
             </div>
 
             <div class="loadout__tab-contents">
-              ${build.tabs.map((tab, index) => `
+              ${build.tabs.map((tab, index) => 
                 <div class="loadout__tab-content ${index === 0 ? 'is-active' : ''}" data-tab-content="tab-${buildIndex}-${index}">
                   <div class="loadout__modules">
                     ${tab.items.map(item => {
                       const ru = moduleNameMap[item] || item;
                       const slot = getCategoryByModule(item, build.weapon_type) || "";
-                      return `
+                      return 
                         <div class="loadout__module">
                           <span class="loadout__module-slot">${slot}</span>
                           <span class="loadout__module-name">${ru}</span>
                         </div>
-                      `;
+                      ;
                     }).join('')}
                   </div>
                 </div>
-              `).join('')}
+              ).join('')}
             </div>
           </div>
         </div>
       </div>
-    `;
+    ;
 
     buildsList.appendChild(wrapper);
   });
 
-  // Обработка вкладок (табы)
+  // Вкладки (табы)
   document.querySelectorAll('.loadout__tab').forEach(button => {
     button.addEventListener('click', () => {
       const parent = button.closest('.loadout');
@@ -424,37 +433,61 @@ async function loadBuilds() {
       tabContents.forEach(content => content.classList.remove('is-active'));
 
       button.classList.add('is-active');
-      parent.querySelector(`[data-tab-content="${tab}"]`)?.classList.add('is-active');
+      parent.querySelector([data-tab-content="${tab}"])?.classList.add('is-active');
     });
   });
 
-// Анимация открытия/закрытия
-document.querySelectorAll('.js-loadout-toggle').forEach(header => {
-  header.addEventListener('click', () => {
-    const loadout = header.closest('.js-loadout');
-    const content = loadout.querySelector('.loadout__content');
-
-    loadout.classList.toggle('is-open');
-
-    if (loadout.classList.contains('is-open')) {
-      content.style.maxHeight = content.scrollHeight + 'px';
-    } else {
-      content.style.maxHeight = '0';
-    }
+  // Анимация открытия/закрытия
+  document.querySelectorAll('.js-loadout-toggle').forEach(header => {
+    header.addEventListener('click', () => {
+      const loadout = header.closest('.js-loadout');
+      const content = loadout.querySelector('.loadout__content');
+      loadout.classList.toggle('is-open');
+      if (loadout.classList.contains('is-open')) {
+        content.style.maxHeight = content.scrollHeight + 'px';
+      } else {
+        content.style.maxHeight = '0';
+      }
+    });
   });
-});
-
 }
+
+
+    // табы
+    setTimeout(() => {
+      const buttons = wrapper.querySelectorAll(".tab-btn");
+      const panels = wrapper.querySelectorAll(".tab-panel");
+      buttons.forEach((btn, i) => {
+        btn.addEventListener("click", () => {
+          panels.forEach(p => p.style.display = "none");
+          panels[i].style.display = "block";
+        });
+      });
+    }, 0);
+
+    buildsList.appendChild(wrapper);
+  });
+}
+
 
 // === При старте загружаем только типы оружия
 loadWeaponTypes();
 
 
 // === Обработчик кнопки "Назад" ===
-document.getElementById('back-to-main')?.addEventListener('click', () => {
-  showScreen('screen-main');
-});
+document.getElementById('back-to-main').addEventListener('click', () => {
+  buildForm.style.display = 'none';
+  buildsList.style.display = 'none';
+  
+  // Всегда показываем кнопки ролей (назад на стартовый экран)
+  roleButtons.style.display = 'block';
 
+  // Проверка: если пользователь админ — показать кнопку добавления
+  const isAdmin = ADMIN_IDS.includes(user.id);
+  if (isAdmin) {
+    addBtn.style.display = 'inline-block';
+  }
+});
 
 
 // const tg = window.Telegram.WebApp;
@@ -463,4 +496,4 @@ document.getElementById('help-btn')?.addEventListener('click', () => {
   // Замените your_tg_username на ваш Telegram‑ник
   const url = 'https://t.me/ndzone_admin';
   tg.openLink(url);
-});
+}); 
