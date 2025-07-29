@@ -375,37 +375,36 @@ async function loadBuilds() {
     wrapper.className = "build-card";
 
     wrapper.innerHTML = `
-      <details>
-        <summary>
-          <div class="build-header">
-            <h3>${build.title}</h3>
-            <div class="top-tags">
-              ${[build.top1, build.top2, build.top3].map((mod, i) =>
-                mod ? `<span class="top-tag" style="background:${topColors[i]}">${mod}</span>` : ''
-              ).join('')}
-            </div>
+      <div class="build-full">
+        <div class="build-header-row">
+          <h2 class="build-title">${build.title}</h2>
+          <div class="build-tags">
+            ${[build.top1, build.top2, build.top3].map((mod, i) =>
+              mod ? `<span class="tag tag-${i + 1}">#${i + 1} ${mod}</span>` : ''
+            ).join('')}
           </div>
-        </summary>
-
-        <p><b>Тип оружия:</b> ${build.weapon_type}</p>
-
-        <div class="tab-buttons">
-          ${build.tabs.map((tab, i) =>
-            `<button class="tab-btn" data-index="${i}">${tab.label}</button>`
-          ).join('')}
         </div>
-
-        <div class="tab-content">
+    
+        <div class="build-type">Тип оружия: <b>${build.weapon_type}</b></div>
+    
+        <div class="build-tabs">
           ${build.tabs.map((tab, i) => `
-            <div class="tab-panel" style="${i === 0 ? '' : 'display:none;'}">
-              ${tab.items.map(item => `
-                <div class="mod-block">${moduleNameMap[item] || item}</div>
-              `).join('')}
+            <div class="build-tab">
+              <h3>${tab.label}</h3>
+              <div class="build-mods">
+                ${tab.items.map(mod => `
+                  <div class="mod-item">
+                    <span class="mod-category">${Object.keys(moduleNameMap).find(k => moduleNameMap[k] === mod) || ''}</span>
+                    <span class="mod-name">${mod}</span>
+                  </div>
+                `).join('')}
+              </div>
             </div>
           `).join('')}
         </div>
-      </details>
+      </div>
     `;
+
 
     // табы
     setTimeout(() => {
