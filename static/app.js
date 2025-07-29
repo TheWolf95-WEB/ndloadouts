@@ -37,15 +37,22 @@ async function checkAdminStatus() {
 
     const data = await res.json();
 
+    const editBtn = document.getElementById('edit-builds-btn');
+
     if (data.is_admin) {
       if (addBtn) addBtn.style.display = 'inline-block';
-      userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
+      if (editBtn) editBtn.style.display = 'inline-block';
+      if (userInfo) userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
     } else {
       if (addBtn) addBtn.style.display = 'none';
+      if (editBtn) editBtn.style.display = 'none';
     }
+
   } catch (e) {
     console.error("Ошибка при проверке прав администратора:", e);
     if (addBtn) addBtn.style.display = 'none';
+    const editBtn = document.getElementById('edit-builds-btn');
+    if (editBtn) editBtn.style.display = 'none';
   }
 }
 
