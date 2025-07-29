@@ -33,18 +33,21 @@ async def send_welcome(message: types.Message):
     name = user.first_name or "боец"
 
     text = (
-        f"👋 Привет, {name}!\n\n"
-        "Добро пожаловать в сборки Warzone.\n\n"
-        "Нажми кнопку ниже, чтобы открыть WebApp ⬇️"
+        f"🎯 На связи, {name}!\n\n"
+        "Ты попал в штаб Warzone — здесь только топовые сборки.\n\n"
+        "🔻 Жми на кнопку ниже, чтобы выбрать пушку, собрать билд и выйти на охоту ⬇️\n\n"
+        "💬 Есть идеи, баги или хочешь предложить своё? — [Пиши в командный центр](https://t.me/ndzone_admin)\n\n"
+        "🔫 Время — пули, не трать его зря. Погнали!"
     )
 
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="🔗 Открыть WebApp", web_app=WebAppInfo(url=WEBAPP_URL))]
+            [InlineKeyboardButton(text="🔗 Открыть сборки", web_app=WebAppInfo(url=WEBAPP_URL))]
         ]
     )
 
-    await message.answer(text, reply_markup=keyboard)
+    await message.answer(text, reply_markup=keyboard, parse_mode="Markdown")
+
 
 # Точка входа
 async def main():
