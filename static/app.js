@@ -267,6 +267,7 @@ document.getElementById('submit-build').addEventListener('click', async () => {
     top1: document.getElementById('top1').value.trim(),
     top2: document.getElementById('top2').value.trim(),
     top3: document.getElementById('top3').value.trim(),
+    date: document.getElementById('build-date').value.trim(),
     tabs
   };
 
@@ -332,6 +333,7 @@ async function loadBuilds() {
         <div class="loadout__header--top">
           <button class="loadout__toggle-icon" type="button"><i class="fa-solid fa-chevron-down"></i></button>
           <h3 class="loadout__title">${build.title}</h3>
+          <span class="loadout__date">${build.date ? new Date(build.date).toLocaleDateString() : ''}</span>
         </div>
         <div class="loadout__meta">
           <div class="loadout__tops">${tops}</div>
@@ -370,6 +372,23 @@ async function loadBuilds() {
     });
   });
 }
+
+
+
+
+// функция получения даты
+document.addEventListener('DOMContentLoaded', () => {
+  showScreen('screen-main');
+  checkAdminStatus();
+
+  const dateInput = document.getElementById('build-date');
+  if (dateInput) {
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.value = today;
+  }
+});
+
+
 
 // JS — функция для загрузки и отрисовки таблицы
 
