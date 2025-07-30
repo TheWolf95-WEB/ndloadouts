@@ -352,6 +352,13 @@ async function loadBuilds() {
     buildsList.appendChild(wrapper);
   });
 
+  document.querySelectorAll('.js-loadout').forEach(el => {
+    el.classList.remove('is-open');
+    const content = el.querySelector('.loadout__content');
+    if (content) content.style.maxHeight = '0';
+  });
+
+
   document.querySelectorAll('.loadout__tab').forEach(button => {
     button.addEventListener('click', () => {
       const parent = button.closest('.loadout');
