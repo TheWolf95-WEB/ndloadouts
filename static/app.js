@@ -1,4 +1,4 @@
-const tg = window.Telegram.WebApp;
+еще const tg = window.Telegram.WebApp;
 tg.expand();
 
 const user = tg.initDataUnsafe?.user;
@@ -17,6 +17,7 @@ const weaponTypeLabels = {};
 const moduleNameMap = {};
 
 let ADMIN_IDS = [];
+let currentSubmitHandler = null;
 
 // === Приветствие и загрузка админов ===
 if (user && userInfo) {
@@ -254,7 +255,12 @@ function addModuleRow(tabDiv, type) {
 
 
 // === Отправка сборки ===
-document.getElementById('submit-build').addEventListener('click', async () => {
+
+// Главный обработчик сохранения (добавление или обновление)
+let currentEditId = null;
+
+// Главный обработчик сохранения (добавление или обновление)
+async function handleSubmitBuild() {
   const tabs = Array.from(tabsContainer.querySelectorAll('.tab-block')).map(tab => {
     const label = tab.querySelector('.tab-label').value.trim();
     const items = Array.from(tab.querySelectorAll('.module-select')).map(sel => sel.value).filter(Boolean);
@@ -271,21 +277,28 @@ document.getElementById('submit-build').addEventListener('click', async () => {
     tabs
   };
 
-  const res = await fetch('/api/builds', {
-    method: 'POST',
+  const method = currentEditId ? 'PUT' : 'POST';
+  const url = currentEditId ? `/api/builds/${currentEditId}` : '/api/builds';
+
+  const res = await fetch(url, {
+    method,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
   });
 
   if (res.ok) {
-    alert('Сборка добавлена!');
-    buildForm.style.display = 'none';
-    buildsList.style.display = 'block';
-    await loadBuilds();
+    alert(currentEditId ? 'Сборка обновлена!' : 'Сборка добавлена!');
+    showScreen('screen-edit-builds');
+    await loadBuildsTable();
+    currentEditId = null;
+    document.getElementById('submit-build').textContent = '➕ Добавить';
   } else {
     alert('Ошибка при сохранении.');
   }
-});
+}
+
+document.getElementById('submit-build').addEventListener('click', handleSubmitBuild);
+
 
 function getCategoryByModule(moduleKey, weaponType) {
   const mods = modulesByType[weaponType];
@@ -466,6 +479,8 @@ async function loadBuildsTable() {
         const build = builds.find(b => String(b.id) === String(id));
         if (!build) return alert("Сборка не найдена");
 
+        currentEditId = id;
+
         showScreen('screen-form');
         document.getElementById('submit-build').textContent = "💾 Сохранить";
 
@@ -506,39 +521,9 @@ async function loadBuildsTable() {
         });
 
         // Обработчик обновления сборки
-        document.getElementById('submit-build').onclick = async () => {
-          const updatedTabs = Array.from(tabsContainer.querySelectorAll('.tab-block')).map(tab => {
-            const label = tab.querySelector('.tab-label').value.trim();
-            const items = Array.from(tab.querySelectorAll('.module-select')).map(sel => sel.value).filter(Boolean);
-            return { label, items };
-          });
+    document.getElementById('submit-build').textContent = "💾 Сохранить";
+    currentEditId = id;
 
-          const updatedData = {
-            title: document.getElementById('title').value.trim(),
-            weapon_type: document.getElementById('weapon_type').value,
-            top1: document.getElementById('top1').value.trim(),
-            top2: document.getElementById('top2').value.trim(),
-            top3: document.getElementById('top3').value.trim(),
-            date: formatRuDate(document.getElementById('build-date').value),
-            tabs: updatedTabs
-          };
-
-          const res = await fetch(`/api/builds/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updatedData)
-          });
-
-          if (res.ok) {
-            alert("Сборка обновлена!");
-            showScreen('screen-edit-builds');
-            await loadBuildsTable();
-          } else {
-            alert("Ошибка при обновлении");
-          }
-        };
-      });
-    });
 
   } catch (e) {
     console.error('Ошибка загрузки сборок:', e);
