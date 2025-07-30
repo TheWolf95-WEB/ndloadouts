@@ -517,7 +517,7 @@ if (data.dop_admins.length) {
   });
 }
 
-
+}
 
 
 // === Init ===
