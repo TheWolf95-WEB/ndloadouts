@@ -1,4 +1,4 @@
-еще const tg = window.Telegram.WebApp;
+const tg = window.Telegram.WebApp;
 tg.expand();
 
 const user = tg.initDataUnsafe?.user;
@@ -422,6 +422,7 @@ function formatRuDate(input) {
 
 // JS — функция для загрузки и отрисовки таблицы
 
+// JS — функция для загрузки и отрисовки таблицы 
 async function loadBuildsTable() {
   try {
     const res = await fetch('/api/builds');
@@ -469,7 +470,7 @@ async function loadBuildsTable() {
       });
     });
 
-        // Обработчики редактирования
+    // Обработчики редактирования
     tableWrapper.querySelectorAll('.edit-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.dataset.id;
@@ -518,16 +519,14 @@ async function loadBuildsTable() {
             if (modSel) modSel.value = mod;
           });
         });
-
-        // Обработчик обновления сборки
-    document.getElementById('submit-build').textContent = "💾 Сохранить";
-    currentEditId = id;
-
+      });
+    });
 
   } catch (e) {
     console.error('Ошибка загрузки сборок:', e);
   }
 }
+
 
 
 // Преобразование даты в YYYY-MM-DD (для input type="date")
