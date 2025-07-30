@@ -7,6 +7,21 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.filters import CommandStart
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, CallbackQuery
 from aiogram.utils.markdown import hlink
+from aiogram import BaseMiddleware
+from aiogram.types import TelegramObject
+from typing import Callable, Awaitable, Dict, Any
+
+class PrivateOnlyMiddleware(BaseMiddleware):
+    async def __call__(
+        self,
+        handler: Callable,
+        event: TelegramObject,
+        data: Dict[str, Any]
+    ) -> Any:
+        chat = getattr(event, 'chat', None) or getattr(getattr(event, 'message', None), 'chat', None)
+        if chat and chat.type != "private":
+            return  # Игнорируем не-private чаты
+        return await handler(event, data)
 
 # Загрузка .env
 load_dotenv("/opt/ndloadouts/.env")
@@ -21,11 +36,13 @@ if not BOT_TOKEN or not WEBAPP_URL:
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
 
+# Middleware для запрета работы в группах/каналах
+dp.message.middleware(PrivateOnlyMiddleware())
+dp.callback_query.middleware(PrivateOnlyMiddleware())
+
 # Хендлер /start
 @router.message(CommandStart())
 async def start_handler(message: Message):
-    if message.chat.type != "private":
-        return  # Не отвечаем в группах/каналах
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
