@@ -11,7 +11,7 @@ from aiogram import BaseMiddleware, Router
 from aiogram.types import TelegramObject
 from typing import Callable, Awaitable, Dict, Any
 
-# Middleware: блокировка всех чатов, кроме лички
+# --- Middleware: пропускаем только личку ---
 class PrivateOnlyMiddleware(BaseMiddleware):
     async def __call__(
         self,
@@ -24,7 +24,7 @@ class PrivateOnlyMiddleware(BaseMiddleware):
             return  # Не обрабатываем групповые/канальные чаты
         return await handler(event, data)
 
-# Загрузка переменных
+# --- Загрузка конфигурации ---
 load_dotenv("/opt/ndloadouts/.env")
 BOT_TOKEN = os.getenv("TOKEN")
 WEBAPP_URL = os.getenv("WEBAPP_URL")
@@ -33,19 +33,16 @@ CHANNEL_ID = "@callofdutynd"
 if not BOT_TOKEN or not WEBAPP_URL:
     raise ValueError("❌ BOT_TOKEN и WEBAPP_URL должны быть заданы в .env")
 
-# Инициализация бота и диспетчера
+# --- Инициализация ---
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
 router = Router()
 
-# Применяем middleware глобально
 dp.message.middleware(PrivateOnlyMiddleware())
 dp.callback_query.middleware(PrivateOnlyMiddleware())
-
-# Подключаем router
 dp.include_router(router)
 
-# Хендлер /start
+# --- /start ---
 @router.message(CommandStart())
 async def start_handler(message: Message):
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -60,15 +57,13 @@ async def start_handler(message: Message):
         reply_markup=keyboard
     )
 
-# Проверка подписки
+# --- Проверка подписки ---
 @router.callback_query(F.data == "check_sub")
 async def check_subscription(callback: CallbackQuery):
     user_id = callback.from_user.id
-
     try:
         member = await bot.get_chat_member(chat_id=CHANNEL_ID, user_id=user_id)
 
-        # ✅ Подписан, если не "left" и не "kicked"
         if member.status not in ("left", "kicked"):
             name = callback.from_user.first_name or "боец"
             text = (
@@ -87,17 +82,16 @@ async def check_subscription(callback: CallbackQuery):
             return
 
     except Exception as e:
-        # можно залогировать e, если нужно
+        # можно логировать: print(f"❌ Ошибка проверки подписки: {e}")
         pass
 
-    # ❌ Не подписан или ошибка
-    await callback.answer("❌ Подписка не подтверждена. Попробуй ещё раз.", show_alert=True)
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(text="📥 Подписаться", url="https://t.me/callofdutynd"),
             InlineKeyboardButton(text="🔁 Проверить снова", callback_data="check_sub")
         ]
     ])
+    await callback.answer("❌ Подписка не подтверждена. Попробуй ещё раз.", show_alert=True)
     await callback.message.edit_text(
         "🚫 Доступ временно ограничен.\n\n"
         "Ты ещё не подписан на нашу базу командования.\n"
@@ -105,7 +99,7 @@ async def check_subscription(callback: CallbackQuery):
         reply_markup=keyboard
     )
 
-# Запуск
+# --- Запуск ---
 async def main():
     print("🤖 Бот запущен.")
     await dp.start_polling(bot)
