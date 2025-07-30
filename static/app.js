@@ -482,7 +482,7 @@ async function loadAdminList(requesterId) {
 
   // 👑 Главный админ
   const mainTitle = document.createElement('div');
-  mainTitle.innerHTML = `<strong>Главный админ:</strong>`;
+  mainTitle.innerHTML = `<strong style="margin: 10px 0; display: block;">Владелец:</strong>`;
   listEl.appendChild(mainTitle);
 
   data.main_admins.forEach(({ id, name }) => {
@@ -494,12 +494,12 @@ async function loadAdminList(requesterId) {
   // 👥 Назначенные админы
   if (data.dop_admins.length > 0) {
     const dopTitle = document.createElement('div');
-    dopTitle.innerHTML = `<strong style="margin-top: 10px; display: block;">Назначенные админы:</strong>`;
+    dopTitle.innerHTML = `<strong style="margin: 10px 0; display: block;">Назначенные админы:</strong>`;
     listEl.appendChild(dopTitle);
 
     data.dop_admins.forEach(({ id, name }) => {
       const li = document.createElement('li');
-      li.innerHTML = `${id} — ${name} <button data-id="${id}" style="background: none; border: none; color: red; cursor: pointer;">Удалить</button>`;
+      li.innerHTML = `${id} — ${name} <button data-id="${id}" style="background: none; border: none; color: red; cursor: pointer;">❌ Удалить</button>`;
       listEl.appendChild(li);
 
       li.querySelector('button').addEventListener('click', async () => {
@@ -508,7 +508,7 @@ async function loadAdminList(requesterId) {
           return;
         }
 
-        if (!confirm(`❌ Удалить ${name}?`)) return;
+        if (!confirm(`Удалить Админа ${name}?`)) return;
 
         const res = await fetch('/api/remove-admin', {
           method: 'POST',
