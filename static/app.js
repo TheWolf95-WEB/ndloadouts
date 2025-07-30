@@ -480,38 +480,52 @@ async function loadAdminList(requesterId) {
   const listEl = document.getElementById('admin-list');
   listEl.innerHTML = '';
 
-  // 👑 Главные админы
+  // 👑 Блок: Главный админ
+  const mainTitle = document.createElement('li');
+  mainTitle.innerHTML = `<strong>Главный админ:</strong>`;
+  listEl.appendChild(mainTitle);
+
   data.main_admins.forEach(({ id, name }) => {
     const li = document.createElement('li');
+    li.style.marginLeft = '10px';
     li.textContent = `${id} — ${name} 👑`;
     listEl.appendChild(li);
   });
 
-  // 👥 Дополнительные админы
-  data.dop_admins.forEach(({ id, name }) => {
-    const li = document.createElement('li');
-    li.innerHTML = `${id} — ${name} <button class="btn btn-sm" data-id="${id}">Удалить</button>`;
-    listEl.appendChild(li);
+  // 👥 Блок: Назначенные админы
+  if (data.dop_admins.length > 0) {
+    const dopTitle = document.createElement('li');
+    dopTitle.innerHTML = `<strong style="margin-top: 10px; display: block;">Назначенные админы:</strong>`;
+    listEl.appendChild(dopTitle);
 
-    li.querySelector('button').addEventListener('click', async () => {
-      if (String(id) === String(requesterId)) {
-        alert("Нельзя удалить самого себя.");
-        return;
-      }
+    data.dop_admins.forEach(({ id, name }) => {
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <div>${id} — ${name}</div>
+        <button class="btn btn-sm" style="margin-top: 5px;" data-id="${id}">Удалить</button>
+      `;
+      listEl.appendChild(li);
 
-      if (!confirm(`Удалить ${name}?`)) return;
+      li.querySelector('button').addEventListener('click', async () => {
+        if (String(id) === String(requesterId)) {
+          alert("Нельзя удалить самого себя.");
+          return;
+        }
 
-      const res = await fetch('/api/remove-admin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: id, requesterId })
+        if (!confirm(`Удалить ${name}?`)) return;
+
+        const res = await fetch('/api/remove-admin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: id, requesterId })
+        });
+
+        const result = await res.json();
+        alert(result.message || 'Готово');
+        await loadAdminList(requesterId);
       });
-
-      const result = await res.json();
-      alert(result.message || 'Готово');
-      await loadAdminList(requesterId);
     });
-  });
+  }
 }
 
 
