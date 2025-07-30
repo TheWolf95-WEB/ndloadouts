@@ -63,7 +63,9 @@ async def create_build(data: dict = Body(...)):
         add_build(data)
         return JSONResponse({"status": "ok"})
     except Exception as e:
+        print(f"[add_build] Ошибка при добавлении сборки: {e}")
         return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
+
 
 # === Получение типов оружия ===
 @app.get("/api/types")
