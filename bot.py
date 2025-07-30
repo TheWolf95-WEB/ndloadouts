@@ -7,7 +7,6 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.filters import CommandStart
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, CallbackQuery
 from aiogram.utils.markdown import hlink
-from aiogram.router import Router
 
 # Загрузка .env
 load_dotenv("/opt/ndloadouts/.env")
@@ -21,11 +20,9 @@ if not BOT_TOKEN or not WEBAPP_URL:
 # Инициализация бота
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
-router = Router()
-dp.include_router(router)
 
 # Хендлер /start
-@router.message(CommandStart())
+@dp.message(CommandStart())
 async def start_handler(message: Message):
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
@@ -40,7 +37,7 @@ async def start_handler(message: Message):
     )
 
 # Проверка подписки
-@router.callback_query(F.data == "check_sub")
+@dp.callback_query(F.data == "check_sub")
 async def check_subscription(callback: CallbackQuery):
     user_id = callback.from_user.id
     try:
