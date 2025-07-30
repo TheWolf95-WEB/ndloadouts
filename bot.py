@@ -28,7 +28,7 @@ class PrivateOnlyMiddleware(BaseMiddleware):
 load_dotenv("/opt/ndloadouts/.env")
 BOT_TOKEN = os.getenv("TOKEN")
 WEBAPP_URL = os.getenv("WEBAPP_URL")
-CHANNEL_ID = "@callofdutynd"
+CHANNEL_ID = "@ndbotslogs"
 
 if not BOT_TOKEN or not WEBAPP_URL:
     raise ValueError("❌ BOT_TOKEN и WEBAPP_URL должны быть заданы в .env")
@@ -47,7 +47,7 @@ dp.include_router(router)
 async def start_handler(message: Message):
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text="📥 Подписаться", url="https://t.me/callofdutynd"),
+            InlineKeyboardButton(text="📥 Подписаться", url="https://t.me/ndbotslogs"),
             InlineKeyboardButton(text="✅ Проверить", callback_data="check_sub")
         ]
     ])
