@@ -1,16 +1,16 @@
 from fastapi import FastAPI, Request, Body, BackgroundTasks
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv, set_key, dotenv_values
+from pathlib import Path
+from urllib.parse import parse_qs
+import subprocess
 import json
 import os
 import hmac
 import hashlib
-import requests 
-import subprocess
-from pathlib import Path
-from urllib.parse import parse_qs
+import sqlite3
 
 # Загрузка переменных окружения
 load_dotenv(dotenv_path="/opt/ndloadouts/.env")
