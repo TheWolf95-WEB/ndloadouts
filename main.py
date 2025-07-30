@@ -133,6 +133,15 @@ def delete_build(build_id: str):
     except Exception as e:
         return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
 
+# Функция редактирования сборок
+
+@app.put("/api/builds/{build_id}")
+async def update_build(build_id: str, data: dict = Body(...)):
+    try:
+        update_build_by_id(build_id, data)
+        return JSONResponse({"status": "ok"})
+    except Exception as e:
+        return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
 
 
 # Эндпоинт получения всех админов:
