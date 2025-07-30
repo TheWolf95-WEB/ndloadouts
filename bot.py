@@ -24,6 +24,9 @@ dp = Dispatcher()
 # Хендлер /start
 @dp.message(CommandStart())
 async def start_handler(message: Message):
+        if message.chat.type != "private":
+        return  # Не отвечаем в группах/каналах
+    
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(text="📥 Подписаться", url="https://t.me/callofdutynd"),
