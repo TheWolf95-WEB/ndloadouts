@@ -102,26 +102,30 @@ async def check_subscription(callback: CallbackQuery):
         conn.close()
 
     # Проверка через Telegram API
+    subscribed = False
     try:
         member = await bot.get_chat_member(chat_id=CHANNEL_ID, user_id=int(user_id))
-        if member.status not in ("left", "kicked"):
-            save_user(user_id, callback.from_user.first_name or "", callback.from_user.username or "")
-            await grant_access(callback)
-            return
+        if member.status in ("member", "administrator", "creator"):
+            subscribed = True
     except Exception as e:
         print(f"[TG ERROR] {e}")
 
-    # Если не подписан
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+    if subscribed:
+        save_user(user_id, callback.from_user.first_name or "", callback.from_user.username or "")
+        await grant_access(callback)
+        return
+
+    # Если не подписан — показываем отказ
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text="📅 Подписаться", url="https://t.me/ndbotslogs"),
+            InlineKeyboardButton(text="📅 Подписаться", url="https://t.me/callofdutynd"),
             InlineKeyboardButton(text="🔁 Проверить снова", callback_data="check_sub")
         ],
         [
             InlineKeyboardButton(text="🧑‍✈️ Связаться", url="https://t.me/ndzone_admin")
         ]
     ])
-    
+
     await callback.message.edit_text(
         "🚫 Доступ временно ограничен.\n\n"
         "📡 Связь с штаб-квартирой не установлена.\n\n"
@@ -131,7 +135,7 @@ async def check_subscription(callback: CallbackQuery):
     )
 
     await callback.answer("❌ Подписка не подтверждена. Попробуй ещё раз.", show_alert=True)
-      
+
 
 # --- Старт ---
 async def main():
