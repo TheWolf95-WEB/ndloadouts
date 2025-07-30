@@ -480,44 +480,41 @@ async function loadAdminList(requesterId) {
   const listEl = document.getElementById('admin-list');
   listEl.innerHTML = '';
 
-  // 👑 Главный админ (может быть один или несколько)
-  if (data.main_admins.length) {
-    data.main_admins.forEach(id => {
-      const li = document.createElement('li');
-      li.textContent = `${id} — Владелец 👑`;
-      listEl.appendChild(li);
-    });
-  }
-
-// 👥 Дополнительные админы
-if (data.dop_admins.length) {
-  data.dop_admins.forEach(userId => {
+  // 👑 Главные админы
+  data.main_admins.forEach(({ id, name }) => {
     const li = document.createElement('li');
-    li.innerHTML = `${userId} <button class="btn btn-sm" data-id="${userId}">Удалить</button>`;
+    li.textContent = `${id} — ${name} 👑`;
+    listEl.appendChild(li);
+  });
+
+  // 👥 Дополнительные админы
+  data.dop_admins.forEach(({ id, name }) => {
+    const li = document.createElement('li');
+    li.innerHTML = `${id} — ${name} <button class="btn btn-sm" data-id="${id}">Удалить</button>`;
     listEl.appendChild(li);
 
     li.querySelector('button').addEventListener('click', async () => {
-      if (String(userId) === String(requesterId)) {
+      if (String(id) === String(requesterId)) {
         alert("Нельзя удалить самого себя.");
         return;
       }
 
-      if (!confirm(`Удалить ${userId} из админов?`)) return;
+      if (!confirm(`Удалить ${name}?`)) return;
 
       const res = await fetch('/api/remove-admin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, requesterId })
+        body: JSON.stringify({ userId: id, requesterId })
       });
 
       const result = await res.json();
       alert(result.message || 'Готово');
-      await loadAdminList(requesterId); // 🔁 Обновить
+      await loadAdminList(requesterId);
     });
   });
 }
 
-}
+
 
 
 // === Init ===
