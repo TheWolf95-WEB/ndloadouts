@@ -19,14 +19,16 @@ const moduleNameMap = {};
 let ADMIN_IDS = [];
 
 // === Приветствие и загрузка админов ===
-window.addEventListener('DOMContentLoaded', () => {
-  if (user && userInfo) {
-    userInfo.innerHTML = `<p>Привет, ${user.first_name}!</p>`;
-    checkAdminStatus();
-  } else {
-    userInfo.innerHTML = 'Ошибка: не удалось получить данные пользователя.';
-    if (addBtn) addBtn.style.display = 'none';
-  }
+if (user && userInfo) {
+  userInfo.innerHTML = `<p>Привет, ${user.first_name}!</p>`;
+} else {
+  userInfo.innerHTML = 'Ошибка: не удалось получить данные пользователя.';
+  if (addBtn) addBtn.style.display = 'none';
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  showScreen('screen-main'); // Показываем главный экран
 });
 
 
