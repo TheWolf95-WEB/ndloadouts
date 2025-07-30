@@ -267,7 +267,7 @@ document.getElementById('submit-build').addEventListener('click', async () => {
     top1: document.getElementById('top1').value.trim(),
     top2: document.getElementById('top2').value.trim(),
     top3: document.getElementById('top3').value.trim(),
-    date: formatRuDate(document.getElementById('build-date').value)
+    date: formatRuDate(document.getElementById('build-date').value),
     tabs
   };
 
