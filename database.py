@@ -8,6 +8,8 @@ DB_PATH.parent.mkdir(exist_ok=True)
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
+
+    # Таблица сборок
     c.execute("""
         CREATE TABLE IF NOT EXISTS builds (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,8 +22,19 @@ def init_db():
             image TEXT
         )
     """)
+
+    # ✅ Таблица пользователей
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id TEXT PRIMARY KEY,
+            first_name TEXT,
+            username TEXT
+        )
+    """)
+
     conn.commit()
     conn.close()
+
 
 def get_all_builds():
     conn = sqlite3.connect(DB_PATH)
@@ -72,33 +85,3 @@ def delete_build_by_id(build_id: str):
     conn.close()
 
 
-
-def init_db():
-    conn = sqlite3.connect(DB_PATH)
-    c = conn.cursor()
-
-    # Таблица сборок
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS builds (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            weapon_type TEXT,
-            top1 TEXT,
-            top2 TEXT,
-            top3 TEXT,
-            tabs_json TEXT,
-            image TEXT
-        )
-    """)
-
-    # ✅ Таблица пользователей
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id TEXT PRIMARY KEY,
-            first_name TEXT,
-            username TEXT
-        )
-    """)
-
-    conn.commit()
-    conn.close()
