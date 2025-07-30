@@ -340,7 +340,7 @@ async function loadBuilds() {
           <div class="loadout__type">${weaponTypeRu}</div>
         </div>
       </div>
-      <div class="loadout__content" style="max-height: none; overflow: hidden;">
+      <div class="loadout__content" style="max-height: 0; overflow: hidden;">
         <div class="loadout__inner">
           <div class="loadout__tabs">
             <div class="loadout__tab-buttons">${tabBtns}</div>
