@@ -93,15 +93,24 @@ async def get_me(data: dict = Body(...)):
         admin_ids = set(map(str.strip, os.getenv("ADMIN_IDS", "").split(",")))
         admin_dop = set(map(str.strip, os.getenv("ADMIN_DOP", "").split(",")))
 
+        is_super_admin = user_id in admin_ids
+        is_admin = is_super_admin or user_id in admin_dop
+
         return JSONResponse({
             "user_id": user_id,
-            "first_name": user_json.get("first_name"),
-            "is_admin": user_id in admin_ids or user_id in admin_dop,
-            "is_super_admin": user_id in admin_ids,  # 👈 вот это важно
-            "admin_ids": list(admin_ids)
+            "first_name": user_json.get("first_name", ""),
+            "is_admin": is_admin,
+            "is_super_admin": is_super_admin,
+            "admin_ids": list(admin_ids),
+            "admin_dop": list(admin_dop)  # ⬅️ для отладки на клиенте, можно убрать позже
         })
+
     except Exception as e:
-        return JSONResponse({"error": "Invalid user data", "detail": str(e)}, status_code=400)
+        return JSONResponse({
+            "error": "Invalid user data",
+            "detail": str(e),
+            "raw": user_data
+        }, status_code=400)
 
 
 
