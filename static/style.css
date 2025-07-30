@@ -345,10 +345,12 @@ select:disabled {
     transition: 0.3s ease;
     background: #171D25;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+
+    transform: scale(1);
 }
 
 .loadout:hover {
-  transform: translateY(-5px);
+  transform: scale(0.95);
 }
 
 
@@ -431,6 +433,12 @@ select:disabled {
   margin-bottom: 10px;
 }
 
+
+.builds-list{
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+}
 
 /* стили для красивой таблицы */
 
