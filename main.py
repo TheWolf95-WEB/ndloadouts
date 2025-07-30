@@ -130,14 +130,19 @@ def delete_build(build_id: str):
 
 @app.get("/api/admins")
 async def get_admins():
-    env_path = Path(".env")
-    env_vars = dotenv_values(env_path)
+    users = get_all_users()  # из БД или JSON (должны быть user_id и first_name)
+
+    admin_ids = set(map(str.strip, os.getenv("ADMIN_IDS", "").split(",")))
+    admin_dop = set(map(str.strip, os.getenv("ADMIN_DOP", "").split(",")))
+
+    def get_name(uid):
+        user = next((u for u in users if str(u["id"]) == uid), None)
+        return user["first_name"] if user else "Без имени"
 
     return {
-        "main_admins": list(filter(None, env_vars.get("ADMIN_IDS", "").split(","))),
-        "dop_admins": list(filter(None, env_vars.get("ADMIN_DOP", "").split(",")))
+        "main_admins": [{"id": uid, "name": get_name(uid)} for uid in admin_ids],
+        "dop_admins": [{"id": uid, "name": get_name(uid)} for uid in admin_dop]
     }
-
 
 
 
