@@ -4,9 +4,11 @@ from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, types
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.client.default import DefaultBotProperties
-from aiogram.filters import CommandStart, Text
+from aiogram.filters import CommandStart
+from aiogram.filters.callback_data import CallbackDataFilter
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 from aiogram.utils.markdown import hlink
+from aiogram import F
 
 # Загрузка переменных окружения
 load_dotenv(dotenv_path="/opt/ndloadouts/.env")
@@ -38,7 +40,7 @@ async def start_handler(message: Message):
     )
 
 # Проверка подписки
-@dp.callback_query(Text("check_sub"))
+@dp.callback_query(F.data == "check_sub")
 async def check_subscription(callback: types.CallbackQuery):
     user_id = callback.from_user.id
     try:
@@ -72,7 +74,7 @@ async def check_subscription(callback: types.CallbackQuery):
                 ]
             ])
         )
-
+        
 # Запуск бота
 async def main():
     print("🤖 Бот запущен.")
