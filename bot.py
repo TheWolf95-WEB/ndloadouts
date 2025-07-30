@@ -1,13 +1,16 @@
+from fastapi import FastAPI, Request, Body, BackgroundTasks
+from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+from dotenv import load_dotenv, set_key, dotenv_values
+import json
 import os
-import asyncio
-from dotenv import load_dotenv
-from aiogram import Bot, Dispatcher, types
-from aiogram.enums.parse_mode import ParseMode
-from aiogram.client.default import DefaultBotProperties
-from aiogram.filters import CommandStart
-from aiogram.filters.text import Text
-from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
-from aiogram.utils.markdown import hlink
+import hmac
+import hashlib
+import requests 
+import subprocess
+from pathlib import Path
+from urllib.parse import parse_qs
 
 # Загрузка переменных окружения
 load_dotenv(dotenv_path="/opt/ndloadouts/.env")
