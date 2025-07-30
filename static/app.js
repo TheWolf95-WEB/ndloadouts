@@ -267,7 +267,7 @@ document.getElementById('submit-build').addEventListener('click', async () => {
     top1: document.getElementById('top1').value.trim(),
     top2: document.getElementById('top2').value.trim(),
     top3: document.getElementById('top3').value.trim(),
-    date: document.getElementById('build-date').value.trim(),
+    date: formatRuDate(document.getElementById('build-date').value)
     tabs
   };
 
@@ -387,6 +387,17 @@ document.addEventListener('DOMContentLoaded', () => {
     dateInput.value = today;
   }
 });
+
+
+// Формат даты ДЕНЬ МЕСЯЦ ГОД
+function formatRuDate(input) {
+  const d = new Date(input);
+  if (isNaN(d)) return '';
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}.${month}.${year}`; // 👈 DD.MM.YYYY
+}
 
 
 
