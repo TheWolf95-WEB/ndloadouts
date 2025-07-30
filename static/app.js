@@ -484,33 +484,34 @@ async function loadAdminList(requesterId) {
     });
   }
 
-  // 👥 Дополнительные админы
-  if (data.dop_admins.length) {
-    data.dop_admins.forEach(userId => {
-      const li = document.createElement('li');
-      li.innerHTML = `${userId} <button class="btn btn-sm" data-id="${userId}">Удалить</button>`;
-      listEl.appendChild(li);
+// 👥 Дополнительные админы
+if (data.dop_admins.length) {
+  data.dop_admins.forEach(userId => {
+    const li = document.createElement('li');
+    li.innerHTML = `${userId} <button class="btn btn-sm" data-id="${userId}">Удалить</button>`;
+    listEl.appendChild(li);
 
-      li.querySelector('button').addEventListener('click', async () => {
-        if (!confirm(`Удалить ${userId} из админов?`)) return;
+    li.querySelector('button').addEventListener('click', async () => {
+      if (String(userId) === String(requesterId)) {
+        alert("Нельзя удалить самого себя.");
+        return;
+      }
 
-        const res = await fetch('/api/remove-admin', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId, requesterId })
-        });
+      if (!confirm(`Удалить ${userId} из админов?`)) return;
 
-        const result = await res.json();
-        alert(result.message || 'Готово');
-        await loadAdminList(requesterId); // 🔁 Обновить
+      const res = await fetch('/api/remove-admin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, requesterId })
       });
-    });
-  }
 
-  if (!data.main_admins.length && !data.dop_admins.length) {
-    listEl.innerHTML = '<p>Админов пока нет.</p>';
-  }
+      const result = await res.json();
+      alert(result.message || 'Готово');
+      await loadAdminList(requesterId); // 🔁 Обновить
+    });
+  });
 }
+
 
 
 
