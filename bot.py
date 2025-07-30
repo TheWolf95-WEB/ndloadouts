@@ -1,18 +1,16 @@
 import os
 import asyncio
 from dotenv import load_dotenv
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher, types, F
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.client.default import DefaultBotProperties
 from aiogram.filters import CommandStart
-from aiogram.filters.callback_data import CallbackDataFilter
-from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, CallbackQuery
 from aiogram.utils.markdown import hlink
-from aiogram import F
+from aiogram.router import Router
 
-# Загрузка переменных окружения
-load_dotenv(dotenv_path="/opt/ndloadouts/.env")
-
+# Загрузка .env
+load_dotenv("/opt/ndloadouts/.env")
 BOT_TOKEN = os.getenv("TOKEN")
 WEBAPP_URL = os.getenv("WEBAPP_URL")
 CHANNEL_ID = "@callofdutynd"
@@ -23,9 +21,11 @@ if not BOT_TOKEN or not WEBAPP_URL:
 # Инициализация бота
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
+router = Router()
+dp.include_router(router)
 
-# Стартовое сообщение
-@dp.message(CommandStart())
+# Хендлер /start
+@router.message(CommandStart())
 async def start_handler(message: Message):
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
@@ -40,8 +40,8 @@ async def start_handler(message: Message):
     )
 
 # Проверка подписки
-@dp.callback_query(F.data == "check_sub")
-async def check_subscription(callback: types.CallbackQuery):
+@router.callback_query(F.data == "check_sub")
+async def check_subscription(callback: CallbackQuery):
     user_id = callback.from_user.id
     try:
         member = await bot.get_chat_member(chat_id=CHANNEL_ID, user_id=user_id)
@@ -74,8 +74,8 @@ async def check_subscription(callback: types.CallbackQuery):
                 ]
             ])
         )
-        
-# Запуск бота
+
+# Запуск
 async def main():
     print("🤖 Бот запущен.")
     await dp.start_polling(bot)
