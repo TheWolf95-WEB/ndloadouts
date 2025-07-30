@@ -457,10 +457,100 @@ async function loadBuildsTable() {
       });
     });
 
+        // Обработчики редактирования
+    tableWrapper.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+
+        // Находим нужную сборку
+        const build = builds.find(b => String(b.id) === String(id));
+        if (!build) return alert("Сборка не найдена");
+
+        showScreen('screen-form');
+        document.getElementById('submit-build').textContent = "💾 Сохранить";
+
+        // Заполняем поля
+        document.getElementById('title').value = build.title;
+        document.getElementById('weapon_type').value = build.weapon_type;
+        document.getElementById('top1').value = build.top1 || '';
+        document.getElementById('top2').value = build.top2 || '';
+        document.getElementById('top3').value = build.top3 || '';
+        document.getElementById('build-date').value = formatToInputDate(build.date || '');
+
+        tabsContainer.innerHTML = '';
+        await loadModules(build.weapon_type); // нужно загрузить модули перед отрисовкой
+
+        build.tabs.forEach(tab => {
+          const tabDiv = document.createElement('div');
+          tabDiv.className = 'tab-block';
+          tabDiv.innerHTML = `
+            <input type="text" class="form-input tab-label" value="${tab.label}">
+            <div class="mod-selects"></div>
+            <div class="tab-actions">
+              <button type="button" class="btn add-mod">+ модуль</button>
+              <button type="button" class="btn delete-tab">🗑 Удалить вкладку</button>
+            </div>`;
+          tabsContainer.appendChild(tabDiv);
+
+          tabDiv.querySelector('.add-mod').addEventListener('click', () => addModuleRow(tabDiv, build.weapon_type));
+          tabDiv.querySelector('.delete-tab').addEventListener('click', () => tabDiv.remove());
+
+          // Добавляем модули
+          tab.items.forEach(mod => {
+            addModuleRow(tabDiv, build.weapon_type);
+            const lastRow = tabDiv.querySelectorAll('.mod-row');
+            const row = lastRow[lastRow.length - 1];
+            const modSel = row.querySelector('.module-select');
+            if (modSel) modSel.value = mod;
+          });
+        });
+
+        // Обработчик обновления сборки
+        document.getElementById('submit-build').onclick = async () => {
+          const updatedTabs = Array.from(tabsContainer.querySelectorAll('.tab-block')).map(tab => {
+            const label = tab.querySelector('.tab-label').value.trim();
+            const items = Array.from(tab.querySelectorAll('.module-select')).map(sel => sel.value).filter(Boolean);
+            return { label, items };
+          });
+
+          const updatedData = {
+            title: document.getElementById('title').value.trim(),
+            weapon_type: document.getElementById('weapon_type').value,
+            top1: document.getElementById('top1').value.trim(),
+            top2: document.getElementById('top2').value.trim(),
+            top3: document.getElementById('top3').value.trim(),
+            date: formatRuDate(document.getElementById('build-date').value),
+            tabs: updatedTabs
+          };
+
+          const res = await fetch(`/api/builds/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedData)
+          });
+
+          if (res.ok) {
+            alert("Сборка обновлена!");
+            showScreen('screen-edit-builds');
+            await loadBuildsTable();
+          } else {
+            alert("Ошибка при обновлении");
+          }
+        };
+      });
+    });
 
   } catch (e) {
     console.error('Ошибка загрузки сборок:', e);
   }
+}
+
+
+// Преобразование даты в YYYY-MM-DD (для input type="date")
+
+function formatToInputDate(dateStr) {
+  const [day, month, year] = dateStr.split('.');
+  return `${year}-${month}-${day}`;
 }
 
 // Назначить админа
