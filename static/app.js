@@ -28,10 +28,24 @@ if (user && userInfo) {
 }
 
 
-document.addEventListener('DOMContentLoaded', () => {
-  showScreen('screen-main'); // Показываем главный экран
-  checkAdminStatus();        // ✅ Запускаем проверку прав
+document.addEventListener('DOMContentLoaded', async () => {
+  // Загрузка типов оружия и модулей
+  await loadWeaponTypes();
+
+  // Установка даты по умолчанию
+  const dateInput = document.getElementById('build-date');
+  if (dateInput) {
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.value = today;
+  }
+
+  // Показываем главный экран
+  showScreen('screen-main');
+
+  // Проверка прав (отображение админ-кнопок)
+  await checkAdminStatus();
 });
+
 
 
 async function checkAdminStatus() {
@@ -392,21 +406,6 @@ async function loadBuilds() {
     });
   });
 }
-
-
-
-
-// функция получения даты
-document.addEventListener('DOMContentLoaded', () => {
-  showScreen('screen-main');
-  checkAdminStatus();
-
-  const dateInput = document.getElementById('build-date');
-  if (dateInput) {
-    const today = new Date().toISOString().split('T')[0];
-    dateInput.value = today;
-  }
-});
 
 
 // Формат даты ДЕНЬ МЕСЯЦ ГОД
