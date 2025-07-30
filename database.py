@@ -87,6 +87,27 @@ def delete_build_by_id(build_id: str):
     conn.commit()
     conn.close()
 
+# Редактирование сборки в БД
+
+def update_build_by_id(build_id, data):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("""
+        UPDATE builds
+        SET title = ?, weapon_type = ?, top1 = ?, top2 = ?, top3 = ?, tabs = ?, date = ?
+        WHERE id = ?
+    """, (
+        data["title"],
+        data["weapon_type"],
+        data.get("top1", ""),
+        data.get("top2", ""),
+        data.get("top3", ""),
+        json.dumps(data["tabs"], ensure_ascii=False),
+        data.get("date", ""),
+        build_id
+    ))
+    conn.commit()
+    conn.close()
 
 def save_user(user_id: str, first_name: str, username: str = ""):
     conn = sqlite3.connect(DB_PATH)
