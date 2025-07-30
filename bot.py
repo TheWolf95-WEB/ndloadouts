@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, types
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.client.default import DefaultBotProperties
-from aiogram.filters import CommandStart, Text
+from aiogram.filters import CommandStart
+from aiogram.filters.text import Text
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
 from aiogram.utils.markdown import hlink
 
