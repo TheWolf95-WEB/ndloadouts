@@ -312,7 +312,7 @@ async function loadBuilds() {
 
   builds.forEach((build, buildIndex) => {
     const wrapper = document.createElement('div');
-    wrapper.className = 'loadout js-loadout is-open';
+    wrapper.className = 'loadout js-loadout';
 
     const weaponTypeRu = weaponTypeLabels[build.weapon_type] || build.weapon_type;
     const tops = [build.top1, build.top2, build.top3].map((mod, i) => mod ? `<span class="loadout__top" style="background:${topColors[i]}">#${i+1} ${moduleNameMap[mod] || mod}</span>` : '').join('');
