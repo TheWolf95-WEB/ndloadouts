@@ -89,6 +89,11 @@ async def get_me(data: dict = Body(...)):
     try:
         user_json = json.loads(user_data)
         user_id = str(user_json.get("id"))
+        first_name = user_json.get("first_name", "")
+        username = user_json.get("username", "")
+
+        # ✅ Сохраняем пользователя
+        save_user(user_id, first_name, username)
 
         admin_ids = set(map(str.strip, os.getenv("ADMIN_IDS", "").split(",")))
         admin_dop = set(map(str.strip, os.getenv("ADMIN_DOP", "").split(",")))
@@ -98,11 +103,11 @@ async def get_me(data: dict = Body(...)):
 
         return JSONResponse({
             "user_id": user_id,
-            "first_name": user_json.get("first_name", ""),
+            "first_name": first_name,
             "is_admin": is_admin,
             "is_super_admin": is_super_admin,
             "admin_ids": list(admin_ids),
-            "admin_dop": list(admin_dop)  # ⬅️ для отладки на клиенте, можно убрать позже
+            "admin_dop": list(admin_dop)  # можно убрать позже
         })
 
     except Exception as e:
