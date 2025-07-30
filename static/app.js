@@ -107,7 +107,11 @@ function showScreen(id) {
 
 
 // === Кнопки перехода ===
-document.getElementById('add-build-btn')?.addEventListener('click', () => showScreen('screen-form'));
+document.getElementById('add-build-btn')?.addEventListener('click', () => {
+  currentEditId = null; // ⬅️ это сбрасывает режим редактирования
+  document.getElementById('submit-build').textContent = "➕ Добавить"; // ⬅️ это меняет текст
+  showScreen('screen-form');
+});
 document.getElementById('show-builds-btn')?.addEventListener('click', async () => {
   await loadBuilds();
   showScreen('screen-builds');
@@ -474,12 +478,11 @@ async function loadBuildsTable() {
     tableWrapper.querySelectorAll('.edit-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.dataset.id;
+        currentEditId = id;
 
         // Находим нужную сборку
         const build = builds.find(b => String(b.id) === String(id));
         if (!build) return alert("Сборка не найдена");
-
-        currentEditId = id;
 
         showScreen('screen-form');
         document.getElementById('submit-build').textContent = "💾 Сохранить";
