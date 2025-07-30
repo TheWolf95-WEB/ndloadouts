@@ -85,3 +85,26 @@ def delete_build_by_id(build_id: str):
     conn.close()
 
 
+def save_user(user_id: str, first_name: str, username: str = ""):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("""
+        INSERT INTO users (id, first_name, username)
+        VALUES (?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET
+            first_name = excluded.first_name,
+            username = excluded.username
+    """, (user_id, first_name, username))
+    conn.commit()
+    conn.close()
+
+
+def get_all_users():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT id, first_name, username FROM users")
+    rows = c.fetchall()
+    conn.close()
+    return [{"id": row[0], "first_name": row[1], "username": row[2]} for row in rows]
+
+
