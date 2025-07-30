@@ -1,31 +1,28 @@
-from fastapi import FastAPI, Request, Body, BackgroundTasks
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from dotenv import load_dotenv, set_key, dotenv_values
-from pathlib import Path
-from urllib.parse import parse_qs
-import subprocess
-import json
 import os
-import hmac
-import hashlib
-import sqlite3
+import asyncio
+from dotenv import load_dotenv
+from aiogram import Bot, Dispatcher, types
+from aiogram.enums.parse_mode import ParseMode
+from aiogram.client.default import DefaultBotProperties
+from aiogram.filters import CommandStart, Text
+from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+from aiogram.utils.markdown import hlink
 
 # Загрузка переменных окружения
 load_dotenv(dotenv_path="/opt/ndloadouts/.env")
 
 BOT_TOKEN = os.getenv("TOKEN")
 WEBAPP_URL = os.getenv("WEBAPP_URL")
-CHANNEL_ID = "@callofdutynd"  # можно и ID, но username надёжнее
+CHANNEL_ID = "@callofdutynd"
 
 if not BOT_TOKEN or not WEBAPP_URL:
     raise ValueError("❌ BOT_TOKEN и WEBAPP_URL должны быть заданы в .env")
 
+# Инициализация бота
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
 
-# /start
+# Стартовое сообщение
 @dp.message(CommandStart())
 async def start_handler(message: Message):
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -47,14 +44,12 @@ async def check_subscription(callback: types.CallbackQuery):
     try:
         member = await bot.get_chat_member(chat_id=CHANNEL_ID, user_id=user_id)
         if member.status in ("member", "creator", "administrator"):
-            # ✅ Подписка подтверждена — отправляем основное сообщение
             name = callback.from_user.first_name or "боец"
             text = (
                 f"🪂 Высадка подтверждена, {name}!\n\n"
                 "🔻 Жми на кнопку ниже, чтобы собрать свою мету и ворваться в топ-1!\n\n"
                 f"💬 Нашёл баг, есть идея или хочешь добавить сборку? — {hlink('Пиши в штаб', 'https://t.me/ndzone_admin')}"
             )
-
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [
                     InlineKeyboardButton(text="🔗 Открыть сборки", web_app=WebAppInfo(url=WEBAPP_URL)),
@@ -78,7 +73,7 @@ async def check_subscription(callback: types.CallbackQuery):
             ])
         )
 
-# Запуск
+# Запуск бота
 async def main():
     print("🤖 Бот запущен.")
     await dp.start_polling(bot)
