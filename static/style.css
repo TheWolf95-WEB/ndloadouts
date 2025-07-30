@@ -427,6 +427,10 @@ select:disabled {
   text-overflow: ellipsis;
 }
 
+#admin-list li {
+  margin-bottom: 10px;
+}
+
 
 /* стили для красивой таблицы */
 
