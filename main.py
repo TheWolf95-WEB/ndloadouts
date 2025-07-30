@@ -95,8 +95,10 @@ async def get_me(data: dict = Body(...)):
         # ✅ Сохраняем пользователя
         save_user(user_id, first_name, username)
 
-        admin_ids = set(map(str.strip, os.getenv("ADMIN_IDS", "").split(",")))
-        admin_dop = set(map(str.strip, os.getenv("ADMIN_DOP", "").split(",")))
+        # ✅ Получаем переменные окружения напрямую из .env
+        env_vars = dotenv_values(".env")
+        admin_ids = set(map(str.strip, env_vars.get("ADMIN_IDS", "").split(",")))
+        admin_dop = set(map(str.strip, env_vars.get("ADMIN_DOP", "").split(",")))
 
         is_super_admin = user_id in admin_ids
         is_admin = is_super_admin or user_id in admin_dop
