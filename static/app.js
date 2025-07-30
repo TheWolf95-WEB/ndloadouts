@@ -29,6 +29,7 @@ if (user && userInfo) {
 
 document.addEventListener('DOMContentLoaded', () => {
   showScreen('screen-main'); // Показываем главный экран
+  checkAdminStatus();        // ✅ Запускаем проверку прав
 });
 
 
