@@ -94,7 +94,7 @@ def update_build_by_id(build_id, data):
     c = conn.cursor()
     c.execute("""
         UPDATE builds
-        SET title = ?, weapon_type = ?, top1 = ?, top2 = ?, top3 = ?, tabs = ?, date = ?
+        SET title = ?, weapon_type = ?, top1 = ?, top2 = ?, top3 = ?, tabs_json = ?, date = ?
         WHERE id = ?
     """, (
         data["title"],
@@ -106,6 +106,7 @@ def update_build_by_id(build_id, data):
         data.get("date", ""),
         build_id
     ))
+
     conn.commit()
     conn.close()
 
