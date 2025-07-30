@@ -482,14 +482,16 @@ async function loadAdminList(requesterId) {
 
   // 👑 Главный админ
   const mainTitle = document.createElement('div');
-  mainTitle.innerHTML = `<strong style="margin: 10px 0; display: block;">Владелец:</strong>`;
+  mainTitle.innerHTML = `<strong style="margin: 20px 0 10px 0; display: block;">Владелец:</strong>`;
   listEl.appendChild(mainTitle);
 
   data.main_admins.forEach(({ id, name }) => {
     const li = document.createElement('li');
     li.textContent = `ID: ${id} — ${name} 👑`;
+    li.style.listStyleType = 'none'; // ⛔ убирает точку
     listEl.appendChild(li);
   });
+
 
   // 👥 Назначенные админы
   if (data.dop_admins.length > 0) {
