@@ -30,7 +30,7 @@ class PrivateOnlyMiddleware(BaseMiddleware):
 load_dotenv("/opt/ndloadouts/.env")
 BOT_TOKEN = os.getenv("TOKEN")
 WEBAPP_URL = os.getenv("WEBAPP_URL")
-CHANNEL_ID = "@ndbotslogs"
+CHANNEL_ID = "@callofdutynd"
 DB_PATH = "/opt/ndloadouts_storage/builds.db"
 
 if not BOT_TOKEN or not WEBAPP_URL:
@@ -69,7 +69,7 @@ async def grant_access(callback: CallbackQuery):
 async def start_handler(message: Message):
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
-            InlineKeyboardButton(text="📅 Подписаться", url="https://t.me/ndbotslogs"),
+            InlineKeyboardButton(text="📅 Подписаться", url="https://t.me/callofdutynd"),
             InlineKeyboardButton(text="✅ Проверить", callback_data="check_sub")
         ]
     ])
