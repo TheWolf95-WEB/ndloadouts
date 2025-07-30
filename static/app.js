@@ -475,30 +475,40 @@ async function loadAdminList(requesterId) {
   const listEl = document.getElementById('admin-list');
   listEl.innerHTML = '';
 
-  data.dop_admins.forEach(userId => {
-    const li = document.createElement('li');
-    li.innerHTML = `${userId} <button class="btn btn-sm" data-id="${userId}">Удалить</button>`;
-    listEl.appendChild(li);
-
-    li.querySelector('button').addEventListener('click', async () => {
-      if (!confirm(`Удалить ${userId} из админов?`)) return;
-
-      const res = await fetch('/api/remove-admin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, requesterId })
-      });
-
-      const result = await res.json();
-      alert(result.message || 'Готово');
-      await loadAdminList(requesterId);
-    });
-  });
-
+  // 👑 Главный админ (может быть один или несколько)
   if (data.main_admins.length) {
-    const label = document.createElement('p');
-    label.textContent = `Супер админ: ${data.main_admins.join(", ")}`;
-    listEl.prepend(label);
+    data.main_admins.forEach(id => {
+      const li = document.createElement('li');
+      li.textContent = `${id} — Владелец 👑`;
+      listEl.appendChild(li);
+    });
+  }
+
+  // 👥 Дополнительные админы
+  if (data.dop_admins.length) {
+    data.dop_admins.forEach(userId => {
+      const li = document.createElement('li');
+      li.innerHTML = `${userId} <button class="btn btn-sm" data-id="${userId}">Удалить</button>`;
+      listEl.appendChild(li);
+
+      li.querySelector('button').addEventListener('click', async () => {
+        if (!confirm(`Удалить ${userId} из админов?`)) return;
+
+        const res = await fetch('/api/remove-admin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, requesterId })
+        });
+
+        const result = await res.json();
+        alert(result.message || 'Готово');
+        await loadAdminList(requesterId); // 🔁 Обновить
+      });
+    });
+  }
+
+  if (!data.main_admins.length && !data.dop_admins.length) {
+    listEl.innerHTML = '<p>Админов пока нет.</p>';
   }
 }
 
