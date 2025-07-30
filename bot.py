@@ -7,10 +7,11 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.filters import CommandStart
 from aiogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, CallbackQuery
 from aiogram.utils.markdown import hlink
-from aiogram import BaseMiddleware
+from aiogram import BaseMiddleware, Router
 from aiogram.types import TelegramObject
 from typing import Callable, Awaitable, Dict, Any
 
+# Middleware: блокировка всех чатов, кроме лички
 class PrivateOnlyMiddleware(BaseMiddleware):
     async def __call__(
         self,
@@ -20,10 +21,10 @@ class PrivateOnlyMiddleware(BaseMiddleware):
     ) -> Any:
         chat = getattr(event, 'chat', None) or getattr(getattr(event, 'message', None), 'chat', None)
         if chat and chat.type != "private":
-            return  # Игнорируем не-private чаты
+            return  # Не обрабатываем групповые/канальные чаты
         return await handler(event, data)
 
-# Загрузка .env
+# Загрузка переменных
 load_dotenv("/opt/ndloadouts/.env")
 BOT_TOKEN = os.getenv("TOKEN")
 WEBAPP_URL = os.getenv("WEBAPP_URL")
@@ -32,18 +33,21 @@ CHANNEL_ID = "@callofdutynd"
 if not BOT_TOKEN or not WEBAPP_URL:
     raise ValueError("❌ BOT_TOKEN и WEBAPP_URL должны быть заданы в .env")
 
-# Инициализация бота
+# Инициализация бота и диспетчера
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
+router = Router()
 
-# Middleware для запрета работы в группах/каналах
+# Применяем middleware глобально
 dp.message.middleware(PrivateOnlyMiddleware())
 dp.callback_query.middleware(PrivateOnlyMiddleware())
+
+# Подключаем router
+dp.include_router(router)
 
 # Хендлер /start
 @router.message(CommandStart())
 async def start_handler(message: Message):
-
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(text="📥 Подписаться", url="https://t.me/callofdutynd"),
@@ -57,7 +61,7 @@ async def start_handler(message: Message):
     )
 
 # Проверка подписки
-@dp.callback_query(F.data == "check_sub")
+@router.callback_query(F.data == "check_sub")
 async def check_subscription(callback: CallbackQuery):
     user_id = callback.from_user.id
     try:
