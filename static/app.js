@@ -487,7 +487,7 @@ async function loadAdminList(requesterId) {
 
   data.main_admins.forEach(({ id, name }) => {
     const li = document.createElement('li');
-    li.textContent = `${id} — ${name} 👑`;
+    li.textContent = `ID: ${id} — ${name} 👑`;
     listEl.appendChild(li);
   });
 
@@ -499,16 +499,28 @@ async function loadAdminList(requesterId) {
 
     data.dop_admins.forEach(({ id, name }) => {
       const li = document.createElement('li');
-      li.innerHTML = `${id} — ${name} <button data-id="${id}" style="background: none; border: none; color: red; cursor: pointer;">❌ Удалить</button>`;
-      listEl.appendChild(li);
+      li.style.display = 'flex';
+      li.style.justifyContent = 'space-between';
+      li.style.alignItems = 'center';
+      li.style.gap = '10px';
 
-      li.querySelector('button').addEventListener('click', async () => {
+      const span = document.createElement('span');
+      span.textContent = `ID: ${id} — ${name}`;
+
+      const btn = document.createElement('button');
+      btn.textContent = 'Удалить';
+      btn.style.background = 'none';
+      btn.style.border = 'none';
+      btn.style.color = 'red';
+      btn.style.cursor = 'pointer';
+
+      btn.addEventListener('click', async () => {
         if (String(id) === String(requesterId)) {
           alert("Нельзя удалить самого себя.");
           return;
         }
 
-        if (!confirm(`Удалить Админа ${name}?`)) return;
+        if (!confirm(`Удалить админа ${name}?`)) return;
 
         const res = await fetch('/api/remove-admin', {
           method: 'POST',
@@ -520,9 +532,14 @@ async function loadAdminList(requesterId) {
         alert(result.message || 'Готово');
         await loadAdminList(requesterId);
       });
+
+      li.appendChild(span);
+      li.appendChild(btn);
+      listEl.appendChild(li);
     });
   }
 }
+
 
 
 
