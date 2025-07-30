@@ -19,13 +19,16 @@ const moduleNameMap = {};
 let ADMIN_IDS = [];
 
 // === Приветствие и загрузка админов ===
-if (user && userInfo) {
-  userInfo.innerHTML = `<p>Привет, ${user.first_name}!</p>`;
-  checkAdminStatus(); // Проверяем админа
-} else {
-  userInfo.innerHTML = 'Ошибка: не удалось получить данные пользователя.';
-  if (addBtn) addBtn.style.display = 'none';
-}
+window.addEventListener('DOMContentLoaded', () => {
+  if (user && userInfo) {
+    userInfo.innerHTML = `<p>Привет, ${user.first_name}!</p>`;
+    checkAdminStatus();
+  } else {
+    userInfo.innerHTML = 'Ошибка: не удалось получить данные пользователя.';
+    if (addBtn) addBtn.style.display = 'none';
+  }
+});
+
 
 async function checkAdminStatus() {
   try {
@@ -68,8 +71,6 @@ async function checkAdminStatus() {
 }
 
 
-
-
 function showScreen(id) {
   const allScreens = document.querySelectorAll('.screen');
   allScreens.forEach(screen => {
@@ -83,8 +84,9 @@ function showScreen(id) {
     }
   });
   roleButtons.style.display = (id === 'screen-main') ? 'flex' : 'none';
-  checkAdmin();
+  checkAdminStatus(); // ✅ правильный вызов
 }
+
 
 // === Кнопки перехода ===
 document.getElementById('add-build-btn')?.addEventListener('click', () => showScreen('screen-form'));
