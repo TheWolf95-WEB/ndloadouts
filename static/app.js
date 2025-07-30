@@ -108,10 +108,21 @@ function showScreen(id) {
 
 // === Кнопки перехода ===
 document.getElementById('add-build-btn')?.addEventListener('click', () => {
-  currentEditId = null; // ⬅️ это сбрасывает режим редактирования
-  document.getElementById('submit-build').textContent = "➕ Добавить"; // ⬅️ это меняет текст
+  currentEditId = null;
+  document.getElementById('submit-build').textContent = "➕ Добавить";
+
+  // Очистка всех полей
+  document.getElementById('title').value = '';
+  document.getElementById('weapon_type').value = weaponTypeSelect.options[0]?.value || '';
+  document.getElementById('top1').value = '';
+  document.getElementById('top2').value = '';
+  document.getElementById('top3').value = '';
+  document.getElementById('build-date').value = new Date().toISOString().split('T')[0];
+  tabsContainer.innerHTML = '';
+
   showScreen('screen-form');
 });
+
 document.getElementById('show-builds-btn')?.addEventListener('click', async () => {
   await loadBuilds();
   showScreen('screen-builds');
