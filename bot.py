@@ -64,14 +64,18 @@ async def start_handler(message: Message):
 @router.callback_query(F.data == "check_sub")
 async def check_subscription(callback: CallbackQuery):
     user_id = callback.from_user.id
+
     try:
         member = await bot.get_chat_member(chat_id=CHANNEL_ID, user_id=user_id)
-        if member.status in ("member", "creator", "administrator"):
+
+        # ✅ Подписан, если не "left" и не "kicked"
+        if member.status not in ("left", "kicked"):
             name = callback.from_user.first_name or "боец"
             text = (
                 f"🪂 Высадка подтверждена, {name}!\n\n"
                 "🔻 Жми на кнопку ниже, чтобы собрать свою мету и ворваться в топ-1!\n\n"
-                f"💬 Нашёл баг, есть идея или хочешь добавить сборку? — {hlink('Пиши в штаб', 'https://t.me/ndzone_admin')}"
+                f"💬 Нашёл баг, есть идея или хочешь добавить сборку? — "
+                f"{hlink('Пиши в штаб', 'https://t.me/ndzone_admin')}"
             )
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
                 [
@@ -80,21 +84,26 @@ async def check_subscription(callback: CallbackQuery):
                 ]
             ])
             await callback.message.edit_text(text, reply_markup=keyboard)
-        else:
-            raise Exception("Not subscribed")
-    except Exception:
-        await callback.answer("❌ Подписка не подтверждена. Попробуй ещё раз.", show_alert=True)
-        await callback.message.edit_text(
-            "🚫 Доступ временно ограничен.\n\n"
-            "Ты ещё не подписан на нашу базу командования.\n"
-            "🛰 Без связи с базой доступ к сборкам невозможен.",
-            reply_markup=InlineKeyboardMarkup(inline_keyboard=[
-                [
-                    InlineKeyboardButton(text="📥 Подписаться", url="https://t.me/callofdutynd"),
-                    InlineKeyboardButton(text="🔁 Проверить снова", callback_data="check_sub")
-                ]
-            ])
-        )
+            return
+
+    except Exception as e:
+        # можно залогировать e, если нужно
+        pass
+
+    # ❌ Не подписан или ошибка
+    await callback.answer("❌ Подписка не подтверждена. Попробуй ещё раз.", show_alert=True)
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [
+            InlineKeyboardButton(text="📥 Подписаться", url="https://t.me/callofdutynd"),
+            InlineKeyboardButton(text="🔁 Проверить снова", callback_data="check_sub")
+        ]
+    ])
+    await callback.message.edit_text(
+        "🚫 Доступ временно ограничен.\n\n"
+        "Ты ещё не подписан на нашу базу командования.\n"
+        "🛰 Без связи с базой доступ к сборкам невозможен.",
+        reply_markup=keyboard
+    )
 
 # Запуск
 async def main():
