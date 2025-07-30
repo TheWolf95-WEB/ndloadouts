@@ -64,19 +64,20 @@ def add_build(data):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("""
-    INSERT INTO builds (title, weapon_type, top1, top2, top3, tabs_json, image, date)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-""", (
-    data["title"],
-    data["weapon_type"],
-    data["top1"],
-    data["top2"],
-    data["top3"],
-    json.dumps(data["tabs"]),
-    data.get("image"),
-    data.get("date")
-))
-
+        INSERT INTO builds (title, weapon_type, top1, top2, top3, tabs_json, image, date)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        data["title"],
+        data["weapon_type"],
+        data["top1"],
+        data["top2"],
+        data["top3"],
+        json.dumps(data["tabs"]),
+        data.get("image"),
+        data.get("date")
+    ))
+    conn.commit()  # ⬅️ важно
+    conn.close()   # ⬅️ важно
 
 # Удаление сборки
 def delete_build_by_id(build_id: str):
