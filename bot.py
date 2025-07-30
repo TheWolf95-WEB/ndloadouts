@@ -30,7 +30,7 @@ class PrivateOnlyMiddleware(BaseMiddleware):
 load_dotenv("/opt/ndloadouts/.env")
 BOT_TOKEN = os.getenv("TOKEN")
 WEBAPP_URL = os.getenv("WEBAPP_URL")
-CHANNEL_ID = "@callofdutynd"
+CHANNEL_ID = -1001990222164 
 DB_PATH = "/opt/ndloadouts_storage/builds.db"
 
 if not BOT_TOKEN or not WEBAPP_URL:
@@ -87,21 +87,7 @@ async def start_handler(message: Message):
 async def check_subscription(callback: CallbackQuery):
     user_id = str(callback.from_user.id)
 
-    # Проверка в базе
-    try:
-        import sqlite3
-        conn = sqlite3.connect(DB_PATH)
-        cursor = conn.cursor()
-        cursor.execute("SELECT 1 FROM users WHERE id = ?", (user_id,))
-        if cursor.fetchone():
-            await grant_access(callback)
-            return
-    except Exception as e:
-        print(f"[DB ERROR] {e}")
-    finally:
-        conn.close()
-
-    # Проверка через Telegram API
+    # Проверка через Telegram API (всегда!)
     subscribed = False
     try:
         member = await bot.get_chat_member(chat_id=CHANNEL_ID, user_id=int(user_id))
@@ -111,7 +97,12 @@ async def check_subscription(callback: CallbackQuery):
         print(f"[TG ERROR] {e}")
 
     if subscribed:
-        save_user(user_id, callback.from_user.first_name or "", callback.from_user.username or "")
+        # Сохраняем пользователя в базу (если ещё не был)
+        try:
+            save_user(user_id, callback.from_user.first_name or "", callback.from_user.username or "")
+        except Exception as e:
+            print(f"[DB ERROR] {e}")
+
         await grant_access(callback)
         return
 
@@ -135,6 +126,7 @@ async def check_subscription(callback: CallbackQuery):
     )
 
     await callback.answer("❌ Подписка не подтверждена. Попробуй ещё раз.", show_alert=True)
+
 
 
 # --- Старт ---
