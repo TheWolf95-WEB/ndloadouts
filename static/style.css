@@ -23,6 +23,17 @@ body {
   padding-bottom: 80px; /* для отступа под футер */
 }
 
+.screen {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.screen.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 
 h1 {
   font-size: 1.8rem;
