@@ -102,12 +102,6 @@ async function checkAdminStatus() {
 
 
 function showScreen(id) {
-  // 🔐 Проверка, есть ли уже userInfo
-  if (!window.userInfo) {
-    console.warn("⏳ Ожидание загрузки прав пользователя...");
-    return;
-  }
-
   const protectedScreens = {
     'screen-form': 'is_admin',
     'screen-edit-builds': 'is_admin',
@@ -121,18 +115,24 @@ function showScreen(id) {
     return;
   }
 
-  document.querySelectorAll('.screen').forEach(screen => {
+  const allScreens = document.querySelectorAll('.screen');
+  allScreens.forEach(screen => {
     if (screen.id === id) {
-      screen.classList.add('active');
+      screen.style.display = 'block';
+      screen.classList.remove('active');
+      requestAnimationFrame(() => screen.classList.add('active'));
     } else {
       screen.classList.remove('active');
+      setTimeout(() => screen.style.display = 'none', 300);
     }
   });
 
   roleButtons.style.display = (id === 'screen-main') ? 'flex' : 'none';
+  checkAdminStatus();
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
 
 
 
