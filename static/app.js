@@ -401,16 +401,22 @@ async function loadBuilds() {
   });
 
 
-  document.querySelectorAll('.loadout__tab').forEach(button => {
-    button.addEventListener('click', () => {
-      const parent = button.closest('.loadout');
-      const tab = button.dataset.tab;
-      parent.querySelectorAll('.loadout__tab').forEach(b => b.classList.remove('is-active'));
-      parent.querySelectorAll('.loadout__tab-content').forEach(c => c.classList.remove('is-active'));
-      button.classList.add('is-active');
-      parent.querySelector(`[data-tab-content="${tab}"]`)?.classList.add('is-active');
-    });
+document.querySelectorAll('.loadout__tab').forEach(button => {
+  button.addEventListener('click', () => {
+    const parent = button.closest('.loadout');
+    const tab = button.dataset.tab;
+
+    parent.querySelectorAll('.loadout__tab').forEach(b => b.classList.remove('is-active'));
+    parent.querySelectorAll('.loadout__tab-content').forEach(c => c.classList.remove('is-active'));
+    button.classList.add('is-active');
+    parent.querySelector(`[data-tab-content="${tab}"]`)?.classList.add('is-active');
+
+    // ⬇️ Обновление высоты после переключения вкладки
+    const content = parent.querySelector('.loadout__content');
+    content.style.maxHeight = content.scrollHeight + 'px';
   });
+});
+
 
   document.querySelectorAll('.js-loadout-toggle').forEach(header => {
     header.addEventListener('click', () => {
