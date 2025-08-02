@@ -37,7 +37,7 @@ body {
   pointer-events: none;
   transition: opacity 0.3s ease, transform 0.3s ease;
   display: none;
-  padding-bottom: 150px;
+  padding-bottom: 180px;
 }
 
 .screen.active {
@@ -488,7 +488,7 @@ select:disabled {
   color: #aaa;
   text-align: center;
   font-size: 1rem;
-  padding: 25px 10px;
+  padding: 35px 10px;
   position: fixed;
   bottom: 0;
   left: 0;
