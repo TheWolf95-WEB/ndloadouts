@@ -477,6 +477,9 @@ select:disabled {
   line-height: 1.5;
 }
 
+.version-entry br{
+  display:none;
+}
 
 @media (max-width: 550px) {
   .loadout__module {
