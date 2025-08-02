@@ -24,42 +24,45 @@
 
       <h1>Сборки Warzone</h1>
 
-        <div id="role-buttons" class="form-section">
-
-          <!-- 👤 Пользователь -->
-          <div id="user-buttons" class="button-grid">
-            <div class="card-btn" id="show-builds-btn">
-              <i class="fas fa-eye"></i>
-              <span>Все сборки</span>
-            </div>
-            <div class="card-btn" id="help-btn">
-              <i class="fas fa-lightbulb"></i>
-              <span>Помощь</span>
-            </div>
+      <div id="role-buttons" class="form-section">
+        <!-- 👤 Пользователь -->
+        <div id="user-buttons" class="button-grid two-column">
+          <div class="card-btn" id="show-builds-btn">
+            <i class="fas fa-eye"></i>
+            <span>Все сборки</span>
           </div>
-        
-          <!-- 🛡 Админ -->
-          <div id="admin-buttons" class="button-grid">
-            <div class="card-btn" id="update-version-btn">
+          <div class="card-btn" id="help-btn">
+            <i class="fas fa-lightbulb"></i>
+            <span>Помощь</span>
+          </div>
+        </div>
+      
+        <!-- 🛡 Админ -->
+        <div id="admin-buttons">
+          <div class="button-grid three-column">
+            <div class="card-btn full-width" id="update-version-btn" style="display: none;">
               <i class="fas fa-sync-alt"></i>
               <span>Версия</span>
             </div>
-            <div class="card-btn" id="edit-builds-btn">
-              <i class="fas fa-database"></i>
-              <span>База</span>
+              <div class="card-btn" id="edit-builds-btn" style="display: none;">
+                <i class="fas fa-database"></i>
+                <span>База</span>
+              </div>
+              <div class="card-btn" id="assign-admin-btn" style="display: none;">
+                <i class="fas fa-user-shield"></i>
+                <span>Админка</span>
+              </div>
             </div>
-            <div class="card-btn" id="assign-admin-btn">
-              <i class="fas fa-user-shield"></i>
-              <span>Админка</span>
+      
+          <!-- Кнопка "Добавить сборку" на всю ширину -->
+             <div class="card-btn" id="add-build-btn" style="display: none;">
+                <i class="fas fa-plus"></i>
+                <span>Добавить сборку</span>
             </div>
-        
-            <!-- Добавить сборку — на новой строке и на всю ширину -->
-            <div class="card-btn full-width" id="add-build-btn">
-              <i class="fas fa-plus"></i>
-              <span>Добавить сборку</span>
-            </div            
-          </div> 
-    </div> 
+        </div>
+      </div>
+
+
 
     </div>
 
