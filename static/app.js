@@ -123,8 +123,6 @@ function showScreen(id) {
   });
 
   roleButtons.style.display = (id === 'screen-main') ? 'flex' : 'none';
-  checkAdminStatus();
-
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
