@@ -39,8 +39,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     dateInput.value = today;
   }
 
-    // Проверка прав (отображение админ-кнопок)
-  await checkAdminStatus();
 
   if (window.userInfo) {
     showScreen('screen-main');
