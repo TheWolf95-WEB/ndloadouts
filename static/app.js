@@ -352,6 +352,7 @@ async function handleSubmitBuild() {
     method,
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
+    initData: tg.initData
   });
 
   if (res.ok) {
