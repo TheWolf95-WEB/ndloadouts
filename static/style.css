@@ -53,16 +53,22 @@ body {
   display: grid;
   gap: 16px;
   margin-bottom: 8px;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
 }
 
+.two-column {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.three-column {
+  grid-template-columns: repeat(3, 1fr);
+}
 
 .card-btn {
   display: none !important;
   flex-direction: column !important;
   align-items: center;
   justify-content: center;
-    background: #1f2937;
+  background: #1f2937;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
   padding: 20px 10px;
   border-radius: 12px;
@@ -70,7 +76,7 @@ body {
   text-align: center;
   transition: transform 0.2s ease, background 0.2s ease;
   cursor: pointer;
-  min-height: 110px; /* ✅ одинаковая высота */
+  min-height: 110px;
 }
 
 .card-btn.is-visible {
@@ -99,6 +105,7 @@ body {
   font-size: 0.95rem;
   font-weight: 500;
 }
+
 
 
 h1 {
