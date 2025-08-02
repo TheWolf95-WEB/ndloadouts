@@ -43,7 +43,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 👉 Добавить ожидание checkAdminStatus
   await checkAdminStatus();
-  updateAdminGridLayout(); // ⬅️ добавь сюда
 
   // ✅ Показываем экран только после загрузки userInfo
   if (window.userInfo) {
@@ -130,29 +129,6 @@ function showScreen(id) {
   roleButtons.style.display = (id === 'screen-main') ? 'flex' : 'none';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
-//  динамически переключать grid-template-columns
-
-function updateAdminGridLayout() {
-  const adminButtons = document.getElementById('admin-buttons');
-  if (!adminButtons) return;
-
-  const visibleButtons = Array.from(adminButtons.children).filter(btn =>
-    btn.classList.contains('card-btn') && btn.classList.contains('is-visible')
-  );
-
-  if (visibleButtons.length === 0) {
-    adminButtons.style.display = 'none';
-    return;
-  }
-
-  adminButtons.style.display = 'grid';
-
-  // 👉 Автоматическое количество колонок: 1, 2 или 3
-  const cols = visibleButtons.length === 1 ? 1 : (visibleButtons.length === 2 ? 2 : 3);
-  adminButtons.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-}
-
 
 
 // === Кнопки перехода ===
@@ -734,10 +710,3 @@ async function loadAdminList(requesterId) {
     });
   }
 }
-
-
-
-
-
-// === Init ===
-loadWeaponTypes();
