@@ -64,6 +64,7 @@ body {
 }
 
 .card-btn {
+  flex-direction: column !important;
   align-items: center;
   justify-content: center;
     background: #1f2937;
