@@ -5,11 +5,9 @@ let versionContent = '';
 function cleanHTML(html) {
   const temp = document.createElement('div');
   temp.innerHTML = html;
-
   temp.querySelectorAll('p, h1, h2, li, ul, ol, br').forEach(el => {
     if (!el.textContent.trim()) el.remove();
   });
-
   return temp.innerHTML.trim();
 }
 
@@ -37,20 +35,28 @@ function initQuillEditor() {
 async function loadVersionText() {
   try {
     const res = await fetch('/api/version-history/all');
-    const versions = await res.json();
+    const { versions } = await res.json();
+
+    console.log('[DEBUG] Версий получено:', versions.length);
 
     // Комментарий и визуальный отступ
     const spacing = '<!-- Новая версия --><p><br></p><p><br></p>';
 
-    const combined = spacing + versions.reverse().map(v => v.content).join('<hr>');
+    let combined = spacing;
+    if (versions.length) {
+      combined += versions.reverse().map(v => v.content).join('<hr>');
+    }
 
     versionContent = combined;
-    if (quill) quill.root.innerHTML = versionContent;
+    if (quill) {
+      quill.root.innerHTML = versionContent;
+    }
+
+    console.log('[DEBUG] Итоговый HTML:', versionContent);
   } catch (err) {
     console.error('Ошибка загрузки версий:', err);
   }
 }
-
 
 // === Сохранение новой версии ===
 async function saveVersionText() {
@@ -88,7 +94,9 @@ async function loadCurrentVersion() {
     const data = await res.json();
     const versionEl = document.getElementById('current-version');
     if (versionEl) {
-      const plain = (data.content || '').replace(/<\/?[^>]+>/g, '').replace(/&nbsp;/g, ' ');
+      const plain = (data.content || '')
+        .replace(/<\/?[^>]+>/g, '')
+        .replace(/&nbsp;/g, ' ');
       const match = plain.match(/Версия:.*?\(\d{2}\.\d{2}\.\d{4}\)/);
       versionEl.textContent = match ? match[0] : '';
     }
@@ -101,11 +109,11 @@ async function loadCurrentVersion() {
 async function showAllVersions() {
   try {
     const res = await fetch('/api/version-history/all');
-    const data = await res.json();
+    const { versions } = await res.json();
     const container = document.getElementById('all-versions-container');
     container.innerHTML = '';
 
-    data.versions.forEach(v => {
+    versions.forEach(v => {
       const block = document.createElement('div');
       block.classList.add('version-entry');
       block.innerHTML = v.content;
