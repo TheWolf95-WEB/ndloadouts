@@ -38,13 +38,19 @@ async function loadVersionText() {
   try {
     const res = await fetch('/api/version-history/all');
     const versions = await res.json();
-    const combined = versions.versions.reverse().map(v => v.content).join('<hr>');
+
+    // Комментарий и визуальный отступ
+    const spacing = '<!-- Новая версия --><p><br></p><p><br></p>';
+
+    const combined = spacing + versions.reverse().map(v => v.content).join('<hr>');
+
     versionContent = combined;
     if (quill) quill.root.innerHTML = versionContent;
   } catch (err) {
     console.error('Ошибка загрузки версий:', err);
   }
 }
+
 
 // === Сохранение новой версии ===
 async function saveVersionText() {
