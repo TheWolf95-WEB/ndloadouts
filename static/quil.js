@@ -67,9 +67,13 @@ async function loadCurrentVersion() {
     const res = await fetch('/api/version-history');
     const data = await res.json();
     const versionEl = document.getElementById('current-version');
+
     if (versionEl) {
-      const plain = (data.content || '').replace(/<\/?[^>]+(>|$)/g, '');
-      const match = plain.match(/Версия:.*$/m);
+      const plain = (data.content || '')
+        .replace(/<\/?[^>]+(>|$)/g, '') // Удаляем HTML
+        .replace(/&nbsp;/g, ' ')        // Удаляем пробелы-заменители
+
+      const match = plain.match(/Версия:.*?\(\d{2}\.\d{2}\.\d{4}\)/); // Только "Версия: 0.4 (02.08.2025)"
       versionEl.textContent = match ? match[0] : '';
     }
   } catch (err) {
