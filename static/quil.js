@@ -95,28 +95,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
   });
 
-  // Клик по текущей версии
-  document.getElementById('current-version')?.addEventListener('click', async () => {
-    const res = await fetch('/api/version-history/all');
-    const data = await res.json();
-    const container = document.getElementById('all-versions-container');
-    container.innerHTML = '';
+// Клик по текущей версии
+document.getElementById('current-version')?.addEventListener('click', async () => {
+  const res = await fetch('/api/version-history/all');
+  const data = await res.json();
+  const container = document.getElementById('all-versions-container');
+  container.innerHTML = '';
 
-    data.versions.forEach(v => {
-      const block = document.createElement('div');
-      block.innerHTML = v.content;
-      block.style.marginBottom = '30px';
-      block.style.paddingBottom = '20px';
-      block.style.borderBottom = '1px solid #333';
-      block.style.fontSize = '15px';
-      container.appendChild(block);
-    });
-
-    showScreen('screen-all-versions');
+  data.versions.forEach(v => {
+    const block = document.createElement('div');
+    block.classList.add('version-entry');
+    block.innerHTML = v.content;
+    container.appendChild(block);
   });
 
-  // Назад из экрана всех версий
-  document.getElementById('back-from-all-versions')?.addEventListener('click', () => {
-    showScreen('screen-main');
-  });
+  showScreen('screen-all-versions');
 });
+
+// Назад
+document.getElementById('back-from-all-versions')?.addEventListener('click', () => {
+  showScreen('screen-main');
+});
+
