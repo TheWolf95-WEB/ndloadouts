@@ -19,12 +19,6 @@ h1 {
   text-align: center;
 }
 
-.loadout__content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.4s ease;
-}
-
 
 .container {
   max-width: 1440px;
@@ -381,6 +375,12 @@ select:disabled {
 
 .loadout.is-open .loadout__toggle-icon i {
   transform: rotate(180deg);
+}
+
+.loadout__content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
 }
 
 
