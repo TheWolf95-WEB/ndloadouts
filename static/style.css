@@ -228,10 +228,18 @@ select:disabled {
 }
 
 
+.version-clickable {
+  transition: color 0.2s ease, transform 0.1s ease;
+}
+
 .version-clickable:hover {
+  color: #22c55e; /* ярко-зелёный оттенок */
   text-decoration: underline;
   cursor: pointer;
-  color: #facc15;
+}
+
+.version-clickable:active {
+  transform: scale(0.95); /* эффект нажатия */
 }
 
 
