@@ -38,7 +38,7 @@ async function loadVersionText() {
   try {
     const res = await fetch('/api/version-history/all');
     const versions = await res.json();
-    const combined = versions.reverse().map(v => v.content).join('<hr>');
+    const combined = versions.versions.reverse().map(v => v.content).join('<hr>');
     versionContent = combined;
     if (quill) quill.root.innerHTML = versionContent;
   } catch (err) {
