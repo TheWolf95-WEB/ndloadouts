@@ -53,6 +53,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 
+
+
 async function checkAdminStatus() {
   try {
     const res = await fetch('/api/me', {
@@ -84,16 +86,18 @@ async function checkAdminStatus() {
     assignBtn?.classList.add('is-visible');
   } else {
     assignBtn?.classList.remove('is-visible');
-  } 
+  }
+
 
   } catch (e) {
     console.error("Ошибка при проверке прав администратора:", e);
-    document.getElementById('add-build-btn')?.classList.remove('is-visible');
-    document.getElementById('admin-buttons')?.style.display = 'none';
-    document.getElementById('superadmin-buttons')?.style.display = 'none';
+    if (addBtn) addBtn.style.display = 'none';
+    const editBtn = document.getElementById('edit-builds-btn');
+    const assignBtn = document.getElementById('assign-admin-btn');
+    if (editBtn) editBtn.style.display = 'none';
+    if (assignBtn) assignBtn.style.display = 'none';
   }
 }
-
 
 
 function showScreen(id) {
@@ -351,8 +355,8 @@ async function handleSubmitBuild() {
       ...data,
       initData: tg.initData
     })
-  });
 
+  });
 
   if (res.ok) {
     alert(currentEditId ? 'Сборка обновлена!' : 'Сборка добавлена!');
@@ -518,10 +522,10 @@ async function loadBuildsTable() {
       btn.addEventListener('click', async () => {
         const id = btn.dataset.id;
         if (confirm('Удалить сборку?')) {
-          const res = await fetch(/api/builds/${id}, {
+          const res = await fetch(`/api/builds/${id}`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ initData: tg.initData }) // ✅
+            body: JSON.stringify({ initData: tg.initData })
           });
           const data = await res.json();
 
@@ -628,11 +632,7 @@ document.getElementById('submit-admin-id')?.addEventListener('click', async () =
     const res = await fetch('/api/assign-admin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId,
-        requesterId: user.id,
-        initData: tg.initData // ✅
-      })
+      body: JSON.stringify({ userId, requesterId: user.id })
     });
 
     const data = await res.json();
@@ -704,12 +704,7 @@ async function loadAdminList(requesterId) {
         const res = await fetch('/api/remove-admin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userId: id,
-            requesterId,
-            initData: tg.initData // ✅
-          })
-
+          body: JSON.stringify({ userId: id, requesterId })
         });
 
         const result = await res.json();
@@ -722,4 +717,4 @@ async function loadAdminList(requesterId) {
       listEl.appendChild(li);
     });
   }
-} 
+}
