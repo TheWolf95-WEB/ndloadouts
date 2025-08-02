@@ -29,27 +29,24 @@ if (user && userInfo) {
 
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Загрузка типов оружия и модулей
-  await loadWeaponTypes();
-
-  // Установка даты по умолчанию
+  await loadWeaponTypes(); // Загрузка типов
   const dateInput = document.getElementById('build-date');
   if (dateInput) {
     const today = new Date().toISOString().split('T')[0];
     dateInput.value = today;
   }
 
+  // 👉 Добавить ожидание checkAdminStatus
+  await checkAdminStatus();
 
+  // ✅ Показываем экран только после загрузки userInfo
   if (window.userInfo) {
     showScreen('screen-main');
   } else {
     console.error("❌ userInfo не загружен — showScreen не будет вызван");
   }
-
-
-  // Показываем главный экран
-  showScreen('screen-main');
 });
+
 
 
 
