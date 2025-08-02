@@ -111,18 +111,26 @@ function showScreen(id) {
 
   const allScreens = document.querySelectorAll('.screen');
   allScreens.forEach(screen => {
-    if (screen.id === id) {
+    const isTarget = screen.id === id;
+
+    if (isTarget) {
       screen.style.display = 'block';
-      screen.classList.remove('active');
-      requestAnimationFrame(() => screen.classList.add('active'));
+      requestAnimationFrame(() => {
+        screen.classList.add('active');
+      });
     } else {
       screen.classList.remove('active');
-      setTimeout(() => screen.style.display = 'none', 300);
+      setTimeout(() => {
+        screen.style.display = 'none';
+      }, 300); // ⏱️ соответствует transition в CSS
     }
   });
 
+  // 🔄 Показывать roleButtons только на главном экране
   roleButtons.style.display = (id === 'screen-main') ? 'flex' : 'none';
-  checkAdminStatus(); // ✅ Обновим UI на всякий
+
+  // 🔁 Обновим права и UI
+  checkAdminStatus();
 }
 
 
