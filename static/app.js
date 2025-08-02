@@ -21,7 +21,7 @@ let currentSubmitHandler = null;
 
 // === Приветствие и загрузка админов ===
 if (user && userInfo) {
-  userInfo.innerHTML = <p>Привет, ${user.first_name}!</p>;
+  userInfo.innerHTML = `<p>Привет, ${user.first_name}!</p>`;
 } else {
   userInfo.innerHTML = 'Ошибка: не удалось получить данные пользователя.';
   if (addBtn) addBtn.style.display = 'none';
@@ -75,7 +75,7 @@ async function checkAdminStatus() {
   addBtn?.classList.add('is-visible');
   editBtn?.classList.add('is-visible');
   updateBtn?.classList.add('is-visible');
-  userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
+  userInfo.innerHTML += <p>Вы вошли как админ ✅</p>;
   } else {
     addBtn?.classList.remove('is-visible');
     editBtn?.classList.remove('is-visible');
