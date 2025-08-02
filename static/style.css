@@ -18,9 +18,7 @@ body {
 .container {
   max-width: 1440px;
   margin: 0 auto;
-  flex: 1;
   padding: 16px;
-  padding-bottom: 120px; /* для отступа под футер */
 }
 
 .screen {
@@ -465,6 +463,7 @@ select:disabled {
 /* версия приложение стили */
 
 .footer-note {
+  margin-top:50px;
     display: flex;
     flex-direction: column;
   gap:10px;
