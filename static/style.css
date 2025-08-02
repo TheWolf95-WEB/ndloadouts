@@ -83,6 +83,10 @@ body {
   display: flex !important;
 }
 
+.card-btn.full-width:not(.is-visible) {
+  display: none !important;
+}
+
 .card-btn i {
   font-size: 26px;
   margin-bottom: 10px;
