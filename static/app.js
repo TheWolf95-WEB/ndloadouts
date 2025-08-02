@@ -39,11 +39,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     dateInput.value = today;
   }
 
+    // Проверка прав (отображение админ-кнопок)
+  await checkAdminStatus();
+
   // Показываем главный экран
   showScreen('screen-main');
-
-  // Проверка прав (отображение админ-кнопок)
-  await checkAdminStatus();
 });
 
 
