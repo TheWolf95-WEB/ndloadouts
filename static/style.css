@@ -243,14 +243,18 @@ select:disabled {
 }
 
 .version-hint {
+  position: fixed;
+  bottom: 55px; /* чуть выше футера */
+  left: 0;
+  width: 100%;
   text-align: center;
   font-size: 0.9rem;
-  color: #6ee7b7; /* мятно-зелёный */
-  margin-top: 20px;
-  margin-bottom: 10px;
+  color: #6ee7b7;
   opacity: 0.8;
+  z-index: 998;
   animation: fadeIn 0.6s ease;
 }
+
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(5px); }
