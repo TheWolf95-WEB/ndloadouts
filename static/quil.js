@@ -1,25 +1,25 @@
 let quill;
 let versionContent = '';
 
-// === Очистка HTML от пустых блоков ===
+// === Очистка от пустых блоков (p, h1, h2, li, br) ===
 function cleanHTML(html) {
   const temp = document.createElement('div');
   temp.innerHTML = html;
 
-  temp.querySelectorAll('p, h2, ul, li, br').forEach(el => {
+  temp.querySelectorAll('p, h1, h2, li, ul, ol, br').forEach(el => {
     if (!el.textContent.trim()) el.remove();
   });
 
   return temp.innerHTML.trim();
 }
 
-// === ИНИЦИАЛИЗАЦИЯ Quill ===
+// === Инициализация Quill ===
 function initQuillEditor() {
   if (quill) return;
-  const editorContainer = document.getElementById('quill-editor');
-  if (!editorContainer) return;
+  const container = document.getElementById('quill-editor');
+  if (!container) return;
 
-  quill = new Quill(editorContainer, {
+  quill = new Quill(container, {
     theme: 'snow',
     placeholder: 'Например:\nВерсия: 0.1\n– Добавлено это\n– Изменено то',
     modules: {
@@ -33,7 +33,7 @@ function initQuillEditor() {
   });
 }
 
-// === Загрузка текста в редактор ===
+// === Загрузка всех версий в редактор ===
 async function loadVersionText() {
   try {
     const res = await fetch('/api/version-history/all');
@@ -46,15 +46,14 @@ async function loadVersionText() {
   }
 }
 
-// === Сохранение ===
+// === Сохранение новой версии ===
 async function saveVersionText() {
-  const statusEl = document.getElementById('save-status');
   try {
     const raw = quill.root.innerHTML;
     const cleaned = cleanHTML(raw);
 
     if (!cleaned.replace(/<[^>]*>/g, '').trim()) {
-      statusEl.textContent = '⚠️ Введите текст версии';
+      alert('⚠️ Введите текст версии перед сохранением');
       return;
     }
 
@@ -65,20 +64,18 @@ async function saveVersionText() {
     });
 
     if (res.ok) {
-      statusEl.textContent = '✅ Сохранено';
+      alert('✅ Версия успешно сохранена');
       versionContent = cleaned;
     } else {
-      statusEl.textContent = '❌ Ошибка при сохранении';
+      alert('❌ Ошибка при сохранении');
     }
   } catch (err) {
     console.error('Ошибка при сохранении:', err);
-    statusEl.textContent = '❌ Сетевая ошибка';
+    alert('❌ Сетевая ошибка');
   }
-
-  setTimeout(() => (statusEl.textContent = ''), 3000);
 }
 
-// === Текущая версия в футере ===
+// === Загрузка текущей версии в футер ===
 async function loadCurrentVersion() {
   try {
     const res = await fetch('/api/version-history');
@@ -94,7 +91,7 @@ async function loadCurrentVersion() {
   }
 }
 
-// === Показать все версии ===
+// === Показать все версии пользователю ===
 async function showAllVersions() {
   try {
     const res = await fetch('/api/version-history/all');
@@ -111,11 +108,11 @@ async function showAllVersions() {
 
     showScreen('screen-all-versions');
   } catch (err) {
-    console.error('Ошибка загрузки истории версий:', err);
+    console.error('Ошибка отображения всех версий:', err);
   }
 }
 
-// === Обработчики ===
+// === Подключение обработчиков ===
 document.addEventListener('DOMContentLoaded', () => {
   loadCurrentVersion();
 
