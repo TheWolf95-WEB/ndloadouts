@@ -1,9 +1,21 @@
 let quill;
 let versionContent = '';
 
+// === Очистка HTML от пустых блоков ===
+function cleanHTML(html) {
+  const temp = document.createElement('div');
+  temp.innerHTML = html;
+
+  temp.querySelectorAll('p, h2, ul, li, br').forEach(el => {
+    if (!el.textContent.trim()) el.remove();
+  });
+
+  return temp.innerHTML.trim();
+}
+
 // === ИНИЦИАЛИЗАЦИЯ Quill ===
 function initQuillEditor() {
-  if (quill) return; // Уже инициализирован
+  if (quill) return;
   const editorContainer = document.getElementById('quill-editor');
   if (!editorContainer) return;
 
@@ -36,27 +48,37 @@ async function loadVersionText() {
 
 // === Сохранение ===
 async function saveVersionText() {
+  const statusEl = document.getElementById('save-status');
   try {
-    const content = quill.root.innerHTML;
+    const raw = quill.root.innerHTML;
+    const cleaned = cleanHTML(raw);
+
+    if (!cleaned.replace(/<[^>]*>/g, '').trim()) {
+      statusEl.textContent = '⚠️ Введите текст версии';
+      return;
+    }
+
     const res = await fetch('/api/version-history', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content })
+      body: JSON.stringify({ content: cleaned })
     });
 
     if (res.ok) {
-      alert('✅ Версия успешно сохранена');
-      versionContent = content;
+      statusEl.textContent = '✅ Сохранено';
+      versionContent = cleaned;
     } else {
-      alert('❌ Ошибка при сохранении версии');
+      statusEl.textContent = '❌ Ошибка при сохранении';
     }
   } catch (err) {
     console.error('Ошибка при сохранении:', err);
-    alert('❌ Сетевая или серверная ошибка');
+    statusEl.textContent = '❌ Сетевая ошибка';
   }
+
+  setTimeout(() => (statusEl.textContent = ''), 3000);
 }
 
-// === Отображение текущей версии в футере ===
+// === Текущая версия в футере ===
 async function loadCurrentVersion() {
   try {
     const res = await fetch('/api/version-history');
@@ -106,14 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('save-version-btn')?.addEventListener('click', saveVersionText);
-
-  document.getElementById('back-from-update')?.addEventListener('click', () => {
-    showScreen('screen-main');
-  });
-
+  document.getElementById('back-from-update')?.addEventListener('click', () => showScreen('screen-main'));
   document.getElementById('current-version')?.addEventListener('click', showAllVersions);
-
-  document.getElementById('back-from-all-versions')?.addEventListener('click', () => {
-    showScreen('screen-main');
-  });
+  document.getElementById('back-from-all-versions')?.addEventListener('click', () => showScreen('screen-main'));
 });
