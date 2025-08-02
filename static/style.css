@@ -52,10 +52,10 @@ body {
 .button-grid {
   display: grid;
   gap: 16px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
-.two-column  {
+.two-column {
   grid-template-columns: repeat(2, 1fr);
 }
 
@@ -95,9 +95,19 @@ body {
 }
 
 .full-width {
-  width: 100%;
-  margin-top: 10px;
+  grid-column: span 3;
 }
+
+@media (max-width: 768px) {
+  .full-width {
+    grid-column: span 2 !important;
+  }
+  .three-column {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+
 
 
 
