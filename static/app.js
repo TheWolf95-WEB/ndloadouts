@@ -204,7 +204,7 @@ weaponTypeSelect.addEventListener('change', async () => {
 
 async function loadModules(type) {
   if (modulesByType[type]) return;
-  const res = await fetch(/data/modules-${type}.json);
+  const res = await fetch(`/data/modules-${type}.json`);
   const mods = await res.json();
   modulesByType[type] = mods;
 
