@@ -20,18 +20,24 @@ body {
   margin: 0 auto;
   padding: 16px;
   width:100%;
+
+    overflow-x: hidden;
+  position: relative;
 }
 
 .screen {
+  min-height: 100vh;
+  padding: 20px;
   opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .screen.active {
   opacity: 1;
-  pointer-events: auto;
+  transform: translateY(0);
 }
+
 
 
 h1 {
