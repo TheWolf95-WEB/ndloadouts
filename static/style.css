@@ -55,7 +55,7 @@ body {
   margin-bottom: 20px;
 }
 
-.two-column {
+.three-column {
   grid-template-columns: repeat(3, 1fr);
 }
 
