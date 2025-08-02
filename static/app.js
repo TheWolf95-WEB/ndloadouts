@@ -73,7 +73,6 @@ async function checkAdminStatus() {
   addBtn?.classList.add('is-visible');
   editBtn?.classList.add('is-visible');
   updateBtn?.classList.add('is-visible');
-  userInfo.innerHTML += <p>Вы вошли как админ ✅</p>;
   } else {
     addBtn?.classList.remove('is-visible');
     editBtn?.classList.remove('is-visible');
