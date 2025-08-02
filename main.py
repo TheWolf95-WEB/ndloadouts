@@ -11,15 +11,19 @@ import requests
 import subprocess
 from pathlib import Path
 from urllib.parse import parse_qs
+from datetime import datetime
+from database import (
 
-from database import init_db, get_all_builds, add_build, delete_build_by_id, get_all_users, save_user,  update_build_by_id 
+    init_db, get_all_builds, add_build, delete_build_by_id, get_all_users,
+    save_user, update_build_by_id,
+
+    add_version_entry, get_latest_version, get_all_versions
+)
 
 # Загрузка .env
 load_dotenv()
 WEBAPP_URL = os.getenv("WEBAPP_URL")
 GITHUB_SECRET = os.getenv("WEBHOOK_SECRET", "")
-
-VERSION_FILE = Path("data/version-history.html")
 
 app = FastAPI()
 
@@ -253,12 +257,28 @@ async def remove_admin(data: dict = Body(...)):
 
 @app.get("/api/version-history")
 async def get_version_history():
-    if VERSION_FILE.exists():
-        return {"content": VERSION_FILE.read_text(encoding="utf-8")}
-    return {"content": ""}
+    try:
+        return {"content": get_latest_version()}
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 @app.post("/api/version-history")
 async def update_version_history(data: dict = Body(...)):
-    content = data.get("content", "")
-    VERSION_FILE.write_text(content, encoding="utf-8")
-    return {"message": "Сохранено!"}
+    content = data.get("content", "").strip()
+    if not content:
+        return JSONResponse({"error": "Контент пуст"}, status_code=400)
+
+    try:
+        add_version_entry(content)
+        return {"message": "Сохранено!"}
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
+@app.get("/api/version-history/all")
+async def all_versions():
+    try:
+        versions = get_all_versions()
+        return {"versions": versions}
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
