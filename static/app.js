@@ -522,7 +522,11 @@ async function loadBuildsTable() {
       btn.addEventListener('click', async () => {
         const id = btn.dataset.id;
         if (confirm('Удалить сборку?')) {
-          const res = await fetch(`/api/builds/${id}`, { method: 'DELETE' });
+          const res = await fetch(`/api/builds/${id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ initData: tg.initData }) // ✅
+          });
           const data = await res.json();
 
           if (res.ok && data.status === "ok") {
@@ -628,7 +632,11 @@ document.getElementById('submit-admin-id')?.addEventListener('click', async () =
     const res = await fetch('/api/assign-admin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, requesterId: user.id })
+      body: JSON.stringify({
+        userId,
+        requesterId: user.id,
+        initData: tg.initData // ✅
+      })
     });
 
     const data = await res.json();
@@ -700,7 +708,12 @@ async function loadAdminList(requesterId) {
         const res = await fetch('/api/remove-admin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: id, requesterId })
+          body: JSON.stringify({
+            userId: id,
+            requesterId,
+            initData: tg.initData // ✅
+          })
+
         });
 
         const result = await res.json();
