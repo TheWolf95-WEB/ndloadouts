@@ -144,50 +144,6 @@ document.getElementById('back-from-edit')?.addEventListener('click', () => {
   showScreen('screen-main');
 });
 
-// Обработка клика по кнопке и перехода на экран
-
-document.getElementById('update-version-btn')?.addEventListener('click', async () => {
-  await loadVersionText();  // загрузим текст
-  showScreen('screen-update-version');
-});
-
-document.getElementById('back-from-update')?.addEventListener('click', () => {
-  showScreen('screen-main');
-});
-
-document.getElementById('save-version-btn')?.addEventListener('click', async () => {
-  const content = quill.root.innerHTML;
-  const res = await fetch('/api/version-history', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content })
-  });
-  const data = await res.json();
-  document.getElementById('save-status').textContent = data.message || 'Сохранено!';
-});
-
-
-
-// Загрузка текста при открытии
-async function loadVersionText() {
-  const res = await fetch('/api/version-history');
-  const data = await res.json();
-  if (quill) quill.root.innerHTML = data.content || '';
-}
-
-// Отобразить текущую версию в футере
-
-async function loadCurrentVersion() {
-  const res = await fetch('/api/version-history');
-  const data = await res.json();
-  const versionEl = document.getElementById('current-version');
-  if (versionEl) {
-    const match = data.content?.match(/Версия:.*$/m);
-    versionEl.textContent = match ? match[0] : '';
-  }
-}
-
-
 
 // === Загрузка типов оружия ===
 async function loadWeaponTypes() {
