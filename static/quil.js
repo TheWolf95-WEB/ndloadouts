@@ -22,9 +22,13 @@ function initQuillEditor() {
 // Загрузка текста в редактор
 async function loadVersionText() {
   try {
-    const res = await fetch('/api/version-history');
-    const data = await res.json();
-    versionContent = data.content || '';
+    const res = await fetch('/api/version-history/all');
+    const versions = await res.json();
+
+    // Склеиваем все версии в один HTML (в порядке от старой к новой)
+    const combinedContent = versions.reverse().map(v => v.content).join('<hr>');
+
+    versionContent = combinedContent;
     if (quill) {
       quill.root.innerHTML = versionContent;
     }
@@ -32,6 +36,7 @@ async function loadVersionText() {
     console.error('Ошибка загрузки версии:', err);
   }
 }
+
 
 // Сохранение
 async function saveVersionText() {
