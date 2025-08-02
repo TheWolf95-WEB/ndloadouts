@@ -60,15 +60,18 @@ async function checkAdminStatus() {
 
     const editBtn = document.getElementById('edit-builds-btn');
     const assignBtn = document.getElementById('assign-admin-btn');
+    const updateBtn = document.getElementById('update-version-btn');
 
     // Для всех админов (главных и доп)
     if (data.is_admin) {
       if (addBtn) addBtn.style.display = 'inline-block';
       if (editBtn) editBtn.style.display = 'inline-block';
+      if (updateBtn) updateBtn.style.display = 'inline-block';
       if (userInfo) userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
     } else {
       if (addBtn) addBtn.style.display = 'none';
       if (editBtn) editBtn.style.display = 'none';
+      if (updateBtn) updateBtn.style.display = 'none';
     }
 
     // Только для главного
@@ -140,6 +143,50 @@ document.getElementById('edit-builds-btn')?.addEventListener('click', async () =
 document.getElementById('back-from-edit')?.addEventListener('click', () => {
   showScreen('screen-main');
 });
+
+// Обработка клика по кнопке и перехода на экран
+
+document.getElementById('update-version-btn')?.addEventListener('click', async () => {
+  await loadVersionText();  // загрузим текст
+  showScreen('screen-update-version');
+});
+
+document.getElementById('back-from-update')?.addEventListener('click', () => {
+  showScreen('screen-main');
+});
+
+document.getElementById('save-version-btn')?.addEventListener('click', async () => {
+  const content = document.getElementById('version-editor').value.trim();
+  const res = await fetch('/api/version-history', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content })
+  });
+  const data = await res.json();
+  document.getElementById('save-status').textContent = data.message || 'Сохранено!';
+});
+
+
+
+// Загрузка текста при открытии
+async function loadVersionText() {
+  const res = await fetch('/api/version-history');
+  const data = await res.json();
+  document.getElementById('version-editor').value = data.content || '';
+}
+
+// Отобразить текущую версию в футере
+
+async function loadCurrentVersion() {
+  const res = await fetch('/api/version-history');
+  const data = await res.json();
+  const versionEl = document.getElementById('current-version');
+  if (versionEl) {
+    const match = data.content?.match(/Версия:.*$/m);
+    versionEl.textContent = match ? match[0] : '';
+  }
+}
+
 
 
 // === Загрузка типов оружия ===
