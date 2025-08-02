@@ -8,9 +8,21 @@ body {
   background-color: #0f111a;
   font-family: 'Rubik', 'Segoe UI', sans-serif;
   color: #ffffff;
-  padding: 16px;
   margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
+
+.container {
+  max-width: 1440px;
+  margin: 0 auto;
+  flex: 1;
+  padding: 16px;
+  padding-bottom: 80px; /* для отступа под футер */
+}
+
 
 h1 {
   font-size: 1.8rem;
@@ -19,11 +31,6 @@ h1 {
   text-align: center;
 }
 
-
-.container {
-  max-width: 1440px;
-  margin: 0 auto;
-}
 
 .subtext {
   font-size: 1rem;
@@ -202,25 +209,29 @@ select:disabled {
   background-color: #612626;
 }
 
-#screen-main {
-  position: relative;
-  min-height: 92vh;
-  padding-bottom: 50px; /* чтобы контент не прилипал к низу */
-  box-sizing: border-box;
-}
-
 .footer-note {
     display: flex;
     flex-direction: column;
   
-  position: absolute;
-  bottom: 10px;
-  left: 0;
-  right: 0;
+  background: #1f2937;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  color: #aaa;
   text-align: center;
   font-size: 1rem;
-  color: #aaa;
-  opacity: 0.5;
+  padding: 12px 10px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 999;
+  opacity: 1;
+}
+
+
+.version-clickable:hover {
+  text-decoration: underline;
+  cursor: pointer;
+  color: #facc15;
 }
 
 
