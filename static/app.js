@@ -503,20 +503,21 @@ async function loadBuildsTable() {
 
     let html = '';
 
-    builds.forEach((build, index) => {
-      html += 
-        <div class="build-card">
-          <div><strong>#${index + 1}</strong></div>
-          <div><strong>Название:</strong> ${build.title}</div>
-          <div><strong>Тип:</strong> ${weaponTypeLabels[build.weapon_type] || build.weapon_type}</div>
-          <div><strong>Вкладки:</strong> ${build.tabs.length}</div>
-          <div class="build-actions">
-            <button class="btn btn-sm edit-btn" data-id="${build.id}">✏</button>
-            <button class="btn btn-sm delete-btn" data-id="${build.id}">🗑</button>
-          </div>
+  builds.forEach((build, index) => {
+    html += `
+      <div class="build-card">
+        <div><strong>#${index + 1}</strong></div>
+        <div><strong>Название:</strong> ${build.title}</div>
+        <div><strong>Тип:</strong> ${weaponTypeLabels[build.weapon_type] || build.weapon_type}</div>
+        <div><strong>Вкладки:</strong> ${build.tabs.length}</div>
+        <div class="build-actions">
+          <button class="btn btn-sm edit-btn" data-id="${build.id}">✏</button>
+          <button class="btn btn-sm delete-btn" data-id="${build.id}">🗑</button>
         </div>
-      ;
-    });
+      </div>
+    `;
+  });
+
 
     tableWrapper.innerHTML = html;
 
