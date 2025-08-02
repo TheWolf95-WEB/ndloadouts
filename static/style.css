@@ -19,9 +19,9 @@ body {
   max-width: 1440px;
   margin: 0 auto;
   padding: 16px;
-  width:100%;
+  width: 100%;
   min-height: 100vh;
-    overflow-x: hidden;
+  overflow-x: hidden;
   position: relative;
 }
 
@@ -36,9 +36,17 @@ body {
   transform: translateY(20px);
   pointer-events: none;
   transition: opacity 0.3s ease, transform 0.3s ease;
+  will-change: opacity, transform;
 }
 
 .screen.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+  z-index: 1;
+}
+
+#screen-main {
   opacity: 1;
   transform: translateY(0);
   pointer-events: all;
