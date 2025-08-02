@@ -19,41 +19,32 @@ const moduleNameMap = {};
 let ADMIN_IDS = [];
 let currentSubmitHandler = null;
 
-// === Приветствие и загрузка админов ===
 if (user && userInfo) {
-  userInfo.innerHTML = <p>Привет, ${user.first_name}!</p>;
+  userInfo.innerHTML = `<p>Привет, ${user.first_name}!</p>`;
 } else {
   userInfo.innerHTML = 'Ошибка: не удалось получить данные пользователя.';
   if (addBtn) addBtn.style.display = 'none';
 }
 
-
 document.addEventListener('DOMContentLoaded', async () => {
-  await loadWeaponTypes(); // Загрузка типов
-
-      // ✅ Показываем кнопки пользователя
+  await loadWeaponTypes();
   document.getElementById('show-builds-btn')?.classList.add('is-visible');
   document.getElementById('help-btn')?.classList.add('is-visible');
-  
+
   const dateInput = document.getElementById('build-date');
   if (dateInput) {
     const today = new Date().toISOString().split('T')[0];
     dateInput.value = today;
   }
 
-  // 👉 Добавить ожидание checkAdminStatus
   await checkAdminStatus();
 
-  // ✅ Показываем экран только после загрузки userInfo
   if (window.userInfo) {
     showScreen('screen-main');
   } else {
     console.error("❌ userInfo не загружен — showScreen не будет вызван");
   }
 });
-
-
-
 
 async function checkAdminStatus() {
   try {
@@ -64,30 +55,28 @@ async function checkAdminStatus() {
     });
 
     const data = await res.json();
-    window.userInfo = data; // ✅ Сохраняем на глобальный доступ
-
+    window.userInfo = data;
 
     const editBtn = document.getElementById('edit-builds-btn');
     const assignBtn = document.getElementById('assign-admin-btn');
     const updateBtn = document.getElementById('update-version-btn');
 
-  if (data.is_admin) {
-  addBtn?.classList.add('is-visible');
-  editBtn?.classList.add('is-visible');
-  updateBtn?.classList.add('is-visible');
-  userInfo.innerHTML += <p>Вы вошли как админ ✅</p>;
-  } else {
-    addBtn?.classList.remove('is-visible');
-    editBtn?.classList.remove('is-visible');
-    updateBtn?.classList.remove('is-visible');
-  }
-  
-  if (data.is_super_admin) {
-    assignBtn?.classList.add('is-visible');
-  } else {
-    assignBtn?.classList.remove('is-visible');
-  }
+    if (data.is_admin) {
+      addBtn?.classList.add('is-visible');
+      editBtn?.classList.add('is-visible');
+      updateBtn?.classList.add('is-visible');
+      userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
+    } else {
+      addBtn?.classList.remove('is-visible');
+      editBtn?.classList.remove('is-visible');
+      updateBtn?.classList.remove('is-visible');
+    }
 
+    if (data.is_super_admin) {
+      assignBtn?.classList.add('is-visible');
+    } else {
+      assignBtn?.classList.remove('is-visible');
+    }
 
   } catch (e) {
     console.error("Ошибка при проверке прав администратора:", e);
@@ -98,6 +87,7 @@ async function checkAdminStatus() {
     if (assignBtn) assignBtn.style.display = 'none';
   }
 }
+
 
 
 function showScreen(id) {
