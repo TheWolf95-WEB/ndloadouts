@@ -49,28 +49,30 @@ body {
 
 /* Кнлопки */
 
-.button-group {
+.button-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
   gap: 16px;
   margin-bottom: 20px;
-  justify-items: center;
+}
+
+.two-column {
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .card-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   background: #1f2937;
-  padding: 16px 10px;
+  padding: 20px 10px;
   border-radius: 12px;
   color: #fff;
   text-align: center;
   transition: transform 0.2s ease, background 0.2s ease;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
   cursor: pointer;
-  width: 100%;
-  max-width: 120px;
+  min-height: 100px;
 }
 
 .card-btn:hover {
@@ -80,13 +82,19 @@ body {
 
 .card-btn i {
   font-size: 24px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .card-btn span {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 500;
 }
+
+.full-width {
+  width: 100%;
+  margin-top: 10px;
+}
+
 
 
 h1 {
