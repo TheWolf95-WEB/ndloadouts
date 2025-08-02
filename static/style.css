@@ -64,6 +64,7 @@ body {
 }
 
 .card-btn {
+  display: none !important;
   flex-direction: column !important;
   align-items: center;
   justify-content: center;
