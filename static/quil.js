@@ -3,10 +3,11 @@ let versionContent = '';
 
 // === ИНИЦИАЛИЗАЦИЯ Quill ===
 function initQuillEditor() {
+  if (quill) return; // Уже инициализирован
   const editorContainer = document.getElementById('quill-editor');
-  if (!editorContainer || quill) return;
+  if (!editorContainer) return;
 
-  quill = new Quill('#quill-editor', {
+  quill = new Quill(editorContainer, {
     theme: 'snow',
     placeholder: 'Например:\nВерсия: 0.1\n– Добавлено это\n– Изменено то',
     modules: {
@@ -25,11 +26,11 @@ async function loadVersionText() {
   try {
     const res = await fetch('/api/version-history/all');
     const versions = await res.json();
-    const combinedContent = versions.reverse().map(v => v.content).join('<hr>');
-    versionContent = combinedContent;
+    const combined = versions.reverse().map(v => v.content).join('<hr>');
+    versionContent = combined;
     if (quill) quill.root.innerHTML = versionContent;
   } catch (err) {
-    console.error('Ошибка загрузки версии:', err);
+    console.error('Ошибка загрузки версий:', err);
   }
 }
 
@@ -55,22 +56,40 @@ async function saveVersionText() {
   }
 }
 
-// === Текущая версия в футере ===
+// === Отображение текущей версии в футере ===
 async function loadCurrentVersion() {
   try {
     const res = await fetch('/api/version-history');
     const data = await res.json();
     const versionEl = document.getElementById('current-version');
-
     if (versionEl) {
-      const plain = (data.content || '')
-        .replace(/<\/?[^>]+(>|$)/g, '')
-        .replace(/&nbsp;/g, ' ');
+      const plain = (data.content || '').replace(/<\/?[^>]+>/g, '').replace(/&nbsp;/g, ' ');
       const match = plain.match(/Версия:.*?\(\d{2}\.\d{2}\.\d{4}\)/);
       versionEl.textContent = match ? match[0] : '';
     }
   } catch (err) {
-    console.error('Ошибка получения текущей версии:', err);
+    console.error('Ошибка загрузки текущей версии:', err);
+  }
+}
+
+// === Показать все версии ===
+async function showAllVersions() {
+  try {
+    const res = await fetch('/api/version-history/all');
+    const data = await res.json();
+    const container = document.getElementById('all-versions-container');
+    container.innerHTML = '';
+
+    data.versions.forEach(v => {
+      const block = document.createElement('div');
+      block.classList.add('version-entry');
+      block.innerHTML = v.content;
+      container.appendChild(block);
+    });
+
+    showScreen('screen-all-versions');
+  } catch (err) {
+    console.error('Ошибка загрузки истории версий:', err);
   }
 }
 
@@ -78,16 +97,7 @@ async function loadCurrentVersion() {
 document.addEventListener('DOMContentLoaded', () => {
   loadCurrentVersion();
 
-  // Кнопка Назад
-  document.getElementById('back-from-update')?.addEventListener('click', () => {
-    showScreen('screen-main');
-  });
-
-  // Сохранить версию
-  document.getElementById('save-version-btn')?.addEventListener('click', saveVersionText);
-
-  // Открытие редактора
-  document.getElementById('update-version-btn')?.addEventListener('click', async () => {
+  document.getElementById('update-version-btn')?.addEventListener('click', () => {
     showScreen('screen-update-version');
     setTimeout(() => {
       initQuillEditor();
@@ -95,25 +105,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 100);
   });
 
-// Клик по текущей версии
-document.getElementById('current-version')?.addEventListener('click', async () => {
-  const res = await fetch('/api/version-history/all');
-  const data = await res.json();
-  const container = document.getElementById('all-versions-container');
-  container.innerHTML = '';
+  document.getElementById('save-version-btn')?.addEventListener('click', saveVersionText);
 
-  data.versions.forEach(v => {
-    const block = document.createElement('div');
-    block.classList.add('version-entry');
-    block.innerHTML = v.content;
-    container.appendChild(block);
+  document.getElementById('back-from-update')?.addEventListener('click', () => {
+    showScreen('screen-main');
   });
 
-  showScreen('screen-all-versions');
-});
+  document.getElementById('current-version')?.addEventListener('click', showAllVersions);
 
-// Назад
-document.getElementById('back-from-all-versions')?.addEventListener('click', () => {
-  showScreen('screen-main');
+  document.getElementById('back-from-all-versions')?.addEventListener('click', () => {
+    showScreen('screen-main');
+  });
 });
-
