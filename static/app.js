@@ -172,7 +172,7 @@ document.getElementById('save-version-btn')?.addEventListener('click', async () 
 async function loadVersionText() {
   const res = await fetch('/api/version-history');
   const data = await res.json();
-  document.getElementById('version-editor').value = data.content || '';
+  if (quill) quill.root.innerHTML = data.content || '';
 }
 
 // Отобразить текущую версию в футере
