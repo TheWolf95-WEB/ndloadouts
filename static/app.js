@@ -337,6 +337,7 @@ async function handleSubmitBuild() {
   });
 
   const data = {
+    initData: tg.initData,
     title: document.getElementById('title').value.trim(),
     weapon_type: weaponTypeSelect.value,
     top1: document.getElementById('top1').value.trim(),
@@ -348,11 +349,11 @@ async function handleSubmitBuild() {
 
   const method = currentEditId ? 'PUT' : 'POST';
   const url = currentEditId ? `/api/builds/${currentEditId}` : '/api/builds';
-
+  
   const res = await fetch(url, {
     method,
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
+    body: JSON.stringify(data) // где `data` уже содержит initData
   });
 
   if (res.ok) {
@@ -526,7 +527,11 @@ async function loadBuildsTable() {
       btn.addEventListener('click', async () => {
         const id = btn.dataset.id;
         if (confirm('Удалить сборку?')) {
-         const res = await fetch(`/api/builds/${id}`, { method: 'DELETE' });
+         const res = await fetch(`/api/builds/${id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ initData: tg.initData }) // ✅ добавили
+          });
           const data = await res.json();
 
           if (res.ok && data.status === "ok") {
