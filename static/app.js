@@ -156,7 +156,7 @@ document.getElementById('back-from-update')?.addEventListener('click', () => {
 });
 
 document.getElementById('save-version-btn')?.addEventListener('click', async () => {
-  const content = document.getElementById('version-editor').value.trim();
+  const content = quill.root.innerHTML;
   const res = await fetch('/api/version-history', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
