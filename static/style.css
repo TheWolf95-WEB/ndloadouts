@@ -37,6 +37,7 @@ body {
   pointer-events: none;
   transition: opacity 0.3s ease, transform 0.3s ease;
   display: none;
+  padding-bottom: 150px;
 }
 
 .screen.active {
