@@ -29,6 +29,7 @@
         <button id="assign-admin-btn" class="btn" style="display: none;">👑 Назначить админа</button>
         <button id="show-builds-btn" class="btn">👁 Посмотреть сборки</button>
         <button id="help-btn" class="btn">💡 Помощь или идеи</button>
+        <button id="update-version-btn" class="btn" style="display: none;">🔄 Обновить версию</button>
       </div>
 
       <div class="footer-note">B06 | ND | Warzone</div>
@@ -105,6 +106,17 @@
           <h4>Список админов:</h4>
           <ul id="admin-list"></ul>
         </div>
+      </div>
+
+
+      <div id="screen-update-version" class="screen">
+        <h2>📦 История изменений</h2>
+        <div id="version-editor-wrapper">
+          <textarea id="version-editor" placeholder="Напиши историю версий здесь..."></textarea>
+          <button id="save-version-btn" class="btn">💾 Сохранить</button>
+          <div id="save-status" style="margin-top:10px;color:limegreen;"></div>
+        </div>
+        <button class="btn" id="back-from-update">⬅ Назад</button>
       </div>
 
 
