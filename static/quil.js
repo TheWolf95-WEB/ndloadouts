@@ -1,14 +1,7 @@
-  // Открытие редактора
-  document.getElementById('update-version-btn')?.addEventListener('click', async () => {
-    initQuillEditor();
-    await loadVersionText();
-    showScreen('screen-update-version');
-  });
-});
-
 let quill;
 let versionContent = '';
 
+// === ИНИЦИАЛИЗАЦИЯ Quill ===
 function initQuillEditor() {
   const editorContainer = document.getElementById('quill-editor');
   if (!editorContainer || quill) return;
@@ -27,30 +20,23 @@ function initQuillEditor() {
   });
 }
 
-// Загрузка текста в редактор
+// === Загрузка текста в редактор ===
 async function loadVersionText() {
   try {
     const res = await fetch('/api/version-history/all');
     const versions = await res.json();
-
-    // Склеиваем все версии в один HTML (в порядке от старой к новой)
     const combinedContent = versions.reverse().map(v => v.content).join('<hr>');
-
     versionContent = combinedContent;
-    if (quill) {
-      quill.root.innerHTML = versionContent;
-    }
+    if (quill) quill.root.innerHTML = versionContent;
   } catch (err) {
     console.error('Ошибка загрузки версии:', err);
   }
 }
 
-
-// Сохранение
+// === Сохранение ===
 async function saveVersionText() {
   try {
     const content = quill.root.innerHTML;
-
     const res = await fetch('/api/version-history', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -69,7 +55,7 @@ async function saveVersionText() {
   }
 }
 
-// Подгрузка текущей версии в футере
+// === Текущая версия в футере ===
 async function loadCurrentVersion() {
   try {
     const res = await fetch('/api/version-history');
@@ -78,10 +64,9 @@ async function loadCurrentVersion() {
 
     if (versionEl) {
       const plain = (data.content || '')
-        .replace(/<\/?[^>]+(>|$)/g, '') // Удаляем HTML
-        .replace(/&nbsp;/g, ' ')        // Удаляем пробелы-заменители
-
-      const match = plain.match(/Версия:.*?\(\d{2}\.\d{2}\.\d{4}\)/); // Только "Версия: 0.4 (02.08.2025)"
+        .replace(/<\/?[^>]+(>|$)/g, '')
+        .replace(/&nbsp;/g, ' ');
+      const match = plain.match(/Версия:.*?\(\d{2}\.\d{2}\.\d{4}\)/);
       versionEl.textContent = match ? match[0] : '';
     }
   } catch (err) {
@@ -89,50 +74,49 @@ async function loadCurrentVersion() {
   }
 }
 
-// === Подключение обработчиков ===
+// === Обработчики ===
 document.addEventListener('DOMContentLoaded', () => {
-  // Футер
   loadCurrentVersion();
 
-  // Назад
+  // Кнопка Назад
   document.getElementById('back-from-update')?.addEventListener('click', () => {
     showScreen('screen-main');
   });
 
-  // Сохранение
+  // Сохранить версию
   document.getElementById('save-version-btn')?.addEventListener('click', saveVersionText);
 
-
-
-// Клик по версии
-// Клик по версии
-document.getElementById('current-version')?.addEventListener('click', async () => {
-  const res = await fetch('/api/version-history/all');
-  const data = await res.json();
-  const container = document.getElementById('all-versions-container');
-
-  // Очистка
-  container.innerHTML = '';
-
-  data.versions.forEach(v => {
-    const block = document.createElement('div');
-    block.innerHTML = v.content;
-    block.style.marginBottom = '30px';
-    block.style.paddingBottom = '20px';
-    block.style.borderBottom = '1px solid #333';
-    block.style.fontSize = '15px';
-    container.appendChild(block);
+  // Открытие редактора
+  document.getElementById('update-version-btn')?.addEventListener('click', async () => {
+    showScreen('screen-update-version');
+    setTimeout(() => {
+      initQuillEditor();
+      loadVersionText();
+    }, 100);
   });
 
-  showScreen('screen-all-versions');
+  // Клик по текущей версии
+  document.getElementById('current-version')?.addEventListener('click', async () => {
+    const res = await fetch('/api/version-history/all');
+    const data = await res.json();
+    const container = document.getElementById('all-versions-container');
+    container.innerHTML = '';
+
+    data.versions.forEach(v => {
+      const block = document.createElement('div');
+      block.innerHTML = v.content;
+      block.style.marginBottom = '30px';
+      block.style.paddingBottom = '20px';
+      block.style.borderBottom = '1px solid #333';
+      block.style.fontSize = '15px';
+      container.appendChild(block);
+    });
+
+    showScreen('screen-all-versions');
+  });
+
+  // Назад из экрана всех версий
+  document.getElementById('back-from-all-versions')?.addEventListener('click', () => {
+    showScreen('screen-main');
+  });
 });
-
-// Назад из истории версий
-document.getElementById('back-from-all-versions')?.addEventListener('click', () => {
-  showScreen('screen-main');
-});
-
-
-
-
-
