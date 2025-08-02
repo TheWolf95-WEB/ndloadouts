@@ -68,9 +68,9 @@ async function checkAdminStatus() {
 
     // Для всех админов (главных и доп)
     if (data.is_admin) {
-      if (addBtn) addBtn.style.display = 'inline-block';
-      if (editBtn) editBtn.style.display = 'inline-block';
-      if (updateBtn) updateBtn.style.display = 'inline-block';
+      if (addBtn) addBtn.style.display = 'flex';
+      if (editBtn) editBtn.style.display = 'flex';
+      if (updateBtn) updateBtn.style.display = 'flex';
       if (userInfo) userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
     } else {
       if (addBtn) addBtn.style.display = 'none';
