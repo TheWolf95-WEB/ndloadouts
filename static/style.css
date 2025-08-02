@@ -52,8 +52,10 @@ body {
 .button-grid {
   display: grid;
   gap: 16px;
-  margin-bottom:8px;
+  margin-bottom: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
 }
+
 
 .two-column {
   grid-template-columns: repeat(2, 1fr);
@@ -83,6 +85,10 @@ body {
   display: flex !important;
 }
 
+.card-btn.full-width {
+  grid-column: 1 / -1;
+}
+
 .card-btn.full-width:not(.is-visible) {
   display: none !important;
 }
@@ -100,10 +106,6 @@ body {
 .card-btn span {
   font-size: 0.95rem;
   font-weight: 500;
-}
-
-.full-width {
-  grid-column: 1 / -1; /* ✅ растягивается на всю ширину */
 }
 
 
