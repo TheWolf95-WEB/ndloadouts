@@ -101,3 +101,37 @@ document.addEventListener('DOMContentLoaded', () => {
     showScreen('screen-update-version');
   });
 });
+
+
+// Клик по версии
+// Клик по версии
+document.getElementById('current-version')?.addEventListener('click', async () => {
+  const res = await fetch('/api/version-history/all');
+  const data = await res.json();
+  const container = document.getElementById('all-versions-container');
+
+  // Очистка
+  container.innerHTML = '';
+
+  data.versions.forEach(v => {
+    const block = document.createElement('div');
+    block.innerHTML = v.content;
+    block.style.marginBottom = '30px';
+    block.style.paddingBottom = '20px';
+    block.style.borderBottom = '1px solid #333';
+    block.style.fontSize = '15px';
+    container.appendChild(block);
+  });
+
+  showScreen('screen-all-versions');
+});
+
+// Назад из истории версий
+document.getElementById('back-from-all-versions')?.addEventListener('click', () => {
+  showScreen('screen-main');
+});
+
+
+
+
+
