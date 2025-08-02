@@ -54,7 +54,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
 
-
 async function checkAdminStatus() {
   try {
     const res = await fetch('/api/me', {
@@ -64,40 +63,44 @@ async function checkAdminStatus() {
     });
 
     const data = await res.json();
-    window.userInfo = data; // ✅ Сохраняем на глобальный доступ
+    window.userInfo = data;
 
+    // Общие элементы
+    const addBtn = document.getElementById('add-build-btn');
+    const adminBlock = document.getElementById('admin-buttons');
+    const superAdminBlock = document.getElementById('superadmin-buttons');
 
-    const editBtn = document.getElementById('edit-builds-btn');
-    const assignBtn = document.getElementById('assign-admin-btn');
-    const updateBtn = document.getElementById('update-version-btn');
+    // Скрыть оба блока сначала
+    adminBlock.style.display = 'none';
+    superAdminBlock.style.display = 'none';
+    addBtn.classList.remove('is-visible');
 
-  if (data.is_admin) {
-  addBtn?.classList.add('is-visible');
-  editBtn?.classList.add('is-visible');
-  updateBtn?.classList.add('is-visible');
-  userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
-  } else {
-    addBtn?.classList.remove('is-visible');
-    editBtn?.classList.remove('is-visible');
-    updateBtn?.classList.remove('is-visible');
-  }
-  
-  if (data.is_super_admin) {
-    assignBtn?.classList.add('is-visible');
-  } else {
-    assignBtn?.classList.remove('is-visible');
-  }
+    if (data.is_super_admin) {
+      // 👑 Супер-админ
+      superAdminBlock.style.display = 'grid';
+      document.getElementById('update-version-btn-sa')?.classList.add('is-visible');
+      document.getElementById('edit-builds-btn-sa')?.classList.add('is-visible');
+      document.getElementById('assign-admin-btn')?.classList.add('is-visible');
+      addBtn.classList.add('is-visible');
+      userInfo.innerHTML += `<p>Вы вошли как супер-админ 👑</p>`;
 
+    } else if (data.is_admin) {
+      // 🛡 Обычный админ
+      adminBlock.style.display = 'grid';
+      document.getElementById('update-version-btn')?.classList.add('is-visible');
+      document.getElementById('edit-builds-btn')?.classList.add('is-visible');
+      addBtn.classList.add('is-visible');
+      userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
+    }
 
   } catch (e) {
     console.error("Ошибка при проверке прав администратора:", e);
-    if (addBtn) addBtn.style.display = 'none';
-    const editBtn = document.getElementById('edit-builds-btn');
-    const assignBtn = document.getElementById('assign-admin-btn');
-    if (editBtn) editBtn.style.display = 'none';
-    if (assignBtn) assignBtn.style.display = 'none';
+    document.getElementById('add-build-btn')?.classList.remove('is-visible');
+    document.getElementById('admin-buttons')?.style.display = 'none';
+    document.getElementById('superadmin-buttons')?.style.display = 'none';
   }
 }
+
 
 
 function showScreen(id) {
