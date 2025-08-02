@@ -1,44 +1,40 @@
 let quill;
 let versionContent = '';
 
-// Инициализация редактора Quill
-document.addEventListener('DOMContentLoaded', async () => {
+// === Инициализация редактора Quill ===
+function initQuillEditor() {
   const editorContainer = document.getElementById('quill-editor');
-  if (editorContainer) {
-    quill = new Quill('#quill-editor', {
-      theme: 'snow',
-      placeholder: 'Например:\nВерсия: 0.1\n– Добавлено это\n– Изменено то',
-      modules: {
-        toolbar: [
-          [{ header: [1, 2, false] }],
-          ['bold', 'italic', 'blockquote'],
-          [{ list: 'ordered' }, { list: 'bullet' }],
-          ['link', 'clean']
-        ]
-      }
-    });
+  if (!editorContainer || quill) return;
 
-    await loadVersionText();
-  }
+  quill = new Quill('#quill-editor', {
+    theme: 'snow',
+    placeholder: 'Например:\nВерсия: 0.1\n– Добавлено это\n– Изменено то',
+    modules: {
+      toolbar: [
+        [{ header: [1, 2, false] }],
+        ['bold', 'italic', 'blockquote'],
+        [{ list: 'ordered' }, { list: 'bullet' }],
+        ['link', 'clean']
+      ]
+    }
+  });
+}
 
-  document.getElementById('save-version-btn')?.addEventListener('click', saveVersionText);
-  document.getElementById('back-from-update')?.addEventListener('click', () => showScreen('screen-main'));
-  document.getElementById('update-version-btn')?.addEventListener('click', () => showScreen('screen-update-version'));
-});
-
-// Загрузка текущей версии
+// === Загрузка текущей версии в редактор ===
 async function loadVersionText() {
   try {
     const res = await fetch('/api/version');
     const data = await res.json();
     versionContent = data.content || '';
-    quill.root.innerHTML = versionContent;
+    if (quill) {
+      quill.root.innerHTML = versionContent;
+    }
   } catch (err) {
     console.error('Ошибка загрузки версии:', err);
   }
 }
 
-// Сохранение новой версии
+// === Сохранение новой версии ===
 async function saveVersionText() {
   const saveStatus = document.getElementById('save-status');
   try {
@@ -64,8 +60,8 @@ async function saveVersionText() {
   setTimeout(() => saveStatus.textContent = '', 3000);
 }
 
-// Загрузка версии в футере (для всех)
-(async () => {
+// === Загрузка версии в футере (только для чтения) ===
+async function loadCurrentVersionToFooter() {
   try {
     const res = await fetch('/api/version');
     const data = await res.json();
@@ -78,4 +74,25 @@ async function saveVersionText() {
   } catch (err) {
     console.error('Ошибка получения текущей версии:', err);
   }
-})();
+}
+
+// === Обработчики событий ===
+document.addEventListener('DOMContentLoaded', () => {
+  // Кнопка открытия редактора
+  document.getElementById('update-version-btn')?.addEventListener('click', async () => {
+    initQuillEditor();
+    await loadVersionText();
+    showScreen('screen-update-version');
+  });
+
+  // Кнопка назад
+  document.getElementById('back-from-update')?.addEventListener('click', () => {
+    showScreen('screen-main');
+  });
+
+  // Кнопка сохранения
+  document.getElementById('save-version-btn')?.addEventListener('click', saveVersionText);
+
+  // Вставка версии в футере при загрузке
+  loadCurrentVersionToFooter();
+});
