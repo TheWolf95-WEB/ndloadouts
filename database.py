@@ -6,6 +6,7 @@ from datetime import datetime
 DB_PATH = Path("/opt/ndloadouts_storage/builds.db")
 DB_PATH.parent.mkdir(exist_ok=True)
 
+
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -20,16 +21,26 @@ def init_db():
             top2 TEXT,
             top3 TEXT,
             tabs_json TEXT,
-            image TEXT
+            image TEXT,
+            date TEXT
         )
     """)
 
-    # ✅ Таблица пользователей
+    # Таблица пользователей
     c.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id TEXT PRIMARY KEY,
             first_name TEXT,
             username TEXT
+        )
+    """)
+
+    # Таблица истории версий
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS version_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            content TEXT NOT NULL,
+            created_at TEXT NOT NULL
         )
     """)
 
@@ -55,11 +66,10 @@ def get_all_builds():
             "tabs": json.loads(row[6]) if row[6] else [],
             "image": row[7],
             "date": row[8] if len(row) > 8 else None
-
         })
     return builds
 
-# Добавление сборки
+
 def add_build(data):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -76,10 +86,10 @@ def add_build(data):
         data.get("image"),
         data.get("date")
     ))
-    conn.commit()  # ⬅️ важно
-    conn.close()   # ⬅️ важно
+    conn.commit()
+    conn.close()
 
-# Удаление сборки
+
 def delete_build_by_id(build_id: str):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -87,7 +97,6 @@ def delete_build_by_id(build_id: str):
     conn.commit()
     conn.close()
 
-# Редактирование сборки в БД
 
 def update_build_by_id(build_id, data):
     conn = sqlite3.connect(DB_PATH)
@@ -106,9 +115,9 @@ def update_build_by_id(build_id, data):
         data.get("date", ""),
         build_id
     ))
-
     conn.commit()
     conn.close()
+
 
 def save_user(user_id: str, first_name: str, username: str = ""):
     conn = sqlite3.connect(DB_PATH)
@@ -132,22 +141,18 @@ def get_all_users():
     conn.close()
     return [{"id": row[0], "first_name": row[1], "username": row[2]} for row in rows]
 
-# Если дата еще не добавлену в сборку то обновляем
+
 def add_date_column_if_not_exists():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-
-    # Проверяем наличие колонки
     c.execute("PRAGMA table_info(builds)")
     columns = [col[1] for col in c.fetchall()]
     if "date" not in columns:
         c.execute("ALTER TABLE builds ADD COLUMN date TEXT")
         print("Поле date добавлено.")
-    else:
-        print("Поле date уже существует.")
-    
     conn.commit()
     conn.close()
+
 
 def fill_empty_dates():
     conn = sqlite3.connect(DB_PATH)
@@ -159,11 +164,38 @@ def fill_empty_dates():
     print("Обновлены пустые даты.")
 
 
+# === История версий ===
+
+def add_version_entry(content: str):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("""
+        INSERT INTO version_history (content, created_at)
+        VALUES (?, ?)
+    """, (content, datetime.now().isoformat()))
+    conn.commit()
+    conn.close()
+
+
+def get_latest_version():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT content FROM version_history ORDER BY created_at DESC LIMIT 1")
+    row = c.fetchone()
+    conn.close()
+    return row[0] if row else ""
+
+
+def get_all_versions():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT content, created_at FROM version_history ORDER BY created_at DESC")
+    rows = c.fetchall()
+    conn.close()
+    return [{"content": r[0], "created_at": r[1]} for r in rows]
+
 
 if __name__ == '__main__':
     init_db()
     add_date_column_if_not_exists()
     fill_empty_dates()
-
-
-
