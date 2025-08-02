@@ -1,3 +1,11 @@
+  // Открытие редактора
+  document.getElementById('update-version-btn')?.addEventListener('click', async () => {
+    initQuillEditor();
+    await loadVersionText();
+    showScreen('screen-update-version');
+  });
+});
+
 let quill;
 let versionContent = '';
 
@@ -94,13 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // Сохранение
   document.getElementById('save-version-btn')?.addEventListener('click', saveVersionText);
 
-  // Открытие редактора
-  document.getElementById('update-version-btn')?.addEventListener('click', async () => {
-    initQuillEditor();
-    await loadVersionText();
-    showScreen('screen-update-version');
-  });
-});
 
 
 // Клик по версии
