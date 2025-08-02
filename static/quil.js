@@ -40,9 +40,9 @@ async function loadVersionText() {
 
 // Сохранение
 async function saveVersionText() {
-  const saveStatus = document.getElementById('save-status');
   try {
     const content = quill.root.innerHTML;
+
     const res = await fetch('/api/version-history', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -50,15 +50,17 @@ async function saveVersionText() {
     });
 
     if (res.ok) {
-      saveStatus.textContent = '✅ Сохранено';
+      alert('✅ Версия успешно сохранена');
       versionContent = content;
     } else {
-      saveStatus.textContent = '❌ Ошибка при сохранении';
+      alert('❌ Ошибка при сохранении версии');
     }
   } catch (err) {
     console.error('Ошибка при сохранении:', err);
-    saveStatus.textContent = '❌ Ошибка';
+    alert('❌ Сетевая или серверная ошибка');
   }
+}
+
 
   setTimeout(() => saveStatus.textContent = '', 3000);
 }
