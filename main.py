@@ -19,6 +19,8 @@ load_dotenv()
 WEBAPP_URL = os.getenv("WEBAPP_URL")
 GITHUB_SECRET = os.getenv("WEBHOOK_SECRET", "")
 
+VERSION_FILE = Path("data/version-history.html")
+
 app = FastAPI()
 
 # === GitHub Webhook ===
@@ -247,4 +249,16 @@ async def remove_admin(data: dict = Body(...)):
     return JSONResponse({"status": "ok", "message": f"Пользователь {target_id} удалён из админов."})
 
 
-# 1
+# версии приложений
+
+@app.get("/api/version-history")
+async def get_version_history():
+    if VERSION_FILE.exists():
+        return {"content": VERSION_FILE.read_text(encoding="utf-8")}
+    return {"content": ""}
+
+@app.post("/api/version-history")
+async def update_version_history(data: dict = Body(...)):
+    content = data.get("content", "")
+    VERSION_FILE.write_text(content, encoding="utf-8")
+    return {"message": "Сохранено!"}
