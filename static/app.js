@@ -42,6 +42,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Проверка прав (отображение админ-кнопок)
   await checkAdminStatus();
 
+  if (window.userInfo) {
+    showScreen('screen-main');
+  } else {
+    console.error("❌ userInfo не загружен — showScreen не будет вызван");
+  }
+
+
   // Показываем главный экран
   showScreen('screen-main');
 });
