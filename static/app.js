@@ -30,6 +30,11 @@ if (user && userInfo) {
 
 document.addEventListener('DOMContentLoaded', async () => {
   await loadWeaponTypes(); // Загрузка типов
+
+      // ✅ Показываем кнопки пользователя
+  document.getElementById('show-builds-btn')?.classList.add('is-visible');
+  document.getElementById('help-btn')?.classList.add('is-visible');
+  
   const dateInput = document.getElementById('build-date');
   if (dateInput) {
     const today = new Date().toISOString().split('T')[0];
