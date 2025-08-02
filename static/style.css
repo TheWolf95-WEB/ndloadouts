@@ -52,6 +52,7 @@ body {
 .button-grid {
   display: grid;
   gap: 16px;
+  margin-bottom:10px;
 }
 
 .two-column {
