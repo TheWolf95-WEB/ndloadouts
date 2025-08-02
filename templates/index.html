@@ -25,20 +25,41 @@
       <h1>Сборки Warzone</h1>
 
       <div id="role-buttons" class="form-section">
-          <!-- 👤 Пользовательские действия -->
-          <div id="user-buttons" class="button-group">
-            <button id="show-builds-btn" class="btn">👁 Все сборки</button>
-            <button id="help-btn" class="btn">💡 Помощь</button>
-          </div>
-          
-          <!-- 🛡 Админские действия -->
-          <div id="admin-buttons" class="button-group">
-              <button id="add-build-btn" class="btn" style="display: none;">➕ Добавить</button>
-              <button id="edit-builds-btn" class="btn" style="display: none;" >🛠 База</button>
-              <button id="assign-admin-btn" class="btn" style="display: none;">👑 Админка</button>
-              <button id="update-version-btn" class="btn" style="display: none;">🔄 Версия</button>
-          </div>
+
+      <!-- 👤 Пользователь -->
+      <div id="user-buttons" class="button-group">
+        <div class="card-btn" id="show-builds-btn">
+          <i class="fas fa-eye"></i>
+          <span>Все сборки</span>
+        </div>
+        <div class="card-btn" id="help-btn">
+          <i class="fas fa-lightbulb"></i>
+          <span>Помощь</span>
+        </div>
       </div>
+    
+      <!-- 🛡 Админ -->
+      <div id="admin-buttons" class="button-group" style="display: none;">
+        <div class="card-btn" id="add-build-btn" style="display: none;">
+          <i class="fas fa-plus"></i>
+          <span>Добавить</span>
+        </div>
+        <div class="card-btn" id="edit-builds-btn" style="display: none;">
+          <i class="fas fa-database"></i>
+          <span>База</span>
+        </div>
+        <div class="card-btn" id="assign-admin-btn" style="display: none;">
+          <i class="fas fa-user-shield"></i>
+          <span>Админка</span>
+        </div>
+        <div class="card-btn" id="update-version-btn" style="display: none;">
+          <i class="fas fa-sync-alt"></i>
+          <span>Версия</span>
+        </div>
+      </div>
+    
+    </div>
+
 
     </div>
 
