@@ -488,7 +488,8 @@ select:disabled {
   color: #aaa;
   text-align: center;
   font-size: 1rem;
-  padding: 35px 10px;
+  padding-top:20px;
+  padding-bottom:45px;
   position: fixed;
   bottom: 0;
   left: 0;
