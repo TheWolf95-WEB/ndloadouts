@@ -351,9 +351,12 @@ async function handleSubmitBuild() {
   const res = await fetch(url, {
     method,
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-    initData: tg.initData
+    body: JSON.stringify({
+      ...data,
+      initData: tg.initData
+    })
   });
+
 
   if (res.ok) {
     alert(currentEditId ? 'Сборка обновлена!' : 'Сборка добавлена!');
