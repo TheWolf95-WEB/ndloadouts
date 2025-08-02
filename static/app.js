@@ -95,7 +95,6 @@ async function checkAdminStatus() {
 
 
 function showScreen(id) {
-  // 🔐 Защита от неавторизованных пользователей
   const protectedScreens = {
     'screen-form': 'is_admin',
     'screen-edit-builds': 'is_admin',
@@ -111,27 +110,19 @@ function showScreen(id) {
 
   const allScreens = document.querySelectorAll('.screen');
   allScreens.forEach(screen => {
-    const isTarget = screen.id === id;
-
-    if (isTarget) {
-      screen.style.display = 'block';
-      requestAnimationFrame(() => {
-        screen.classList.add('active');
-      });
+    if (screen.id === id) {
+      screen.classList.add('active');
     } else {
       screen.classList.remove('active');
-      setTimeout(() => {
-        screen.style.display = 'none';
-      }, 300); // ⏱️ соответствует transition в CSS
     }
   });
 
-  // 🔄 Показывать roleButtons только на главном экране
   roleButtons.style.display = (id === 'screen-main') ? 'flex' : 'none';
-
-  // 🔁 Обновим права и UI
   checkAdminStatus();
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
 
 
 // === Кнопки перехода ===
