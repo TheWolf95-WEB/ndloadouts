@@ -98,6 +98,15 @@ body {
   grid-column: 1 / -1; /* ✅ растягивается на всю ширину */
 }
 
+@media (max-width: 768px) {
+  .three-column {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .full-width {
+    grid-column: span 2;
+  }
+}
 
 
 
