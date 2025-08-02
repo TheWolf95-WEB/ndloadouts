@@ -212,7 +212,7 @@ select:disabled {
 .footer-note {
     display: flex;
     flex-direction: column;
-  
+  gap:10px;
   background: #1f2937;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
   color: #aaa;
