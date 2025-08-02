@@ -57,6 +57,8 @@ async function checkAdminStatus() {
     });
 
     const data = await res.json();
+    window.userInfo = data; // ✅ Сохраняем на глобальный доступ
+
 
     const editBtn = document.getElementById('edit-builds-btn');
     const assignBtn = document.getElementById('assign-admin-btn');
@@ -93,6 +95,20 @@ async function checkAdminStatus() {
 
 
 function showScreen(id) {
+  // 🔐 Защита от неавторизованных пользователей
+  const protectedScreens = {
+    'screen-form': 'is_admin',
+    'screen-edit-builds': 'is_admin',
+    'screen-update-version': 'is_admin',
+    'screen-assign-admin': 'is_super_admin'
+  };
+
+  const requiredRole = protectedScreens[id];
+  if (requiredRole && !window.userInfo?.[requiredRole]) {
+    alert("🚫 У вас нет доступа к этому разделу.");
+    return;
+  }
+
   const allScreens = document.querySelectorAll('.screen');
   allScreens.forEach(screen => {
     if (screen.id === id) {
@@ -104,8 +120,9 @@ function showScreen(id) {
       setTimeout(() => screen.style.display = 'none', 300);
     }
   });
+
   roleButtons.style.display = (id === 'screen-main') ? 'flex' : 'none';
-  checkAdminStatus(); // ✅ правильный вызов
+  checkAdminStatus(); // ✅ Обновим UI на всякий
 }
 
 
