@@ -61,10 +61,6 @@ async function saveVersionText() {
   }
 }
 
-
-  setTimeout(() => saveStatus.textContent = '', 3000);
-}
-
 // Подгрузка текущей версии в футере
 async function loadCurrentVersion() {
   try {
