@@ -89,27 +89,9 @@ body {
   font-weight: 500;
 }
 
-.card-btn:hover {
-  transform: translateY(-3px);
-  background: #2d3748;
-}
-
 .full-width {
   grid-column: 1 / -1; /* ✅ растягивается на всю ширину */
 }
-
-@media (max-width: 768px) {
-  .three-column {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .full-width {
-    grid-column: span 2;
-  }
-}
-
-
-
 
 
 h1 {
