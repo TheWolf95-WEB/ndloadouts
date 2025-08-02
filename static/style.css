@@ -244,7 +244,7 @@ select:disabled {
 
 .version-hint {
   position: fixed;
-  bottom: 55px; /* чуть выше футера */
+  bottom: 80px; /* чуть выше футера */
   left: 0;
   width: 100%;
   text-align: center;
