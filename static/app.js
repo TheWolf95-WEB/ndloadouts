@@ -64,38 +64,44 @@ async function checkAdminStatus() {
     });
 
     const data = await res.json();
-    window.userInfo = data; // ✅ Сохраняем на глобальный доступ
-
+    window.userInfo = data;
 
     const editBtn = document.getElementById('edit-builds-btn');
     const assignBtn = document.getElementById('assign-admin-btn');
     const updateBtn = document.getElementById('update-version-btn');
+    const addBtn = document.getElementById('add-build-btn');
 
-  if (data.is_admin) {
-  addBtn?.classList.add('is-visible');
-  editBtn?.classList.add('is-visible');
-  updateBtn?.classList.add('is-visible');
-  userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
-  } else {
-    addBtn?.classList.remove('is-visible');
-    editBtn?.classList.remove('is-visible');
-    updateBtn?.classList.remove('is-visible');
-  }
-  
-  if (data.is_super_admin) {
-    assignBtn?.classList.add('is-visible');
-  } else {
-    assignBtn?.classList.remove('is-visible');
-  }
+    // Сначала прячем всё
+    [editBtn, assignBtn, updateBtn, addBtn].forEach(btn => {
+      if (btn) btn.classList.remove('is-visible', 'full-width');
+    });
 
+    if (data.is_admin) {
+      editBtn?.classList.add('is-visible');
+      updateBtn?.classList.add('is-visible');
+      addBtn?.classList.add('is-visible');
+      userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
+    }
+
+    if (data.is_super_admin) {
+      assignBtn?.classList.add('is-visible');
+      // Супер-админу делаем "Добавить сборку" на всю ширину
+      addBtn?.classList.add('full-width');
+    } else {
+      // У обычного админа — убираем full-width
+      addBtn?.classList.remove('full-width');
+    }
 
   } catch (e) {
     console.error("Ошибка при проверке прав администратора:", e);
-    if (addBtn) addBtn.style.display = 'none';
     const editBtn = document.getElementById('edit-builds-btn');
     const assignBtn = document.getElementById('assign-admin-btn');
-    if (editBtn) editBtn.style.display = 'none';
-    if (assignBtn) assignBtn.style.display = 'none';
+    const updateBtn = document.getElementById('update-version-btn');
+    const addBtn = document.getElementById('add-build-btn');
+
+    [editBtn, assignBtn, updateBtn, addBtn].forEach(btn => {
+      if (btn) btn.style.display = 'none';
+    });
   }
 }
 
