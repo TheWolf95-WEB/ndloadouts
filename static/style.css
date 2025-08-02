@@ -37,6 +37,9 @@ body {
   pointer-events: none;
   transition: opacity 0.3s ease, transform 0.3s ease;
   will-change: opacity, transform;
+
+    backface-visibility: hidden;
+  will-change: opacity, transform;
 }
 
 .screen.active {
