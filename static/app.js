@@ -110,7 +110,13 @@ function showScreen(id) {
 
 
 // === Кнопки перехода ===
+// === Кнопки перехода ===
 document.getElementById('add-build-btn')?.addEventListener('click', () => {
+  if (!window.userInfo?.is_admin) {
+    alert("🚫 У вас нет прав доступа к добавлению сборок.");
+    return;
+  }
+
   currentEditId = null;
   document.getElementById('submit-build').textContent = "➕ Добавить";
 
@@ -130,12 +136,20 @@ document.getElementById('show-builds-btn')?.addEventListener('click', async () =
   await loadBuilds();
   showScreen('screen-builds');
 });
+
 document.getElementById('back-to-main')?.addEventListener('click', () => showScreen('screen-main'));
 document.getElementById('back-from-builds')?.addEventListener('click', () => showScreen('screen-main'));
+
 document.getElementById('help-btn')?.addEventListener('click', () => {
   tg.openLink('https://t.me/ndzone_admin');
 });
+
 document.getElementById('edit-builds-btn')?.addEventListener('click', async () => {
+  if (!window.userInfo?.is_admin) {
+    alert("🚫 У вас нет прав доступа к редактированию.");
+    return;
+  }
+
   await loadBuildsTable();
   showScreen('screen-edit-builds');
 });
