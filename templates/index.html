@@ -25,12 +25,19 @@
       <h1>Сборки Warzone</h1>
 
       <div id="role-buttons" class="form-section">
-        <button id="add-build-btn" class="btn" style="display: none;">➕ Добавить сборку</button>
-        <button id="edit-builds-btn" class="btn" style="display: none;">🛠 База сборок</button>
-        <button id="assign-admin-btn" class="btn" style="display: none;">👑 Назначить админа</button>
-        <button id="show-builds-btn" class="btn">👁 Посмотреть сборки</button>
-        <button id="help-btn" class="btn">💡 Помощь или идеи</button>
-        <button id="update-version-btn" class="btn" style="display: none;">🔄 Обновить версию</button>
+                <!-- 👤 Пользовательские действия -->
+        <div id="user-buttons" class="button-group">
+          <button id="show-builds-btn" class="btn">👁 Посмотреть сборки</button>
+          <button id="help-btn" class="btn">💡 Помощь или идеи</button>
+        </div>
+        
+        <!-- 🛡 Админские действия -->
+        <div id="admin-buttons" class="button-group" style="display: none;">
+          <button id="add-build-btn" class="btn">➕ Добавить сборку</button>
+          <button id="edit-builds-btn" class="btn">🛠 База сборок</button>
+          <button id="assign-admin-btn" class="btn">👑 Назначить админа</button>
+          <button id="update-version-btn" class="btn">🔄 Обновить версию</button>
+        </div>
       </div>
 
     </div>
