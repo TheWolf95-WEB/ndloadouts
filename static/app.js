@@ -75,7 +75,7 @@ async function checkAdminStatus() {
   addBtn?.classList.add('is-visible');
   editBtn?.classList.add('is-visible');
   updateBtn?.classList.add('is-visible');
-  userInfo.innerHTML += <p>Вы вошли как админ ✅</p>;
+  userInfo.innerHTML += '<p>Вы вошли как админ ✅</p>';
   } else {
     addBtn?.classList.remove('is-visible');
     editBtn?.classList.remove('is-visible');
@@ -223,13 +223,14 @@ document.getElementById('add-tab').addEventListener('click', () => {
 
   const tabDiv = document.createElement('div');
   tabDiv.className = 'tab-block';
-  tabDiv.innerHTML = 
+  tabDiv.innerHTML = `
     <input type="text" class="form-input tab-label" placeholder="Название вкладки" style="margin-bottom: 10px;">
     <div class="mod-selects"></div>
     <div class="tab-actions">
       <button type="button" class="btn add-mod">+ модуль</button>
       <button type="button" class="btn delete-tab">🗑 Удалить вкладку</button>
-    </div>;
+    </div>`;
+  
   tabsContainer.appendChild(tabDiv);
 
   tabDiv.querySelector('.add-mod').addEventListener('click', () => addModuleRow(tabDiv, type));
@@ -346,7 +347,7 @@ async function handleSubmitBuild() {
   };
 
   const method = currentEditId ? 'PUT' : 'POST';
-  const url = currentEditId ? /api/builds/${currentEditId} : '/api/builds';
+  const url = currentEditId ? `/api/builds/${currentEditId}` : '/api/builds';
 
   const res = await fetch(url, {
     method,
@@ -409,7 +410,7 @@ async function loadBuilds() {
         </div>
       </div>).join('');
 
-    wrapper.innerHTML = 
+    wrapper.innerHTML = `
       <div class="loadout__header js-loadout-toggle">
         <div class="loadout__header--top">
           <button class="loadout__toggle-icon" type="button"><i class="fa-solid fa-chevron-down"></i></button>
@@ -428,7 +429,8 @@ async function loadBuilds() {
             <div class="loadout__tab-contents">${tabContents}</div>
           </div>
         </div>
-      </div>;
+      </div>
+    `;
 
     buildsList.appendChild(wrapper);
   });
@@ -448,7 +450,7 @@ document.querySelectorAll('.loadout__tab').forEach(button => {
     parent.querySelectorAll('.loadout__tab').forEach(b => b.classList.remove('is-active'));
     parent.querySelectorAll('.loadout__tab-content').forEach(c => c.classList.remove('is-active'));
     button.classList.add('is-active');
-    parent.querySelector([data-tab-content="${tab}"])?.classList.add('is-active');
+    parent.querySelector(`[data-tab-content="${tab}"]`)?.classList.add('is-active');
 
     // ⬇️ Обновление высоты после переключения вкладки
     const content = parent.querySelector('.loadout__content');
@@ -475,7 +477,7 @@ function formatRuDate(input) {
   const day = String(d.getDate()).padStart(2, '0');
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const year = d.getFullYear();
-  return ${day}.${month}.${year}; // 👈 DD.MM.YYYY
+  return `${day}.${month}.${year}`;
 }
 
 
@@ -518,7 +520,7 @@ async function loadBuildsTable() {
       btn.addEventListener('click', async () => {
         const id = btn.dataset.id;
         if (confirm('Удалить сборку?')) {
-          const res = await fetch(/api/builds/${id}, { method: 'DELETE' });
+         const res = await fetch(`/api/builds/${id}`, { method: 'DELETE' });
           const data = await res.json();
 
           if (res.ok && data.status === "ok") {
@@ -557,13 +559,14 @@ async function loadBuildsTable() {
         build.tabs.forEach(tab => {
           const tabDiv = document.createElement('div');
           tabDiv.className = 'tab-block';
-          tabDiv.innerHTML = 
+          tabDiv.innerHTML = `
             <input type="text" class="form-input tab-label" value="${tab.label}">
             <div class="mod-selects"></div>
             <div class="tab-actions">
               <button type="button" class="btn add-mod">+ модуль</button>
               <button type="button" class="btn delete-tab">🗑 Удалить вкладку</button>
-            </div>;
+            </div>`;
+          
           tabsContainer.appendChild(tabDiv);
 
           tabDiv.querySelector('.add-mod').addEventListener('click', () => addModuleRow(tabDiv, build.weapon_type));
@@ -592,7 +595,7 @@ async function loadBuildsTable() {
 
 function formatToInputDate(dateStr) {
   const [day, month, year] = dateStr.split('.');
-  return ${year}-${month}-${day};
+  return `${year}-${month}-${day}`;
 }
 
 // Назначить админа
@@ -651,12 +654,12 @@ async function loadAdminList(requesterId) {
 
   // 👑 Главный админ
   const mainTitle = document.createElement('div');
-  mainTitle.innerHTML = <strong style="margin: 20px 0 10px 0; display: block;">Владелец:</strong>;
+  mainTitle.innerHTML = `<strong style="margin: 20px 0 10px 0; display: block;">Владелец:</strong>`;
   listEl.appendChild(mainTitle);
 
   data.main_admins.forEach(({ id, name }) => {
     const li = document.createElement('li');
-    li.textContent = ID: ${id} — ${name} 👑;
+    li.textContent = `ID: ${id} — ${name} 👑`;
     li.style.listStyleType = 'none'; // ⛔ убирает точку
     listEl.appendChild(li);
   });
@@ -665,7 +668,7 @@ async function loadAdminList(requesterId) {
   // 👥 Назначенные админы
   if (data.dop_admins.length > 0) {
     const dopTitle = document.createElement('div');
-    dopTitle.innerHTML = <strong style="margin: 10px 0; display: block;">Назначенные админы:</strong>;
+    dopTitle.innerHTML = `<strong style="margin: 10px 0; display: block;">Назначенные админы:</strong>`;
     listEl.appendChild(dopTitle);
 
     data.dop_admins.forEach(({ id, name }) => {
@@ -676,7 +679,7 @@ async function loadAdminList(requesterId) {
       li.style.gap = '10px';
 
       const span = document.createElement('span');
-      span.textContent = ID: ${id} — ${name};
+      span.textContent = `ID: ${id} — ${name}`;
 
       const btn = document.createElement('button');
       btn.textContent = 'Удалить';
@@ -691,7 +694,7 @@ async function loadAdminList(requesterId) {
           return;
         }
 
-        if (!confirm(Удалить админа ${name}?)) return;
+        if (!confirm(`Удалить админа ${name}?`)) return;
 
         const res = await fetch('/api/remove-admin', {
           method: 'POST',
