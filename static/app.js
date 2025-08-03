@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ✅ Показываем экран только после загрузки userInfo
   if (window.userInfo) {
-    showScreen('screen-main');
+    showScreen('screen-home');
   } else {
     console.error("❌ userInfo не загружен — showScreen не будет вызван");
   }
