@@ -108,7 +108,9 @@ body {
 /* Главный экран */
 
 .button-grid {
-    gap: 16px;
+  display: grid;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
 
