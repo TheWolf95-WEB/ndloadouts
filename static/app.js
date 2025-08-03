@@ -132,7 +132,7 @@ function showScreen(id) {
     }
   });
 
-  roleButtons.style.display = (id === 'screen-main') ? 'flex' : 'none';
+  roleButtons.style.display = (id === 'screen-warzone-main') ? 'flex' : 'none';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -165,8 +165,8 @@ document.getElementById('show-builds-btn')?.addEventListener('click', async () =
   showScreen('screen-builds');
 });
 
-document.getElementById('back-to-main')?.addEventListener('click', () => showScreen('screen-main'));
-document.getElementById('back-from-builds')?.addEventListener('click', () => showScreen('screen-main'));
+document.getElementById('back-to-main')?.addEventListener('click', () => showScreen('screen-warzone-main');
+document.getElementById('back-from-builds')?.addEventListener('click', () => showScreen('screen-warzone-main'));
 
 document.getElementById('help-btn')?.addEventListener('click', () => {
   tg.openLink('https://t.me/ndzone_admin');
@@ -183,7 +183,7 @@ document.getElementById('edit-builds-btn')?.addEventListener('click', async () =
 });
 
 document.getElementById('back-from-edit')?.addEventListener('click', () => {
-  showScreen('screen-main');
+  showScreen('screen-warzone-main');
 });
 
 
@@ -625,7 +625,7 @@ document.getElementById('assign-admin-btn')?.addEventListener('click', () => {
 
 // Назад с экрана назначения
 document.getElementById('back-from-assign')?.addEventListener('click', () => {
-  showScreen('screen-main');
+  showScreen('screen-warzone-main');
 });
 
 // Обработка формы назначения админа
