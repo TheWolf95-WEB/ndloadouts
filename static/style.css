@@ -138,11 +138,7 @@ body {
   font-size: 24px;
 }
 
-.home-tile.half-width {
-  grid-column: span 1;
-}
-
-.home-tile.full-width {
+.home-tile.full-row {
   grid-column: span 3;
 }
 
