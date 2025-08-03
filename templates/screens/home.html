@@ -2,34 +2,37 @@
   <h2 class="home-title">Выберите игру</h2>
 
   <div class="home-grid">
-    <!-- 🔹 Первая строка: 3 игры -->
-    <div class="home-tile" onclick="showScreen('screen-warzone-main')">
-      <i class="fas fa-crosshairs"></i>
-      <span>Калда</span>
-    </div>
-    <div class="home-tile" onclick="alert('Battlefield в разработке')">
-      <i class="fas fa-bullseye"></i>
-      <span>Батла</span>
-    </div>
-    <div class="home-tile" onclick="alert('Fortnite в разработке')">
-      <i class="fas fa-bolt"></i>
-      <span>Фортнайт</span>
-    </div>
-
-    <!-- 🔹 Вторая строка: по 1 на строку -->
-    <div class="home-tile full-row" onclick="alert('Магазин в разработке')">
-      <i class="fas fa-store"></i>
-      <span>Магазин</span>
-    </div>
-    <div class="home-tile full-row" onclick="alert('Новости в разработке')">
-      <i class="fas fa-newspaper"></i>
-      <span>Новости</span>
+    <div class="home-row">
+      <div class="home-tile" onclick="showScreen('screen-warzone-main')">
+        <i class="fas fa-crosshairs"></i>
+        <span>Калда</span>
+      </div>
+      <div class="home-tile" onclick="alert('Battlefield в разработке')">
+        <i class="fas fa-bullseye"></i>
+        <span>Батла</span>
+      </div>
+      <div class="home-tile" onclick="alert('Fortnite в разработке')">
+        <i class="fas fa-bolt"></i>
+        <span>Фортнайт</span>
+      </div>
     </div>
 
-    <!-- 🔹 Третья строка -->
-    <div class="home-tile full-row" onclick="alert('Помощь в разработке')">
-      <i class="fas fa-question-circle"></i>
-      <span>Помощь</span>
+    <div class="home-row">
+      <div class="home-tile" onclick="alert('Магазин в разработке')">
+        <i class="fas fa-store"></i>
+        <span>Магазин</span>
+      </div>
+      <div class="home-tile" onclick="alert('Новости в разработке')">
+        <i class="fas fa-newspaper"></i>
+        <span>Новости</span>
+      </div>
+    </div>
+
+    <div class="home-row">
+      <div class="home-tile full-width" onclick="alert('Помощь в разработке')">
+        <i class="fas fa-question-circle"></i>
+        <span>Помощь</span>
+      </div>
     </div>
   </div>
 </div>
