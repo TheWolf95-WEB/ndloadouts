@@ -148,6 +148,12 @@ function showScreen(id) {
 
   roleButtons.style.display = (id === 'screen-warzone-main') ? 'flex' : 'none';
   window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // ✅ Управление кнопкой "🏠 Главное меню"
+  const globalHomeBtn = document.querySelector('.global-home-button');
+  if (globalHomeBtn) {
+    globalHomeBtn.style.display = (id !== 'screen-warzone-main') ? 'block' : 'none';
+  }
 }
 
 
