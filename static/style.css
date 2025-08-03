@@ -108,7 +108,18 @@ body {
   transform: scale(0.96);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) inset;
 }
+.game-thumb {
+  width: 100%;
+  max-width: 100px;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease;
+}
 
+.card-btn:hover .game-thumb {
+  transform: scale(1.05);
+}
 
 /* ГЛАВНОЕ МЕНЮ */
 .global-home-button {
