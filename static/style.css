@@ -111,16 +111,15 @@ body {
 
 
 /* ГЛАВНОЕ МЕНЮ */
+/* Скрывать на всех экранах */
 .global-home-button {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 999;
+  display: none !important;
 }
 
-
-
+/* Показывать только на #screen-warzone-main, когда он активен */
+#screen-warzone-main.active .global-home-button {
+  display: block !important;
+}
 
 
 
