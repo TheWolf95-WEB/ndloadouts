@@ -127,7 +127,7 @@ body {
   border-radius: 12px;
   text-align: center;
   flex: 1;
-   padding: 20px;
+    padding: 20px 10px;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   display: flex;
