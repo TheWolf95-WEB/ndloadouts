@@ -112,17 +112,24 @@ body {
 
 /* ГЛАВНОЕ МЕНЮ */
 .global-home-button {
-  position: relative;
-  margin: 24px auto 0;
+  margin-top: 20px;
   width: 100%;
   max-width: 400px;
   padding: 0 16px;
   box-sizing: border-box;
   display: none;
+  text-align: center;
 }
 
+/* По умолчанию скрыта */
+.global-home-button {
+  display: none;
+}
 
-
+/* Показывать только если экран активен */
+#screen-warzone-main.active .global-home-button {
+  display: block;
+}
 
 
 
