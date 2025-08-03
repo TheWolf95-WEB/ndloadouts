@@ -165,7 +165,7 @@ document.getElementById('show-builds-btn')?.addEventListener('click', async () =
   showScreen('screen-builds');
 });
 
-document.getElementById('back-to-main')?.addEventListener('click', () => showScreen('screen-warzone-main');
+document.getElementById('back-to-main')?.addEventListener('click', () => showScreen('screen-warzone-main'));
 document.getElementById('back-from-builds')?.addEventListener('click', () => showScreen('screen-warzone-main'));
 
 document.getElementById('help-btn')?.addEventListener('click', () => {
