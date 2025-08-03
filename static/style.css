@@ -112,14 +112,15 @@ body {
 
 /* ГЛАВНОЕ МЕНЮ */
 .global-home-button {
-  position: fixed;
-  bottom: 0;
-  display:inline-block;
-  left: 50%;
-  transform: translateX(-20%);
-  z-index: 999;
+  position: relative;
+  margin: 24px auto 0;
+  width: 100%;
+  max-width: 400px;
+  padding: 0 16px;
+  box-sizing: border-box;
   display: none;
 }
+
 
 
 
