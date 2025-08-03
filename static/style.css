@@ -129,6 +129,7 @@ body {
   box-sizing: border-box;
   display: none;
   text-align: center;
+  padding: 0 10px;
 }
 
 /* По умолчанию скрыта */
