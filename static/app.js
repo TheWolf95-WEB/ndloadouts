@@ -52,22 +52,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-  const template = document.createElement('template');
-  template.innerHTML = `
-    <div class="global-home-button-wrapper">
-      <button class="btn full-width" onclick="showScreen('screen-home')">🏠 Главное меню</button>
-    </div>
-  `.trim();
-
-  document.querySelectorAll('.screen').forEach(screen => {
-    if (screen.id !== 'screen-home') {
-      screen.appendChild(template.content.cloneNode(true));
-    }
-  });
-});
-
-
 
 async function checkAdminStatus() {
   try {
