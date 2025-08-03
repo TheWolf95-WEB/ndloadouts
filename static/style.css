@@ -110,7 +110,7 @@ body {
 }
 .game-thumb {
   width: 100%;
-  max-width: 120px;
+  max-width: 80px;
      object-fit: cover;
   height: auto;
   border-radius: 12px;
