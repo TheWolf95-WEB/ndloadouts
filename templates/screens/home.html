@@ -1,38 +1,39 @@
 <div id="screen-home" class="screen active">
   <h2 class="home-title">Выберите игру</h2>
 
-  <div class="home-grid">
-    <div class="home-row">
-      <div class="home-tile" onclick="showScreen('screen-warzone-main')">
-        <i class="fas fa-crosshairs"></i>
-        <span>Калда</span>
-      </div>
-      <div class="home-tile" onclick="alert('Battlefield в разработке')">
-        <i class="fas fa-bullseye"></i>
-        <span>Батла</span>
-      </div>
-      <div class="home-tile" onclick="alert('Fortnite в разработке')">
-        <i class="fas fa-bolt"></i>
-        <span>Фортнайт</span>
-      </div>
+  <!-- 🎮 Игры -->
+  <div class="button-grid three-column">
+    <div class="card-btn is-visible" onclick="showScreen('screen-warzone-main')">
+      <i class="fas fa-crosshairs"></i>
+      <span>Калда</span>
     </div>
-
-    <div class="home-row">
-      <div class="home-tile" onclick="alert('Магазин в разработке')">
-        <i class="fas fa-store"></i>
-        <span>Магазин</span>
-      </div>
-      <div class="home-tile" onclick="alert('Новости в разработке')">
-        <i class="fas fa-newspaper"></i>
-        <span>Новости</span>
-      </div>
+    <div class="card-btn is-visible" onclick="alert('Battlefield в разработке')">
+      <i class="fas fa-bullseye"></i>
+      <span>Батла</span>
     </div>
+    <div class="card-btn is-visible" onclick="alert('Fortnite в разработке')">
+      <i class="fas fa-bolt"></i>
+      <span>Фортнайт</span>
+    </div>
+  </div>
 
-    <div class="home-row">
-      <div class="home-tile full-width" onclick="alert('Помощь в разработке')">
-        <i class="fas fa-question-circle"></i>
-        <span>Помощь</span>
-      </div>
+  <!-- 🛒 Магазин и Новости -->
+  <div class="button-grid two-column">
+    <div class="card-btn is-visible" onclick="alert('Магазин в разработке')">
+      <i class="fas fa-store"></i>
+      <span>Магазин</span>
+    </div>
+    <div class="card-btn is-visible" onclick="alert('Новости в разработке')">
+      <i class="fas fa-newspaper"></i>
+      <span>Новости</span>
+    </div>
+  </div>
+
+  <!-- ❓ Помощь -->
+  <div class="button-grid">
+    <div class="card-btn is-visible full-width" onclick="alert('Помощь в разработке')">
+      <i class="fas fa-question-circle"></i>
+      <span>Помощь</span>
     </div>
   </div>
 </div>
