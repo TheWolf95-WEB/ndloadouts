@@ -53,18 +53,25 @@ body {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
+  padding: 0 8px;
 }
-
 
 .button-grid.three-column {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 16px;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
+  padding: 0 8px;
 }
 
-/* Кнопка в ряду */
+.button-grid {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 0 8px;
+}
+
 .card-btn {
   display: none !important;
   flex-direction: column;
@@ -79,6 +86,7 @@ body {
   transition: transform 0.2s ease, background 0.2s ease;
   cursor: pointer;
   min-height: 110px;
+  gap: 10px;
 }
 
 .card-btn.is-visible {
@@ -91,12 +99,6 @@ body {
 
 .card-btn i {
   font-size: 26px;
-  margin-bottom: 10px;
-}
-
-.card-btn:active {
-  transform: scale(0.96);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) inset;
 }
 
 .card-btn span {
@@ -104,13 +106,9 @@ body {
   font-weight: 500;
 }
 
-
-/* Главный экран */
-
-.button-grid {
-  display: grid;
-  gap: 16px;
-  margin-bottom: 16px;
+.card-btn:active {
+  transform: scale(0.96);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) inset;
 }
 
 
