@@ -112,10 +112,11 @@ body {
 
 /* ГЛАВНОЕ МЕНЮ */
 .global-home-button {
-/*   position: fixed; */
-  bottom: 20px;
+  position: fixed;
+  bottom: 0;
+  display:inline-block;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-20%);
   z-index: 999;
   display: none;
 }
