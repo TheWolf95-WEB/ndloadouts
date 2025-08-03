@@ -1,6 +1,6 @@
 
     <!-- 👋 Главный экран -->
-    <div id="screen-warzone-main" class="screen">
+    <div id="screen-main" class="screen active">
       <p class="subtext">
         Все лучшие сборки прямо у вас под рукой.<br><br>
         Выбирай, настраивай и делись с друзьями.
@@ -47,16 +47,14 @@
             </div>
           </div>
         </div>
-        
+       
         </div>
-            
-            <div id="global-home-btn" class="global-home-button" style="display: none;">
-              <button class="btn" onclick="showScreen('screen-home')">🏠 Главное меню</button>
-            </div>
 
-        
+        <div class="card-btn full-width" onclick="showScreen('screen-home')">
+          🏠 Главное меню
+        </div>
+
       </div>
-
 
     <!-- ➕ Экран добавления сборки -->
     <div id="screen-form" class="screen" style="display: none;">
