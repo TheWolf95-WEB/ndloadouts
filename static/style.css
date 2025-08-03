@@ -104,6 +104,62 @@ body {
   font-weight: 500;
 }
 
+
+/* Главный экран */
+
+.home-title {
+  text-align: center;
+  font-size: 22px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  padding: 20px;
+}
+
+.home-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #ffffff;
+  color: #000;
+  padding: 20px 10px;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+
+.home-tile i {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.home-tile:hover {
+  transform: translateY(-2px);
+}
+
+.home-tile.full {
+  grid-column: span 3;
+}
+
+
+
+
+
+
+
+
+
+
+
 h1 {
   font-size: 1.8rem;
   color: #ffffff;
