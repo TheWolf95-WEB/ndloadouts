@@ -107,37 +107,8 @@ body {
 
 /* Главный экран */
 
-.home-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.home-row {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.home-tile {
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: #1f2937;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-  padding: 20px 10px;
-  border-radius: 12px;
-  color: #fff;
-  text-align: center;
-  transition: transform 0.2s ease, background 0.2s ease;
-  cursor: pointer;
-  min-height: 110px;
-}
-
-.full-width {
-  width: 100%;
-  max-width: none;
+.button-grid {
+    gap: 16px;
 }
 
 
