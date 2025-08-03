@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('save-version-btn')?.addEventListener('click', saveVersionText);
-  document.getElementById('back-from-update')?.addEventListener('click', () => showScreen('screen-main'));
+  document.getElementById('back-from-update')?.addEventListener('click', () => showScreen('screen-warzone-main'));
   document.getElementById('current-version')?.addEventListener('click', showAllVersions);
-  document.getElementById('back-from-all-versions')?.addEventListener('click', () => showScreen('screen-main'));
+  document.getElementById('back-from-all-versions')?.addEventListener('click', () => showScreen('screen-warzone-main'));
 });
