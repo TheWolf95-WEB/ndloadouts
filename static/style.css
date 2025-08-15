@@ -125,7 +125,6 @@ body {
 .global-home-button {
   margin-top: 20px;
   width: 100%;
-  max-width: 400px;
   box-sizing: border-box;
   display: none;
   text-align: center;
