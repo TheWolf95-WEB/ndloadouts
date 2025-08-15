@@ -342,7 +342,7 @@ select:disabled {
 }
 
 .form-input option {
-  background-color: #1e1e2f;
+  background-color: #333;
   color: #fff;
   padding: 10px;
 }
