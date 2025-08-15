@@ -416,6 +416,8 @@ async function loadBuilds(category = 'all') {
   const builds = await res.json();
   buildsList.innerHTML = '';
 
+  cachedBuilds = builds; 
+
   if (builds.length === 0) {
     buildsList.innerHTML = '<p>Сборок пока нет.</p>';
     return;
@@ -521,9 +523,21 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 
     // Если после фильтрации ничего не найдено — показать сообщение
     const anyVisible = [...document.querySelectorAll('.js-loadout')].some(el => el.style.display !== 'none');
+    let messageEl = document.getElementById('no-results-msg');
+    
     if (!anyVisible) {
-      buildsList.innerHTML = `<p style="color:#aaa; margin-top:15px;">😕 Сборки не найдены</p>`;
+      if (!messageEl) {
+        messageEl = document.createElement('p');
+        messageEl.id = 'no-results-msg';
+        messageEl.textContent = '😕 Сборки не найдены';
+        messageEl.style.color = '#aaa';
+        messageEl.style.marginTop = '15px';
+        buildsList.appendChild(messageEl);
+      }
+    } else {
+      document.getElementById('no-results-msg')?.remove();
     }
+
   });
 });
 
@@ -657,28 +671,6 @@ async function loadBuildsTable() {
     console.error('Ошибка загрузки сборок:', e);
   }
 }
-
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-
-    const type = btn.dataset.type;
-    document.querySelectorAll('.js-loadout').forEach((el, i) => {
-      const build = cachedBuilds[i];
-      const matches = (type === 'all' || build.weapon_type === type);
-      el.style.display = matches ? 'block' : 'none';
-    });
-
-    // Если после фильтрации ничего не найдено — показать сообщение
-    const anyVisible = [...document.querySelectorAll('.js-loadout')].some(el => el.style.display !== 'none');
-    if (!anyVisible) {
-      buildsList.innerHTML = `<p style="color:#aaa; margin-top:15px;">😕 Сборки не найдены</p>`;
-    }
-  });
-});
-
-
 
 
 // Преобразование даты в YYYY-MM-DD (для input type="date")
