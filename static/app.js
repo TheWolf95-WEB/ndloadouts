@@ -52,6 +52,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+// 👉 Обработка смены категории в фильтре
+document.getElementById('category-filter')?.addEventListener('change', async (e) => {
+  const category = e.target.value;
+  await loadBuilds(category);
+});
 
 async function checkAdminStatus() {
   try {
@@ -402,8 +407,8 @@ function getCategoryByModule(moduleKey, weaponType) {
 }
 
 // === Загрузка сборок ===
-async function loadBuilds() {
-  const res = await fetch('/api/builds');
+async function loadBuilds(category = 'all') {
+  const res = await fetch(`/api/builds?category=${category}`);
   const builds = await res.json();
   buildsList.innerHTML = '';
 
@@ -578,6 +583,11 @@ async function loadBuildsTable() {
 
         showScreen('screen-form');
         document.getElementById('submit-build').textContent = "💾 Сохранить";
+
+        const checkboxes = document.querySelectorAll('.build-category');
+        checkboxes.forEach(cb => {
+          cb.checked = build.categories?.includes(cb.value);
+        });
 
         // Заполняем поля
         document.getElementById('title').value = build.title;
