@@ -331,7 +331,7 @@ select:disabled {
 
 
 
-.select-custom {
+.form-input {
   appearance: none;
   background-color: #1e1e2f;
   color: #fff;
@@ -343,7 +343,7 @@ select:disabled {
   cursor: pointer;
 }
 
-.select-custom option {
+.form-input option {
   background-color: #1e1e2f;
   color: #fff;
   padding: 10px;
