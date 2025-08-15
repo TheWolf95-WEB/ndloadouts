@@ -96,10 +96,13 @@ async def create_build(request: Request, data: dict = Body(...)):
         return JSONResponse({"error": "Недостаточно прав"}, status_code=403)
 
     try:
+        print("[DEBUG] Полученные данные при создании сборки:", data)
         add_build(data)
         return JSONResponse({"status": "ok"})
     except Exception as e:
+        print("[ERROR] Ошибка при добавлении сборки:", str(e))
         return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
+
 
 @app.put("/api/builds/{build_id}")
 async def update_build(build_id: str, request: Request):
