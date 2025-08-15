@@ -1,6 +1,5 @@
 // /static/search.js
 (function (global) {
-  // ——— публичные настройки
   const SCORE = { exact: 5, synonym: 4, partial: 2, top: 3 };
 
   const typeSynonyms = {
@@ -19,98 +18,73 @@
   };
 
   function norm(s='') {
-    return String(s)
-      .toLowerCase()
-      .replaceAll('ё','е')
-      .replace(/[^\p{L}\p{N}\s#-]/gu,' ')
-      .replace(/\s+/g,' ')
-      .trim();
+    return String(s).toLowerCase().replaceAll('ё','е')
+      .replace(/[^\p{L}\p{N}\s#-]/gu,' ').replace(/\s+/g,' ').trim();
   }
 
-  function textHasAny(text, list) {
+  function has(text, arr) {
     const t = norm(text);
-    return list.some(v => t.includes(norm(v)));
+    return arr.some(x => t.includes(norm(x)));
   }
 
-  // строим индекс для одного билда
-  function buildSearchIndex(build, weaponTypeLabels, moduleNameMap) {
-    const title = build.title || '';
+  function buildIndex(build, weaponTypeLabels, moduleNameMap) {
     const wtKey = build.weapon_type || '';
     const wtLabel = weaponTypeLabels?.[wtKey] || wtKey;
-    const tops = [build.top1, build.top2, build.top3].filter(Boolean);
 
-    const tabLabels = [];
-    const modules = [];
-    (build.tabs || []).forEach(tab => {
-      tabLabels.push(tab.label || '');
-      (tab.items || []).forEach(enKey => {
-        modules.push(enKey);
-        modules.push(moduleNameMap?.[enKey] || '');
+    const fields = [
+      build.title || '',
+      wtKey, wtLabel,
+      build.top1||'', build.top2||'', build.top3||'',
+    ];
+
+    (build.tabs||[]).forEach(tab => {
+      fields.push(tab.label||'');
+      (tab.items||[]).forEach(en => {
+        fields.push(en, moduleNameMap?.[en] || '');
       });
+      const n = (tab.items||[]).length;
+      if (n>0) fields.push(`${n} модулей`, `${n} мод`, String(n));
     });
 
-    const modulesCounts = [];
-    (build.tabs || []).forEach(tab => {
-      const n = (tab.items || []).length;
-      if (n > 0) {
-        modulesCounts.push(`${n} модулей`, `${n} мод`, String(n));
-      }
-    });
-
-    return norm([
-      title, wtKey, wtLabel, ...tops, ...tabLabels, ...modules, ...modulesCounts
-    ].filter(Boolean).join(' '));
+    return norm(fields.filter(Boolean).join(' '));
   }
 
-  // считаем score
-  function calcScore(build, query, moduleNameMap) {
+  function calcScore(build, query) {
     const q = norm(query);
     if (!q) return 0;
 
-    const index = build._index || '';
+    const idx = build._index || '';
     let score = 0;
 
     const tokens = q.split(' ').filter(Boolean);
     tokens.forEach(tok => {
-      if (index.includes(tok)) score += SCORE.exact;
-      else if (tok.length >= 3 && index.includes(tok.slice(0, Math.max(2, Math.floor(tok.length*0.6))))) {
+      if (idx.includes(tok)) score += SCORE.exact;
+      else if (tok.length >= 3 && idx.includes(tok.slice(0, Math.max(2, Math.floor(tok.length*0.6))))) {
         score += SCORE.partial;
       }
     });
 
-    const wt = build.weapon_type || '';
-    (typeSynonyms[wt] || []).forEach(syn => {
-      if (textHasAny(q, [syn])) score += SCORE.synonym;
+    (typeSynonyms[build.weapon_type||''] || []).forEach(s => {
+      if (has(q,[s])) score += SCORE.synonym;
     });
 
-    const hasTop1 = Boolean(build.top1);
-    const hasTop2 = Boolean(build.top2);
-    const hasTop3 = Boolean(build.top3);
-    const topMatches =
-      (hasTop1 && textHasAny(q, topSynonyms['#1'])) ||
-      (hasTop2 && textHasAny(q, topSynonyms['#2'])) ||
-      (hasTop3 && textHasAny(q, topSynonyms['#3']));
-    if (topMatches) score += SCORE.top;
+    const t1 = !!build.top1, t2 = !!build.top2, t3 = !!build.top3;
+    if ((t1 && has(q, topSynonyms['#1'])) ||
+        (t2 && has(q, topSynonyms['#2'])) ||
+        (t3 && has(q, topSynonyms['#3']))) score += SCORE.top;
 
-    const numMatch = q.match(/\b(\d+)\b/);
-    if (numMatch) {
-      const n = Number(numMatch[1]);
-      const tabHasN = (build.tabs || []).some(t => (t.items || []).length === n);
-      if (tabHasN) score += SCORE.exact + 1;
+    const m = q.match(/\b(\d+)\b/);
+    if (m) {
+      const n = Number(m[1]);
+      if ((build.tabs||[]).some(t => (t.items||[]).length === n)) score += SCORE.exact + 1;
     }
 
     return score;
   }
 
   function debounce(fn, ms=250) {
-    let t;
-    return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+    let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args),ms); };
   }
 
-  global.SearchUtils = {
-    norm,
-    buildSearchIndex,
-    calcScore,
-    debounce,
-  };
+  global.SearchUtils = { buildIndex, calcScore, debounce };
 })(window);
