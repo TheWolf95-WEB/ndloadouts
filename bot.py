@@ -146,9 +146,10 @@ async def check_subscription(callback: CallbackQuery):
             conn.close()
         except Exception as e:
             print(f"[DB ERROR] {e}")
-        
-                await grant_access(callback)
-                return
+
+        await grant_access(callback)
+        return
+
 
     # Если не подписан — показываем отказ
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
