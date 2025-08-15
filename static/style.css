@@ -150,13 +150,15 @@ body {
   flex-wrap: wrap;
   gap: 8px;
   margin: 10px 0 20px;
+  justify-content: center;
 }
 
 .filter-btn {
   padding: 6px 14px;
-  background: #1e1e1e;
+  background: #1f2937;
   color: #fff;
-  border: 1px solid #444;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  border:none;
   border-radius: 20px;
   cursor: pointer;
   font-size: 12px;
@@ -165,8 +167,8 @@ body {
 }
 
 .filter-btn.active {
-  background: #00ffaa22;
-  border-color: #00ffaa;
+    background: #1f2937;
+  border-color: #333;
   color: #fff;
 }
 
