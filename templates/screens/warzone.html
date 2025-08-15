@@ -112,8 +112,7 @@
     <!-- 📋 Экран со сборками -->
     <div id="screen-builds" class="screen">
 
-     <div style="display:flex;gap:20px;justify-content:space-between;>   
-              <!-- 🔎 Поиск -->
+     <div style="display:flex;gap:20px;justify-content:space-between;">   
         <div class="form-section">
           <label for="build-search">🔍 Поиск:</label>
           <input type="text" id="build-search" class="form-input" placeholder="Введите название, модуль, тип, топ..." />
@@ -129,7 +128,7 @@
               <option value="meta">Мета</option>
             </select>
           </div>
-  </div>
+      </div>
         
     
     
@@ -214,6 +213,3 @@ categorySelect.addEventListener("change", (e) => {
   buildsTitle.textContent = categoryTitles[selected] || "📦 Сборки";
 });
 </script>
-
-
-
