@@ -349,6 +349,15 @@ async function handleSubmitBuild() {
     return { label, items };
   });
 
+  // 📦 Чтение выбранных категорий
+  const categoryCheckboxes = document.querySelectorAll('.build-category');
+  const selectedCategories = Array.from(categoryCheckboxes)
+    .filter(cb => cb.checked)
+    .map(cb => cb.value);
+
+  // Если ничего не выбрано — по умолчанию "all"
+  const categories = selectedCategories.length > 0 ? selectedCategories : ['all'];
+
   const data = {
     initData: tg.initData,
     title: document.getElementById('title').value.trim(),
@@ -357,16 +366,17 @@ async function handleSubmitBuild() {
     top2: document.getElementById('top2').value.trim(),
     top3: document.getElementById('top3').value.trim(),
     date: formatRuDate(document.getElementById('build-date').value),
-    tabs
+    tabs,
+    categories // 🆕 добавляем в тело запроса
   };
 
   const method = currentEditId ? 'PUT' : 'POST';
-  const url = currentEditId ? `/api/builds/${currentEditId}` : '/api/builds';
+  const url = currentEditId ? `/api/builds/${currentEditId}` : '/api/builds`;
   
   const res = await fetch(url, {
     method,
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data) // где `data` уже содержит initData
+    body: JSON.stringify(data)
   });
 
   if (res.ok) {
