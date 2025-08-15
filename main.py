@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request, Body, BackgroundTasks
+from fastapi import Query
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -71,8 +72,22 @@ async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/api/builds")
-async def api_builds():
-    return JSONResponse(get_all_builds())
+async def api_builds(category: str = Query("all")):
+    try:
+        builds = get_all_builds()
+
+        if category == "all":
+            return JSONResponse(builds)
+
+        # Фильтрация по вхождению категории в списке
+        filtered = [
+            b for b in builds
+            if "categories" in b and category in b["categories"]
+        ]
+
+        return JSONResponse(filtered)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 @app.post("/api/builds")
 async def create_build(request: Request, data: dict = Body(...)):
