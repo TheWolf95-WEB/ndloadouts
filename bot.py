@@ -1,5 +1,6 @@
 import os
 import asyncio
+import sqlite3
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, F
 from aiogram.enums.parse_mode import ParseMode
@@ -71,6 +72,35 @@ async def grant_access(callback: CallbackQuery):
 # --- /start ---
 @router.message(CommandStart())
 async def start_handler(message: Message):
+    user_id = str(message.from_user.id)
+
+    # 🔍 Проверяем, был ли уже подтверждён
+    try:
+        import sqlite3
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT verified FROM users WHERE id = ?", (user_id,))
+        row = cursor.fetchone()
+        conn.close()
+
+        if row and row[0] == 1:
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="🔗 Открыть сборки", web_app=WebAppInfo(url=WEBAPP_URL)),
+                    InlineKeyboardButton(text="💬 Связаться", url="https://t.me/ndzone_admin")
+                ]
+            ])
+            await message.answer(
+                "✅ Личность подтверждена ранее.\n"
+                "🪂 Добро пожаловать в NDHQ.\n\n"
+                "📡 Жми на кнопку ниже и погнали!",
+                reply_markup=keyboard
+            )
+            return
+    except Exception as e:
+        print(f"[DB ERROR] {e}")
+
+    # Показываем стандартный текст
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
             InlineKeyboardButton(text="📅 Подписаться", url="https://t.me/callofdutynd"),
@@ -86,6 +116,7 @@ async def start_handler(message: Message):
         "Соблюдай протокол безопасности.",
         reply_markup=keyboard
     )
+
     
 
 
@@ -107,11 +138,17 @@ async def check_subscription(callback: CallbackQuery):
         # Сохраняем пользователя в базу (если ещё не был)
         try:
             save_user(user_id, callback.from_user.first_name or "", callback.from_user.username or "")
+            # Обновляем verified = 1
+            conn = sqlite3.connect(DB_PATH)
+            cursor = conn.cursor()
+            cursor.execute("UPDATE users SET verified = 1 WHERE id = ?", (user_id,))
+            conn.commit()
+            conn.close()
         except Exception as e:
             print(f"[DB ERROR] {e}")
-
-        await grant_access(callback)
-        return
+        
+                await grant_access(callback)
+                return
 
     # Если не подписан — показываем отказ
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
