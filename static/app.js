@@ -1,4 +1,11 @@
 import { initSearch } from './search-warzone.js';
+...
+cachedBuilds = builds.map(b => ({
+  ...b,
+  _index: SearchUtils.buildIndex(b, weaponTypeLabels, moduleNameMap)
+}));
+initSearch({ cachedBuilds, weaponTypeLabels, moduleNameMap });
+
 
 const tg = window.Telegram.WebApp;
 tg.expand();
@@ -481,14 +488,6 @@ async function loadBuilds(category = 'all') {
     if (content) content.style.maxHeight = '0';
   });
 
-
- // Индексация для поиска
-cachedBuilds = builds.map(b => ({
-  ...b,
-  _index: SearchUtils.buildIndex(b, weaponTypeLabels, moduleNameMap)
-}));
-
-initSearch({ cachedBuilds, weaponTypeLabels, moduleNameMap });
 
 document.querySelectorAll('.loadout__tab').forEach(button => {
   button.addEventListener('click', () => {
