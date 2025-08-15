@@ -1,11 +1,4 @@
-import { initSearch } from './search-warzone.js';
-...
-cachedBuilds = builds.map(b => ({
-  ...b,
-  _index: SearchUtils.buildIndex(b, weaponTypeLabels, moduleNameMap)
-}));
-initSearch({ cachedBuilds, weaponTypeLabels, moduleNameMap });
-
+import { initSearch, buildIndex, calcScore } from './search-warzone.js';
 
 const tg = window.Telegram.WebApp;
 tg.expand();
@@ -505,6 +498,12 @@ document.querySelectorAll('.loadout__tab').forEach(button => {
   });
 });
 
+  // 👉 Индексация для поиска
+cachedBuilds = builds.map(b => ({
+  ...b,
+  _index: buildIndex(b, weaponTypeLabels, moduleNameMap)
+}));
+initSearch({ cachedBuilds });
 
   document.querySelectorAll('.js-loadout-toggle').forEach(header => {
     header.addEventListener('click', () => {
@@ -652,7 +651,7 @@ function handleSearch() {
   const builds = document.querySelectorAll('.js-loadout');
 
   cachedBuilds.forEach((build, i) => {
-    const score = SearchUtils.calcScore(build, query);
+    const score = calcScore(build, query);
     const el = builds[i];
     if (el) el.style.display = score > 0 || query.length < 2 ? 'block' : 'none';
   });
