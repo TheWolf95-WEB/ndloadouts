@@ -74,6 +74,16 @@ def get_all_builds():
 def add_build(data):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
+    
+    # Защита от ошибок: всегда массив
+    tabs = data.get("tabs") or []
+    if not isinstance(tabs, list):
+        tabs = []
+
+    categories = data.get("categories", ["all"])
+    if not isinstance(categories, list):
+        categories = ["all"]
+
     c.execute("""
         INSERT INTO builds (title, weapon_type, top1, top2, top3, tabs_json, image, date, categories)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -83,13 +93,14 @@ def add_build(data):
         data["top1"],
         data["top2"],
         data["top3"],
-        json.dumps(data["tabs"]),
+        json.dumps(tabs, ensure_ascii=False),
         data.get("image"),
         data.get("date"),
-        json.dumps(data.get("categories", ["all"]))
+        json.dumps(categories, ensure_ascii=False)
     ))
     conn.commit()
     conn.close()
+
 
 
 def delete_build_by_id(build_id: str):
@@ -103,6 +114,15 @@ def delete_build_by_id(build_id: str):
 def update_build_by_id(build_id, data):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
+
+    tabs = data.get("tabs") or []
+    if not isinstance(tabs, list):
+        tabs = []
+
+    categories = data.get("categories", ["all"])
+    if not isinstance(categories, list):
+        categories = ["all"]
+
     c.execute("""
         UPDATE builds
         SET title = ?, weapon_type = ?, top1 = ?, top2 = ?, top3 = ?, tabs_json = ?, date = ?, categories = ?
@@ -113,13 +133,14 @@ def update_build_by_id(build_id, data):
         data.get("top1", ""),
         data.get("top2", ""),
         data.get("top3", ""),
-        json.dumps(data["tabs"], ensure_ascii=False),
+        json.dumps(tabs, ensure_ascii=False),
         data.get("date", ""),
-        json.dumps(data.get("categories", ["all"])),
+        json.dumps(categories, ensure_ascii=False),
         build_id
     ))
     conn.commit()
     conn.close()
+
 
 
 def save_user(user_id: str, first_name: str, username: str = ""):
