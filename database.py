@@ -6,12 +6,10 @@ from datetime import datetime
 DB_PATH = Path("/opt/ndloadouts_storage/builds.db")
 DB_PATH.parent.mkdir(exist_ok=True)
 
-
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
-    # Таблица сборок
     c.execute("""
         CREATE TABLE IF NOT EXISTS builds (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,11 +20,11 @@ def init_db():
             top3 TEXT,
             tabs_json TEXT,
             image TEXT,
-            date TEXT
+            date TEXT,
+            categories TEXT
         )
     """)
 
-    # Таблица пользователей
     c.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id TEXT PRIMARY KEY,
@@ -35,7 +33,6 @@ def init_db():
         )
     """)
 
-    # Таблица истории версий
     c.execute("""
         CREATE TABLE IF NOT EXISTS version_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,19 +50,23 @@ def get_all_builds():
     c = conn.cursor()
     c.execute("SELECT * FROM builds ORDER BY id DESC")
     rows = c.fetchall()
+    columns = [desc[0] for desc in c.description]
     conn.close()
+
     builds = []
     for row in rows:
+        row_dict = dict(zip(columns, row))
         builds.append({
-            "id": row[0],
-            "title": row[1],
-            "weapon_type": row[2],
-            "top1": row[3],
-            "top2": row[4],
-            "top3": row[5],
-            "tabs": json.loads(row[6]) if row[6] else [],
-            "image": row[7],
-            "date": row[8] if len(row) > 8 else None
+            "id": row_dict["id"],
+            "title": row_dict["title"],
+            "weapon_type": row_dict["weapon_type"],
+            "top1": row_dict["top1"],
+            "top2": row_dict["top2"],
+            "top3": row_dict["top3"],
+            "tabs": json.loads(row_dict.get("tabs_json") or "[]"),
+            "image": row_dict.get("image"),
+            "date": row_dict.get("date"),
+            "categories": json.loads(row_dict.get("categories") or "[]")
         })
     return builds
 
@@ -74,8 +75,8 @@ def add_build(data):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("""
-        INSERT INTO builds (title, weapon_type, top1, top2, top3, tabs_json, image, date)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO builds (title, weapon_type, top1, top2, top3, tabs_json, image, date, categories)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         data["title"],
         data["weapon_type"],
@@ -84,7 +85,8 @@ def add_build(data):
         data["top3"],
         json.dumps(data["tabs"]),
         data.get("image"),
-        data.get("date")
+        data.get("date"),
+        json.dumps(data.get("categories", ["all"]))
     ))
     conn.commit()
     conn.close()
@@ -103,7 +105,7 @@ def update_build_by_id(build_id, data):
     c = conn.cursor()
     c.execute("""
         UPDATE builds
-        SET title = ?, weapon_type = ?, top1 = ?, top2 = ?, top3 = ?, tabs_json = ?, date = ?
+        SET title = ?, weapon_type = ?, top1 = ?, top2 = ?, top3 = ?, tabs_json = ?, date = ?, categories = ?
         WHERE id = ?
     """, (
         data["title"],
@@ -113,6 +115,7 @@ def update_build_by_id(build_id, data):
         data.get("top3", ""),
         json.dumps(data["tabs"], ensure_ascii=False),
         data.get("date", ""),
+        json.dumps(data.get("categories", ["all"])),
         build_id
     ))
     conn.commit()
@@ -164,6 +167,18 @@ def fill_empty_dates():
     print("Обновлены пустые даты.")
 
 
+def add_categories_column_if_not_exists():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("PRAGMA table_info(builds)")
+    columns = [col[1] for col in c.fetchall()]
+    if "categories" not in columns:
+        c.execute("ALTER TABLE builds ADD COLUMN categories TEXT DEFAULT '[]'")
+        print("Поле categories добавлено.")
+    conn.commit()
+    conn.close()
+
+
 # === История версий ===
 
 def add_version_entry(content: str):
@@ -199,3 +214,4 @@ if __name__ == '__main__':
     init_db()
     add_date_column_if_not_exists()
     fill_empty_dates()
+    add_categories_column_if_not_exists()  # ✅ ДОБАВИЛИ поле categories
