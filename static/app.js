@@ -877,20 +877,33 @@ function debounce(fn, ms=250) {
 
 function initSearch({ cachedBuilds }) {
   const input = document.getElementById('build-search');
+  const noResults = document.getElementById('no-results-message');
   if (!input) return;
 
   const onInput = debounce(() => {
     const query = input.value || '';
     const nodes = document.querySelectorAll('.js-loadout');
 
+    let visibleCount = 0;
+
     cachedBuilds.forEach((build, i) => {
       const score = calcScore(build, query);
       const el = nodes[i];
-      if (el) el.style.display = score > 0 || query.length < 2 ? 'block' : 'none';
+      if (el) {
+        const show = score > 0 || query.length < 2;
+        el.style.display = show ? 'block' : 'none';
+        if (show) visibleCount++;
+      }
     });
+
+    // 👇 Показываем или скрываем сообщение "ничего не найдено"
+    if (noResults) {
+      noResults.style.display = (query.length >= 2 && visibleCount === 0) ? 'block' : 'none';
+    }
+
   }, 300);
 
-  input.removeEventListener('input', onInput); // на всякий
+  input.removeEventListener('input', onInput);
   input.addEventListener('input', onInput);
 }
 
