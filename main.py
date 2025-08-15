@@ -74,7 +74,16 @@ async def index(request: Request):
 @app.get("/api/builds")
 async def api_builds(category: str = Query("all")):
     try:
-        builds = get_all_builds()
+        # Приоритет сортировки
+        priority = {"#1 ТОП": 1, "#2 ТОП": 2, "#3 ТОП": 3}
+        
+        # Сортировка — сначала по приоритету, потом по дате
+        builds.sort(
+            key=lambda b: (
+                priority.get(b["top1"], 999),  # если нет топа, в конец
+                b["date"] if b["date"] else ""
+            )
+        )
 
         if category == "all":
             return JSONResponse(builds)
