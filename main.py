@@ -74,29 +74,34 @@ async def index(request: Request):
 @app.get("/api/builds")
 async def api_builds(category: str = Query("all")):
     try:
-        # Приоритет сортировки
-        priority = {"#1 ТОП": 1, "#2 ТОП": 2, "#3 ТОП": 3}
-        
-        # Сортировка — сначала по приоритету, потом по дате
-        builds.sort(
-            key=lambda b: (
-                priority.get(b["top1"], 999),  # если нет топа, в конец
-                b["date"] if b["date"] else ""
-            )
-        )
+        builds = get_all_builds()
 
-        if category == "all":
-            return JSONResponse(builds)
+        # Фильтрация по категории (если выбрана не "all")
+        if category != "all":
+            builds = [b for b in builds if category in (b.get("categories") or [])]
 
-        # Фильтрация по вхождению категории в списке
-        filtered = [
-            b for b in builds
-            if "categories" in b and category in b["categories"]
-        ]
+        # Приоритет топа: есть top1 -> 1, иначе если есть top2 -> 2, далее top3 -> 3, иначе в конец
+        def top_priority(b):
+            if b.get("top1"): return 1
+            if b.get("top2"): return 2
+            if b.get("top3"): return 3
+            return 999
 
-        return JSONResponse(filtered)
+        # Ключ даты: парсим "ДД.ММ.ГГГГ", для пустых ставим 0; сортируем по убыванию
+        def date_ts(b):
+            s = b.get("date") or ""
+            try:
+                return datetime.strptime(s, "%d.%m.%Y").timestamp()
+            except Exception:
+                return 0
+
+        # Сортировка: 1) по приоритету топа (возр.), 2) по дате (убыв.)
+        builds.sort(key=lambda b: (top_priority(b), -date_ts(b)))
+
+        return JSONResponse(builds)
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
+
 
 @app.post("/api/builds")
 async def create_build(request: Request, data: dict = Body(...)):
