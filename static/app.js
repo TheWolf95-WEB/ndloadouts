@@ -514,6 +514,28 @@ initSearch({ cachedBuilds });
 }
 
 
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    const type = btn.dataset.type;
+    document.querySelectorAll('.js-loadout').forEach((el, i) => {
+      const build = cachedBuilds[i];
+      const matches = (type === 'all' || build.weapon_type === type);
+      el.style.display = matches ? 'block' : 'none';
+    });
+
+    // Если после фильтрации ничего не найдено — показать сообщение
+    const anyVisible = [...document.querySelectorAll('.js-loadout')].some(el => el.style.display !== 'none');
+    if (!anyVisible) {
+      buildsList.innerHTML = `<p style="color:#aaa; margin-top:15px;">😕 Сборки не найдены</p>`;
+    }
+  });
+});
+
+
+
 // Формат даты ДЕНЬ МЕСЯЦ ГОД
 function formatRuDate(input) {
   const d = new Date(input);
