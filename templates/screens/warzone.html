@@ -122,7 +122,7 @@
           </select>
         </div>
       <div class="form-section" style="display: flex; flex-direction: inherit;gap: 20px;justify-content: space-between; height: 50px; align-items: center;">
-        <h2>📦 Все сборки</h2>
+        <h2 id="builds-title">📦 Все сборки</h2>
         <button id="back-from-builds" class="btn-back" style="width: 40%; border: 0; padding: 15px 15px;border-radius: 10px;">⬅ Назад</button>
       </div>
       <div id="builds-list">
@@ -180,5 +180,25 @@
             <span id="current-version" class="version-clickable"></span>
           </div>
         </div>
-    
-      
+
+
+<script>
+    const categorySelect = document.getElementById("category-filter");
+const buildsTitle = document.getElementById("builds-title");
+
+const categoryTitles = {
+  all: "📦 Все сборки",
+  popular: "🔥 Популярные сборки",
+  new: "🆕 Новинки",
+  topmeta: "🏆 Топ мета сборки",
+  meta: "🎯 Мета сборки"
+};
+
+categorySelect.addEventListener("change", (e) => {
+  const selected = e.target.value;
+  buildsTitle.textContent = categoryTitles[selected] || "📦 Сборки";
+});
+</script>
+
+
+
