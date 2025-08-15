@@ -376,7 +376,7 @@ async function handleSubmitBuild() {
   };
 
   const method = currentEditId ? 'PUT' : 'POST';
-  const url = currentEditId ? `/api/builds/${currentEditId}` : '/api/builds`;
+  const url = currentEditId ? `/api/builds/${currentEditId}` : '/api/builds';
   
   const res = await fetch(url, {
     method,
