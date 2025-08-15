@@ -111,25 +111,26 @@
 
     <!-- 📋 Экран со сборками -->
     <div id="screen-builds" class="screen">
-    
-          <!-- 🔎 Поиск -->
-    <div class="form-section">
-      <label for="build-search">🔍 Поиск:</label>
-      <input type="text" id="build-search" class="form-input" placeholder="Введите название, модуль, тип, топ..." />
-    </div>
 
-
+     <div style="display:flex;gap:20px;justify-content:space-between;>   
+              <!-- 🔎 Поиск -->
+        <div class="form-section">
+          <label for="build-search">🔍 Поиск:</label>
+          <input type="text" id="build-search" class="form-input" placeholder="Введите название, модуль, тип, топ..." />
+        </div>
+            
+          <div class="form-section">
+            <label for="category-filter">Категория:</label>
+            <select id="category-filter" class="form-input">
+              <option value="all">Все сборки</option>
+              <option value="popular">Популярное</option>
+              <option value="new">Новинки</option>
+              <option value="topmeta">Топ мета</option>
+              <option value="meta">Мета</option>
+            </select>
+          </div>
+  </div>
         
-      <div class="form-section">
-        <label for="category-filter">Категория:</label>
-        <select id="category-filter" class="form-input">
-          <option value="all">Все сборки</option>
-          <option value="popular">Популярное</option>
-          <option value="new">Новинки</option>
-          <option value="topmeta">Топ мета</option>
-          <option value="meta">Мета</option>
-        </select>
-      </div>
     
     
       <div class="form-section" style="display:flex;gap:20px;justify-content:space-between;height:50px;align-items:center;    flex-direction: row;">
