@@ -422,8 +422,10 @@ select:disabled {
 }
 
 .loadout__tab-buttons{
-  display:flex;
-  gap:20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
 }
 
 .loadout__tops {
@@ -471,6 +473,7 @@ select:disabled {
 
 
 .loadout__tab{
+   flex: 1 1 calc(50% - 10px);
         color: #fff;
     padding: 5px 15px;
     border-radius: 20px 4px 20px 4px;
