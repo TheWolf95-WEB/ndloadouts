@@ -173,6 +173,31 @@ async def check_subscription(callback: CallbackQuery):
     await callback.answer("❌ Подписка не подтверждена. Попробуй ещё раз.", show_alert=True)
 
 
+@router.channel_post()
+async def on_channel_post(message: Message):
+    try:
+        if message.chat.id != CHANNEL_ID:
+            return
+
+        text = message.text or message.caption or ""
+        if "#новости" not in text.lower():
+            return
+
+        # Формируем тело запроса
+        payload = {
+            "title": text[:100],  # первые 100 символов как заголовок
+            "content": text.strip(),  # весь текст
+            "date": message.date.strftime("%d.%m.%Y %H:%M"),
+        }
+
+        # Отправляем в FastAPI
+        api_url = "http://127.0.0.1:8000/api/news"
+        response = requests.post(api_url, json=payload)
+        print(f"[NEWS] Отправлено: {response.status_code}")
+
+    except Exception as e:
+        print(f"[ERROR] Ошибка автопостинга новости: {e}")
+
 
 
 # --- Старт ---
