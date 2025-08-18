@@ -57,19 +57,22 @@ async def process_post(msg: Message):
     if CHANNEL_ID:
         try:
             if str(msg.chat.id) != str(CHANNEL_ID):
-                # Комментарий: убери этот return, если хочешь слушать все каналы, где бот админ
                 return
         except Exception:
             pass
 
-    # Проверка дубликата
+    title = text.strip().split("\n")[0][:100]
+    content = text.strip()
+    date = datetime.now().strftime("%d.%m.%Y")
+
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
+
     cur.execute("SELECT 1 FROM news WHERE tg_id = ?", (tg_id,))
     exists = cur.fetchone()
+
     if exists:
-        # обновляем текст и дату
-        cursor.execute(
+        cur.execute(
             "UPDATE news SET title = ?, content = ?, date = ? WHERE tg_id = ?",
             (title, content, date, tg_id)
         )
@@ -77,11 +80,6 @@ async def process_post(msg: Message):
         conn.close()
         print(f"[UPDATE] Обновлён пост {tg_id}")
         return
-
-
-    title = text.strip().split("\n")[0][:100]
-    content = text.strip()
-    date = datetime.now().strftime("%d.%m.%Y")
 
     payload = {
         "title": title,
@@ -105,6 +103,7 @@ async def process_post(msg: Message):
         print(f"[ERROR] Ошибка запроса: {e}")
     finally:
         conn.close()
+
 
 @dp.message(F.chat.type == "channel")
 async def handle_new_channel_post(message: Message):
