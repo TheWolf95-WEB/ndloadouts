@@ -104,6 +104,11 @@ async def process_post(msg: Message):
     finally:
         conn.close()
 
+@dp.message(F.chat.type == "channel")
+async def handle_new_channel_post(message: Message):
+    print(f"[RECEIVED] Канал: {message.chat.id} — Текст: {message.text or message.caption}")
+    await process_post(message)
+
 
 @dp.message(F.chat.type == "channel")
 async def handle_new_channel_post(message: Message):
