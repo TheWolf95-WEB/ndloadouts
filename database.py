@@ -10,6 +10,7 @@ def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
 
+    # Сборки
     c.execute("""
         CREATE TABLE IF NOT EXISTS builds (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,6 +26,19 @@ def init_db():
         )
     """)
 
+    # Новости
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS news (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                content TEXT NOT NULL,
+                image TEXT,
+                date TEXT,
+                category TEXT
+            )
+        """)
+
+    # Пользователи
     c.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id TEXT PRIMARY KEY,
@@ -33,6 +47,7 @@ def init_db():
         )
     """)
 
+    # История версии приложения
     c.execute("""
         CREATE TABLE IF NOT EXISTS version_history (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
