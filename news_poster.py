@@ -68,9 +68,16 @@ async def process_post(msg: Message):
     cur.execute("SELECT 1 FROM news WHERE tg_id = ?", (tg_id,))
     exists = cur.fetchone()
     if exists:
+        # обновляем текст и дату
+        cursor.execute(
+            "UPDATE news SET title = ?, content = ?, date = ? WHERE tg_id = ?",
+            (title, content, date, tg_id)
+        )
+        conn.commit()
         conn.close()
-        print(f"[SKIP] Уже опубликовано: {tg_id}")
+        print(f"[UPDATE] Обновлён пост {tg_id}")
         return
+
 
     title = text.strip().split("\n")[0][:100]
     content = text.strip()
