@@ -287,6 +287,25 @@ async def all_versions():
         return JSONResponse({"error": str(e)}, status_code=500)
 
 
+@app.get("/api/news")
+async def get_news():
+    try:
+        from database import get_all_news
+        return JSONResponse(get_all_news())
+    except Exception as e:
+        return JSONResponse({ "error": str(e) }, status_code=500)
+
+@app.post("/api/news")
+async def post_news(request: Request):
+    try:
+        from database import add_news
+        body = await request.json()
+        add_news(body)
+        return JSONResponse({ "status": "ok" })
+    except Exception as e:
+        return JSONResponse({ "error": str(e) }, status_code=500)
+
+
 
 if __name__ == "__main__":
     import uvicorn
