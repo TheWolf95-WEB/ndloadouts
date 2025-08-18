@@ -110,10 +110,6 @@ async def handle_new_channel_post(message: Message):
     await process_post(message)
 
 
-@dp.message(F.chat.type == "channel")
-async def handle_new_channel_post(message: Message):
-    await process_post(message)
-
 async def main():
     ensure_news_schema()
     print("[*] Слушаем новые посты в канале(ах)...")
