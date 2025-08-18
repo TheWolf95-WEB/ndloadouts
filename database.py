@@ -59,6 +59,34 @@ def init_db():
     conn.commit()
     conn.close()
 
+def add_news(news: dict):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("""
+        INSERT INTO news (title, content, image, date, category)
+        VALUES (?, ?, ?, ?, ?)
+    """, (news["title"], news["content"], news.get("image"), news.get("date"), news.get("category")))
+    conn.commit()
+    conn.close()
+
+def get_all_news():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT * FROM news ORDER BY id DESC")
+    rows = c.fetchall()
+    conn.close()
+    return [
+        {
+            "id": r[0],
+            "title": r[1],
+            "content": r[2],
+            "image": r[3],
+            "date": r[4],
+            "category": r[5]
+        }
+        for r in rows
+    ]
+
 
 def get_all_builds():
     conn = sqlite3.connect(DB_PATH)
