@@ -4,6 +4,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv, set_key, dotenv_values
+from fastapi.middleware.cors import CORSMiddleware
 import json
 import os
 import hmac
@@ -23,6 +24,14 @@ WEBAPP_URL = os.getenv("WEBAPP_URL")
 GITHUB_SECRET = os.getenv("WEBHOOK_SECRET", "")
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://ndloadouts.ru"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # --- Утилита для проверки прав ---
 def extract_user_roles(init_data_str: str):
