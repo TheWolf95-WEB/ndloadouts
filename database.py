@@ -27,16 +27,17 @@ def init_db():
     """)
 
     # Новости
-        c.execute("""
-            CREATE TABLE IF NOT EXISTS news (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT NOT NULL,
-                content TEXT NOT NULL,
-                image TEXT,
-                date TEXT,
-                category TEXT
-            )
-        """)
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS news (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            content TEXT NOT NULL,
+            image TEXT,
+            date TEXT,
+            category TEXT
+        )
+    """)
+
 
     # Пользователи
     c.execute("""
