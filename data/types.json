@@ -4,7 +4,7 @@
   { "key": "pp", "label": "Пистолеты - пулеметы" },
   { "key": "drobovik", "label": "Дробовики" },
   { "key": "pulemet", "label": "Ручные пулеметы" },
-  { "key": "pehotnay", "label": "Пехотные винтовки" },
+  { "key": "pehotnye", "label": "Пехотные винтовки" },
   { "key": "snayperki", "label": "Снайперские винтовки" },
   { "key": "pistol", "label": "Пистолеты" },
   { "key": "special", "label": "Особое" }
