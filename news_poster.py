@@ -1,34 +1,35 @@
 import os
 import asyncio
 import requests
-from aiogram import Bot, Dispatcher, F
-from aiogram.enums.parse_mode import ParseMode
-from aiogram.client.default import DefaultBotProperties 
-from aiogram.types import Message
-from dotenv import load_dotenv
 import sqlite3
 from datetime import datetime
+from aiogram import Bot, Dispatcher, F
+from aiogram.enums.parse_mode import ParseMode
+from aiogram.client.default import DefaultBotProperties
+from aiogram.types import Message
+from dotenv import load_dotenv
 
-# Загрузка переменных
+# --- Загрузка .env ---
 load_dotenv("/opt/ndloadouts/.env")
 
 BOT_TOKEN = os.getenv("TOKEN")
 API_URL = "https://ndloadouts.ru/api/news"
 DB_PATH = "/opt/ndloadouts_storage/builds.db"
 
-# Бот
-bot = Bot(
-    token=BOT_TOKEN,
-    default=DefaultBotProperties(parse_mode=ParseMode.HTML)
-)
+bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
 
-# --- Обработка сообщений из канала ---
+# --- Обработка новых постов в канале ---
 @dp.message(F.chat.type == "channel")
 async def handle_channel_post(message: Message):
     tg_id = str(message.message_id)
+    text = message.text or message.caption or ""
 
-    # Проверяем, есть ли такой пост уже
+    if not text.strip():
+        print("[SKIP] Пустой текст")
+        return
+
+    # Проверка — есть ли уже такой ID
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT 1 FROM news WHERE tg_id = ?", (tg_id,))
@@ -39,13 +40,7 @@ async def handle_channel_post(message: Message):
         print(f"[SKIP] Уже опубликовано: {tg_id}")
         return
 
-    # Формируем данные
-    text = message.text or message.caption or ""
-    if not text.strip():
-        print(f"[SKIP] Пустой текст")
-        return
-
-    title = text.strip().split("\n")[0][:100]  # Первая строка — заголовок
+    title = text.strip().split("\n")[0][:100]
     content = text.strip()
     date = datetime.now().strftime("%d.%m.%Y")
 
@@ -76,9 +71,9 @@ async def handle_channel_post(message: Message):
         print(f"[ERROR] Ошибка запроса: {e}")
 
 
-# --- Старт ---
+# --- Запуск ---
 async def main():
-    print("[*] Запуск слушателя новостей...")
+    print("[*] Бот слушает канал и ждёт новые посты...")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
