@@ -3,6 +3,7 @@ import asyncio
 import requests
 from aiogram import Bot, Dispatcher, F
 from aiogram.enums.parse_mode import ParseMode
+from aiogram.client.default import DefaultBotProperties 
 from aiogram.types import Message
 from dotenv import load_dotenv
 import sqlite3
@@ -16,7 +17,10 @@ API_URL = "https://ndloadouts.ru/api/news"
 DB_PATH = "/opt/ndloadouts_storage/builds.db"
 
 # Бот
-bot = Bot(token=BOT_TOKEN, parse_mode=ParseMode.HTML)
+bot = Bot(
+    token=BOT_TOKEN,
+    default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+)
 dp = Dispatcher()
 
 # --- Обработка сообщений из канала ---
