@@ -687,6 +687,42 @@ select:disabled {
   display:none;
 }
 
+
+
+
+
+
+
+
+/* Новости */
+
+
+.news-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.news-card {
+  background: #1c1f26;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  color: #fff;
+}
+
+.news-card img {
+  width: 100%;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.news-meta {
+  font-size: 0.9rem;
+  color: #aaa;
+}
+
+
 @media (max-width: 550px) {
   .loadout__module {
     width: 100%;
