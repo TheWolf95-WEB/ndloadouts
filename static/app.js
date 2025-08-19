@@ -26,9 +26,12 @@ let currentCategory = 'all';  // текущая категория
 if (user && userInfo) {
   userInfo.innerHTML = `<p>Привет, ${user.first_name}!</p>`;
 } else {
-  userInfo.innerHTML = 'Ошибка: не удалось получить данные пользователя.';
+  if (userInfo) {
+    userInfo.innerHTML = 'Ошибка: не удалось получить данные пользователя.';
+  }
   if (addBtn) addBtn.style.display = 'none';
 }
+
 
 
 document.addEventListener('DOMContentLoaded', async () => {
