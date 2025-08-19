@@ -24,13 +24,17 @@ function renderNews(items) {
 
   container.innerHTML = items.map(n => `
     <div class="news-card">
-      ${n.image ? `<img src="${n.image}" alt="${n.title}" class="news-img">` : ""}
+      ${n.image ? `
+        <div class="news-img-wrapper">
+          <img src="${n.image}" alt="${n.title}" class="news-img">
+        </div>
+      ` : ""}
       <div class="news-content">
         <h3 class="news-title">${n.title}</h3>
-        <p class="news-text">${n.content}</p>
+        <p class="news-text">${n.content.slice(0, 250)}${n.content.length > 250 ? '...' : ''}</p>
         <div class="news-meta">
-          <span class="news-date">${n.date || "?"}</span>
-          <span class="news-category">${n.category || ""}</span>
+          <span class="news-date">🕒 ${n.date || "?"}</span>
+          <span class="news-category">🏷️ ${n.category || ""}</span>
         </div>
       </div>
     </div>
