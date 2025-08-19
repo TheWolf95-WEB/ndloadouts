@@ -1,25 +1,23 @@
 <div id="screen-news" class="screen">
   <h2>📰 Новости</h2>
 
-  <!-- Админ-блок: виден только админам -->
-  <div id="news-admin-panel" style="display: none;">
-    <h3>📋 База новостей (только для админов)</h3>
+  <div class="news-screen-wrapper">
+    <!-- Левая колонка: Админка (только для админов) -->
+    <div id="news-admin-panel" class="news-admin-panel" style="display: none;">
+      <h3>🛠 База новостей</h3>
+      <div id="news-admin-table">
+        <!-- Тут будет таблица с новостями -->
+      </div>
+      <button class="btn" id="add-news-btn">➕ Добавить новость</button>
+    </div>
 
-    <form id="news-form" style="margin-bottom: 20px;">
-      <input type="hidden" id="news-id">
-      <input type="text" id="news-title" class="form-input" placeholder="Заголовок">
-      <textarea id="news-content" class="form-textarea" placeholder="Текст"></textarea>
-      <input type="text" id="news-date" class="form-input" placeholder="Дата (например, 19.08.2025)">
-      <button type="button" class="btn" onclick="submitNews()">💾 Сохранить</button>
-    </form>
-
-    <div id="admin-news-list"></div>
+    <!-- Правая колонка: Список новостей -->
+    <div id="news-list" class="news-grid">
+      <!-- Сами новости -->
+    </div>
   </div>
 
-  <!-- Обычный список новостей -->
-  <div id="news-list" class="news-grid"></div>
-
-  <!-- 🏠 Глобальная кнопка "Главное меню" -->
+  <!-- Глобальная кнопка "Главное меню" -->
   <div id="global-home-btn" class="global-home-button" style="display: none;">
     <button class="btn" onclick="showScreen('screen-home')">🏠 Главное меню</button>
   </div>
