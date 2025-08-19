@@ -88,10 +88,7 @@ async function checkAdminStatus() {
       updateBtn?.classList.add('is-visible');
       addBtn?.classList.add('is-visible');
       userInfoEl.innerHTML += `<p>Вы вошли как админ ✅</p>`;
-    
-      // ✅ Показываем панель новостей админа
-      document.getElementById('admin-panel-entry')?.style.display = 'flex';
-      document.getElementById('news-admin-panel')?.style.display = 'block';
+
     }
 
     if (data.is_super_admin) {
