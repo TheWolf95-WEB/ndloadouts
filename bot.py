@@ -173,6 +173,9 @@ async def check_subscription(callback: CallbackQuery):
     await callback.answer("❌ Подписка не подтверждена. Попробуй ещё раз.", show_alert=True)
 
 
+from database import add_news
+import re
+
 @router.channel_post()
 async def on_channel_post(message: Message):
     try:
@@ -183,20 +186,60 @@ async def on_channel_post(message: Message):
         if "#новости" not in text.lower():
             return
 
-        # Формируем тело запроса
-        payload = {
-            "title": text[:100],  # первые 100 символов как заголовок
-            "content": text.strip(),  # весь текст
-            "date": message.date.strftime("%d.%m.%Y %H:%M"),
-        }
+        # ✅ Анти-дубли (по message_id)
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM news WHERE content LIKE ?", (f"%tg://{message.message_id}%",))
+        if cursor.fetchone()[0] > 0:
+            print("[SKIP] Уже есть такая новость.")
+            return
 
-        # Отправляем в FastAPI
-        api_url = "http://127.0.0.1:8000/api/news"
-        response = requests.post(api_url, json=payload)
-        print(f"[NEWS] Отправлено: {response.status_code}")
+        # ✅ Заголовок — первая строка
+        title = text.strip().split('\n')[0]
+
+        # ✅ Картинка
+        image_url = None
+        if message.photo:
+            largest = message.photo[-1]
+            file = await bot.get_file(largest.file_id)
+            image_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file.file_path}"
+
+        # ✅ Просмотры
+        views = message.views or 0
+
+        # ✅ Дата
+        date_str = message.date.strftime("%d.%m.%Y %H:%M")
+
+        # ✅ Категория по хэштегам
+        def detect_category(text: str) -> str:
+            text = text.lower()
+            rules = {
+                "call-of-duty": ["#callofduty", "#blackops", "#bo7", "#warzone", "#cod", "#mw3"],
+                "battlefield": ["#battlefield", "#bf6", "#bf2042"],
+                "cs2": ["#cs2", "#counterstrike"],
+                "apex": ["#apex", "#apexlegends"],
+            }
+            for cat, tags in rules.items():
+                if any(tag in text for tag in tags):
+                    return cat
+            return "general"
+
+        category = detect_category(text)
+
+        # ✅ Добавляем в БД
+        add_news({
+            "title": title,
+            "content": text.strip(),
+            "image": image_url,
+            "date": date_str,
+            "category": category
+        })
+
+        print(f"[OK] Новость добавлена: {title}")
 
     except Exception as e:
-        print(f"[ERROR] Ошибка автопостинга новости: {e}")
+        print(f"[ERROR] Ошибка автопостинга: {e}")
+
 
 
 
