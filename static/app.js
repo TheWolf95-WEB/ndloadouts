@@ -95,7 +95,7 @@ async function checkAdminStatus() {
     }
 
     if (data.is_super_admin) {
-      assignBtn?.classList.add('is-visible');
+      assignBtn?.classList.add('is-visible'); // ✅
       // Супер-админу делаем "Добавить сборку" на всю ширину
       addBtn?.classList.add('full-width');
     } else {
