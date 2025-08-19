@@ -3,7 +3,7 @@ tg.expand();
 
 const user = tg.initDataUnsafe?.user;
 
-const userInfo = document.getElementById('user-info');
+const userInfoEl = document.getElementById('user-info')
 const buildsList = document.getElementById('builds-list');
 const buildForm = document.getElementById('build-form');
 const addBtn = document.getElementById('add-build-btn');
@@ -23,15 +23,13 @@ let currentCategory = 'all';  // текущая категория
 
 
 // === Приветствие и загрузка админов ===
-if (user && userInfo) {
-  userInfo.innerHTML = `<p>Привет, ${user.first_name}!</p>`;
+if (user && userInfoEl) {
+  userInfoEl.innerHTML = `<p>Привет, ${user.first_name}!</p>`;
 } else {
-  if (userInfo) {
-    userInfo.innerHTML = 'Ошибка: не удалось получить данные пользователя.';
+  if (userInfoEl) {
+    userInfoEl.innerHTML = 'Ошибка: не удалось получить данные пользователя.';
   }
-  if (addBtn) addBtn.style.display = 'none';
 }
-
 
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -89,7 +87,7 @@ async function checkAdminStatus() {
       editBtn?.classList.add('is-visible');
       updateBtn?.classList.add('is-visible');
       addBtn?.classList.add('is-visible');
-      userInfo.innerHTML += `<p>Вы вошли как админ ✅</p>`;
+      userInfoEl.innerHTML += `<p>Вы вошли как админ ✅</p>`;
     
       // ✅ Показываем панель новостей админа
       document.getElementById('admin-panel-entry')?.style.display = 'flex';
