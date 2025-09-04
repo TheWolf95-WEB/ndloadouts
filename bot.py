@@ -1,5 +1,4 @@
 import os
-import re
 import sqlite3
 import asyncio
 from datetime import datetime
@@ -16,7 +15,7 @@ from aiogram import BaseMiddleware, Router
 from typing import Callable, Awaitable, Dict, Any
 from database import save_user, init_db, add_news
 
-# --- Загрузка переменных окружения ---
+# --- Загрузка переменных ---
 load_dotenv("/opt/ndloadouts/.env")
 BOT_TOKEN = os.getenv("TOKEN")
 WEBAPP_URL = os.getenv("WEBAPP_URL")
@@ -26,7 +25,7 @@ DB_PATH = "/opt/ndloadouts_storage/builds.db"
 if not BOT_TOKEN or not WEBAPP_URL:
     raise ValueError("❌ BOT_TOKEN и WEBAPP_URL должны быть заданы в .env")
 
-# --- Инициализация бота и диспетчера ---
+# --- Инициализация бота ---
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
 router = Router()
@@ -43,6 +42,15 @@ dp.message.middleware(PrivateOnlyMiddleware())
 dp.callback_query.middleware(PrivateOnlyMiddleware())
 dp.include_router(router)
 
+# --- Хелпер проверки подписки ---
+async def is_subscribed(user_id: int) -> bool:
+    try:
+        member = await bot.get_chat_member(chat_id=CHANNEL_ID, user_id=user_id)
+        return member.status in ("member", "administrator", "creator")
+    except Exception as e:
+        print(f"[TG ERROR] get_chat_member: {e}")
+        return False
+
 # --- Выдача доступа ---
 async def grant_access(callback: CallbackQuery):
     name = callback.from_user.first_name or "боец"
@@ -57,93 +65,82 @@ async def grant_access(callback: CallbackQuery):
         "Соблюдай протокол. Удачи в бою!"
     )
 
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [
-            InlineKeyboardButton(text="🔗 Открыть сборки", web_app=WebAppInfo(url=WEBAPP_URL)),
-            InlineKeyboardButton(text="💬 Связаться", url="https://t.me/ndzone_admin")
-        ]
-    ])
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[[
+        InlineKeyboardButton(text="🔗 Открыть сборки", web_app=WebAppInfo(url=WEBAPP_URL)),
+        InlineKeyboardButton(text="💬 Связаться", url="https://t.me/ndzone_admin")
+    ]])
     await callback.message.edit_text(text, reply_markup=keyboard)
 
 # --- /start ---
 @router.message(CommandStart())
 async def start_handler(message: Message):
-    user_id = str(message.from_user.id)
+    user_id = int(message.from_user.id)
+    subscribed = await is_subscribed(user_id)
 
     try:
         with sqlite3.connect(DB_PATH) as conn:
             cur = conn.cursor()
-            cur.execute("SELECT verified FROM users WHERE id = ?", (user_id,))
-            row = cur.fetchone()
+            cur.execute("INSERT OR IGNORE INTO users(id, first_name, username, verified) VALUES(?, ?, ?, 0)",
+                        (str(user_id), message.from_user.first_name or "", message.from_user.username or ""))
+            cur.execute("UPDATE users SET verified = ? WHERE id = ?", (1 if subscribed else 0, str(user_id)))
+            conn.commit()
     except Exception as e:
         print(f"[DB ERROR] {e}")
-        row = None
 
-    if row and row[0] == 1:
-        keyboard = InlineKeyboardMarkup(inline_keyboard=[
-            [
-                InlineKeyboardButton(text="🔗 Открыть сборки", web_app=WebAppInfo(url=WEBAPP_URL)),
-                InlineKeyboardButton(text="💬 Связаться", url="https://t.me/ndzone_admin")
-            ]
-        ])
-        await message.answer("✅ Личность подтверждена ранее.\n\n🪂 Добро пожаловать в NDHQ.", reply_markup=keyboard)
-        return
-
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [
+    if subscribed:
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[[
+            InlineKeyboardButton(text="🔗 Открыть сборки", web_app=WebAppInfo(url=WEBAPP_URL)),
+            InlineKeyboardButton(text="💬 Связаться", url="https://t.me/ndzone_admin")
+        ]])
+        await message.answer("✅ Личность подтверждена.\n\n🪂 Добро пожаловать в NDHQ.", reply_markup=keyboard)
+    else:
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[[
             InlineKeyboardButton(text="📅 Подписаться", url="https://t.me/callofdutynd"),
-            InlineKeyboardButton(text="✅ Проверить", callback_data="check_sub")
-        ]
-    ])
-    await message.answer(
-        "🪂 Добро пожаловать, боец!\n\n"
-        "🔐 Ты на NDHQ — секретной базе для игроков.\n"
-        "📡 Подтверди личность: вступи в штаб и нажми «Проверить».",
-        reply_markup=keyboard
-    )
+            InlineKeyboardButton(text="✅ Проверить", callback_data="recheck_sub")
+        ]])
+        await message.answer(
+            "🪂 Добро пожаловать, боец!\n\n"
+            "🔐 Ты на NDHQ — секретной базе для игроков.\n"
+            "📡 Подтверди личность: вступи в штаб и нажми «Проверить».",
+            reply_markup=keyboard
+        )
 
-# --- Проверка подписки ---
-@router.callback_query(F.data == "check_sub")
-async def check_subscription(callback: CallbackQuery):
-    user_id = str(callback.from_user.id)
+# --- Повторная проверка подписки ---
+@router.callback_query(F.data == "recheck_sub")
+async def recheck_subscription(callback: CallbackQuery):
+    user_id = int(callback.from_user.id)
 
-    subscribed = False
     try:
-        member = await bot.get_chat_member(chat_id=CHANNEL_ID, user_id=int(user_id))
-        if member.status in ("member", "administrator", "creator"):
-            subscribed = True
+        await callback.answer("Проверяю подписку…")
+    except: pass
+
+    subscribed = await is_subscribed(user_id)
+
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            cur = conn.cursor()
+            cur.execute("UPDATE users SET verified = ? WHERE id = ?", (1 if subscribed else 0, str(user_id)))
+            conn.commit()
     except Exception as e:
-        print(f"[TG ERROR] {e}")
+        print(f"[DB ERROR] {e}")
 
     if subscribed:
         try:
-            save_user(user_id, callback.from_user.first_name or "", callback.from_user.username or "")
-            with sqlite3.connect(DB_PATH) as conn:
-                cur = conn.cursor()
-                cur.execute("UPDATE users SET verified = 1 WHERE id = ?", (user_id,))
-                conn.commit()
+            save_user(str(user_id), callback.from_user.first_name or "", callback.from_user.username or "")
         except Exception as e:
-            print(f"[DB ERROR] {e}")
-
+            print(f"[DB ERROR] save_user: {e}")
         await grant_access(callback)
-        return
-
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [
-            InlineKeyboardButton(text="📅 Подписаться", url="https://t.me/callofdutynd"),
-            InlineKeyboardButton(text="🔁 Проверить снова", callback_data="check_sub")
-        ],
-        [
-            InlineKeyboardButton(text="🧑‍✈️ Связаться", url="https://t.me/ndzone_admin")
-        ]
-    ])
-
-    await callback.message.edit_text(
-        "❌ Ошибка идентификации. Доступ к NDHQ запрещён.\n"
-        "📡 Подпишись на канал и повтори попытку.",
-        reply_markup=keyboard
-    )
-    await callback.answer("❌ Подписка не подтверждена. Попробуй ещё раз.", show_alert=True)
+    else:
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="📅 Подписаться", url="https://t.me/callofdutynd")],
+            [InlineKeyboardButton(text="🔁 Проверить снова", callback_data="recheck_sub")],
+            [InlineKeyboardButton(text="🧑‍✈️ Связаться", url="https://t.me/ndzone_admin")]
+        ])
+        await callback.message.edit_text(
+            "❌ Ошибка идентификации. Доступ к NDHQ запрещён.\n"
+            "📡 Подпишись на канал и повтори попытку.",
+            reply_markup=keyboard
+        )
 
 # --- Обработка постов из канала ---
 @router.channel_post()
@@ -156,7 +153,6 @@ async def on_channel_post(message: Message):
         if "#новости" not in text.lower():
             return
 
-        # Проверка дубликатов по message_id
         with sqlite3.connect(DB_PATH) as conn:
             cur = conn.cursor()
             cur.execute("SELECT COUNT(*) FROM news WHERE content LIKE ?", (f"%{message.message_id}%",))
@@ -164,17 +160,13 @@ async def on_channel_post(message: Message):
                 print("[SKIP] Уже опубликовано.")
                 return
 
-        # Заголовок
         title = text.strip().split('\n')[0]
-
-        # Картинка
         image_url = None
         if message.photo:
             largest = message.photo[-1]
             file = await bot.get_file(largest.file_id)
             image_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file.file_path}"
 
-        # Категория
         def detect_category(text: str) -> str:
             text = text.lower()
             rules = {
@@ -191,7 +183,6 @@ async def on_channel_post(message: Message):
         category = detect_category(text)
         date_str = message.date.strftime("%d.%m.%Y %H:%M")
 
-        # Добавляем новость
         add_news({
             "title": title,
             "content": text.strip(),
@@ -205,7 +196,7 @@ async def on_channel_post(message: Message):
     except Exception as e:
         print(f"[ERROR] Ошибка автопостинга: {e}")
 
-# --- Старт ---
+# --- Запуск ---
 async def main():
     print("🤖 Бот запущен.")
     init_db()
