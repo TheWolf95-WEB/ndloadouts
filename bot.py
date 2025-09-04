@@ -112,9 +112,11 @@ async def recheck_subscription(callback: CallbackQuery):
 
     try:
         await callback.answer("Проверяю подписку…")
-    except: pass
+    except:
+        pass
 
     subscribed = await is_subscribed(user_id)
+    print(f"[DEBUG] user_id={user_id} | subscribed={subscribed}")
 
     try:
         with sqlite3.connect(DB_PATH) as conn:
@@ -129,6 +131,8 @@ async def recheck_subscription(callback: CallbackQuery):
             save_user(str(user_id), callback.from_user.first_name or "", callback.from_user.username or "")
         except Exception as e:
             print(f"[DB ERROR] save_user: {e}")
+
+        await callback.answer("✅ Подписка подтверждена.")  # <- добавили
         await grant_access(callback)
     else:
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -141,6 +145,7 @@ async def recheck_subscription(callback: CallbackQuery):
             "📡 Подпишись на канал и повтори попытку.",
             reply_markup=keyboard
         )
+
 
 # --- Обработка постов из канала ---
 @router.channel_post()
