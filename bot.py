@@ -1,7 +1,6 @@
 import os
 import sqlite3
 import asyncio
-from datetime import datetime
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, F
 from aiogram.enums.parse_mode import ParseMode
@@ -12,8 +11,9 @@ from aiogram.types import (
     WebAppInfo, CallbackQuery, TelegramObject
 )
 from aiogram import BaseMiddleware, Router
+from aiogram.exceptions import TelegramBadRequest
 from typing import Callable, Awaitable, Dict, Any
-from database import save_user, init_db, add_news
+from database import save_user, init_db
 
 # --- Загрузка переменных ---
 load_dotenv("/opt/ndloadouts/.env")
@@ -42,23 +42,37 @@ dp.message.middleware(PrivateOnlyMiddleware())
 dp.callback_query.middleware(PrivateOnlyMiddleware())
 dp.include_router(router)
 
+# --- Хелпер: безопасное редактирование сообщения (fallback -> send) ---
+async def safe_edit(orig_message: Message, text: str, reply_markup: InlineKeyboardMarkup | None = None):
+    try:
+        await orig_message.edit_text(text, reply_markup=reply_markup)
+    except TelegramBadRequest as e:
+        if "message is not modified" in str(e):
+            await orig_message.answer(text, reply_markup=reply_markup)
+        else:
+            print(f"[TG ERROR] edit_text failed: {e}")
+            await orig_message.answer(text, reply_markup=reply_markup)
+
 # --- Хелпер проверки подписки ---
 async def is_subscribed(user_id: int) -> bool:
     try:
         member = await bot.get_chat_member(chat_id=CHANNEL_ID, user_id=user_id)
-        return member.status in ("member", "administrator", "creator")
+        ok = member.status in ("member", "administrator", "creator")
+        print(f"[DEBUG] get_chat_member ok | user_id={user_id} | status={member.status} | subscribed={ok}")
+        return ok
     except Exception as e:
-        print(f"[TG ERROR] get_chat_member: {e}")
+        msg = str(e)
+        print(f"[TG ERROR] get_chat_member: {msg}")
+        if "CHAT_ADMIN_REQUIRED" in msg or "not enough rights" in msg.lower():
+            print("[HINT] Добавь бота админом в канал, иначе проверка подписки невозможна.")
         return False
 
 # --- Выдача доступа ---
 async def grant_access(callback: CallbackQuery):
-    name = callback.from_user.first_name or "боец"
     text = (
         "✅ Личность подтверждена, боец.\n"
         "🪂 Добро пожаловать в NDHQ.\n\n"
         "📡 Теперь тебе доступны:\n"
-        "📰 Свежие игровые новости\n"
         "🛠 Мета-сборки и арсенал\n"
         "📖 Гайды и разборы\n"
         "🎯 Полезные советы\n\n"
@@ -69,7 +83,7 @@ async def grant_access(callback: CallbackQuery):
         InlineKeyboardButton(text="🔗 Открыть сборки", web_app=WebAppInfo(url=WEBAPP_URL)),
         InlineKeyboardButton(text="💬 Связаться", url="https://t.me/ndzone_admin")
     ]])
-    await callback.message.edit_text(text, reply_markup=keyboard)
+    await safe_edit(callback.message, text, keyboard)
 
 # --- /start ---
 @router.message(CommandStart())
@@ -80,8 +94,10 @@ async def start_handler(message: Message):
     try:
         with sqlite3.connect(DB_PATH) as conn:
             cur = conn.cursor()
-            cur.execute("INSERT OR IGNORE INTO users(id, first_name, username, verified) VALUES(?, ?, ?, 0)",
-                        (str(user_id), message.from_user.first_name or "", message.from_user.username or ""))
+            cur.execute(
+                "INSERT OR IGNORE INTO users(id, first_name, username, verified) VALUES(?, ?, ?, 0)",
+                (str(user_id), message.from_user.first_name or "", message.from_user.username or "")
+            )
             cur.execute("UPDATE users SET verified = ? WHERE id = ?", (1 if subscribed else 0, str(user_id)))
             conn.commit()
     except Exception as e:
@@ -112,7 +128,7 @@ async def recheck_subscription(callback: CallbackQuery):
 
     try:
         await callback.answer("Проверяю подписку…")
-    except:
+    except Exception:
         pass
 
     subscribed = await is_subscribed(user_id)
@@ -132,7 +148,11 @@ async def recheck_subscription(callback: CallbackQuery):
         except Exception as e:
             print(f"[DB ERROR] save_user: {e}")
 
-        await callback.answer("✅ Подписка подтверждена.")  # <- добавили
+        try:
+            await callback.answer("✅ Подписка подтверждена.")
+        except Exception:
+            pass
+
         await grant_access(callback)
     else:
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -140,66 +160,12 @@ async def recheck_subscription(callback: CallbackQuery):
             [InlineKeyboardButton(text="🔁 Проверить снова", callback_data="recheck_sub")],
             [InlineKeyboardButton(text="🧑‍✈️ Связаться", url="https://t.me/ndzone_admin")]
         ])
-        await callback.message.edit_text(
+        await safe_edit(
+            callback.message,
             "❌ Ошибка идентификации. Доступ к NDHQ запрещён.\n"
             "📡 Подпишись на канал и повтори попытку.",
-            reply_markup=keyboard
+            keyboard
         )
-
-
-# --- Обработка постов из канала ---
-@router.channel_post()
-async def on_channel_post(message: Message):
-    try:
-        if message.chat.id != CHANNEL_ID:
-            return
-
-        text = message.text or message.caption or ""
-        if "#новости" not in text.lower():
-            return
-
-        with sqlite3.connect(DB_PATH) as conn:
-            cur = conn.cursor()
-            cur.execute("SELECT COUNT(*) FROM news WHERE content LIKE ?", (f"%{message.message_id}%",))
-            if cur.fetchone()[0] > 0:
-                print("[SKIP] Уже опубликовано.")
-                return
-
-        title = text.strip().split('\n')[0]
-        image_url = None
-        if message.photo:
-            largest = message.photo[-1]
-            file = await bot.get_file(largest.file_id)
-            image_url = f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file.file_path}"
-
-        def detect_category(text: str) -> str:
-            text = text.lower()
-            rules = {
-                "call-of-duty": ["#callofduty", "#blackops", "#bo7", "#warzone", "#cod", "#mw3"],
-                "battlefield": ["#battlefield", "#bf6", "#bf2042"],
-                "cs2": ["#cs2", "#counterstrike"],
-                "apex": ["#apex", "#apexlegends"]
-            }
-            for cat, tags in rules.items():
-                if any(tag in text for tag in tags):
-                    return cat
-            return "general"
-
-        category = detect_category(text)
-        date_str = message.date.strftime("%d.%m.%Y %H:%M")
-
-        add_news({
-            "title": title,
-            "content": text.strip(),
-            "image": image_url,
-            "date": date_str,
-            "category": category
-        })
-
-        print(f"[OK] Новость добавлена: {title}")
-
-    except Exception as e:
-        print(f"[ERROR] Ошибка автопостинга: {e}")
 
 # --- Запуск ---
 async def main():
