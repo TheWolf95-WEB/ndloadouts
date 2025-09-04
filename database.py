@@ -13,7 +13,7 @@ from aiogram.types import (
 from aiogram import BaseMiddleware, Router
 from aiogram.exceptions import TelegramBadRequest
 from typing import Callable, Awaitable, Dict, Any
-from database import save_user, init_db
+
 
 # --- env ---
 load_dotenv("/opt/ndloadouts/.env")
