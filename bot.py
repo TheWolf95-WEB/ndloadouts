@@ -15,22 +15,21 @@ from aiogram.exceptions import TelegramBadRequest
 from typing import Callable, Awaitable, Dict, Any
 from database import save_user, init_db
 
-# --- Загрузка переменных ---
+# --- env ---
 load_dotenv("/opt/ndloadouts/.env")
 BOT_TOKEN = os.getenv("TOKEN")
 WEBAPP_URL = os.getenv("WEBAPP_URL")
 CHANNEL_ID = int(os.getenv("CHANNEL_ID", -1001990222164))
 DB_PATH = "/opt/ndloadouts_storage/builds.db"
-
 if not BOT_TOKEN or not WEBAPP_URL:
     raise ValueError("❌ BOT_TOKEN и WEBAPP_URL должны быть заданы в .env")
 
-# --- Инициализация бота ---
+# --- bot ---
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher()
 router = Router()
 
-# --- Middleware: пропускаем только личку ---
+# --- only private ---
 class PrivateOnlyMiddleware(BaseMiddleware):
     async def __call__(self, handler: Callable, event: TelegramObject, data: Dict[str, Any]) -> Any:
         chat = getattr(event, 'chat', None) or getattr(getattr(event, 'message', None), 'chat', None)
@@ -42,7 +41,7 @@ dp.message.middleware(PrivateOnlyMiddleware())
 dp.callback_query.middleware(PrivateOnlyMiddleware())
 dp.include_router(router)
 
-# --- Хелпер: безопасное редактирование сообщения (fallback -> send) ---
+# --- safe edit helper ---
 async def safe_edit(orig_message: Message, text: str, reply_markup: InlineKeyboardMarkup | None = None):
     try:
         await orig_message.edit_text(text, reply_markup=reply_markup)
@@ -53,21 +52,21 @@ async def safe_edit(orig_message: Message, text: str, reply_markup: InlineKeyboa
             print(f"[TG ERROR] edit_text failed: {e}")
             await orig_message.answer(text, reply_markup=reply_markup)
 
-# --- Хелпер проверки подписки ---
+# --- subscription check ---
 async def is_subscribed(user_id: int) -> bool:
     try:
         member = await bot.get_chat_member(chat_id=CHANNEL_ID, user_id=user_id)
         ok = member.status in ("member", "administrator", "creator")
-        print(f"[DEBUG] get_chat_member ok | user_id={user_id} | status={member.status} | subscribed={ok}")
+        print(f"[DEBUG] get_chat_member | user_id={user_id} | status={member.status} | subscribed={ok}")
         return ok
     except Exception as e:
         msg = str(e)
         print(f"[TG ERROR] get_chat_member: {msg}")
         if "CHAT_ADMIN_REQUIRED" in msg or "not enough rights" in msg.lower():
-            print("[HINT] Добавь бота админом в канал, иначе проверка подписки невозможна.")
+            print("[HINT] Бот должен быть АДМИНОМ канала @callofdutynd, иначе проверка подписки невозможна.")
         return False
 
-# --- Выдача доступа ---
+# --- access screen ---
 async def grant_access(callback: CallbackQuery):
     text = (
         "✅ Личность подтверждена, боец.\n"
@@ -78,7 +77,6 @@ async def grant_access(callback: CallbackQuery):
         "🎯 Полезные советы\n\n"
         "Соблюдай протокол. Удачи в бою!"
     )
-
     keyboard = InlineKeyboardMarkup(inline_keyboard=[[
         InlineKeyboardButton(text="🔗 Открыть сборки", web_app=WebAppInfo(url=WEBAPP_URL)),
         InlineKeyboardButton(text="💬 Связаться", url="https://t.me/ndzone_admin")
@@ -121,18 +119,17 @@ async def start_handler(message: Message):
             reply_markup=keyboard
         )
 
-# --- Повторная проверка подписки ---
+# --- recheck ---
 @router.callback_query(F.data == "recheck_sub")
 async def recheck_subscription(callback: CallbackQuery):
     user_id = int(callback.from_user.id)
-
     try:
         await callback.answer("Проверяю подписку…")
     except Exception:
         pass
 
     subscribed = await is_subscribed(user_id)
-    print(f"[DEBUG] user_id={user_id} | subscribed={subscribed}")
+    print(f"[DEBUG] recheck | user_id={user_id} | subscribed={subscribed}")
 
     try:
         with sqlite3.connect(DB_PATH) as conn:
@@ -152,7 +149,6 @@ async def recheck_subscription(callback: CallbackQuery):
             await callback.answer("✅ Подписка подтверждена.")
         except Exception:
             pass
-
         await grant_access(callback)
     else:
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
@@ -167,10 +163,17 @@ async def recheck_subscription(callback: CallbackQuery):
             keyboard
         )
 
-# --- Запуск ---
+# --- run ---
 async def main():
-    print("🤖 Бот запущен.")
+    print("🤖 Бот запускается…")
     init_db()
+    # КРИТИЧЕСКОЕ: сносим webhook, чтобы не было 409 Conflict
+    try:
+        await bot.delete_webhook(drop_pending_updates=True)
+        print("[INIT] Webhook удалён (если был). Переключаемся на polling.")
+    except Exception as e:
+        print(f"[INIT] delete_webhook error: {e}")
+
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
