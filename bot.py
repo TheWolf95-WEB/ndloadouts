@@ -66,6 +66,13 @@ async def is_subscribed(user_id: int) -> bool:
             print("[HINT] Бот должен быть АДМИНОМ канала @callofdutynd, иначе проверка подписки невозможна.")
         return False
 
+@router.message(F.text == "/me")
+async def whoami(message: Message):
+    member = await bot.get_chat_member(chat_id=CHANNEL_ID, user_id=message.from_user.id)
+    await message.answer(f"Ты: {message.from_user.id}\nСтатус: {member.status}")
+
+
+
 # --- access screen ---
 async def grant_access(callback: CallbackQuery):
     text = (
