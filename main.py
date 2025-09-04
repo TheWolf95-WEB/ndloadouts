@@ -16,7 +16,7 @@ from urllib.parse import parse_qs
 from datetime import datetime
 from database import (
     init_db, get_all_builds, add_build, delete_build_by_id, get_all_users,
-    save_user, update_build_by_id, add_version_entry, get_latest_version, get_all_versions, get_all_news, add_news
+    save_user, update_build_by_id, add_version_entry, get_latest_version, get_all_versions
 )
 
 load_dotenv()
@@ -31,7 +31,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # --- Утилита для проверки прав ---
 def extract_user_roles(init_data_str: str):
@@ -85,18 +84,15 @@ async def api_builds(category: str = Query("all")):
     try:
         builds = get_all_builds()
 
-        # Фильтрация по категории (если выбрана не "all")
         if category != "all":
             builds = [b for b in builds if category in (b.get("categories") or [])]
 
-        # Приоритет топа: есть top1 -> 1, иначе если есть top2 -> 2, далее top3 -> 3, иначе в конец
         def top_priority(b):
             if b.get("top1"): return 1
             if b.get("top2"): return 2
             if b.get("top3"): return 3
             return 999
 
-        # Ключ даты: парсим "ДД.ММ.ГГГГ", для пустых ставим 0; сортируем по убыванию
         def date_ts(b):
             s = b.get("date") or ""
             try:
@@ -104,13 +100,11 @@ async def api_builds(category: str = Query("all")):
             except Exception:
                 return 0
 
-        # Сортировка: 1) по приоритету топа (возр.), 2) по дате (убыв.)
         builds.sort(key=lambda b: (top_priority(b), -date_ts(b)))
 
         return JSONResponse(builds)
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
-
 
 @app.post("/api/builds")
 async def create_build(request: Request, data: dict = Body(...)):
@@ -119,13 +113,10 @@ async def create_build(request: Request, data: dict = Body(...)):
         return JSONResponse({"error": "Недостаточно прав"}, status_code=403)
 
     try:
-        print("[DEBUG] Полученные данные при создании сборки:", data)
         add_build(data)
         return JSONResponse({"status": "ok"})
     except Exception as e:
-        print("[ERROR] Ошибка при добавлении сборки:", str(e))
         return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
-
 
 @app.put("/api/builds/{build_id}")
 async def update_build(build_id: str, request: Request):
@@ -294,27 +285,6 @@ async def all_versions():
         return {"versions": versions}
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
-
-
-@app.get("/api/news")
-async def get_news():
-    try:
-        from database import get_all_news
-        return JSONResponse(get_all_news())
-    except Exception as e:
-        return JSONResponse({ "error": str(e) }, status_code=500)
-
-@app.post("/api/news")
-async def post_news(request: Request):
-    try:
-        from database import add_news
-        body = await request.json()
-        add_news(body)
-        return JSONResponse({ "status": "ok" })
-    except Exception as e:
-        return JSONResponse({ "error": str(e) }, status_code=500)
-
-
 
 if __name__ == "__main__":
     import uvicorn
