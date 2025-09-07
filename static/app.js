@@ -564,8 +564,6 @@ function formatRuDate(input) {
 
 
 
-// JS — функция для загрузки и отрисовки таблицы
-
 // JS — функция для загрузки и отрисовки таблицы 
 async function loadBuildsTable() {
   try {
@@ -579,22 +577,20 @@ async function loadBuildsTable() {
     }
 
     let html = '';
-
-  builds.forEach((build, index) => {
-    html += `
-      <div class="build-card">
-        <div><strong>#${index + 1}</strong></div>
-        <div><strong>Название:</strong> ${build.title}</div>
-        <div><strong>Тип:</strong> ${weaponTypeLabels[build.weapon_type] || build.weapon_type}</div>
-        <div><strong>Вкладки:</strong> ${build.tabs.length}</div>
-        <div class="build-actions">
-          <button class="btn btn-sm edit-btn" data-id="${build.id}">✏</button>
-          <button class="btn btn-sm delete-btn" data-id="${build.id}">🗑</button>
+    builds.forEach((build, index) => {
+      html += `
+        <div class="build-card">
+          <div><strong>#${index + 1}</strong></div>
+          <div><strong>Название:</strong> ${build.title}</div>
+          <div><strong>Тип:</strong> ${weaponTypeLabels[build.weapon_type] || build.weapon_type}</div>
+          <div><strong>Вкладки:</strong> ${build.tabs.length}</div>
+          <div class="build-actions">
+            <button class="btn btn-sm edit-btn" data-id="${build.id}">✏</button>
+            <button class="btn btn-sm delete-btn" data-id="${build.id}">🗑</button>
+          </div>
         </div>
-      </div>
-    `;
-  });
-
+      `;
+    });
 
     tableWrapper.innerHTML = html;
 
@@ -602,101 +598,103 @@ async function loadBuildsTable() {
     tableWrapper.querySelectorAll('.delete-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.dataset.id;
-        if (confirm('Удалить сборку?')) {
-         const res = await fetch(`/api/builds/${id}`, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ initData: tg.initData }) // ✅ добавили
-          });
-          const data = await res.json();
+        if (!confirm('Удалить сборку?')) return;
 
-          if (res.ok && data.status === "ok") {
-            await loadBuildsTable(); // перезагрузка
-          } else {
-            alert("Не удалось удалить сборку. " + (data.detail || ""));
-          }
+        const delRes = await fetch(`/api/builds/${id}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ initData: tg.initData })
+        });
+        const data = await delRes.json();
+
+        if (delRes.ok && data.status === "ok") {
+          await loadBuildsTable();
+        } else {
+          alert("Не удалось удалить сборку. " + (data.detail || ""));
         }
       });
     });
 
     // Обработчики редактирования
-// Обработчики редактирования
-tableWrapper.querySelectorAll('.edit-btn').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    const id = btn.dataset.id;
-    currentEditId = id;
+    tableWrapper.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        currentEditId = id;
 
-    const build = builds.find(b => String(b.id) === String(id));
-    if (!build) return alert("Сборка не найдена");
+        const build = builds.find(b => String(b.id) === String(id));
+        if (!build) return alert("Сборка не найдена");
 
-    showScreen('screen-form');
-    document.getElementById('submit-build').textContent = "💾 Сохранить";
+        showScreen('screen-form');
+        document.getElementById('submit-build').textContent = "💾 Сохранить";
 
-    // Отмечаем категории
-    const checkboxes = document.querySelectorAll('.build-category');
-    checkboxes.forEach(cb => {
-      cb.checked = build.categories?.includes(cb.value);
-    });
+        // Отмечаем категории
+        const checkboxes = document.querySelectorAll('.build-category');
+        checkboxes.forEach(cb => {
+          cb.checked = build.categories?.includes(cb.value);
+        });
 
-    // Заполняем поля
-    document.getElementById('title').value = build.title;
-    document.getElementById('weapon_type').value = build.weapon_type;
-    document.getElementById('top1').value = build.top1 || '';
-    document.getElementById('top2').value = build.top2 || '';
-    document.getElementById('top3').value = build.top3 || '';
-    document.getElementById('build-date').value = formatToInputDate(build.date || '');
+        // Заполняем поля
+        document.getElementById('title').value = build.title;
+        document.getElementById('weapon_type').value = build.weapon_type;
+        document.getElementById('top1').value = build.top1 || '';
+        document.getElementById('top2').value = build.top2 || '';
+        document.getElementById('top3').value = build.top3 || '';
+        document.getElementById('build-date').value = formatToInputDate(build.date || '');
 
-    // Загружаем модули по типу оружия
-    tabsContainer.innerHTML = '';
-    await loadModules(build.weapon_type);
+        // Загружаем модули по типу оружия
+        tabsContainer.innerHTML = '';
+        await loadModules(build.weapon_type);
 
-    // Восстанавливаем вкладки
-    build.tabs.forEach(tab => {
-      const tabDiv = document.createElement('div');
-      tabDiv.className = 'tab-block';
-      tabDiv.innerHTML = `
-        <input type="text" class="form-input tab-label" value="${tab.label}">
-        <div class="mod-selects"></div>
-        <div class="tab-actions">
-          <button type="button" class="btn add-mod">+ модуль</button>
-          <button type="button" class="btn delete-tab">🗑 Удалить вкладку</button>
-        </div>
-      `;
+        // Восстанавливаем вкладки
+        build.tabs.forEach(tab => {
+          const tabDiv = document.createElement('div');
+          tabDiv.className = 'tab-block';
+          tabDiv.innerHTML = `
+            <input type="text" class="form-input tab-label" value="${tab.label}">
+            <div class="mod-selects"></div>
+            <div class="tab-actions">
+              <button type="button" class="btn add-mod">+ модуль</button>
+              <button type="button" class="btn delete-tab">🗑 Удалить вкладку</button>
+            </div>
+          `;
+          tabsContainer.appendChild(tabDiv);
 
-      tabsContainer.appendChild(tabDiv);
+          tabDiv.querySelector('.add-mod').addEventListener('click', () => addModuleRow(tabDiv, build.weapon_type));
+          tabDiv.querySelector('.delete-tab').addEventListener('click', () => tabDiv.remove());
 
-      tabDiv.querySelector('.add-mod').addEventListener('click', () => addModuleRow(tabDiv, build.weapon_type));
-      tabDiv.querySelector('.delete-tab').addEventListener('click', () => tabDiv.remove());
+          // Добавляем модули во вкладку
+          tab.items.forEach(mod => {
+            if (!mod || typeof mod !== 'string') return;
 
-      // Добавляем модули во вкладку
-      tab.items.forEach(mod => {
-        if (!mod || typeof mod !== 'string') return;
+            addModuleRow(tabDiv, build.weapon_type);
 
-        addModuleRow(tabDiv, build.weapon_type);
+            const allRows = tabDiv.querySelectorAll('.mod-row');
+            const row = allRows[allRows.length - 1];
+            const modSel = row.querySelector('.module-select');
 
-        const allRows = tabDiv.querySelectorAll('.mod-row');
-        const row = allRows[allRows.length - 1];
-        const modSel = row.querySelector('.module-select');
+            if (modSel) {
+              const exists = Array.from(modSel.options).some(opt => opt.value === mod);
 
-        if (modSel) {
-          const exists = Array.from(modSel.options).some(opt => opt.value === mod);
+              // Если модуль отсутствует — добавляем его как "неизвестный"
+              if (!exists) {
+                const unknownOption = document.createElement('option');
+                unknownOption.value = mod;
+                unknownOption.textContent = mod + ' (неизвестный)';
+                unknownOption.style.color = 'orange';
+                modSel.appendChild(unknownOption);
+              }
 
-          // Если модуль отсутствует — добавляем его как "неизвестный"
-          if (!exists) {
-            const unknownOption = document.createElement('option');
-            unknownOption.value = mod;
-            unknownOption.textContent = mod + ' (неизвестный)';
-            unknownOption.style.color = 'orange';
-            modSel.appendChild(unknownOption);
-          }
-
-          modSel.value = mod;
-        }
+              modSel.value = mod;
+            }
+          });
+        });
       });
     });
-  });
-});
 
+  } catch (e) {
+    console.error('Ошибка загрузки сборок:', e);
+  }
+}
 
 
 // Преобразование даты в YYYY-MM-DD (для input type="date")
