@@ -45,6 +45,10 @@
                   <i class="fas fa-plus"></i>
                   <span>Добавить сборку</span>
                 </div>
+                  <div class="card-btn" id="modules-dict-btn">
+                      <i class="fas fa-list"></i>
+                      <span>Справочник модулей</span>
+                    </div>
               </div>
 
                 
@@ -108,6 +112,33 @@
         <button id="back-to-main" class="btn btn-back">⬅ Назад</button>
       </div>
     </div>
+
+
+    <!-- Экран выбора типа для справочника -->
+<div id="screen-modules-types" class="screen" style="display:none">
+  <h2>Справочник модулей — тип оружия</h2>
+  <div id="modules-types-grid" class="button-grid"></div>
+  <button class="btn" id="back-from-mod-types">← Назад</button>
+</div>
+
+<!-- Экран списка модулей выбранного типа -->
+<div id="screen-modules-list" class="screen" style="display:none">
+  <h2 id="modules-title"></h2>
+
+  <div id="modules-toolbar" class="flex" style="gap: 8px; margin-bottom: 10px;">
+    <input id="mod-category" class="form-input" placeholder="Категория (напр. Дуло)">
+    <input id="mod-en" class="form-input" placeholder="Ключ en (Compensator)">
+    <input id="mod-ru" class="form-input" placeholder="Название ru (Компенсатор)">
+    <input id="mod-pos" class="form-input" type="number" placeholder="Порядок" style="width: 110px;">
+    <button class="btn" id="mod-add-btn">➕ Добавить</button>
+  </div>
+
+  <div id="modules-list"></div>
+
+  <button class="btn" id="back-from-mod-list">← Назад</button>
+</div>
+
+
 
     <!-- 📋 Экран со сборками -->
     <div id="screen-builds" class="screen">
