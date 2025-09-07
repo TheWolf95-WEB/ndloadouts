@@ -16,7 +16,9 @@ from urllib.parse import parse_qs
 from datetime import datetime
 from database import (
     init_db, get_all_builds, add_build, delete_build_by_id, get_all_users,
-    save_user, update_build_by_id, add_version_entry, get_latest_version, get_all_versions
+    save_user, update_build_by_id, add_version_entry, get_latest_version, get_all_versions,
+    init_modules_table, modules_grouped_by_category,
+    module_add, module_update, module_delete,
 )
 
 load_dotenv()
@@ -74,6 +76,51 @@ app.mount("/data", StaticFiles(directory="data"), name="data")
 templates = Jinja2Templates(directory="templates")
 
 init_db()
+init_modules_table()
+
+
+def ensure_admin_from_init(init_data_str: str):
+    uid, is_admin, _ = extract_user_roles(init_data_str or "")
+    if not is_admin:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail="Недостаточно прав")
+
+# ====== MODULES DICT API ======
+
+@app.get("/api/modules/{weapon_type}")
+def api_modules_list(weapon_type: str):
+    return modules_grouped_by_category(weapon_type)
+
+@app.post("/api/modules")
+async def api_modules_add(payload: dict = Body(...)):
+    ensure_admin_from_init(payload.get("initData", ""))
+    module_add(
+        weapon_type=payload["weapon_type"],
+        category=payload["category"],
+        en=payload["en"],
+        ru=payload["ru"],
+        pos=int(payload.get("pos", 0) or 0)
+    )
+    return {"status": "ok"}
+
+@app.put("/api/modules/{module_id}")
+async def api_modules_update(module_id: int, payload: dict = Body(...)):
+    ensure_admin_from_init(payload.get("initData", ""))
+    module_update(
+        module_id,
+        category=payload.get("category"),
+        en=payload.get("en"),
+        ru=payload.get("ru"),
+        pos=payload.get("pos")
+    )
+    return {"status": "ok"}
+
+@app.delete("/api/modules/{module_id}")
+async def api_modules_delete(module_id: int, payload: dict = Body(...)):
+    ensure_admin_from_init(payload.get("initData", ""))
+    module_delete(module_id)
+    return {"status": "ok"}
+
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
