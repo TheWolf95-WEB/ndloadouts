@@ -196,6 +196,85 @@ def add_categories_column_if_not_exists():
     conn.commit()
     conn.close()
 
+
+
+# ==== СПРАВОЧНИК МОДУЛЕЙ ====
+
+def init_modules_table():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS weapon_modules (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            weapon_type TEXT NOT NULL,    -- assault, pp, drobovik, ...
+            category    TEXT NOT NULL,    -- "Дуло", "Оптика", ...
+            en          TEXT NOT NULL,    -- ключ, как в сборках
+            ru          TEXT NOT NULL,    -- отображаемое имя
+            pos         INTEGER DEFAULT 0
+        )
+    """)
+    c.execute("CREATE UNIQUE INDEX IF NOT EXISTS wm_unique ON weapon_modules(weapon_type, category, en)")
+    c.execute("CREATE INDEX IF NOT EXISTS wm_idx ON weapon_modules(weapon_type, category)")
+    conn.commit()
+    conn.close()
+
+def modules_list(weapon_type: str):
+    """Возвращает список словарей: {id, weapon_type, category, en, ru, pos}"""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute("""SELECT id, weapon_type, category, en, ru, pos
+                FROM weapon_modules
+                WHERE weapon_type = ?
+                ORDER BY category, pos, ru""", (weapon_type,))
+    rows = [dict(r) for r in c.fetchall()]
+    conn.close()
+    return rows
+
+def modules_grouped_by_category(weapon_type: str):
+    """Группирует как твои JSON: {category: [{en,ru,id,pos}, ...]}"""
+    out = {}
+    for row in modules_list(weapon_type):
+        cat = row["category"]
+        out.setdefault(cat, []).append({
+            "id": row["id"], "en": row["en"], "ru": row["ru"], "pos": row["pos"]
+        })
+    return out
+
+def module_add(weapon_type: str, category: str, en: str, ru: str, pos: int = 0):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("""INSERT OR IGNORE INTO weapon_modules(weapon_type, category, en, ru, pos)
+                 VALUES (?,?,?,?,?)""", (weapon_type.strip(), category.strip(), en.strip(), ru.strip(), int(pos or 0)))
+    conn.commit()
+    conn.close()
+
+def module_update(module_id: int, *, category: str | None = None, en: str | None = None,
+                  ru: str | None = None, pos: int | None = None):
+    sets, vals = [], []
+    if category is not None: sets.append("category = ?"); vals.append(category.strip())
+    if en is not None:       sets.append("en = ?");       vals.append(en.strip())
+    if ru is not None:       sets.append("ru = ?");       vals.append(ru.strip())
+    if pos is not None:      sets.append("pos = ?");      vals.append(int(pos))
+    if not sets: return
+    vals.append(module_id)
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute(f"UPDATE weapon_modules SET {', '.join(sets)} WHERE id = ?", vals)
+    conn.commit()
+    conn.close()
+
+def module_delete(module_id: int):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("DELETE FROM weapon_modules WHERE id = ?", (module_id,))
+    conn.commit()
+    conn.close()
+
+
+
+
+
 # === ВЕРСИИ ===
 
 def add_version_entry(content: str):
@@ -223,6 +302,11 @@ def get_all_versions():
     rows = c.fetchall()
     conn.close()
     return [{"content": r[0], "created_at": r[1]} for r in rows]
+
+
+
+
+
 
 # === Запуск вручную ===
 
