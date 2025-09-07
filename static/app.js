@@ -348,14 +348,16 @@ function addModuleRow(tabDiv, type) {
 
 // === Отправка сборки ===
 
-// Главный обработчик сохранения (добавление или обновление)
 let currentEditId = null;
 
 // Главный обработчик сохранения (добавление или обновление)
 async function handleSubmitBuild() {
   const tabs = Array.from(tabsContainer.querySelectorAll('.tab-block')).map(tab => {
-    const label = tab.querySelector('.tab-label').value.trim();
-    const items = Array.from(tab.querySelectorAll('.module-select')).map(sel => sel.value).filter(Boolean);
+    const label = tab.querySelector('.tab-label')?.value?.trim() || '';
+    const items = Array.from(tab.querySelectorAll('.mod-row')).map(row => {
+      const select = row.querySelector('.module-select');
+      return select?.value?.trim() || '';
+    });
     return { label, items };
   });
 
@@ -365,44 +367,49 @@ async function handleSubmitBuild() {
     .filter(cb => cb.checked)
     .map(cb => cb.value);
 
-  // Если ничего не выбрано — по умолчанию "all"
   const categories = selectedCategories.length > 0 ? selectedCategories : ['all'];
 
   const data = {
     initData: tg.initData,
-    title: document.getElementById('title').value.trim(),
-    weapon_type: weaponTypeSelect.value,
-    top1: document.getElementById('top1').value.trim(),
-    top2: document.getElementById('top2').value.trim(),
-    top3: document.getElementById('top3').value.trim(),
-    date: formatRuDate(document.getElementById('build-date').value),
+    title: document.getElementById('title')?.value?.trim() || '',
+    weapon_type: weaponTypeSelect?.value || '',
+    top1: document.getElementById('top1')?.value?.trim() || '',
+    top2: document.getElementById('top2')?.value?.trim() || '',
+    top3: document.getElementById('top3')?.value?.trim() || '',
+    date: formatRuDate(document.getElementById('build-date')?.value || ''),
     tabs,
-    categories // 🆕 добавляем в тело запроса
+    categories
   };
 
   const method = currentEditId ? 'PUT' : 'POST';
   const url = currentEditId ? `/api/builds/${currentEditId}` : '/api/builds';
-  
-  const res = await fetch(url, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
 
-  if (res.ok) {
-    alert(currentEditId ? 'Сборка обновлена!' : 'Сборка добавлена!');
-    showScreen('screen-edit-builds');
-    await loadBuildsTable();
-    currentEditId = null;
-    document.getElementById('submit-build').textContent = '➕ Добавить';
-  } else {
-    alert('Ошибка при сохранении.');
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    if (res.ok) {
+      alert(currentEditId ? 'Сборка обновлена!' : 'Сборка добавлена!');
+      showScreen('screen-edit-builds');
+      await loadBuildsTable();
+      currentEditId = null;
+      document.getElementById('submit-build').textContent = '➕ Добавить';
+    } else {
+      const errorText = await res.text();
+      alert(`Ошибка при сохранении:\n${errorText}`);
+    }
+  } catch (err) {
+    console.error('Сетевая ошибка:', err);
+    alert('Ошибка подключения к серверу.');
   }
 }
 
 document.getElementById('submit-build').addEventListener('click', handleSubmitBuild);
 
-
+// Помощник для определения категории по ключу модуля
 function getCategoryByModule(moduleKey, weaponType) {
   const mods = modulesByType[weaponType];
   for (const cat in mods) {
@@ -613,66 +620,83 @@ async function loadBuildsTable() {
     });
 
     // Обработчики редактирования
-    tableWrapper.querySelectorAll('.edit-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.dataset.id;
-        currentEditId = id;
+// Обработчики редактирования
+tableWrapper.querySelectorAll('.edit-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const id = btn.dataset.id;
+    currentEditId = id;
 
-        // Находим нужную сборку
-        const build = builds.find(b => String(b.id) === String(id));
-        if (!build) return alert("Сборка не найдена");
+    const build = builds.find(b => String(b.id) === String(id));
+    if (!build) return alert("Сборка не найдена");
 
-        showScreen('screen-form');
-        document.getElementById('submit-build').textContent = "💾 Сохранить";
+    showScreen('screen-form');
+    document.getElementById('submit-build').textContent = "💾 Сохранить";
 
-        const checkboxes = document.querySelectorAll('.build-category');
-        checkboxes.forEach(cb => {
-          cb.checked = build.categories?.includes(cb.value);
-        });
-
-        // Заполняем поля
-        document.getElementById('title').value = build.title;
-        document.getElementById('weapon_type').value = build.weapon_type;
-        document.getElementById('top1').value = build.top1 || '';
-        document.getElementById('top2').value = build.top2 || '';
-        document.getElementById('top3').value = build.top3 || '';
-        document.getElementById('build-date').value = formatToInputDate(build.date || '');
-
-        tabsContainer.innerHTML = '';
-        await loadModules(build.weapon_type); // нужно загрузить модули перед отрисовкой
-
-        build.tabs.forEach(tab => {
-          const tabDiv = document.createElement('div');
-          tabDiv.className = 'tab-block';
-          tabDiv.innerHTML = `
-            <input type="text" class="form-input tab-label" value="${tab.label}">
-            <div class="mod-selects"></div>
-            <div class="tab-actions">
-              <button type="button" class="btn add-mod">+ модуль</button>
-              <button type="button" class="btn delete-tab">🗑 Удалить вкладку</button>
-            </div>`;
-          
-          tabsContainer.appendChild(tabDiv);
-
-          tabDiv.querySelector('.add-mod').addEventListener('click', () => addModuleRow(tabDiv, build.weapon_type));
-          tabDiv.querySelector('.delete-tab').addEventListener('click', () => tabDiv.remove());
-
-          // Добавляем модули
-          tab.items.forEach(mod => {
-            addModuleRow(tabDiv, build.weapon_type);
-            const lastRow = tabDiv.querySelectorAll('.mod-row');
-            const row = lastRow[lastRow.length - 1];
-            const modSel = row.querySelector('.module-select');
-            if (modSel) modSel.value = mod;
-          });
-        });
-      });
+    // Отмечаем категории
+    const checkboxes = document.querySelectorAll('.build-category');
+    checkboxes.forEach(cb => {
+      cb.checked = build.categories?.includes(cb.value);
     });
 
-  } catch (e) {
-    console.error('Ошибка загрузки сборок:', e);
-  }
-}
+    // Заполняем поля
+    document.getElementById('title').value = build.title;
+    document.getElementById('weapon_type').value = build.weapon_type;
+    document.getElementById('top1').value = build.top1 || '';
+    document.getElementById('top2').value = build.top2 || '';
+    document.getElementById('top3').value = build.top3 || '';
+    document.getElementById('build-date').value = formatToInputDate(build.date || '');
+
+    // Загружаем модули по типу оружия
+    tabsContainer.innerHTML = '';
+    await loadModules(build.weapon_type);
+
+    // Восстанавливаем вкладки
+    build.tabs.forEach(tab => {
+      const tabDiv = document.createElement('div');
+      tabDiv.className = 'tab-block';
+      tabDiv.innerHTML = `
+        <input type="text" class="form-input tab-label" value="${tab.label}">
+        <div class="mod-selects"></div>
+        <div class="tab-actions">
+          <button type="button" class="btn add-mod">+ модуль</button>
+          <button type="button" class="btn delete-tab">🗑 Удалить вкладку</button>
+        </div>
+      `;
+
+      tabsContainer.appendChild(tabDiv);
+
+      tabDiv.querySelector('.add-mod').addEventListener('click', () => addModuleRow(tabDiv, build.weapon_type));
+      tabDiv.querySelector('.delete-tab').addEventListener('click', () => tabDiv.remove());
+
+      // Добавляем модули во вкладку
+      tab.items.forEach(mod => {
+        if (!mod || typeof mod !== 'string') return;
+
+        addModuleRow(tabDiv, build.weapon_type);
+
+        const allRows = tabDiv.querySelectorAll('.mod-row');
+        const row = allRows[allRows.length - 1];
+        const modSel = row.querySelector('.module-select');
+
+        if (modSel) {
+          const exists = Array.from(modSel.options).some(opt => opt.value === mod);
+
+          // Если модуль отсутствует — добавляем его как "неизвестный"
+          if (!exists) {
+            const unknownOption = document.createElement('option');
+            unknownOption.value = mod;
+            unknownOption.textContent = mod + ' (неизвестный)';
+            unknownOption.style.color = 'orange';
+            modSel.appendChild(unknownOption);
+          }
+
+          modSel.value = mod;
+        }
+      });
+    });
+  });
+});
+
 
 
 // Преобразование даты в YYYY-MM-DD (для input type="date")
