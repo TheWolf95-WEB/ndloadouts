@@ -711,7 +711,7 @@ function formatToInputDate(dateStr) {
 // Переход на экран
 document.getElementById('assign-admin-btn')?.addEventListener('click', () => {
   showScreen('screen-assign-admin');
-  loadAdminList(user.id); // ✅ загружаем список админов
+  loadAdminList(window.userInfo?.user_id); // ✅ загружаем список админов
 });
 
 // Назад с экрана назначения
@@ -735,7 +735,7 @@ document.getElementById('submit-admin-id')?.addEventListener('click', async () =
     const res = await fetch('/api/assign-admin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, requesterId: user.id })
+      body: JSON.stringify({ userId, requesterId: window.userInfo?.user_id })
     });
 
     const data = await res.json();
