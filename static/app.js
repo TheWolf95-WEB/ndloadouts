@@ -425,7 +425,7 @@ async function loadBuilds(category = 'all') {
     return;
   }
 
-  const topColors = ["#FFD700", "#FF8C00", "#B0B0B0"];
+  const topColors = ["#FFD700", "#B0B0B0", "#FF8C00"];
   const uniqueTypes = [...new Set(builds.map(b => b.weapon_type))];
   await Promise.all(uniqueTypes.map(loadModules));
 
