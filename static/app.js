@@ -298,19 +298,21 @@ document.getElementById('add-tab').addEventListener('click', () => {
 });
 
 function addModuleRow(tabDiv, type) {
-  const currentModules = modulesByType[type];
+  const modsWrap = modulesByType[type];
+  if (!modsWrap) return alert("Сначала выбери тип оружия");
+
   const row = document.createElement('div');
   row.className = 'mod-row';
 
   const categorySelect = document.createElement('select');
   categorySelect.className = 'form-input category-select';
+
   const moduleSelect = document.createElement('select');
   moduleSelect.className = 'form-input module-select';
 
-  // Заполняем категории (оставшиеся)
+  // категории, которых ещё нет во вкладке
   const usedCategories = Array.from(tabDiv.querySelectorAll('.category-select')).map(s => s.value);
-  const availableCategories = Object.keys(currentModules).filter(cat => !usedCategories.includes(cat));
-
+  const availableCategories = Object.keys(modsWrap.byCategory).filter(cat => !usedCategories.includes(cat));
   if (availableCategories.length === 0) {
     alert("Все категории уже добавлены");
     return;
@@ -327,60 +329,61 @@ function addModuleRow(tabDiv, type) {
   row.appendChild(moduleSelect);
   tabDiv.querySelector('.mod-selects').appendChild(row);
 
-  // === Обновляет модули в moduleSelect
-  function updateModuleOptions() {
-    const category = categorySelect.value;
-    const mods = currentModules[category] || [];
+  function refreshModuleOptions() {
+    const cat = categorySelect.value;
+    const list = modsWrap.byCategory[cat] || [];
     const selected = Array.from(tabDiv.querySelectorAll('.module-select')).map(s => s.value);
 
+    const currentValue = moduleSelect.value;
     moduleSelect.innerHTML = '';
-    mods.forEach(mod => {
-      if (selected.includes(mod.en) && moduleSelect.value !== mod.en) return; // оставить текущий
+
+    list.forEach(m => {
+      if (selected.includes(m.en) && m.en !== currentValue) return;
       const opt = document.createElement('option');
-      opt.value = mod.en;
-      opt.textContent = mod.en;
+      opt.value = m.en;
+      opt.textContent = m.en; // хочешь — поставь m.ru
       moduleSelect.appendChild(opt);
     });
 
-    if (!moduleSelect.value && moduleSelect.options.length > 0) {
+    if (!moduleSelect.value && moduleSelect.options.length) {
       moduleSelect.value = moduleSelect.options[0].value;
     }
   }
 
-  // === Обновляет все moduleSelect'ы
-  function updateAllModules() {
+  function syncAllModuleSelects() {
+    const selected = Array.from(tabDiv.querySelectorAll('.module-select')).map(s => s.value);
+
     tabDiv.querySelectorAll('.mod-row').forEach(r => {
       const catSel = r.querySelector('.category-select');
       const modSel = r.querySelector('.module-select');
-      const category = catSel.value;
-      const mods = currentModules[category] || [];
-      const selected = Array.from(tabDiv.querySelectorAll('.module-select')).map(s => s.value);
+      const cat = catSel.value;
+      const list = modsWrap.byCategory[cat] || [];
       const currentValue = modSel.value;
 
       modSel.innerHTML = '';
-      mods.forEach(mod => {
-        if (selected.includes(mod.en) && mod.en !== currentValue) return;
+      list.forEach(m => {
+        if (selected.includes(m.en) && m.en !== currentValue) return;
         const opt = document.createElement('option');
-        opt.value = mod.en;
-        opt.textContent = mod.en;
+        opt.value = m.en;
+        opt.textContent = m.en;
         modSel.appendChild(opt);
       });
 
-      modSel.value = currentValue;
+      if ([...modSel.options].some(o => o.value === currentValue)) {
+        modSel.value = currentValue;
+      } else if (modSel.options.length) {
+        modSel.value = modSel.options[0].value;
+      }
     });
   }
 
-  categorySelect.addEventListener('change', () => {
-    updateModuleOptions();
-    updateAllModules();
-  });
+  categorySelect.addEventListener('change', () => { refreshModuleOptions(); syncAllModuleSelects(); });
+  moduleSelect.addEventListener('change', syncAllModuleSelects);
 
-  moduleSelect.addEventListener('change', () => {
-    updateAllModules();
-  });
-
+  // первичная инициализация
   categorySelect.dispatchEvent(new Event('change'));
 }
+
 
 
 // === Отправка сборки ===
@@ -449,11 +452,9 @@ document.getElementById('submit-build').addEventListener('click', handleSubmitBu
 // Помощник для определения категории по ключу модуля
 function getCategoryByModule(moduleKey, weaponType) {
   const mods = modulesByType[weaponType];
-  for (const cat in mods) {
-    if (mods[cat].some(mod => mod.en === moduleKey)) return cat;
-  }
-  return '';
+  return mods?.byKey?.[moduleKey]?.category || '';
 }
+
 
 // (загружает список типов оружия и отрисовывает кнопки на экране screen-modules-types)
 async function loadWeaponTypesForModules() {
