@@ -469,9 +469,11 @@ function addModuleRow(tabDiv, type) {
     mods.forEach(mod => {
       if (selected.includes(mod.en) && moduleSelect.value !== mod.en) return; // оставить текущий
       const opt = document.createElement('option');
-      opt.value = mod.en;
-      opt.textContent = mod.en;
-      moduleSelect.appendChild(opt);
+      opt.value = modKey;
+      const ru = moduleNameMap[modKey]; // уже заполняется в loadModules
+      opt.textContent = `${ru || modKey} (неизвестный)`;
+      modSelect.appendChild(opt);
+
     });
 
     if (!moduleSelect.value && moduleSelect.options.length > 0) {
@@ -494,7 +496,7 @@ function addModuleRow(tabDiv, type) {
         if (selected.includes(mod.en) && mod.en !== currentValue) return;
         const opt = document.createElement('option');
         opt.value = mod.en;
-        opt.textContent = mod.en;
+        opt.textContent = mod.ru || mod.en;
         modSel.appendChild(opt);
       });
 
