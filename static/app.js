@@ -624,8 +624,7 @@ const tabContents = build.tabs.map((tab, i) => {
     <div class="loadout__tab-content ${i === 0 ? 'is-active' : ''}" data-tab-content="tab-${buildIndex}-${i}">
       <div class="loadout__modules">
         ${tab.items.map(itemKey => {
-          const allModules = Object.values(modulesByType[build.weapon_type] || {}).flat();
-          const moduleObj = allModules.find(m => m.en === itemKey);
+          const moduleObj = (modulesByType[build.weapon_type] || []).find(m => m.en === itemKey);
           const slot = moduleObj?.category || "—";
           const ru = moduleObj?.ru || itemKey;
 
@@ -640,6 +639,7 @@ const tabContents = build.tabs.map((tab, i) => {
     </div>
   `;
 }).join('');
+
 
 
     wrapper.innerHTML = `
