@@ -458,7 +458,7 @@ async function loadWeaponTypesForModules() {
 
     types.forEach(type => {
       const item = document.createElement('button');
-      item.className = 'type-btn';
+      item.className = 'modules-type-btn';
       item.textContent = type.label;
       item.addEventListener('click', () => loadModulesList(type.key, type.label));
       list.appendChild(item);
