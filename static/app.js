@@ -521,7 +521,9 @@ async function loadModulesForType(weaponType, label) {
   }
 }
 
-
+async function loadModulesList(typeKey, typeLabel) {
+  await loadModulesForType(typeKey, typeLabel);
+}
 
 // Добавление нового модуля (кнопка "➕ Добавить")
 document.getElementById('mod-add-btn')?.addEventListener('click', async () => {
