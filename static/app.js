@@ -453,7 +453,7 @@ async function loadWeaponTypesForModules() {
   try {
     const res = await fetch('/api/types');
     const types = await res.json();
-    const list = document.getElementById('weapon-type-list');
+    const list = document.getElementById('modules-types-grid');
     list.innerHTML = '';
 
     types.forEach(type => {
