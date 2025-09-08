@@ -915,25 +915,13 @@ function showScreenSafe(id) {
 }
 
 async function apiGetJSON(url) {
-  const r = await fetch(url, { cache: 'no-store' });
-  if (!r.ok) throw new Error(await r.text());
-  return r.json();
-}
-async function apiSendJSON(url, method, payload) {
-  const r = await fetch(url, {
-    method,
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify(payload || {})
-  });
-  if (!r.ok) throw new Error(await r.text());
-  try { return await r.json(); } catch { return {}; }
-}
-function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-
-async function ensureAdminForModules() {
-  const res = await apiSendJSON('/api/me', 'POST', { initData: tg.initData });
-  _isAdminModules = !!res.is_admin;
-  return _isAdminModules;
+  try {
+    const r = await fetch(url, { cache: 'no-store' });
+    if (!r.ok) throw new Error(await r.text());
+    return await r.json();
+  } catch (e) {
+    return { __error: String(e) }; // чтобы было что проверить
+  }
 }
 
 modulesDictBtn?.addEventListener('click', async () => {
@@ -943,24 +931,47 @@ modulesDictBtn?.addEventListener('click', async () => {
 });
 
 async function openModulesTypesScreen() {
-  weaponTypesList = await apiGetJSON('/api/types'); // [{key,label}]
-  modulesTypesGrid.innerHTML = weaponTypesList.map(t => `
+  // 1) пытаемся взять типы с бэка
+  let list = await apiGetJSON('/api/types');
+
+  // 2) если не массив — fallback на уже загруженные метки из селекта
+  if (!Array.isArray(list) || list.length === 0) {
+    list = Object.entries(weaponTypeLabels).map(([key, label]) => ({ key, label }));
+  }
+
+  // 3) если и тут пусто — покажем понятное сообщение
+  if (!Array.isArray(list) || list.length === 0) {
+    modulesTypesGrid.innerHTML = `
+      <div class="subtext" style="opacity:.7">
+        Не удалось получить список типов оружия.<br>
+        Проверь /api/types и файл data/types.json.
+      </div>`;
+    showScreenSafe('screen-modules-types');
+    return;
+  }
+
+  // 4) рендер карточек типов
+  modulesTypesGrid.innerHTML = list.map(t => `
     <div class="card-btn" data-weapon-key="${esc(t.key)}" style="min-width:160px;">
       <i class="fas fa-list"></i>
       <span>${esc(t.label)}</span>
     </div>
   `).join('');
+
+  // 5) навесим клики
   modulesTypesGrid.querySelectorAll('.card-btn').forEach(card => {
     card.addEventListener('click', () => {
       const key = card.dataset.weaponKey;
-      const obj = weaponTypesList.find(x => x.key === key);
+      const obj = list.find(x => x.key === key);
       currentWeaponTypeKey = key;
       currentWeaponTypeLabel = obj?.label || key;
       openModulesListScreen();
     });
   });
+
   showScreenSafe('screen-modules-types');
 }
+
 
 backFromModTypesBtn?.addEventListener('click', () => {
   showScreenSafe('screen-warzone-main');
