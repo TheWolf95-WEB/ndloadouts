@@ -647,8 +647,12 @@ const tabContents = build.tabs.map((tab, i) => {
     <div class="loadout__tab-content ${i === 0 ? 'is-active' : ''}" data-tab-content="tab-${buildIndex}-${i}">
       <div class="loadout__modules">
       ${tab.items.map(itemKey => {
-        const mod = modulesByType[build.weapon_type]?.byKey?.[itemKey];
-        const slot = mod?.category || "—";
+        // Берём модуль напрямую из справочника (который ты уже загрузил в loadModules)
+        const wrap = modulesByType[build.weapon_type];
+        const mod  = wrap?.byKey?.[itemKey] || null;
+      
+        // Категория и имя — ТОЛЬКО из справочника (по-русски)
+        const slot = mod?.category || '—';
         const ru   = mod?.ru || itemKey;
       
         return `
@@ -658,6 +662,7 @@ const tabContents = build.tabs.map((tab, i) => {
           </div>
         `;
       }).join('')}
+
 
       </div>
     </div>
