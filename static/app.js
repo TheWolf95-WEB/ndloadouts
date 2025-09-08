@@ -261,13 +261,18 @@ async function loadModules(type) {
 
   const byKey = {};
   const flat = [];
+  const norm = s => String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
 
   for (const cat in byCategory) {
     byCategory[cat].forEach(m => {
       const mod = { ...m, category: cat };
       flat.push(mod);
+
+      // индексы по исходному и нормализованному ключу
       byKey[m.en] = { en: m.en, ru: m.ru, category: cat };
-      moduleNameMap[m.en] = m.ru; // оставим, если где-то ещё используется
+      byKey[norm(m.en)] = { en: m.en, ru: m.ru, category: cat };
+
+      moduleNameMap[m.en] = m.ru;
     });
   }
 
@@ -647,13 +652,12 @@ const tabContents = build.tabs.map((tab, i) => {
     <div class="loadout__tab-content ${i === 0 ? 'is-active' : ''}" data-tab-content="tab-${buildIndex}-${i}">
       <div class="loadout__modules">
       ${tab.items.map(itemKey => {
-        // Берём модуль напрямую из справочника (который ты уже загрузил в loadModules)
         const wrap = modulesByType[build.weapon_type];
-        const mod  = wrap?.byKey?.[itemKey] || null;
+        const norm = s => String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
+        const mod  = wrap?.byKey?.[itemKey] || wrap?.byKey?.[norm(itemKey)] || null;
       
-        // Категория и имя — ТОЛЬКО из справочника (по-русски)
-        const slot = mod?.category || '—';
-        const ru   = mod?.ru || itemKey;
+        const slot = mod?.category || '—';  // категория из справочника (у тебя по-русски)
+        const ru   = mod?.ru || itemKey;    // русское название из справочника
       
         return `
           <div class="loadout__module">
@@ -662,6 +666,7 @@ const tabContents = build.tabs.map((tab, i) => {
           </div>
         `;
       }).join('')}
+
 
 
       </div>
