@@ -121,6 +121,32 @@ body {
   transform: scale(1.05);
 }
 
+#modules-types-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* две колонки */
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.modules-type-btn {
+  background-color: #131923;       /* тёмный фон как у "Назад" */
+  color: #fff;
+  font-weight: 500;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.2s ease;
+  width: 100%;
+}
+
+.modules-type-btn:hover {
+  background-color: #1f2631; /* чуть светлее при наведении */
+}
+
+
+
 /* ГЛАВНОЕ МЕНЮ */
 .global-home-button {
   margin-top: 20px;
