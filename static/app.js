@@ -635,11 +635,6 @@ async function loadBuilds(category = 'all') {
                 `;
               }).join('')}
 
-          </div>
-        </div>
-      `).join('');
-
-
     wrapper.innerHTML = `
       <div class="loadout__header js-loadout-toggle">
         <div class="loadout__header--top">
