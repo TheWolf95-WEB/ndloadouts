@@ -115,16 +115,17 @@ async function checkAdminStatus() {
 
 
 function showScreen(id) {
-// вынеси в глобальную область
+// --- Доступ к экранам (глобально)
 const protectedScreens = {
   'screen-form': 'is_admin',
   'screen-edit-builds': 'is_admin',
   'screen-update-version': 'is_admin',
   'screen-assign-admin': 'is_super_admin',
   'screen-modules-types': 'is_admin',
-  'screen-modules-list': 'is_admin'
+  'screen-modules-list': 'is_admin',
 };
 
+// --- Показ экрана (одна функция!)
 function showScreen(id) {
   const requiredRole = protectedScreens[id];
   if (requiredRole && !window.userInfo?.[requiredRole]) {
@@ -140,7 +141,7 @@ function showScreen(id) {
       requestAnimationFrame(() => screen.classList.add('active'));
     } else {
       screen.classList.remove('active');
-      setTimeout(() => screen.style.display = 'none', 300);
+      setTimeout(() => (screen.style.display = 'none'), 300);
     }
   });
 
@@ -148,18 +149,13 @@ function showScreen(id) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
   const globalHomeBtn = document.getElementById('global-home-btn');
-  if (id === 'screen-warzone-main') {
-    globalHomeBtn.style.display = 'block';
-  } else {
-    globalHomeBtn.style.display = 'none';
-  }
+  globalHomeBtn.style.display = (id === 'screen-warzone-main') ? 'block' : 'none';
 }
 
-
-// Модули справочник
-
-// Доступ к экранам и кнопкам
-const modulesDictBtn = document.getElementById('modules-dict-btn');
+// =============================
+// Справочник модулей (глобально)
+// =============================
+const modulesDictBtn    = document.getElementById('modules-dict-btn');
 const screenModulesTypes = document.getElementById('screen-modules-types');
 const screenModulesList  = document.getElementById('screen-modules-list');
 const modulesTypesGrid   = document.getElementById('modules-types-grid');
@@ -172,9 +168,9 @@ const modRuInput  = document.getElementById('mod-ru');
 const modPosInput = document.getElementById('mod-pos');
 const modAddBtn   = document.getElementById('mod-add-btn');
 
-let currentModulesType = null; // выбранный weapon_type
+let currentModulesType = null;
 
-// Дадим доступ к экрану только админам
+// Хелпер с проверкой прав
 function showScreenWithGuard(id) {
   const needAdmin = ['screen-modules-types', 'screen-modules-list'].includes(id);
   if (needAdmin && !window.userInfo?.is_admin) {
@@ -197,7 +193,7 @@ document.getElementById('back-from-mod-list')?.addEventListener('click', () => {
   showScreenWithGuard('screen-modules-types');
 });
 
-// Список типов оружия из /api/types
+// Список типов оружия
 async function renderModulesTypes() {
   modulesTypesGrid.innerHTML = '';
   const res = await fetch('/api/types');
@@ -236,26 +232,27 @@ async function renderModulesList(weaponType) {
       <div class="card__title">${cat}</div>
       <div class="simple-table">`;
 
-    data[cat].sort((a,b) => (a.pos ?? 0) - (b.pos ?? 0) || a.ru.localeCompare(b.ru));
-    data[cat].forEach(m => {
-      html += `
-        <div class="row" data-id="${m.id}">
-          <div class="cell cell-en"><code>${m.en}</code></div>
-          <div class="cell cell-ru">${m.ru}</div>
-          <div class="cell cell-pos">${m.pos ?? 0}</div>
-          <div class="cell cell-actions">
-            <button class="btn btn-sm" data-act="edit">✏</button>
-            <button class="btn btn-sm" data-act="del">🗑</button>
-          </div>
-        </div>`;
-    });
+    data[cat]
+      .sort((a,b) => (a.pos ?? 0) - (b.pos ?? 0) || a.ru.localeCompare(b.ru))
+      .forEach(m => {
+        html += `
+          <div class="row" data-id="${m.id}">
+            <div class="cell cell-en"><code>${m.en}</code></div>
+            <div class="cell cell-ru">${m.ru}</div>
+            <div class="cell cell-pos">${m.pos ?? 0}</div>
+            <div class="cell cell-actions">
+              <button class="btn btn-sm" data-act="edit">✏</button>
+              <button class="btn btn-sm" data-act="del">🗑</button>
+            </div>
+          </div>`;
+      });
 
     html += `</div></div>`;
   });
 
   modulesListBox.innerHTML = html;
 
-  // Делегируем клики по кнопкам
+  // Удаление
   modulesListBox.querySelectorAll('button[data-act="del"]').forEach(btn => {
     btn.addEventListener('click', async () => {
       const row = btn.closest('.row');
@@ -271,9 +268,9 @@ async function renderModulesList(weaponType) {
     });
   });
 
+  // Редактирование
   modulesListBox.querySelectorAll('button[data-act="edit"]').forEach(btn => {
     btn.addEventListener('click', async () => {
-      // простая inline-форма
       const row = btn.closest('.row');
       const id = row.dataset.id;
       const oldEn  = row.querySelector('.cell-en').textContent.trim();
@@ -315,9 +312,10 @@ modAddBtn?.addEventListener('click', async () => {
   });
 
   if (res.ok) {
-    modEnInput.value = ''; modRuInput.value = '';
+    modEnInput.value = '';
+    modRuInput.value = '';
     await renderModulesList(currentModulesType);
-    // обновим кэш, чтобы форма сборок видела новый модуль
+    // обновим кэш модулей для формы сборок
     delete modulesByType[currentModulesType];
     await loadModules(currentModulesType);
   } else {
