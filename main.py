@@ -16,8 +16,7 @@ from urllib.parse import parse_qs
 from datetime import datetime
 from database import (
     init_db, get_all_builds, add_build, delete_build_by_id, get_all_users,
-    save_user, update_build_by_id, add_version_entry, get_latest_version, get_all_versions,
-    init_modules_table, modules_grouped_by_category,
+    save_user, update_build_by_id, add_version_entry, get_latest_version, get_all_versions, modules_grouped_by_category,
     module_add, module_update, module_delete,
 )
 
@@ -76,8 +75,6 @@ app.mount("/data", StaticFiles(directory="data"), name="data")
 templates = Jinja2Templates(directory="templates")
 
 init_db()
-init_modules_table()
-
 
 def ensure_admin_from_init(init_data_str: str):
     uid, is_admin, _ = extract_user_roles(init_data_str or "")
