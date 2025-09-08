@@ -123,26 +123,32 @@ body {
 
 #modules-types-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* две колонки */
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   margin-top: 24px;
 }
 
 .modules-type-btn {
-  background-color: #131923;       /* тёмный фон как у "Назад" */
+  background-color: #131923;
   color: #fff;
-  font-weight: 500;
-  padding: 12px 16px;
+  font-weight: 600;
+  font-size: 16px;         /* 👈 увеличен шрифт */
+  padding: 14px 16px;
+  height: 52px;
+  font-weight:700;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   text-align: center;
   transition: background-color 0.2s ease;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modules-type-btn:hover {
-  background-color: #1f2631; /* чуть светлее при наведении */
+  background-color: #1f2631;
 }
 
 
