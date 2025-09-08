@@ -883,8 +883,6 @@ async function loadAdminList(requesterId) {
 
 
 
-// Справочник
-
 // ==== СПРАВОЧНИК МОДУЛЕЙ: выбор типа → CRUD модулей ====
 
 const modulesDictBtn = document.getElementById('modules-dict-btn');
@@ -912,9 +910,7 @@ let weaponTypesList = []; // [{key,label}]
 let editingModuleId = null; // null — добавление; number — редактирование
 
 function showScreenSafe(id) {
-  // используем твою showScreen, если есть
   if (typeof showScreen === 'function') return showScreen(id);
-  // fallback (если вдруг вызов вне контекста)
   document.querySelectorAll('.screen').forEach(s => s.style.display = (s.id === id ? 'block' : 'none'));
 }
 
@@ -978,11 +974,9 @@ async function openModulesListScreen() {
 
 async function reloadModulesList() {
   const grouped = await apiGetJSON(`/api/modules/${encodeURIComponent(currentWeaponTypeKey)}`);
-  // если справочник пуст — подтянем старые JSON, чтобы не было пусто
   if (!grouped || Object.keys(grouped).length === 0) {
-    await loadModules(currentWeaponTypeKey); // заполнит modulesByType + moduleNameMap
+    await loadModules(currentWeaponTypeKey); 
     const mods = modulesByType[currentWeaponTypeKey] || {};
-    // отрисуем из JSON (без id)
     renderGroups(Object.fromEntries(Object.entries(mods).map(([cat, arr]) => [
       cat, arr.map((x, i) => ({ id: null, en: x.en, ru: x.ru, pos: i }))
     ])));
@@ -1028,7 +1022,6 @@ function renderGroups(grouped) {
 }
 
 function bindModulesListEvents() {
-  // заполнить категорию в тулбаре
   modulesListWrap.querySelectorAll('[data-act="add-to-cat"]').forEach(btn => {
     btn.addEventListener('click', () => {
       modCategoryInput.value = btn.dataset.category || '';
@@ -1038,7 +1031,6 @@ function bindModulesListEvents() {
     });
   });
 
-  // редактировать
   modulesListWrap.querySelectorAll('[data-act="edit"]').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = Number(btn.dataset.id);
@@ -1052,7 +1044,6 @@ function bindModulesListEvents() {
       modEnInput.value = en;
       modRuInput.value = ru;
 
-      // pos = текущий индекс
       const ul = li.closest('.mod-list');
       const idx = Array.from(ul.children).indexOf(li);
       modPosInput.value = String(idx);
@@ -1061,7 +1052,6 @@ function bindModulesListEvents() {
     });
   });
 
-  // удалить
   modulesListWrap.querySelectorAll('[data-act="del"]').forEach(btn => {
     btn.addEventListener('click', async () => {
       const id = Number(btn.dataset.id);
@@ -1072,10 +1062,8 @@ function bindModulesListEvents() {
     });
   });
 
-  // DnD сортировка внутри категории — только для элементов из БД (id != null)
   modulesListWrap.querySelectorAll('.mod-list').forEach(ul => {
     initDragSort(ul, async (orderedIds) => {
-      // фильтруем только id с БД
       const ids = orderedIds.filter(x => x != null);
       for (let i = 0; i < ids.length; i++) {
         await apiSendJSON(`/api/modules/${ids[i]}`, 'PUT', { initData: tg.initData, pos: i });
@@ -1099,20 +1087,16 @@ modAddBtn?.addEventListener('click', async () => {
 
   try {
     if (editingModuleId == null) {
-      // добавление в БД
       await apiSendJSON('/api/modules', 'POST', {
         initData: tg.initData,
         weapon_type: currentWeaponTypeKey,
         category, en, ru, pos
       });
     } else {
-      // обновление
       await apiSendJSON(`/api/modules/${editingModuleId}`, 'PUT', {
         initData: tg.initData, category, en, ru, pos
       });
     }
-    // обновим и локальный кэш для корректного отображения сборок
-    // (чтобы moduleNameMap знал новые названия)
     modulesByType[currentWeaponTypeKey] = undefined;
     await loadModules(currentWeaponTypeKey);
 
@@ -1142,7 +1126,6 @@ function resetModulesToolbar(clear = false) {
 function initDragSort(listEl, onSorted) {
   let dragEl = null;
   listEl.querySelectorAll('.mod-item').forEach(li => {
-    // запрещаем dnd для JSON (id пустой)
     if (!li.dataset.id) return;
     li.setAttribute('draggable', 'true');
     li.addEventListener('dragstart', (e) => {
