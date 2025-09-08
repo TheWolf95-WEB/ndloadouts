@@ -114,7 +114,6 @@ async function checkAdminStatus() {
 }
 
 
-function showScreen(id) {
 // --- Доступ к экранам (глобально)
 const protectedScreens = {
   'screen-form': 'is_admin',
@@ -155,7 +154,7 @@ function showScreen(id) {
 // =============================
 // Справочник модулей (глобально)
 // =============================
-const modulesDictBtn    = document.getElementById('modules-dict-btn');
+const modulesDictBtn     = document.getElementById('modules-dict-btn');
 const screenModulesTypes = document.getElementById('screen-modules-types');
 const screenModulesList  = document.getElementById('screen-modules-list');
 const modulesTypesGrid   = document.getElementById('modules-types-grid');
@@ -170,7 +169,7 @@ const modAddBtn   = document.getElementById('mod-add-btn');
 
 let currentModulesType = null;
 
-// Хелпер с проверкой прав
+// Проверка прав и показ экрана
 function showScreenWithGuard(id) {
   const needAdmin = ['screen-modules-types', 'screen-modules-list'].includes(id);
   if (needAdmin && !window.userInfo?.is_admin) {
@@ -218,7 +217,7 @@ async function renderModulesTypes() {
 async function renderModulesList(weaponType) {
   modulesListBox.innerHTML = 'Загрузка…';
   const res = await fetch(`/api/modules/${weaponType}`);
-  const data = await res.json(); // { "Дуло": [{id,en,ru,pos}, ...], ... }
+  const data = await res.json(); // { "Категория": [{id,en,ru,pos}, ...], ... }
 
   const cats = Object.keys(data);
   if (cats.length === 0) {
@@ -322,8 +321,6 @@ modAddBtn?.addEventListener('click', async () => {
     alert('Ошибка добавления');
   }
 });
-
-
 
 
 // === Кнопки перехода ===
