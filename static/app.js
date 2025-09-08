@@ -62,16 +62,64 @@ document.getElementById('category-filter')?.addEventListener('change', async (e)
   await loadBuilds(category);
 });
 
+async function checkAdminStatus() {
+  try {
+    const res = await fetch('/api/me', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ initData: tg.initData })
+    });
 
-// 📌 Глобальный переключатель экранов
-window.showScreen = function(id) {
+    const data = await res.json();
+    window.userInfo = data;
+
+    const editBtn = document.getElementById('edit-builds-btn');
+    const assignBtn = document.getElementById('assign-admin-btn');
+    const updateBtn = document.getElementById('update-version-btn');
+    const addBtn = document.getElementById('add-build-btn');
+
+    // Сначала прячем всё
+    [editBtn, assignBtn, updateBtn, addBtn].forEach(btn => {
+      if (btn) btn.classList.remove('is-visible', 'full-width');
+    });
+
+    if (data.is_admin) {
+      editBtn?.classList.add('is-visible');
+      updateBtn?.classList.add('is-visible');
+      addBtn?.classList.add('is-visible');
+      userInfoEl.innerHTML += `<p>Вы вошли как админ ✅</p>`;
+
+    }
+
+    if (data.is_super_admin) {
+      assignBtn?.classList.add('is-visible'); // ✅
+      // Супер-админу делаем "Добавить сборку" на всю ширину
+      addBtn?.classList.add('full-width');
+    } else {
+      // У обычного админа — убираем full-width
+      addBtn?.classList.remove('full-width');
+    }
+
+  } catch (e) {
+    console.error("Ошибка при проверке прав администратора:", e);
+    const editBtn = document.getElementById('edit-builds-btn');
+    const assignBtn = document.getElementById('assign-admin-btn');
+    const updateBtn = document.getElementById('update-version-btn');
+    const addBtn = document.getElementById('add-build-btn');
+
+    [editBtn, assignBtn, updateBtn, addBtn].forEach(btn => {
+      if (btn) btn.style.display = 'none';
+    });
+  }
+}
+
+
+function showScreen(id) {
   const protectedScreens = {
     'screen-form': 'is_admin',
     'screen-edit-builds': 'is_admin',
     'screen-update-version': 'is_admin',
-    'screen-assign-admin': 'is_super_admin',
-    'screen-modules-types': 'is_admin',
-    'screen-modules-list': 'is_admin',
+    'screen-assign-admin': 'is_super_admin'
   };
 
   const requiredRole = protectedScreens[id];
@@ -92,71 +140,17 @@ window.showScreen = function(id) {
     }
   });
 
-  // Показываем role-buttons только на экране Warzone
-  const roleButtons = document.getElementById('role-buttons');
-  if (roleButtons) {
-    roleButtons.style.display = id === 'screen-warzone-main' ? 'flex' : 'none';
-  }
-
-  // Кнопка "Главное меню"
-  const globalHomeBtn = document.getElementById('global-home-btn');
-  if (globalHomeBtn) {
-    globalHomeBtn.style.display = id === 'screen-warzone-main' ? 'block' : 'none';
-  }
-
+  roleButtons.style.display = (id === 'screen-warzone-main') ? 'flex' : 'none';
   window.scrollTo({ top: 0, behavior: 'smooth' });
-};
 
-
-async function checkAdminStatus() {
-  try {
-    const res = await fetch('/api/me', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ initData: tg.initData })
-    });
-
-    const data = await res.json();
-    window.userInfo = data;
-
-    const editBtn    = document.getElementById('edit-builds-btn');
-    const assignBtn  = document.getElementById('assign-admin-btn');
-    const updateBtn  = document.getElementById('update-version-btn');
-    const addBtn     = document.getElementById('add-build-btn');
-    const modulesBtn = document.getElementById('modules-dict-btn'); // 👈
-
-    // Сначала прячем всё
-    [editBtn, assignBtn, updateBtn, addBtn, modulesBtn].forEach(btn => {
-      if (btn) btn.classList.remove('is-visible', 'full-width');
-    });
-
-    if (data.is_admin) {
-      editBtn?.classList.add('is-visible');
-      updateBtn?.classList.add('is-visible');
-      addBtn?.classList.add('is-visible');
-      modulesBtn?.classList.add('is-visible');            // 👈 показать кнопку
-      userInfoEl.innerHTML += `<p>Вы вошли как админ ✅</p>`;
-    }
-
-    if (data.is_super_admin) {
-      assignBtn?.classList.add('is-visible');
-      addBtn?.classList.add('full-width');
-    } else {
-      addBtn?.classList.remove('full-width');
-    }
-
-  } catch (e) {
-    console.error("Ошибка при проверке прав администратора:", e);
-    const editBtn    = document.getElementById('edit-builds-btn');
-    const assignBtn  = document.getElementById('assign-admin-btn');
-    const updateBtn  = document.getElementById('update-version-btn');
-    const addBtn     = document.getElementById('add-build-btn');
-    const modulesBtn = document.getElementById('modules-dict-btn');
-
-    [editBtn, assignBtn, updateBtn, addBtn, modulesBtn].forEach(btn => {
-      if (btn) btn?.classList.remove('is-visible', 'full-width');
-    });
+  // Показывать кнопку "Главное меню" только на экране с кнопками
+  const globalHomeBtn = document.getElementById('global-home-btn');
+  if (id === 'screen-warzone-main') {
+    globalHomeBtn.style.display = 'block';
+  } else {
+    globalHomeBtn.style.display = 'none';
   }
+
 }
 
 
@@ -215,7 +209,6 @@ async function loadWeaponTypes() {
   const res = await fetch('/api/types');
   const types = await res.json();
 
-  weaponTypeSelect.innerHTML = ''; // на всякий
   types.forEach(type => {
     const opt = document.createElement('option');
     opt.value = type.key;
@@ -224,71 +217,26 @@ async function loadWeaponTypes() {
     weaponTypeSelect.appendChild(opt);
   });
 
-  // выберем первый тип явно
-  if (types.length && !weaponTypeSelect.value) {
-    weaponTypeSelect.value = types[0].key;
-  }
-  await loadModules(weaponTypeSelect.value);
+  const defaultType = weaponTypeSelect.value;
+  await loadModules(defaultType);
 }
-
 
 weaponTypeSelect.addEventListener('change', async () => {
   await loadModules(weaponTypeSelect.value);
 });
 
 async function loadModules(type) {
-  // уже загружали — выходим
   if (modulesByType[type]) return;
+  const res = await fetch(`/data/modules-${type}.json`);
+  const mods = await res.json();
+  modulesByType[type] = mods;
 
-  // 1) пробуем API /api/modules/{type}
-  const apiOk = await (async () => {
-    try {
-      const res = await fetch(`/api/modules/${encodeURIComponent(type)}`, { cache: 'no-store' });
-      if (!res.ok) return false;
-      const grouped = await res.json(); // { category: [{id,en,ru,pos}, ...], ... }
-      // если пусто — считаем как неуспешную загрузку
-      if (!grouped || typeof grouped !== 'object' || Object.keys(grouped).length === 0) return false;
-
-      // приводим к формату, который уже использует твой код:
-      // modulesByType[type] = { category: [{en,ru}, ...], ... }
-      const normalized = {};
-      Object.keys(grouped).forEach(cat => {
-        normalized[cat] = (grouped[cat] || []).map(it => ({ en: it.en, ru: it.ru }));
-      });
-      modulesByType[type] = normalized;
-
-      // заполним карту имён для отображения
-      for (const cat in normalized) {
-        normalized[cat].forEach(mod => {
-          moduleNameMap[mod.en] = mod.ru;
-        });
-      }
-      return true;
-    } catch (e) {
-      return false;
-    }
-  })();
-
-  if (apiOk) return;
-
-  // 2) fallback на старые JSON (ничего не ломаем)
-  try {
-    const res = await fetch(`/data/modules-${type}.json`, { cache: 'no-store' });
-    if (!res.ok) throw new Error(await res.text());
-    const mods = await res.json(); // { category: [{en,ru}, ...], ... }
-    modulesByType[type] = mods;
-
-    for (const cat in mods) {
-      (mods[cat] || []).forEach(mod => {
-        moduleNameMap[mod.en] = mod.ru;
-      });
-    }
-  } catch (e) {
-    // если нет ни API, ни JSON — ставим пусто
-    modulesByType[type] = {};
+  for (const cat in mods) {
+    mods[cat].forEach(mod => {
+      moduleNameMap[mod.en] = mod.ru;
+    });
   }
 }
-
 
 // === Добавление вкладки ===
 document.getElementById('add-tab').addEventListener('click', () => {
@@ -879,301 +827,5 @@ async function loadAdminList(requesterId) {
       listEl.appendChild(li);
     });
   }
-}
+} 
 
-
-
-// ==== СПРАВОЧНИК МОДУЛЕЙ: выбор типа → CRUD модулей ====
-
-const modulesDictBtn = document.getElementById('modules-dict-btn');
-
-const screenModulesTypes  = document.getElementById('screen-modules-types');
-const screenModulesList   = document.getElementById('screen-modules-list');
-
-const modulesTypesGrid    = document.getElementById('modules-types-grid');
-const backFromModTypesBtn = document.getElementById('back-from-mod-types');
-
-const modulesTitle     = document.getElementById('modules-title');
-const modulesListWrap  = document.getElementById('modules-list');
-const backFromModList  = document.getElementById('back-from-mod-list');
-
-const modCategoryInput = document.getElementById('mod-category');
-const modEnInput       = document.getElementById('mod-en');
-const modRuInput       = document.getElementById('mod-ru');
-const modPosInput      = document.getElementById('mod-pos');
-const modAddBtn        = document.getElementById('mod-add-btn');
-
-let _isAdminModules = false;
-let currentWeaponTypeKey = null;
-let currentWeaponTypeLabel = null;
-let weaponTypesList = []; // [{key,label}]
-let editingModuleId = null; // null — добавление; number — редактирование
-
-function showScreenSafe(id) {
-  if (typeof showScreen === 'function') return showScreen(id);
-  document.querySelectorAll('.screen').forEach(s => s.style.display = (s.id === id ? 'block' : 'none'));
-}
-
-async function apiGetJSON(url) {
-  try {
-    const r = await fetch(url, { cache: 'no-store' });
-    if (!r.ok) throw new Error(await r.text());
-    return await r.json();
-  } catch (e) {
-    return { __error: String(e) }; // чтобы было что проверить
-  }
-}
-
-modulesDictBtn?.addEventListener('click', async () => {
-  const ok = await ensureAdminForModules();
-  if (!ok) return alert('Экран доступен только администраторам');
-  await openModulesTypesScreen();
-});
-
-async function openModulesTypesScreen() {
-  // 1) пытаемся взять типы с бэка
-  let list = await apiGetJSON('/api/types');
-
-  // 2) если не массив — fallback на уже загруженные метки из селекта
-  if (!Array.isArray(list) || list.length === 0) {
-    list = Object.entries(weaponTypeLabels).map(([key, label]) => ({ key, label }));
-  }
-
-  // 3) если и тут пусто — покажем понятное сообщение
-  if (!Array.isArray(list) || list.length === 0) {
-    modulesTypesGrid.innerHTML = `
-      <div class="subtext" style="opacity:.7">
-        Не удалось получить список типов оружия.<br>
-        Проверь /api/types и файл data/types.json.
-      </div>`;
-    showScreenSafe('screen-modules-types');
-    return;
-  }
-
-  // 4) рендер карточек типов
-  modulesTypesGrid.innerHTML = list.map(t => `
-    <div class="card-btn" data-weapon-key="${esc(t.key)}" style="min-width:160px;">
-      <i class="fas fa-list"></i>
-      <span>${esc(t.label)}</span>
-    </div>
-  `).join('');
-
-  // 5) навесим клики
-  modulesTypesGrid.querySelectorAll('.card-btn').forEach(card => {
-    card.addEventListener('click', () => {
-      const key = card.dataset.weaponKey;
-      const obj = list.find(x => x.key === key);
-      currentWeaponTypeKey = key;
-      currentWeaponTypeLabel = obj?.label || key;
-      openModulesListScreen();
-    });
-  });
-
-  showScreenSafe('screen-modules-types');
-}
-
-
-backFromModTypesBtn?.addEventListener('click', () => {
-  showScreenSafe('screen-warzone-main');
-});
-
-async function openModulesListScreen() {
-  modulesTitle.textContent = `Справочник: ${currentWeaponTypeLabel}`;
-  await reloadModulesList();
-  showScreenSafe('screen-modules-list');
-}
-
-async function reloadModulesList() {
-  const grouped = await apiGetJSON(`/api/modules/${encodeURIComponent(currentWeaponTypeKey)}`);
-  if (!grouped || Object.keys(grouped).length === 0) {
-    await loadModules(currentWeaponTypeKey); 
-    const mods = modulesByType[currentWeaponTypeKey] || {};
-    renderGroups(Object.fromEntries(Object.entries(mods).map(([cat, arr]) => [
-      cat, arr.map((x, i) => ({ id: null, en: x.en, ru: x.ru, pos: i }))
-    ])));
-  } else {
-    renderGroups(grouped);
-  }
-}
-
-function renderGroups(grouped) {
-  const cats = Object.keys(grouped).sort();
-  if (!cats.length) {
-    modulesListWrap.innerHTML = `<div class="subtext">Пока модулей нет. Заполните поля выше и нажмите «Добавить».</div>`;
-    return;
-  }
-  modulesListWrap.innerHTML = cats.map(cat => {
-    const items = (grouped[cat] || []).slice().sort((a,b)=> (a.pos - b.pos) || String(a.ru).localeCompare(String(b.ru)));
-    const lis = items.map(it => `
-      <li class="mod-item" data-id="${it.id ?? ''}" draggable="${it.id!=null}">
-        <span class="mod-item__handle">☰</span>
-        <div class="mod-item__name">
-          <div><b>${esc(it.ru)}</b></div>
-          <div style="opacity:.7;font-size:.9em">${esc(it.en)}</div>
-        </div>
-        <div class="mod-item__actions">
-          ${it.id!=null ? `<button class="btn btn-small" data-act="edit" data-id="${it.id}" data-cat="${esc(cat)}">✏️</button>
-          <button class="btn btn-small" data-act="del" data-id="${it.id}">🗑</button>` : `<span style="opacity:.6;">(из JSON, сохраните в БД)</span>`}
-        </div>
-      </li>
-    `).join('');
-
-    return `
-      <section class="mod-group" data-category="${esc(cat)}" style="background:#171D25;padding:12px;border-radius:10px;margin-bottom:12px;">
-        <div class="mod-group__title" style="font-weight:700;margin-bottom:8px;">${esc(cat)}</div>
-        <ul class="mod-list" data-category="${esc(cat)}" style="list-style:none;margin:0;padding:0;">
-          ${lis}
-        </ul>
-        <button class="btn btn-small" data-act="add-to-cat" data-category="${esc(cat)}" style="margin-top:8px;">+ Добавить в ${esc(cat)}</button>
-      </section>
-    `;
-  }).join('');
-
-  bindModulesListEvents();
-}
-
-function bindModulesListEvents() {
-  modulesListWrap.querySelectorAll('[data-act="add-to-cat"]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      modCategoryInput.value = btn.dataset.category || '';
-      modEnInput.focus();
-      editingModuleId = null;
-      modAddBtn.textContent = '➕ Добавить';
-    });
-  });
-
-  modulesListWrap.querySelectorAll('[data-act="edit"]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const id = Number(btn.dataset.id);
-      const li = modulesListWrap.querySelector(`.mod-item[data-id="${id}"]`);
-      const cat = btn.dataset.cat || '';
-      const ru = li?.querySelector('.mod-item__name b')?.textContent || '';
-      const en = li?.querySelector('.mod-item__name div:nth-child(2)')?.textContent || '';
-
-      editingModuleId = id;
-      modCategoryInput.value = cat;
-      modEnInput.value = en;
-      modRuInput.value = ru;
-
-      const ul = li.closest('.mod-list');
-      const idx = Array.from(ul.children).indexOf(li);
-      modPosInput.value = String(idx);
-
-      modAddBtn.textContent = '💾 Сохранить';
-    });
-  });
-
-  modulesListWrap.querySelectorAll('[data-act="del"]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const id = Number(btn.dataset.id);
-      if (!confirm('Удалить модуль?')) return;
-      await apiSendJSON(`/api/modules/${id}`, 'DELETE', { initData: tg.initData });
-      await reloadModulesList();
-      if (editingModuleId === id) resetModulesToolbar(true);
-    });
-  });
-
-  modulesListWrap.querySelectorAll('.mod-list').forEach(ul => {
-    initDragSort(ul, async (orderedIds) => {
-      const ids = orderedIds.filter(x => x != null);
-      for (let i = 0; i < ids.length; i++) {
-        await apiSendJSON(`/api/modules/${ids[i]}`, 'PUT', { initData: tg.initData, pos: i });
-      }
-      await reloadModulesList();
-      resetModulesToolbar();
-    });
-  });
-}
-
-modAddBtn?.addEventListener('click', async () => {
-  const category = modCategoryInput.value.trim();
-  const en = modEnInput.value.trim();
-  const ru = modRuInput.value.trim();
-  const pos = Number(modPosInput.value || 0);
-
-  if (!category || !en || !ru) {
-    alert('Категория, EN и RU обязательны');
-    return;
-  }
-
-  try {
-    if (editingModuleId == null) {
-      await apiSendJSON('/api/modules', 'POST', {
-        initData: tg.initData,
-        weapon_type: currentWeaponTypeKey,
-        category, en, ru, pos
-      });
-    } else {
-      await apiSendJSON(`/api/modules/${editingModuleId}`, 'PUT', {
-        initData: tg.initData, category, en, ru, pos
-      });
-    }
-    modulesByType[currentWeaponTypeKey] = undefined;
-    await loadModules(currentWeaponTypeKey);
-
-    await reloadModulesList();
-    resetModulesToolbar(true);
-  } catch (e) {
-    alert('Ошибка: ' + (e?.message || e));
-  }
-});
-
-backFromModList?.addEventListener('click', () => {
-  resetModulesToolbar();
-  showScreenSafe('screen-modules-types');
-});
-
-function resetModulesToolbar(clear = false) {
-  editingModuleId = null;
-  modAddBtn.textContent = '➕ Добавить';
-  if (clear) {
-    modCategoryInput.value = '';
-    modEnInput.value = '';
-    modRuInput.value = '';
-    modPosInput.value = '0';
-  }
-}
-
-function initDragSort(listEl, onSorted) {
-  let dragEl = null;
-  listEl.querySelectorAll('.mod-item').forEach(li => {
-    if (!li.dataset.id) return;
-    li.setAttribute('draggable', 'true');
-    li.addEventListener('dragstart', (e) => {
-      dragEl = li;
-      li.classList.add('dragging');
-      e.dataTransfer.effectAllowed = 'move';
-    });
-    li.addEventListener('dragend', () => {
-      if (dragEl) dragEl.classList.remove('dragging');
-      dragEl = null;
-    });
-  });
-
-  listEl.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    const dragging = listEl.querySelector('.dragging');
-    if (!dragging) return;
-    const after = getDragAfterElement(listEl, e.clientY);
-    if (after == null) listEl.appendChild(dragging);
-    else listEl.insertBefore(dragging, after);
-  });
-
-  listEl.addEventListener('drop', async () => {
-    const orderedIds = Array.from(listEl.querySelectorAll('.mod-item')).map(li => {
-      const id = li.dataset.id;
-      return id ? Number(id) : null;
-    });
-    if (typeof onSorted === 'function') await onSorted(orderedIds);
-  });
-}
-
-function getDragAfterElement(container, y) {
-  const els = [...container.querySelectorAll('.mod-item:not(.dragging)')];
-  return els.reduce((closest, child) => {
-    const box = child.getBoundingClientRect();
-    const offset = y - box.top - box.height/2;
-    if (offset < 0 && offset > closest.offset) return { offset, element: child };
-    else return closest;
-  }, { offset: Number.NEGATIVE_INFINITY }).element;
-}
