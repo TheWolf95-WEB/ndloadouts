@@ -173,6 +173,38 @@ body {
 }
 
 
+/* верхние поля справочника */
+#modules-toolbar{
+  display: grid !important;
+  grid-template-columns: 1.15fr 1.15fr 1.15fr 0.55fr auto; /* Кат, EN, RU, Порядок, Кнопка */
+  gap: 12px;
+  align-items: center;
+  margin: 12px 0 16px;
+}
+
+/* группы */
+.module-group{ margin: 18px 0; }
+.module-group h4{ margin: 12px 0 10px; font-weight: 600; opacity: .9; }
+
+/* строка модуля: текст слева, удалить справа */
+.module-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #1f2836;
+  border-radius: 10px;
+  margin: 8px 0;
+}
+.module-row .mod-title{
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.module-row .mod-title .en{ text-transform: capitalize; } /* Suppressor, а не suppressor */
+
 
 /* ТИПЫ ОРУЖИЯ */
 
