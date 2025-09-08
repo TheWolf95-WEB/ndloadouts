@@ -257,19 +257,21 @@ weaponTypeSelect.addEventListener('change', async () => {
 
 async function loadModules(type) {
   const res = await fetch(`/api/modules/${type}`);
-  const modsByCategory = await res.json();
+  const byCategory = await res.json(); // { category: Mod[] }
 
-  const allMods = [];
+  const byKey = {};
+  const flat = [];
 
-  for (const cat in modsByCategory) {
-    modsByCategory[cat].forEach(mod => {
-      mod.category = cat; // 👈 сохраняем категорию прямо в объект модуля
-      allMods.push(mod);
-      moduleNameMap[mod.en] = mod.ru;
+  for (const cat in byCategory) {
+    byCategory[cat].forEach(m => {
+      const mod = { ...m, category: cat };
+      flat.push(mod);
+      byKey[m.en] = { en: m.en, ru: m.ru, category: cat };
+      moduleNameMap[m.en] = m.ru; // оставим, если где-то ещё используется
     });
   }
 
-  modulesByType[type] = allMods; // 👈 теперь это массив
+  modulesByType[type] = { byCategory, byKey, flat };
 }
 
 
@@ -573,26 +575,41 @@ document.getElementById('mod-add-btn')?.addEventListener('click', async () => {
 
 
 function rebuildModuleSelects() {
-  const selects = document.querySelectorAll('.module-select');
+  const weaponType = weaponTypeSelect?.value;
+  const mods = modulesByType[weaponType];
+  if (!weaponType || !mods) return;
 
-  selects.forEach(select => {
-    const category = select.getAttribute('data-category');
-    const weaponType = weaponTypeSelect?.value;
+  // Пробегаем по всем вкладкам, пересобираем модульные селекты с учётом выбранных
+  document.querySelectorAll('.tab-block').forEach(tab => {
+    const selectedNow = Array.from(tab.querySelectorAll('.module-select')).map(s => s.value);
 
-    if (!weaponType || !modulesByType[weaponType] || !modulesByType[weaponType][category]) return;
+    tab.querySelectorAll('.mod-row').forEach(row => {
+      const catSel = row.querySelector('.category-select');
+      const modSel = row.querySelector('.module-select');
+      const cat = catSel?.value;
 
-    // Очищаем select
-    select.innerHTML = '';
+      if (!cat || !mods.byCategory[cat]) return;
 
-    // Добавляем новые модули в select
-    modulesByType[weaponType][category].forEach(mod => {
-      const opt = document.createElement('option');
-      opt.value = mod.en;
-      opt.textContent = mod.en; // или mod.ru, если хочешь по-русски
-      select.appendChild(opt);
+      const currentValue = modSel.value;
+      modSel.innerHTML = '';
+
+      mods.byCategory[cat].forEach(m => {
+        if (selectedNow.includes(m.en) && m.en !== currentValue) return;
+        const opt = document.createElement('option');
+        opt.value = m.en;
+        opt.textContent = m.en;
+        modSel.appendChild(opt);
+      });
+
+      if ([...modSel.options].some(o => o.value === currentValue)) {
+        modSel.value = currentValue;
+      } else if (modSel.options.length) {
+        modSel.value = modSel.options[0].value;
+      }
     });
   });
 }
+
 
 
 
@@ -628,18 +645,19 @@ const tabContents = build.tabs.map((tab, i) => {
   return `
     <div class="loadout__tab-content ${i === 0 ? 'is-active' : ''}" data-tab-content="tab-${buildIndex}-${i}">
       <div class="loadout__modules">
-        ${tab.items.map(itemKey => {
-          const moduleObj = (modulesByType[build.weapon_type] || []).find(m => m.en === itemKey);
-          const slot = moduleObj?.category || "—";
-          const ru = moduleObj?.ru || itemKey;
+      ${tab.items.map(itemKey => {
+        const mod = modulesByType[build.weapon_type]?.byKey?.[itemKey];
+        const slot = mod?.category || "—";
+        const ru   = mod?.ru || itemKey;
+      
+        return `
+          <div class="loadout__module">
+            <span class="loadout__module-slot">${slot}</span>
+            <span class="loadout__module-name">${ru}</span>
+          </div>
+        `;
+      }).join('')}
 
-          return `
-            <div class="loadout__module">
-              <span class="loadout__module-slot">${slot}</span>
-              <span class="loadout__module-name">${ru}</span>
-            </div>
-          `;
-        }).join('')}
       </div>
     </div>
   `;
