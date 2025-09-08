@@ -619,21 +619,28 @@ async function loadBuilds(category = 'all') {
         `<button class="loadout__tab ${i === 0 ? 'is-active' : ''}" data-tab="tab-${buildIndex}-${i}">${tab.label}</button>`
       ).join('');
       
-      const tabContents = build.tabs.map((tab, i) => `
-        <div class="loadout__tab-content ${i === 0 ? 'is-active' : ''}" data-tab-content="tab-${buildIndex}-${i}">
-          <div class="loadout__modules">
-            ${tab.items.map(itemKey => {
-                const moduleObj = modulesByType[build.weapon_type]?.find(m => m.key === itemKey);
-                const slot = moduleObj?.category || "—";
-                const ru = moduleObj?.ru || itemKey;
-              
-                return `
-                  <div class="loadout__module">
-                    <span class="loadout__module-slot">${slot}</span>
-                    <span class="loadout__module-name">${ru}</span>
-                  </div>
-                `;
-              }).join('')}
+const tabContents = build.tabs.map((tab, i) => {
+  return `
+    <div class="loadout__tab-content ${i === 0 ? 'is-active' : ''}" data-tab-content="tab-${buildIndex}-${i}">
+      <div class="loadout__modules">
+        ${tab.items.map(itemKey => {
+          const allModules = Object.values(modulesByType[build.weapon_type] || {}).flat();
+          const moduleObj = allModules.find(m => m.en === itemKey);
+          const slot = moduleObj?.category || "—";
+          const ru = moduleObj?.ru || itemKey;
+
+          return `
+            <div class="loadout__module">
+              <span class="loadout__module-slot">${slot}</span>
+              <span class="loadout__module-name">${ru}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}).join('');
+
 
     wrapper.innerHTML = `
       <div class="loadout__header js-loadout-toggle">
