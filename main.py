@@ -90,7 +90,7 @@ def api_modules_list(weapon_type: str):
 
 @app.post("/api/modules")
 async def api_modules_add(payload: dict = Body(...)):
-    # ensure_admin_from_init(payload.get("initData", ""))
+    ensure_admin_from_init(payload.get("initData", ""))
     module_add_or_update(
         weapon_type=payload["weapon_type"],
         category=payload["category"],
