@@ -558,6 +558,36 @@ document.getElementById('mod-add-btn')?.addEventListener('click', async () => {
   }
 });
 
+// Обновляем справочник модулей
+await loadModulesForType(payload.weapon_type, weaponTypeLabels[payload.weapon_type] || payload.weapon_type);
+
+// Обновляем выпадающие списки модулей на форме сборки (если выбрано нужное оружие)
+if (weaponTypeSelect?.value === payload.weapon_type) {
+  rebuildModuleSelects();  // ← это функция, которую мы сейчас создадим
+}
+
+function rebuildModuleSelects() {
+  const selects = document.querySelectorAll('.module-select');
+
+  selects.forEach(select => {
+    const category = select.getAttribute('data-category');
+    const weaponType = weaponTypeSelect?.value;
+
+    if (!weaponType || !modulesByType[weaponType] || !modulesByType[weaponType][category]) return;
+
+    // Очищаем select
+    select.innerHTML = '';
+
+    // Добавляем новые модули в select
+    modulesByType[weaponType][category].forEach(mod => {
+      const opt = document.createElement('option');
+      opt.value = mod.en;
+      opt.textContent = mod.en; // или mod.ru, если хочешь по-русски
+      select.appendChild(opt);
+    });
+  });
+}
+
 
 
 // === Загрузка сборок ===
