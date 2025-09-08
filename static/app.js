@@ -62,6 +62,52 @@ document.getElementById('category-filter')?.addEventListener('change', async (e)
   await loadBuilds(category);
 });
 
+
+// 📌 Глобальный переключатель экранов
+window.showScreen = function(id) {
+  const protectedScreens = {
+    'screen-form': 'is_admin',
+    'screen-edit-builds': 'is_admin',
+    'screen-update-version': 'is_admin',
+    'screen-assign-admin': 'is_super_admin',
+    'screen-modules-types': 'is_admin',
+    'screen-modules-list': 'is_admin',
+  };
+
+  const requiredRole = protectedScreens[id];
+  if (requiredRole && !window.userInfo?.[requiredRole]) {
+    alert("🚫 У вас нет доступа к этому разделу.");
+    return;
+  }
+
+  const allScreens = document.querySelectorAll('.screen');
+  allScreens.forEach(screen => {
+    if (screen.id === id) {
+      screen.style.display = 'block';
+      screen.classList.remove('active');
+      requestAnimationFrame(() => screen.classList.add('active'));
+    } else {
+      screen.classList.remove('active');
+      setTimeout(() => screen.style.display = 'none', 300);
+    }
+  });
+
+  // Показываем role-buttons только на экране Warzone
+  const roleButtons = document.getElementById('role-buttons');
+  if (roleButtons) {
+    roleButtons.style.display = id === 'screen-warzone-main' ? 'flex' : 'none';
+  }
+
+  // Кнопка "Главное меню"
+  const globalHomeBtn = document.getElementById('global-home-btn');
+  if (globalHomeBtn) {
+    globalHomeBtn.style.display = id === 'screen-warzone-main' ? 'block' : 'none';
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+
 async function checkAdminStatus() {
   try {
     const res = await fetch('/api/me', {
