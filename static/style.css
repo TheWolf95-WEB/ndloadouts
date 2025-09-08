@@ -219,24 +219,6 @@ body {
   opacity: .95;
 }
 
-/* Кнопка удаления – компактная, «прозрачная» */
-.module-row .btn.btn-sm{
-  min-width: 36px;
-  height: 32px;
-  padding: 0 10px;
-  background: rgba(255,60,60,.12);
-  color: #ff6b6b;
-  border: 1px solid rgba(255,60,60,.25);
-  border-radius: 8px;
-  transition: background .15s, transform .05s;
-}
-.module-row .btn.btn-sm:hover{
-  background: rgba(255,60,60,.2);
-}
-.module-row .btn.btn-sm:active{
-  transform: translateY(1px);
-}
-
 
 
 /* ТИПЫ ОРУЖИЯ */
