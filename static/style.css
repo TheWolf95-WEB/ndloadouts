@@ -173,53 +173,6 @@ body {
 }
 
 
-/* === Сетка для верхних полей === */
-.mod-controls-grid{
-  display: grid;
-  grid-template-columns: 1.2fr 1.2fr 1.2fr 0.6fr auto; /* Кат, EN, RU, Порядок, Кнопка */
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 16px;
-}
-@media (max-width: 720px){
-  .mod-controls-grid{
-    grid-template-columns: 1fr 1fr; /* на мобиле в 2 колонки */
-  }
-  .mod-controls-grid > .mod-add-btn{
-    grid-column: 1 / -1; /* кнопка на всю ширину */
-  }
-}
-
-/* === Группа модулей === */
-.module-group{
-  margin: 18px 0;
-}
-.module-group h4{
-  margin: 10px 0 8px;
-  font-weight: 600;
-  opacity: .9;
-}
-
-/* === Строка модуля: слева текст, справа кнопка удаления === */
-.module-row{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 14px;
-  background: #1f2836;      /* под твой тёмный фон */
-  border-radius: 10px;
-  margin: 6px 0;
-}
-.module-row > span{
-  flex: 1;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  opacity: .95;
-}
-
-
 
 /* ТИПЫ ОРУЖИЯ */
 
