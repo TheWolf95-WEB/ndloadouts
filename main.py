@@ -17,7 +17,7 @@ from datetime import datetime
 from database import (
     init_db, get_all_builds, add_build, delete_build_by_id, get_all_users,
     save_user, update_build_by_id, add_version_entry, get_latest_version, get_all_versions, modules_grouped_by_category,
-    module_add, module_update, module_delete,
+    module_add_or_update, module_update, module_delete,
 )
 
 load_dotenv()
@@ -91,7 +91,7 @@ def api_modules_list(weapon_type: str):
 @app.post("/api/modules")
 async def api_modules_add(payload: dict = Body(...)):
     ensure_admin_from_init(payload.get("initData", ""))
-    module_add(
+    module_add_or_update(
         weapon_type=payload["weapon_type"],
         category=payload["category"],
         en=payload["en"],
@@ -138,17 +138,20 @@ async def api_builds(category: str = Query("all")):
             return 999
 
         def date_ts(b):
-            s = b.get("date") or ""
-            try:
-                return datetime.strptime(s, "%d.%m.%Y").timestamp()
-            except Exception:
-                return 0
+            s = (b.get("date") or "").strip()
+            for fmt in ("%d.%m.%Y", "%Y-%m-%d", "%Y.%m.%d"):
+                try:
+                    return datetime.strptime(s, fmt).timestamp()
+                except Exception:
+                    continue
+            return 0
 
         builds.sort(key=lambda b: (top_priority(b), -date_ts(b)))
-
         return JSONResponse(builds)
+
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
+
 
 @app.post("/api/builds")
 async def create_build(request: Request, data: dict = Body(...)):
