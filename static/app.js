@@ -450,26 +450,25 @@ function getCategoryByModule(moduleKey, weaponType) {
 
 // (загружает список типов оружия и отрисовывает кнопки на экране screen-modules-types)
 async function loadWeaponTypesForModules() {
-  const grid = document.getElementById('modules-types-grid');
-  grid.innerHTML = '';
-
   try {
     const res = await fetch('/api/types');
     const types = await res.json();
+    const list = document.getElementById('weapon-type-list');
+    list.innerHTML = '';
 
     types.forEach(type => {
-      const btn = document.createElement('div');
-      btn.className = 'card-btn';
-      btn.innerHTML = `<span>${type.label}</span>`;
-      btn.addEventListener('click', () => loadModulesForType(type.key, type.label));
-      grid.appendChild(btn);
+      const item = document.createElement('button');
+      item.className = 'type-btn';
+      item.textContent = type.label;
+      item.addEventListener('click', () => loadModulesList(type.key, type.label));
+      list.appendChild(item);
     });
 
   } catch (e) {
-    console.error("Ошибка загрузки типов оружия:", e);
-    grid.innerHTML = '<p>❌ Не удалось загрузить типы оружия.</p>';
+    console.error('Ошибка при загрузке типов оружия:', e);
   }
 }
+
 
 
 
