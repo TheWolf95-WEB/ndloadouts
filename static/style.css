@@ -173,6 +173,71 @@ body {
 }
 
 
+/* === Сетка для верхних полей === */
+.mod-controls-grid{
+  display: grid;
+  grid-template-columns: 1.2fr 1.2fr 1.2fr 0.6fr auto; /* Кат, EN, RU, Порядок, Кнопка */
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+@media (max-width: 720px){
+  .mod-controls-grid{
+    grid-template-columns: 1fr 1fr; /* на мобиле в 2 колонки */
+  }
+  .mod-controls-grid > .mod-add-btn{
+    grid-column: 1 / -1; /* кнопка на всю ширину */
+  }
+}
+
+/* === Группа модулей === */
+.module-group{
+  margin: 18px 0;
+}
+.module-group h4{
+  margin: 10px 0 8px;
+  font-weight: 600;
+  opacity: .9;
+}
+
+/* === Строка модуля: слева текст, справа кнопка удаления === */
+.module-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #1f2836;      /* под твой тёмный фон */
+  border-radius: 10px;
+  margin: 6px 0;
+}
+.module-row > span{
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  opacity: .95;
+}
+
+/* Кнопка удаления – компактная, «прозрачная» */
+.module-row .btn.btn-sm{
+  min-width: 36px;
+  height: 32px;
+  padding: 0 10px;
+  background: rgba(255,60,60,.12);
+  color: #ff6b6b;
+  border: 1px solid rgba(255,60,60,.25);
+  border-radius: 8px;
+  transition: background .15s, transform .05s;
+}
+.module-row .btn.btn-sm:hover{
+  background: rgba(255,60,60,.2);
+}
+.module-row .btn.btn-sm:active{
+  transform: translateY(1px);
+}
+
+
 
 /* ТИПЫ ОРУЖИЯ */
 
