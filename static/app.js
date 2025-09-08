@@ -77,37 +77,44 @@ async function checkAdminStatus() {
     const assignBtn = document.getElementById('assign-admin-btn');
     const updateBtn = document.getElementById('update-version-btn');
     const addBtn = document.getElementById('add-build-btn');
+    const modulesBtn = document.getElementById('modules-dict-btn');
 
-    // Сначала прячем всё
-    [editBtn, assignBtn, updateBtn, addBtn].forEach(btn => {
+    // Прячем все админские кнопки по умолчанию
+    [editBtn, assignBtn, updateBtn, addBtn, modulesBtn].forEach(btn => {
       if (btn) btn.classList.remove('is-visible', 'full-width');
     });
 
+    // === Если админ ===
     if (data.is_admin) {
       editBtn?.classList.add('is-visible');
       updateBtn?.classList.add('is-visible');
       addBtn?.classList.add('is-visible');
+      modulesBtn?.classList.add('is-visible'); // 👈 теперь будет показываться только админам
       userInfoEl.innerHTML += `<p>Вы вошли как админ ✅</p>`;
-
     }
 
+    // === Если супер-админ ===
     if (data.is_super_admin) {
-      assignBtn?.classList.add('is-visible'); // ✅
-      // Супер-админу делаем "Добавить сборку" на всю ширину
+      assignBtn?.classList.add('is-visible');
       addBtn?.classList.add('full-width');
     } else {
-      // У обычного админа — убираем full-width
       addBtn?.classList.remove('full-width');
     }
 
   } catch (e) {
     console.error("Ошибка при проверке прав администратора:", e);
-    const editBtn = document.getElementById('edit-builds-btn');
-    const assignBtn = document.getElementById('assign-admin-btn');
-    const updateBtn = document.getElementById('update-version-btn');
-    const addBtn = document.getElementById('add-build-btn');
 
-    [editBtn, assignBtn, updateBtn, addBtn].forEach(btn => {
+    // Если ошибка — прячем кнопки
+    const allAdminBtns = [
+      'edit-builds-btn',
+      'assign-admin-btn',
+      'update-version-btn',
+      'add-build-btn',
+      'modules-dict-btn'
+    ];
+
+    allAdminBtns.forEach(id => {
+      const btn = document.getElementById(id);
       if (btn) btn.style.display = 'none';
     });
   }
@@ -202,6 +209,29 @@ document.getElementById('edit-builds-btn')?.addEventListener('click', async () =
 document.getElementById('back-from-edit')?.addEventListener('click', () => {
   showScreen('screen-warzone-main');
 });
+
+
+// Открытие справочника модулей (только для админов)
+document.getElementById('modules-dict-btn')?.addEventListener('click', async () => {
+  if (!window.userInfo?.is_admin) {
+    alert("🚫 У вас нет прав доступа к справочнику модулей.");
+    return;
+  }
+
+  await loadWeaponTypesForModules(); // 👈 подгружаем типы оружия в grid
+  showScreen('screen-modules-types');
+});
+
+// Назад из выбора типа оружия
+document.getElementById('back-from-mod-types')?.addEventListener('click', () => {
+  showScreen('screen-warzone-main');
+});
+
+// Назад из списка модулей
+document.getElementById('back-from-mod-list')?.addEventListener('click', () => {
+  showScreen('screen-modules-types');
+});
+
 
 
 // === Загрузка типов оружия ===
@@ -417,6 +447,116 @@ function getCategoryByModule(moduleKey, weaponType) {
   }
   return '';
 }
+
+// (загружает список типов оружия и отрисовывает кнопки на экране screen-modules-types)
+async function loadWeaponTypesForModules() {
+  const grid = document.getElementById('modules-types-grid');
+  grid.innerHTML = '';
+
+  try {
+    const res = await fetch('/api/types');
+    const types = await res.json();
+
+    types.forEach(type => {
+      const btn = document.createElement('div');
+      btn.className = 'card-btn';
+      btn.innerHTML = `<span>${type.label}</span>`;
+      btn.addEventListener('click', () => loadModulesForType(type.key, type.label));
+      grid.appendChild(btn);
+    });
+
+  } catch (e) {
+    console.error("Ошибка загрузки типов оружия:", e);
+    grid.innerHTML = '<p>❌ Не удалось загрузить типы оружия.</p>';
+  }
+}
+
+
+
+// (загружает модули через /api/modules/{weaponType} и отрисовывает их на экране screen-modules-list)
+async function loadModulesForType(weaponType, label) {
+  try {
+    const res = await fetch(`/api/modules/${weaponType}`);
+    const data = await res.json();
+
+    document.getElementById('modules-title').textContent = `Справочник модулей — ${label}`;
+    const listEl = document.getElementById('modules-list');
+    listEl.innerHTML = '';
+
+    for (const category in data) {
+      const groupDiv = document.createElement('div');
+      groupDiv.className = 'module-group';
+      groupDiv.innerHTML = `<h4>${category}</h4>`;
+
+      data[category].forEach(mod => {
+        const row = document.createElement('div');
+        row.className = 'module-row';
+
+        row.innerHTML = `
+          <span>${mod.en} — ${mod.ru}</span>
+          <button class="btn btn-sm" data-id="${mod.id}">🗑</button>
+        `;
+
+        row.querySelector('button').addEventListener('click', async () => {
+          if (!confirm(`Удалить модуль ${mod.en}?`)) return;
+          await fetch(`/api/modules/${mod.id}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ initData: tg.initData })
+          });
+          await loadModulesForType(weaponType, label); // перезагрузка
+        });
+
+        groupDiv.appendChild(row);
+      });
+
+      listEl.appendChild(groupDiv);
+    }
+
+    // 👉 Сохраним текущий тип оружия, чтобы добавлять модули
+    window.currentModuleWeaponType = weaponType;
+    showScreen('screen-modules-list');
+
+  } catch (e) {
+    console.error("Ошибка загрузки модулей:", e);
+  }
+}
+
+
+
+// Добавление нового модуля (кнопка "➕ Добавить")
+document.getElementById('mod-add-btn')?.addEventListener('click', async () => {
+  const payload = {
+    initData: tg.initData,
+    weapon_type: window.currentModuleWeaponType,
+    category: document.getElementById('mod-category').value.trim(),
+    en: document.getElementById('mod-en').value.trim(),
+    ru: document.getElementById('mod-ru').value.trim(),
+    pos: parseInt(document.getElementById('mod-pos').value) || 0
+  };
+
+  if (!payload.category || !payload.en || !payload.ru) {
+    alert("Все поля обязательны");
+    return;
+  }
+
+  try {
+    await fetch('/api/modules', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    // Очищаем поля
+    ['mod-category', 'mod-en', 'mod-ru', 'mod-pos'].forEach(id => document.getElementById(id).value = '');
+    await loadModulesForType(payload.weapon_type, weaponTypeLabels[payload.weapon_type] || payload.weapon_type);
+
+  } catch (e) {
+    alert("Ошибка при добавлении");
+    console.error(e);
+  }
+});
+
 
 
 // === Загрузка сборок ===
