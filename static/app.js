@@ -552,19 +552,21 @@ document.getElementById('mod-add-btn')?.addEventListener('click', async () => {
     ['mod-category', 'mod-en', 'mod-ru', 'mod-pos'].forEach(id => document.getElementById(id).value = '');
     await loadModulesForType(payload.weapon_type, weaponTypeLabels[payload.weapon_type] || payload.weapon_type);
 
+
+    // Обновляем справочник модулей
+    await loadModulesForType(payload.weapon_type, weaponTypeLabels[payload.weapon_type] || payload.weapon_type);
+    
+    // Обновляем выпадающие списки модулей на форме сборки (если выбрано нужное оружие)
+    if (weaponTypeSelect?.value === payload.weapon_type) {
+      rebuildModuleSelects();  // ← это функция, которую мы сейчас создадим
+    }
+
   } catch (e) {
     alert("Ошибка при добавлении");
     console.error(e);
   }
 });
 
-// Обновляем справочник модулей
-await loadModulesForType(payload.weapon_type, weaponTypeLabels[payload.weapon_type] || payload.weapon_type);
-
-// Обновляем выпадающие списки модулей на форме сборки (если выбрано нужное оружие)
-if (weaponTypeSelect?.value === payload.weapon_type) {
-  rebuildModuleSelects();  // ← это функция, которую мы сейчас создадим
-}
 
 function rebuildModuleSelects() {
   const selects = document.querySelectorAll('.module-select');
