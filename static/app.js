@@ -622,10 +622,19 @@ async function loadBuilds(category = 'all') {
       const tabContents = build.tabs.map((tab, i) => `
         <div class="loadout__tab-content ${i === 0 ? 'is-active' : ''}" data-tab-content="tab-${buildIndex}-${i}">
           <div class="loadout__modules">
-            ${tab.items.map(item => {
-              const slot = getCategoryByModule(item, build.weapon_type);
-              return `<div class="loadout__module"><span class="loadout__module-slot">${slot}</span><span class="loadout__module-name">${moduleNameMap[item] || item}</span></div>`;
-            }).join('')}
+            ${tab.items.map(itemKey => {
+                const moduleObj = modulesByType[build.weapon_type]?.find(m => m.key === itemKey);
+                const slot = moduleObj?.category || "—";
+                const ru = moduleObj?.ru || itemKey;
+              
+                return `
+                  <div class="loadout__module">
+                    <span class="loadout__module-slot">${slot}</span>
+                    <span class="loadout__module-name">${ru}</span>
+                  </div>
+                `;
+              }).join('')}
+
           </div>
         </div>
       `).join('');
