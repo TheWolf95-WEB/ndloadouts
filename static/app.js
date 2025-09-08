@@ -256,8 +256,7 @@ weaponTypeSelect.addEventListener('change', async () => {
 });
 
 async function loadModules(type) {
-  if (modulesByType[type]) return;
-  const res = await fetch(`/data/modules-${type}.json`);
+  const res = await fetch(`/api/modules/${type}`);
   const mods = await res.json();
   modulesByType[type] = mods;
 
@@ -267,6 +266,7 @@ async function loadModules(type) {
     });
   }
 }
+
 
 // === Добавление вкладки ===
 document.getElementById('add-tab').addEventListener('click', () => {
@@ -550,11 +550,10 @@ document.getElementById('mod-add-btn')?.addEventListener('click', async () => {
 
     // Очищаем поля
     ['mod-category', 'mod-en', 'mod-ru', 'mod-pos'].forEach(id => document.getElementById(id).value = '');
-    await loadModulesForType(payload.weapon_type, weaponTypeLabels[payload.weapon_type] || payload.weapon_type);
+    await loadModules(payload.weapon_type); // обновим modulesByType
+    await loadModulesForType(payload.weapon_type, weaponTypeLabels[payload.weapon_type] || payload.weapon_type); // перерисуем визуально
+    rebuildModuleSelects(); // обновим выпадашки
 
-
-    // Обновляем справочник модулей
-    await loadModulesForType(payload.weapon_type, weaponTypeLabels[payload.weapon_type] || payload.weapon_type);
     
     // Обновляем выпадающие списки модулей на форме сборки (если выбрано нужное оружие)
     if (weaponTypeSelect?.value === payload.weapon_type) {
