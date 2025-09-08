@@ -169,6 +169,7 @@ async function loadWeaponTypes() {
   const res = await fetch('/api/types');
   const types = await res.json();
 
+  weaponTypeSelect.innerHTML = ''; // на всякий
   types.forEach(type => {
     const opt = document.createElement('option');
     opt.value = type.key;
@@ -177,9 +178,13 @@ async function loadWeaponTypes() {
     weaponTypeSelect.appendChild(opt);
   });
 
-  const defaultType = weaponTypeSelect.value;
-  await loadModules(defaultType);
+  // выберем первый тип явно
+  if (types.length && !weaponTypeSelect.value) {
+    weaponTypeSelect.value = types[0].key;
+  }
+  await loadModules(weaponTypeSelect.value);
 }
+
 
 weaponTypeSelect.addEventListener('change', async () => {
   await loadModules(weaponTypeSelect.value);
