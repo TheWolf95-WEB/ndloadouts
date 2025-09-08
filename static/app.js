@@ -73,13 +73,14 @@ async function checkAdminStatus() {
     const data = await res.json();
     window.userInfo = data;
 
-    const editBtn = document.getElementById('edit-builds-btn');
-    const assignBtn = document.getElementById('assign-admin-btn');
-    const updateBtn = document.getElementById('update-version-btn');
-    const addBtn = document.getElementById('add-build-btn');
+    const editBtn    = document.getElementById('edit-builds-btn');
+    const assignBtn  = document.getElementById('assign-admin-btn');
+    const updateBtn  = document.getElementById('update-version-btn');
+    const addBtn     = document.getElementById('add-build-btn');
+    const modulesBtn = document.getElementById('modules-dict-btn'); // 👈
 
     // Сначала прячем всё
-    [editBtn, assignBtn, updateBtn, addBtn].forEach(btn => {
+    [editBtn, assignBtn, updateBtn, addBtn, modulesBtn].forEach(btn => {
       if (btn) btn.classList.remove('is-visible', 'full-width');
     });
 
@@ -87,70 +88,29 @@ async function checkAdminStatus() {
       editBtn?.classList.add('is-visible');
       updateBtn?.classList.add('is-visible');
       addBtn?.classList.add('is-visible');
+      modulesBtn?.classList.add('is-visible');            // 👈 показать кнопку
       userInfoEl.innerHTML += `<p>Вы вошли как админ ✅</p>`;
-
     }
 
     if (data.is_super_admin) {
-      assignBtn?.classList.add('is-visible'); // ✅
-      // Супер-админу делаем "Добавить сборку" на всю ширину
+      assignBtn?.classList.add('is-visible');
       addBtn?.classList.add('full-width');
     } else {
-      // У обычного админа — убираем full-width
       addBtn?.classList.remove('full-width');
     }
 
   } catch (e) {
     console.error("Ошибка при проверке прав администратора:", e);
-    const editBtn = document.getElementById('edit-builds-btn');
-    const assignBtn = document.getElementById('assign-admin-btn');
-    const updateBtn = document.getElementById('update-version-btn');
-    const addBtn = document.getElementById('add-build-btn');
+    const editBtn    = document.getElementById('edit-builds-btn');
+    const assignBtn  = document.getElementById('assign-admin-btn');
+    const updateBtn  = document.getElementById('update-version-btn');
+    const addBtn     = document.getElementById('add-build-btn');
+    const modulesBtn = document.getElementById('modules-dict-btn');
 
-    [editBtn, assignBtn, updateBtn, addBtn].forEach(btn => {
-      if (btn) btn.style.display = 'none';
+    [editBtn, assignBtn, updateBtn, addBtn, modulesBtn].forEach(btn => {
+      if (btn) btn?.classList.remove('is-visible', 'full-width');
     });
   }
-}
-
-
-function showScreen(id) {
-  const protectedScreens = {
-    'screen-form': 'is_admin',
-    'screen-edit-builds': 'is_admin',
-    'screen-update-version': 'is_admin',
-    'screen-assign-admin': 'is_super_admin'
-  };
-
-  const requiredRole = protectedScreens[id];
-  if (requiredRole && !window.userInfo?.[requiredRole]) {
-    alert("🚫 У вас нет доступа к этому разделу.");
-    return;
-  }
-
-  const allScreens = document.querySelectorAll('.screen');
-  allScreens.forEach(screen => {
-    if (screen.id === id) {
-      screen.style.display = 'block';
-      screen.classList.remove('active');
-      requestAnimationFrame(() => screen.classList.add('active'));
-    } else {
-      screen.classList.remove('active');
-      setTimeout(() => screen.style.display = 'none', 300);
-    }
-  });
-
-  roleButtons.style.display = (id === 'screen-warzone-main') ? 'flex' : 'none';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  // Показывать кнопку "Главное меню" только на экране с кнопками
-  const globalHomeBtn = document.getElementById('global-home-btn');
-  if (id === 'screen-warzone-main') {
-    globalHomeBtn.style.display = 'block';
-  } else {
-    globalHomeBtn.style.display = 'none';
-  }
-
 }
 
 
