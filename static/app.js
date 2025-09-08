@@ -226,17 +226,58 @@ weaponTypeSelect.addEventListener('change', async () => {
 });
 
 async function loadModules(type) {
+  // уже загружали — выходим
   if (modulesByType[type]) return;
-  const res = await fetch(`/data/modules-${type}.json`);
-  const mods = await res.json();
-  modulesByType[type] = mods;
 
-  for (const cat in mods) {
-    mods[cat].forEach(mod => {
-      moduleNameMap[mod.en] = mod.ru;
-    });
+  // 1) пробуем API /api/modules/{type}
+  const apiOk = await (async () => {
+    try {
+      const res = await fetch(`/api/modules/${encodeURIComponent(type)}`, { cache: 'no-store' });
+      if (!res.ok) return false;
+      const grouped = await res.json(); // { category: [{id,en,ru,pos}, ...], ... }
+      // если пусто — считаем как неуспешную загрузку
+      if (!grouped || typeof grouped !== 'object' || Object.keys(grouped).length === 0) return false;
+
+      // приводим к формату, который уже использует твой код:
+      // modulesByType[type] = { category: [{en,ru}, ...], ... }
+      const normalized = {};
+      Object.keys(grouped).forEach(cat => {
+        normalized[cat] = (grouped[cat] || []).map(it => ({ en: it.en, ru: it.ru }));
+      });
+      modulesByType[type] = normalized;
+
+      // заполним карту имён для отображения
+      for (const cat in normalized) {
+        normalized[cat].forEach(mod => {
+          moduleNameMap[mod.en] = mod.ru;
+        });
+      }
+      return true;
+    } catch (e) {
+      return false;
+    }
+  })();
+
+  if (apiOk) return;
+
+  // 2) fallback на старые JSON (ничего не ломаем)
+  try {
+    const res = await fetch(`/data/modules-${type}.json`, { cache: 'no-store' });
+    if (!res.ok) throw new Error(await res.text());
+    const mods = await res.json(); // { category: [{en,ru}, ...], ... }
+    modulesByType[type] = mods;
+
+    for (const cat in mods) {
+      (mods[cat] || []).forEach(mod => {
+        moduleNameMap[mod.en] = mod.ru;
+      });
+    }
+  } catch (e) {
+    // если нет ни API, ни JSON — ставим пусто
+    modulesByType[type] = {};
   }
 }
+
 
 // === Добавление вкладки ===
 document.getElementById('add-tab').addEventListener('click', () => {
@@ -827,5 +868,307 @@ async function loadAdminList(requesterId) {
       listEl.appendChild(li);
     });
   }
-} 
+}
 
+
+
+// Справочник
+
+// ==== СПРАВОЧНИК МОДУЛЕЙ: выбор типа → CRUD модулей ====
+
+const modulesDictBtn = document.getElementById('modules-dict-btn');
+
+const screenModulesTypes  = document.getElementById('screen-modules-types');
+const screenModulesList   = document.getElementById('screen-modules-list');
+
+const modulesTypesGrid    = document.getElementById('modules-types-grid');
+const backFromModTypesBtn = document.getElementById('back-from-mod-types');
+
+const modulesTitle     = document.getElementById('modules-title');
+const modulesListWrap  = document.getElementById('modules-list');
+const backFromModList  = document.getElementById('back-from-mod-list');
+
+const modCategoryInput = document.getElementById('mod-category');
+const modEnInput       = document.getElementById('mod-en');
+const modRuInput       = document.getElementById('mod-ru');
+const modPosInput      = document.getElementById('mod-pos');
+const modAddBtn        = document.getElementById('mod-add-btn');
+
+let _isAdminModules = false;
+let currentWeaponTypeKey = null;
+let currentWeaponTypeLabel = null;
+let weaponTypesList = []; // [{key,label}]
+let editingModuleId = null; // null — добавление; number — редактирование
+
+function showScreenSafe(id) {
+  // используем твою showScreen, если есть
+  if (typeof showScreen === 'function') return showScreen(id);
+  // fallback (если вдруг вызов вне контекста)
+  document.querySelectorAll('.screen').forEach(s => s.style.display = (s.id === id ? 'block' : 'none'));
+}
+
+async function apiGetJSON(url) {
+  const r = await fetch(url, { cache: 'no-store' });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function apiSendJSON(url, method, payload) {
+  const r = await fetch(url, {
+    method,
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(payload || {})
+  });
+  if (!r.ok) throw new Error(await r.text());
+  try { return await r.json(); } catch { return {}; }
+}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+
+async function ensureAdminForModules() {
+  const res = await apiSendJSON('/api/me', 'POST', { initData: tg.initData });
+  _isAdminModules = !!res.is_admin;
+  return _isAdminModules;
+}
+
+modulesDictBtn?.addEventListener('click', async () => {
+  const ok = await ensureAdminForModules();
+  if (!ok) return alert('Экран доступен только администраторам');
+  await openModulesTypesScreen();
+});
+
+async function openModulesTypesScreen() {
+  weaponTypesList = await apiGetJSON('/api/types'); // [{key,label}]
+  modulesTypesGrid.innerHTML = weaponTypesList.map(t => `
+    <div class="card-btn" data-weapon-key="${esc(t.key)}" style="min-width:160px;">
+      <i class="fas fa-list"></i>
+      <span>${esc(t.label)}</span>
+    </div>
+  `).join('');
+  modulesTypesGrid.querySelectorAll('.card-btn').forEach(card => {
+    card.addEventListener('click', () => {
+      const key = card.dataset.weaponKey;
+      const obj = weaponTypesList.find(x => x.key === key);
+      currentWeaponTypeKey = key;
+      currentWeaponTypeLabel = obj?.label || key;
+      openModulesListScreen();
+    });
+  });
+  showScreenSafe('screen-modules-types');
+}
+
+backFromModTypesBtn?.addEventListener('click', () => {
+  showScreenSafe('screen-warzone-main');
+});
+
+async function openModulesListScreen() {
+  modulesTitle.textContent = `Справочник: ${currentWeaponTypeLabel}`;
+  await reloadModulesList();
+  showScreenSafe('screen-modules-list');
+}
+
+async function reloadModulesList() {
+  const grouped = await apiGetJSON(`/api/modules/${encodeURIComponent(currentWeaponTypeKey)}`);
+  // если справочник пуст — подтянем старые JSON, чтобы не было пусто
+  if (!grouped || Object.keys(grouped).length === 0) {
+    await loadModules(currentWeaponTypeKey); // заполнит modulesByType + moduleNameMap
+    const mods = modulesByType[currentWeaponTypeKey] || {};
+    // отрисуем из JSON (без id)
+    renderGroups(Object.fromEntries(Object.entries(mods).map(([cat, arr]) => [
+      cat, arr.map((x, i) => ({ id: null, en: x.en, ru: x.ru, pos: i }))
+    ])));
+  } else {
+    renderGroups(grouped);
+  }
+}
+
+function renderGroups(grouped) {
+  const cats = Object.keys(grouped).sort();
+  if (!cats.length) {
+    modulesListWrap.innerHTML = `<div class="subtext">Пока модулей нет. Заполните поля выше и нажмите «Добавить».</div>`;
+    return;
+  }
+  modulesListWrap.innerHTML = cats.map(cat => {
+    const items = (grouped[cat] || []).slice().sort((a,b)=> (a.pos - b.pos) || String(a.ru).localeCompare(String(b.ru)));
+    const lis = items.map(it => `
+      <li class="mod-item" data-id="${it.id ?? ''}" draggable="${it.id!=null}">
+        <span class="mod-item__handle">☰</span>
+        <div class="mod-item__name">
+          <div><b>${esc(it.ru)}</b></div>
+          <div style="opacity:.7;font-size:.9em">${esc(it.en)}</div>
+        </div>
+        <div class="mod-item__actions">
+          ${it.id!=null ? `<button class="btn btn-small" data-act="edit" data-id="${it.id}" data-cat="${esc(cat)}">✏️</button>
+          <button class="btn btn-small" data-act="del" data-id="${it.id}">🗑</button>` : `<span style="opacity:.6;">(из JSON, сохраните в БД)</span>`}
+        </div>
+      </li>
+    `).join('');
+
+    return `
+      <section class="mod-group" data-category="${esc(cat)}" style="background:#171D25;padding:12px;border-radius:10px;margin-bottom:12px;">
+        <div class="mod-group__title" style="font-weight:700;margin-bottom:8px;">${esc(cat)}</div>
+        <ul class="mod-list" data-category="${esc(cat)}" style="list-style:none;margin:0;padding:0;">
+          ${lis}
+        </ul>
+        <button class="btn btn-small" data-act="add-to-cat" data-category="${esc(cat)}" style="margin-top:8px;">+ Добавить в ${esc(cat)}</button>
+      </section>
+    `;
+  }).join('');
+
+  bindModulesListEvents();
+}
+
+function bindModulesListEvents() {
+  // заполнить категорию в тулбаре
+  modulesListWrap.querySelectorAll('[data-act="add-to-cat"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      modCategoryInput.value = btn.dataset.category || '';
+      modEnInput.focus();
+      editingModuleId = null;
+      modAddBtn.textContent = '➕ Добавить';
+    });
+  });
+
+  // редактировать
+  modulesListWrap.querySelectorAll('[data-act="edit"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = Number(btn.dataset.id);
+      const li = modulesListWrap.querySelector(`.mod-item[data-id="${id}"]`);
+      const cat = btn.dataset.cat || '';
+      const ru = li?.querySelector('.mod-item__name b')?.textContent || '';
+      const en = li?.querySelector('.mod-item__name div:nth-child(2)')?.textContent || '';
+
+      editingModuleId = id;
+      modCategoryInput.value = cat;
+      modEnInput.value = en;
+      modRuInput.value = ru;
+
+      // pos = текущий индекс
+      const ul = li.closest('.mod-list');
+      const idx = Array.from(ul.children).indexOf(li);
+      modPosInput.value = String(idx);
+
+      modAddBtn.textContent = '💾 Сохранить';
+    });
+  });
+
+  // удалить
+  modulesListWrap.querySelectorAll('[data-act="del"]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = Number(btn.dataset.id);
+      if (!confirm('Удалить модуль?')) return;
+      await apiSendJSON(`/api/modules/${id}`, 'DELETE', { initData: tg.initData });
+      await reloadModulesList();
+      if (editingModuleId === id) resetModulesToolbar(true);
+    });
+  });
+
+  // DnD сортировка внутри категории — только для элементов из БД (id != null)
+  modulesListWrap.querySelectorAll('.mod-list').forEach(ul => {
+    initDragSort(ul, async (orderedIds) => {
+      // фильтруем только id с БД
+      const ids = orderedIds.filter(x => x != null);
+      for (let i = 0; i < ids.length; i++) {
+        await apiSendJSON(`/api/modules/${ids[i]}`, 'PUT', { initData: tg.initData, pos: i });
+      }
+      await reloadModulesList();
+      resetModulesToolbar();
+    });
+  });
+}
+
+modAddBtn?.addEventListener('click', async () => {
+  const category = modCategoryInput.value.trim();
+  const en = modEnInput.value.trim();
+  const ru = modRuInput.value.trim();
+  const pos = Number(modPosInput.value || 0);
+
+  if (!category || !en || !ru) {
+    alert('Категория, EN и RU обязательны');
+    return;
+  }
+
+  try {
+    if (editingModuleId == null) {
+      // добавление в БД
+      await apiSendJSON('/api/modules', 'POST', {
+        initData: tg.initData,
+        weapon_type: currentWeaponTypeKey,
+        category, en, ru, pos
+      });
+    } else {
+      // обновление
+      await apiSendJSON(`/api/modules/${editingModuleId}`, 'PUT', {
+        initData: tg.initData, category, en, ru, pos
+      });
+    }
+    // обновим и локальный кэш для корректного отображения сборок
+    // (чтобы moduleNameMap знал новые названия)
+    modulesByType[currentWeaponTypeKey] = undefined;
+    await loadModules(currentWeaponTypeKey);
+
+    await reloadModulesList();
+    resetModulesToolbar(true);
+  } catch (e) {
+    alert('Ошибка: ' + (e?.message || e));
+  }
+});
+
+backFromModList?.addEventListener('click', () => {
+  resetModulesToolbar();
+  showScreenSafe('screen-modules-types');
+});
+
+function resetModulesToolbar(clear = false) {
+  editingModuleId = null;
+  modAddBtn.textContent = '➕ Добавить';
+  if (clear) {
+    modCategoryInput.value = '';
+    modEnInput.value = '';
+    modRuInput.value = '';
+    modPosInput.value = '0';
+  }
+}
+
+function initDragSort(listEl, onSorted) {
+  let dragEl = null;
+  listEl.querySelectorAll('.mod-item').forEach(li => {
+    // запрещаем dnd для JSON (id пустой)
+    if (!li.dataset.id) return;
+    li.setAttribute('draggable', 'true');
+    li.addEventListener('dragstart', (e) => {
+      dragEl = li;
+      li.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    li.addEventListener('dragend', () => {
+      if (dragEl) dragEl.classList.remove('dragging');
+      dragEl = null;
+    });
+  });
+
+  listEl.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    const dragging = listEl.querySelector('.dragging');
+    if (!dragging) return;
+    const after = getDragAfterElement(listEl, e.clientY);
+    if (after == null) listEl.appendChild(dragging);
+    else listEl.insertBefore(dragging, after);
+  });
+
+  listEl.addEventListener('drop', async () => {
+    const orderedIds = Array.from(listEl.querySelectorAll('.mod-item')).map(li => {
+      const id = li.dataset.id;
+      return id ? Number(id) : null;
+    });
+    if (typeof onSorted === 'function') await onSorted(orderedIds);
+  });
+}
+
+function getDragAfterElement(container, y) {
+  const els = [...container.querySelectorAll('.mod-item:not(.dragging)')];
+  return els.reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height/2;
+    if (offset < 0 && offset > closest.offset) return { offset, element: child };
+    else return closest;
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
