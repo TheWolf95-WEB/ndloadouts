@@ -257,14 +257,19 @@ weaponTypeSelect.addEventListener('change', async () => {
 
 async function loadModules(type) {
   const res = await fetch(`/api/modules/${type}`);
-  const mods = await res.json();
-  modulesByType[type] = mods;
+  const modsByCategory = await res.json();
 
-  for (const cat in mods) {
-    mods[cat].forEach(mod => {
+  const allMods = [];
+
+  for (const cat in modsByCategory) {
+    modsByCategory[cat].forEach(mod => {
+      mod.category = cat; // 👈 сохраняем категорию прямо в объект модуля
+      allMods.push(mod);
       moduleNameMap[mod.en] = mod.ru;
     });
   }
+
+  modulesByType[type] = allMods; // 👈 теперь это массив
 }
 
 
