@@ -172,21 +172,36 @@ body {
   display: block;
 }
 
-
-/* верхние поля справочника */
+/* Верхние поля формы */
 #modules-toolbar{
-  display: grid !important;
-  grid-template-columns: 1.15fr 1.15fr 1.15fr 0.55fr auto; /* Кат, EN, RU, Порядок, Кнопка */
-  gap: 12px;
-  align-items: center;
-  margin: 12px 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* равный отступ между всеми полями */
+  margin: 12px 0 18px;
 }
 
-/* группы */
-.module-group{ margin: 18px 0; }
-.module-group h4{ margin: 12px 0 10px; font-weight: 600; opacity: .9; }
+#modules-toolbar .form-input{
+  height: 42px;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
 
-/* строка модуля: текст слева, удалить справа */
+/* Кнопка "Добавить" */
+#modules-toolbar .btn{
+  align-self: flex-start;   /* кнопка прижата влево */
+  height: 42px;
+  padding: 0 18px;
+  background: #2d3748;
+  color: #fff;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background .2s;
+}
+#modules-toolbar .btn:hover{
+  background: #3b475a;
+}
+
+/* Строка модуля */
 .module-row{
   display: flex;
   align-items: center;
@@ -197,13 +212,36 @@ body {
   border-radius: 10px;
   margin: 8px 0;
 }
+
 .module-row .mod-title{
   flex: 1;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
-.module-row .mod-title .en{ text-transform: capitalize; } /* Suppressor, а не suppressor */
+
+.module-row .mod-title .en{
+  text-transform: capitalize; /* Suppressor */
+}
+
+/* Кнопка удалить — большая, красная */
+.module-row .btn.btn-sm{
+  width: 40px;
+  height: 40px;
+  background: #2b1616;
+  color: #ff6b6b;
+  border: 1px solid #ff6b6b;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background .15s, transform .05s;
+}
+.module-row .btn.btn-sm:hover{
+  background: #3a1b1b;
+}
+.module-row .btn.btn-sm:active{
+  transform: translateY(1px);
+}
+
 
 
 /* ТИПЫ ОРУЖИЯ */
