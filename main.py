@@ -60,11 +60,12 @@ def prettify_time(ts: str):
     if not ts:
         return "-"
     try:
-        # превращаем ISO строку (2025-09-12T20:15:30.123Z) в datetime
-        dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-        return dt.strftime("%d.%m.%Y %H:%M:%S")   # формат: 12.09.2025 20:15:30
+        # парсим как UTC
+        dt = datetime.fromisoformat(ts.replace("Z", "+00:00")).astimezone(timezone(timedelta(hours=3)))  
+        return dt.strftime("%d.%m.%Y %H:%M:%S")
     except Exception:
         return ts
+
 
 
 # --- GitHub Webhook ---
