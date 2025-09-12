@@ -32,18 +32,30 @@ const Analytics = {
 
 // === Автоматические события ===
 
-// Начало сессии
-Analytics.trackEvent('session_start', { platform: Telegram.WebApp.platform });
+// Начало сессии (после полной загрузки DOM)
+document.addEventListener('DOMContentLoaded', () => {
+  Analytics.trackEvent('session_start', {
+    platform: window.Telegram?.WebApp?.platform || 'unknown'
+  });
+});
 
 // Конец сессии (когда закрывают WebApp)
-Telegram.WebApp.onEvent('web_app_close', () => {
+window.Telegram?.WebApp?.onEvent('web_app_close', () => {
   Analytics.trackEvent('session_end');
 });
 
 // Ошибки JS
 window.addEventListener('error', e => {
-  Analytics.trackError(e.message, { source: e.filename, line: e.lineno });
+  Analytics.trackError(e.message, {
+    source: e.filename,
+    line: e.lineno,
+    url: location.href
+  });
 });
+
 window.addEventListener('unhandledrejection', e => {
-  Analytics.trackError(e.reason, { type: 'promise' });
+  Analytics.trackError(e.reason, {
+    type: 'promise',
+    url: location.href
+  });
 });
