@@ -480,7 +480,7 @@ async def save_error(data: dict = Body(...)):
 async def get_errors():
  conn = sqlite3.connect(ANALYTICS_DB)
  cur = conn.cursor()
- cur.execute("SELECT user_id, error, details, timestamp FROM errors ORDER BY id DESC LIMIT 100")
+ cur.execute("SELECT user_id, error, details, timestamp FROM errors ORDER BY id DESC LIMIT 30")
  rows = cur.fetchall()
  conn.close()
 
