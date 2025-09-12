@@ -419,6 +419,20 @@ async def analytics_page(request: Request):
 
     return templates.TemplateResponse("analytics.html", {"request": request, "rows": rows})
 
+@app.get("/api/analytics/latest")
+async def get_latest_analytics():
+    conn = sqlite3.connect("/opt/ndloadouts_storage/analytics.db")
+    cur = conn.cursor()
+    cur.execute("SELECT user_id, action, details, timestamp FROM analytics ORDER BY id DESC LIMIT 50")
+    rows = cur.fetchall()
+    conn.close()
+    return {
+        "analytics": [
+            {"user_id": r[0], "action": r[1], "details": r[2], "timestamp": r[3]}
+            for r in rows
+        ]
+    }
+
 
 
 if __name__ == "__main__":
