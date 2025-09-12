@@ -767,10 +767,9 @@ document.querySelectorAll('.js-loadout-toggle').forEach(header => {
 
     const finalTitle = build.title && build.title.trim() !== ""
       ? build.title
-      : weaponTypeRu; // если нет названия — подставляем тип оружия
-
+      : (weaponTypeLabels[build.weapon_type] || build.weapon_type);
+    
     Analytics.trackEvent('view_build', { 
-      build_id: build.id || null,
       title: finalTitle
     });
   });
