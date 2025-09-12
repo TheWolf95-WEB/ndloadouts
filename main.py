@@ -11,6 +11,7 @@ import hmac
 import hashlib
 import requests
 import subprocess
+import sqlite3
 from pathlib import Path
 from urllib.parse import parse_qs
 from datetime import datetime
@@ -332,6 +333,80 @@ async def all_versions():
         return {"versions": versions}
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
+
+
+# АНАЛИТИКА
+
+ANALYTICS_DB = Path("/opt/ndloadouts_storage/analytics.db")
+
+def init_analytics_db():
+    conn = sqlite3.connect(ANALYTICS_DB)
+    cur = conn.cursor()
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS analytics (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT,
+        action TEXT,
+        details TEXT,
+        timestamp TEXT
+    )
+    """)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS errors (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT,
+        error TEXT,
+        details TEXT,
+        timestamp TEXT
+    )
+    """)
+    conn.commit()
+    conn.close()
+
+init_analytics_db()
+
+@app.post("/api/analytics")
+async def save_analytics(data: dict = Body(...)):
+    try:
+        conn = sqlite3.connect(ANALYTICS_DB)
+        cur = conn.cursor()
+        cur.execute(
+            "INSERT INTO analytics (user_id, action, details, timestamp) VALUES (?, ?, ?, ?)",
+            (
+                data.get("user_id"),
+                data.get("action"),
+                json.dumps(data.get("details"), ensure_ascii=False),
+                data.get("timestamp"),
+            )
+        )
+        conn.commit()
+        conn.close()
+        return {"status": "ok"}
+    except Exception as e:
+        return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
+
+
+@app.post("/api/errors")
+async def save_error(data: dict = Body(...)):
+    try:
+        conn = sqlite3.connect(ANALYTICS_DB)
+        cur = conn.cursor()
+        cur.execute(
+            "INSERT INTO errors (user_id, error, details, timestamp) VALUES (?, ?, ?, ?)",
+            (
+                data.get("user_id"),
+                data.get("error"),
+                json.dumps(data.get("details"), ensure_ascii=False),
+                data.get("timestamp"),
+            )
+        )
+        conn.commit()
+        conn.close()
+        return {"status": "ok"}
+    except Exception as e:
+        return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
+
+
 
 if __name__ == "__main__":
     import uvicorn
