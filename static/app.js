@@ -759,9 +759,9 @@ document.querySelectorAll('.js-loadout-toggle').forEach(header => {
     const buildIndex = [...document.querySelectorAll('.js-loadout')].indexOf(loadout);
     const build = cachedBuilds[buildIndex];
     Analytics.trackEvent('view_build', { 
-      build_id: build.id, 
-      weapon: build.weapon_type, 
-      title: build.title 
+      build_id: id, 
+      title: buildTitle,      // если есть кастомное название сборки
+      weapon_name: weaponName // нормальное название оружия
     });
 
   });
