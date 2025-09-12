@@ -770,9 +770,10 @@ document.querySelectorAll('.js-loadout-toggle').forEach(header => {
       : (weaponTypeLabels[build.weapon_type] || build.weapon_type);
     
     Analytics.trackEvent('view_build', { 
-      title: finalTitle
+      title: finalTitle,
       weapon_name: weaponTypeRu
     });
+
   });
 });
 
