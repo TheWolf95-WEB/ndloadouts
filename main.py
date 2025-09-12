@@ -517,25 +517,25 @@ async def get_latest_analytics():
 
     users = {str(u["id"]): u for u in get_all_users()}
 
-def prettify_action(action, details_json):
-    details = {}
-    try:
-        details = json.loads(details_json or "{}")
-    except:
-        pass
+    def prettify_action(action, details_json):
+        details = {}
+        try:
+            details = json.loads(details_json or "{}")
+        except:
+            pass
 
-    mapping = {
-        "session_start": "🔵 Начало сессии",
-        "session_end": "🔴 Конец сессии",
-        "open_screen": f"📂 Открытие экрана: {details.get('screen','неизвестно')}",
-        "view_build": f"🔫 Просмотр сборки: {details.get('title') or details.get('weapon_name') or 'без названия'}",
-        "switch_category": f"📑 Категория: {details.get('category','')}",
-        "switch_tab": f"📌 Вкладка: {details.get('tab','')}",
-        "click_button": f"🖱 Кнопка: {details.get('button','')}",
-        "search": f"🔍 Поиск: {details.get('query','')}"
-    }
-    return mapping.get(action, action)
-
+        mapping = {
+            "session_start": "🔵 Начало сессии",
+            "session_end": "🔴 Конец сессии",
+            "open_screen": f"📂 Открытие экрана: {details.get('screen','неизвестно')}",
+            # 👇 сначала сборка по названию, если пусто — название оружия
+            "view_build": f"🔫 Просмотр сборки: {details.get('title') or details.get('weapon_name') or 'без названия'}",
+            "switch_category": f"📑 Категория: {details.get('category','')}",
+            "switch_tab": f"📌 Вкладка: {details.get('tab','')}",
+            "click_button": f"🖱 Кнопка: {details.get('button','')}",
+            "search": f"🔍 Поиск: {details.get('query','')}"
+        }
+        return mapping.get(action, action)
 
     def prettify_platform(details_json):
         try:
@@ -552,9 +552,7 @@ def prettify_action(action, details_json):
             return "-"
 
     def prettify_status(action):
-        if action == "session_end":
-            return "⚪ Оффлайн"
-        return "🟢 Онлайн"
+        return "⚪ Оффлайн" if action == "session_end" else "🟢 Онлайн"
 
     def prettify_time(ts):
         try:
@@ -575,6 +573,7 @@ def prettify_action(action, details_json):
         })
 
     return {"analytics": analytics}
+
 
 
 
