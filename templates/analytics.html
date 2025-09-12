@@ -91,20 +91,27 @@
         const res = await fetch("/api/analytics/latest");
         const data = await res.json();
 
-        const analyticsBody = document.getElementById("analytics-body");
-        analyticsBody.innerHTML = "";
+        const onlineBody = document.getElementById("online-body");
+        const offlineBody = document.getElementById("offline-body");
+        onlineBody.innerHTML = "";
+        offlineBody.innerHTML = "";
+
         data.analytics.forEach(row => {
-          analyticsBody.innerHTML += `
+          const tr = `
             <tr>
               <td>${row.user}</td>
               <td>${row.action}</td>
               <td>${row.platform}</td>
               <td>${row.status}</td>
-              <td>${row.timestamp}</td>
+              <td>${row.time}</td>
             </tr>
           `;
+          if (row.status.includes("Онлайн")) {
+            onlineBody.innerHTML += tr;
+          } else {
+            offlineBody.innerHTML += tr;
+          }
         });
-
 
         document.getElementById("last-update").textContent =
           "⏱ Обновлено: " + new Date().toLocaleTimeString();
@@ -124,7 +131,8 @@
   </header>
 
   <div class="container">
-    <h2><span>📂</span>Действия пользователей</h2>
+    <!-- Онлайн -->
+    <h2><span>🟢</span>Пользователи онлайн</h2>
     <div class="card">
       <table>
         <thead>
@@ -136,10 +144,32 @@
             <th>Время</th>
           </tr>
         </thead>
-        <tbody id="analytics-body"></tbody>
+        <tbody id="online-body">
+          <tr><td colspan="5" style="text-align:center;color:#777">Нет онлайн пользователей</td></tr>
+        </tbody>
       </table>
     </div>
 
+    <!-- Оффлайн -->
+    <h2><span>⚪</span>Пользователи оффлайн</h2>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Пользователь</th>
+            <th>Действие</th>
+            <th>Платформа</th>
+            <th>Статус</th>
+            <th>Последний раз в сети</th>
+          </tr>
+        </thead>
+        <tbody id="offline-body">
+          <tr><td colspan="5" style="text-align:center;color:#777">Нет данных</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Ошибки -->
     <h2><span>⚠️</span>Ошибки</h2>
     <div class="card">
       <table>
