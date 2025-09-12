@@ -485,7 +485,6 @@ async def get_latest_analytics():
     rows = cur.fetchall()
     conn.close()
 
-    # Загружаем имена пользователей из таблицы users
     users = {str(u["id"]): u for u in get_all_users()}
 
     def prettify_action(action):
@@ -513,6 +512,9 @@ async def get_latest_analytics():
         except:
             return "-"
 
+    def prettify_status(action):
+        return "🟢 Онлайн" if action == "session_start" else "⚪ Оффлайн"
+
     def prettify_time(ts):
         try:
             dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
@@ -521,15 +523,14 @@ async def get_latest_analytics():
             return ts
 
     analytics = []
-    for r in rows:
-        user_id, action, details, timestamp = r
+    for user_id, action, details, timestamp in rows:
         user = users.get(str(user_id), {})
         analytics.append({
             "user": f"{user_id} - {user.get('first_name', '')} (@{user.get('username','')})",
             "action": prettify_action(action),
             "platform": prettify_platform(details),
-            "details": details,
-            "time": prettify_time(timestamp)
+            "status": prettify_status(action),
+            "timestamp": prettify_time(timestamp)
         })
 
     return {"analytics": analytics}
