@@ -16,6 +16,11 @@ const modulesByType = {};
 const weaponTypeLabels = {};
 const moduleNameMap = {};
 
+if (!window.Analytics) {
+  window.Analytics = { trackEvent: () => {} };
+}
+
+
 let ADMIN_IDS = [];
 let currentSubmitHandler = null;
 let cachedBuilds = [];        // кэш всех сборок последней загрузки
@@ -71,6 +76,7 @@ document.getElementById('category-filter')?.addEventListener('change', async (e)
     category,
     time: new Date().toISOString()
   });
+});
 
 
 async function checkAdminStatus() {
@@ -984,10 +990,6 @@ async function loadBuildsTable() {
   } catch (e) {
     console.error('Ошибка загрузки сборок:', e);
   }
-}
-
-if (!window.Analytics) {
-  window.Analytics = { trackEvent: () => {} };
 }
 
 
