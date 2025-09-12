@@ -758,7 +758,12 @@ document.querySelectorAll('.js-loadout-toggle').forEach(header => {
     // 👇 фиксируем просмотр сборки
     const buildIndex = [...document.querySelectorAll('.js-loadout')].indexOf(loadout);
     const build = cachedBuilds[buildIndex];
-    Analytics.trackEvent('view_build', { build_id: build.id, weapon: build.weapon_type });
+    Analytics.trackEvent('view_build', { 
+      build_id: build.id, 
+      weapon: build.weapon_type, 
+      title: build.title 
+    });
+
   });
 });
 
