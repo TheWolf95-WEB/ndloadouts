@@ -73,11 +73,6 @@ document.getElementById('category-filter')?.addEventListener('change', async (e)
   });
 
 
-tg.onEvent('web_app_close', () => {
-  Analytics.trackEvent('session_end');
-});
-
-
 async function checkAdminStatus() {
   try {
     const res = await fetch('/api/me', {
@@ -139,7 +134,11 @@ async function checkAdminStatus() {
 
 function showScreen(id) {
   // 👇 сюда добавляем
-  Analytics.trackEvent('open_screen', { screen: id });
+  Analytics.trackEvent('open_screen', { 
+  screen: id,
+  timestamp: new Date().toISOString()
+});
+
   
   const protectedScreens = {
     'screen-form': 'is_admin',
@@ -206,19 +205,28 @@ document.getElementById('add-build-btn')?.addEventListener('click', () => {
 document.getElementById('show-builds-btn')?.addEventListener('click', async () => {
   await loadBuilds();
   showScreen('screen-builds');
-  Analytics.trackEvent('click_button', { button: 'show-builds' });
+  Analytics.trackEvent('click_button', { 
+  button: 'show-builds',
+  timestamp: new Date().toISOString()
+});
 });
 
 
 document.getElementById('back-to-main')?.addEventListener('click', () => {
   showScreen('screen-warzone-main');
-  Analytics.trackEvent('click_button', { button: 'back-to-main' });
+  Analytics.trackEvent('click_button', { 
+  button: 'back-to-main',
+  timestamp: new Date().toISOString()
+});
 });
 document.getElementById('back-from-builds')?.addEventListener('click', () => showScreen('screen-warzone-main'));
 
 document.getElementById('help-btn')?.addEventListener('click', () => {
   tg.openLink('https://t.me/ndzone_admin');
-  Analytics.trackEvent('click_button', { button: 'help' });
+  Analytics.trackEvent('click_button', { 
+  button: 'help',
+  timestamp: new Date().toISOString()
+});
 });
 
 
@@ -742,8 +750,10 @@ document.querySelectorAll('.loadout__tab').forEach(button => {
 
     // фиксируем событие переключения вкладки
     Analytics.trackEvent('switch_tab', { 
-      tab: button.textContent.trim() || 'Без названия' 
+      tab: button.textContent.trim() || 'Без названия',
+      timestamp: new Date().toISOString()
     });
+
 
     parent.querySelectorAll('.loadout__tab').forEach(b => b.classList.remove('is-active'));
     parent.querySelectorAll('.loadout__tab-content').forEach(c => c.classList.remove('is-active'));
@@ -816,8 +826,11 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
     }
 
     // 👇 фиксируем событие фильтрации
-    Analytics.trackEvent('switch_category', { category: type });
-  });
+    Analytics.trackEvent('switch_category', { 
+      category: type,
+      timestamp: new Date().toISOString()
+    });
+
 });
 
 
@@ -1100,3 +1113,10 @@ async function loadAdminList(requesterId) {
   }
 } 
 
+tg.onEvent('web_app_close', () => {
+  Analytics.trackEvent('session_end', { 
+    timestamp: new Date().toISOString() 
+  });
+});
+
+  
