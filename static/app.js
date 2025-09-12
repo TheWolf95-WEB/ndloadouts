@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // фиксируем старт сессии
   Analytics.trackEvent('session_start', { 
   platform: tg.platform, 
-  "time": prettify_time(timestamp) 
+  time: new Date().toISOString()
 });
   
   await loadWeaponTypes(); // Загрузка типов
@@ -1115,7 +1115,7 @@ async function loadAdminList(requesterId) {
 
 tg.onEvent('web_app_close', () => {
   Analytics.trackEvent('session_end', { 
-    "time": prettify_time(timestamp) 
+    time: new Date().toISOString()
   });
 });
 
