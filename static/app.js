@@ -33,6 +33,9 @@ if (user && userInfoEl) {
 
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // фиксируем старт сессии
+  Analytics.trackEvent('session_start', { platform: tg.platform });
+  
   await loadWeaponTypes(); // Загрузка типов
 
       // ✅ Показываем кнопки пользователя
@@ -60,7 +63,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 document.getElementById('category-filter')?.addEventListener('change', async (e) => {
   const category = e.target.value;
   await loadBuilds(category);
+
+  // 👇 добавляем
+  Analytics.trackEvent('switch_category', { category });
 });
+
+
+tg.onEvent('web_app_close', () => {
+  Analytics.trackEvent('session_end');
+});
+
 
 async function checkAdminStatus() {
   try {
@@ -122,6 +134,9 @@ async function checkAdminStatus() {
 
 
 function showScreen(id) {
+  // 👇 сюда добавляем
+  Analytics.trackEvent('open_screen', { screen: id });
+  
   const protectedScreens = {
     'screen-form': 'is_admin',
     'screen-edit-builds': 'is_admin',
@@ -187,14 +202,21 @@ document.getElementById('add-build-btn')?.addEventListener('click', () => {
 document.getElementById('show-builds-btn')?.addEventListener('click', async () => {
   await loadBuilds();
   showScreen('screen-builds');
+  Analytics.trackEvent('click_button', { button: 'show-builds' });
 });
 
-document.getElementById('back-to-main')?.addEventListener('click', () => showScreen('screen-warzone-main'));
+
+document.getElementById('back-to-main')?.addEventListener('click', () => {
+  showScreen('screen-warzone-main');
+  Analytics.trackEvent('click_button', { button: 'back-to-main' });
+});
 document.getElementById('back-from-builds')?.addEventListener('click', () => showScreen('screen-warzone-main'));
 
 document.getElementById('help-btn')?.addEventListener('click', () => {
   tg.openLink('https://t.me/ndzone_admin');
+  Analytics.trackEvent('click_button', { button: 'help' });
 });
+
 
 document.getElementById('edit-builds-btn')?.addEventListener('click', async () => {
   if (!window.userInfo?.is_admin) {
@@ -713,6 +735,8 @@ document.querySelectorAll('.loadout__tab').forEach(button => {
     const parent = button.closest('.loadout');
     const tab = button.dataset.tab;
 
+    Analytics.trackEvent('switch_tab', { tab: button.textContent });
+
     parent.querySelectorAll('.loadout__tab').forEach(b => b.classList.remove('is-active'));
     parent.querySelectorAll('.loadout__tab-content').forEach(c => c.classList.remove('is-active'));
     button.classList.add('is-active');
@@ -724,14 +748,20 @@ document.querySelectorAll('.loadout__tab').forEach(button => {
   });
 });
 
-  document.querySelectorAll('.js-loadout-toggle').forEach(header => {
-    header.addEventListener('click', () => {
-      const loadout = header.closest('.js-loadout');
-      const content = loadout.querySelector('.loadout__content');
-      loadout.classList.toggle('is-open');
-      content.style.maxHeight = loadout.classList.contains('is-open') ? content.scrollHeight + 'px' : '0';
-    });
+document.querySelectorAll('.js-loadout-toggle').forEach(header => {
+  header.addEventListener('click', () => {
+    const loadout = header.closest('.js-loadout');
+    const content = loadout.querySelector('.loadout__content');
+    loadout.classList.toggle('is-open');
+    content.style.maxHeight = loadout.classList.contains('is-open') ? content.scrollHeight + 'px' : '0';
+
+    // 👇 фиксируем просмотр сборки
+    const buildIndex = [...document.querySelectorAll('.js-loadout')].indexOf(loadout);
+    const build = cachedBuilds[buildIndex];
+    Analytics.trackEvent('view_build', { build_id: build.id, weapon: build.weapon_type });
   });
+});
+
 }
 
 
@@ -747,7 +777,6 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
       el.style.display = matches ? 'block' : 'none';
     });
 
-    // Если после фильтрации ничего не найдено — показать сообщение
     const anyVisible = [...document.querySelectorAll('.js-loadout')].some(el => el.style.display !== 'none');
     let messageEl = document.getElementById('no-results-msg');
     
@@ -764,8 +793,11 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
       document.getElementById('no-results-msg')?.remove();
     }
 
+    // 👇 фиксируем событие фильтрации
+    Analytics.trackEvent('switch_category', { category: type });
   });
 });
+
 
 
 
