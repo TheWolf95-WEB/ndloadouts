@@ -423,17 +423,59 @@ async def analytics_page(request: Request):
 async def get_latest_analytics():
     conn = sqlite3.connect("/opt/ndloadouts_storage/analytics.db")
     cur = conn.cursor()
-
-    # последние действия
     cur.execute("SELECT user_id, action, details, timestamp FROM analytics ORDER BY id DESC LIMIT 50")
-    analytics = [{"user_id": r[0], "action": r[1], "details": r[2], "timestamp": r[3]} for r in cur.fetchall()]
-
-    # последние ошибки
-    cur.execute("SELECT user_id, error, details, timestamp FROM errors ORDER BY id DESC LIMIT 20")
-    errors = [{"user_id": r[0], "error": r[1], "details": r[2], "timestamp": r[3]} for r in cur.fetchall()]
-
+    rows = cur.fetchall()
     conn.close()
-    return {"analytics": analytics, "errors": errors}
+
+    # Загружаем имена пользователей из таблицы users
+    users = {str(u["id"]): u for u in get_all_users()}
+
+    def prettify_action(action):
+        mapping = {
+            "session_start": "🔵 Начало сессии",
+            "session_end": "🔴 Конец сессии",
+            "open_screen": "📂 Открытие экрана",
+            "view_build": "🔫 Просмотр сборки",
+            "switch_category": "📑 Переключение категории",
+            "search": "🔍 Поиск"
+        }
+        return mapping.get(action, action)
+
+    def prettify_platform(details_json):
+        try:
+            details = json.loads(details_json)
+            platform = details.get("platform", "")
+            if platform in ("tdesktop", "web"):
+                return "💻 ПК"
+            elif platform in ("android", "ios"):
+                return "📱 Телефон"
+            elif platform:
+                return platform
+            return "-"
+        except:
+            return "-"
+
+    def prettify_time(ts):
+        try:
+            dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+            return dt.strftime("%d.%m.%Y %H:%M:%S")
+        except:
+            return ts
+
+    analytics = []
+    for r in rows:
+        user_id, action, details, timestamp = r
+        user = users.get(str(user_id), {})
+        analytics.append({
+            "user": f"{user_id} - {user.get('first_name', '')} (@{user.get('username','')})",
+            "action": prettify_action(action),
+            "platform": prettify_platform(details),
+            "details": details,
+            "time": prettify_time(timestamp)
+        })
+
+    return {"analytics": analytics}
+
 
 
 
