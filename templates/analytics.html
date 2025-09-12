@@ -2,47 +2,115 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Аналитика ND Loadouts</title>
+  <title>Аналитика NDHQ</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
+    header {
       background: #171d25;
-      color: #eee;
-      margin: 0;
       padding: 20px;
-    }
-    h1 {
       text-align: center;
-      color: #fff;
+      border-bottom: 2px solid #2a3545;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 28px;
+      color: #00ffcc;
+    }
+    header p {
+      margin: 5px 0 0;
+      color: #aaa;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+    h2 {
+      margin-top: 30px;
+      color: #00ccff;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
+      margin-top: 15px;
+      font-size: 14px;
     }
     th, td {
-      border: 1px solid #444;
+      border: 1px solid #333;
       padding: 8px 10px;
       text-align: left;
+      word-break: break-word;
     }
     th {
-      background: #222;
+      background: #1c222d;
+      color: #00ffcc;
     }
     tr:nth-child(even) {
-      background: #1f242e;
+      background: #151b24;
     }
     tr:hover {
-      background: #2a3545;
+      background: #223044;
     }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
+    footer {
+      text-align: center;
+      padding: 15px;
+      color: #777;
+      border-top: 1px solid #222;
+      margin-top: 40px;
     }
   </style>
+  <script>
+    async function loadData() {
+      try {
+        const res = await fetch("/api/analytics/latest");
+        const data = await res.json();
+
+        // события
+        const analyticsBody = document.getElementById("analytics-body");
+        analyticsBody.innerHTML = "";
+        data.analytics.forEach(row => {
+          analyticsBody.innerHTML += `
+            <tr>
+              <td>${row.user_id}</td>
+              <td>${row.action}</td>
+              <td>${row.details}</td>
+              <td>${row.timestamp}</td>
+            </tr>
+          `;
+        });
+
+        // ошибки
+        const errorsBody = document.getElementById("errors-body");
+        errorsBody.innerHTML = "";
+        data.errors.forEach(row => {
+          errorsBody.innerHTML += `
+            <tr>
+              <td>${row.user_id}</td>
+              <td>${row.error}</td>
+              <td>${row.details}</td>
+              <td>${row.timestamp}</td>
+            </tr>
+          `;
+        });
+
+        document.getElementById("last-update").textContent =
+          "Обновлено: " + new Date().toLocaleTimeString();
+      } catch (e) {
+        console.error("Ошибка загрузки аналитики:", e);
+      }
+    }
+
+    setInterval(loadData, 10000); // автообновление каждые 10 секунд
+    window.onload = loadData;
+  </script>
 </head>
 <body>
+  <header>
+    <h1>📊 Аналитика пользователей NDHQ</h1>
+    <p id="last-update">Загрузка...</p>
+  </header>
+
   <div class="container">
-    <h1>📊 Аналитика пользователей</h1>
+    <h2>Действия пользователей</h2>
     <table>
       <thead>
         <tr>
@@ -52,17 +120,25 @@
           <th>Время</th>
         </tr>
       </thead>
-      <tbody>
-        {% for row in rows %}
+      <tbody id="analytics-body"></tbody>
+    </table>
+
+    <h2>Ошибки</h2>
+    <table>
+      <thead>
         <tr>
-          <td>{{ row[0] }}</td>
-          <td>{{ row[1] }}</td>
-          <td>{{ row[2] }}</td>
-          <td>{{ row[3] }}</td>
+          <th>User ID</th>
+          <th>Ошибка</th>
+          <th>Детали</th>
+          <th>Время</th>
         </tr>
-        {% endfor %}
-      </tbody>
+      </thead>
+      <tbody id="errors-body"></tbody>
     </table>
   </div>
+
+  <footer>
+    NDHQ © 2025 — внутренняя аналитика
+  </footer>
 </body>
 </html>
