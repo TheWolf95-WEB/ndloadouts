@@ -517,19 +517,23 @@ async def get_latest_analytics():
 
     users = {str(u["id"]): u for u in get_all_users()}
 
-    def prettify_action(action, details_json):
-        details = {}
+    def prettify_action(action: str, details_json: str):
         try:
             details = json.loads(details_json or "{}")
         except:
-            pass
+            details = {}
+
+        if action == "view_build":
+            # 🔑 название сборки приоритетно, если пусто → название оружия
+            title = details.get("title")
+            weapon = details.get("weapon_name")
+            final = title.strip() if title and title.strip() else weapon or "без названия"
+            return f"🔫 Просмотр сборки: {final}"
 
         mapping = {
             "session_start": "🔵 Начало сессии",
             "session_end": "🔴 Конец сессии",
             "open_screen": f"📂 Открытие экрана: {details.get('screen','неизвестно')}",
-            # 👇 сначала сборка по названию, если пусто — название оружия
-            "view_build": f"🔫 Просмотр сборки: {details.get('title') or details.get('weapon_name') or 'без названия'}",
             "switch_category": f"📑 Категория: {details.get('category','')}",
             "switch_tab": f"📌 Вкладка: {details.get('tab','')}",
             "click_button": f"🖱 Кнопка: {details.get('button','')}",
@@ -537,7 +541,7 @@ async def get_latest_analytics():
         }
         return mapping.get(action, action)
 
-    def prettify_platform(details_json):
+    def prettify_platform(details_json: str):
         try:
             details = json.loads(details_json or "{}")
             platform = details.get("platform", "")
@@ -551,10 +555,10 @@ async def get_latest_analytics():
         except:
             return "-"
 
-    def prettify_status(action):
+    def prettify_status(action: str):
         return "⚪ Оффлайн" if action == "session_end" else "🟢 Онлайн"
 
-    def prettify_time(ts):
+    def prettify_time(ts: str):
         try:
             dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
             return dt.strftime("%d.%m.%Y %H:%M:%S")
@@ -573,9 +577,6 @@ async def get_latest_analytics():
         })
 
     return {"analytics": analytics}
-
-
-
 
 
 
