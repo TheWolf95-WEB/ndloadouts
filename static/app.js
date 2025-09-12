@@ -758,11 +758,15 @@ document.querySelectorAll('.js-loadout-toggle').forEach(header => {
     // 👇 фиксируем просмотр сборки
     const buildIndex = [...document.querySelectorAll('.js-loadout')].indexOf(loadout);
     const build = cachedBuilds[buildIndex];
+    const weaponTypeRu = weaponTypeLabels[build.weapon_type] || build.weapon_type;
+    
     Analytics.trackEvent('view_build', { 
-      build_id: id, 
-      title: buildTitle,      // если есть кастомное название сборки
-      weapon_name: weaponName // нормальное название оружия
+      build_id: build.id,
+      title: build.title || null,        // название сборки (если админ задал)
+      weapon_name: weaponTypeRu          // нормальное название оружия
     });
+
+
 
   });
 });
