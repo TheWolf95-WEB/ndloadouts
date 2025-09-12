@@ -481,26 +481,34 @@ async def analytics_page(request: Request):
 async def get_latest_analytics():
     conn = sqlite3.connect("/opt/ndloadouts_storage/analytics.db")
     cur = conn.cursor()
-    cur.execute("SELECT user_id, action, details, timestamp FROM analytics ORDER BY id DESC LIMIT 50")
+    cur.execute("SELECT user_id, action, details, timestamp FROM analytics ORDER BY id DESC LIMIT 200")
     rows = cur.fetchall()
     conn.close()
 
     users = {str(u["id"]): u for u in get_all_users()}
 
-    def prettify_action(action):
+    def prettify_action(action, details_json):
+        details = {}
+        try:
+            details = json.loads(details_json or "{}")
+        except:
+            pass
+
         mapping = {
             "session_start": "🔵 Начало сессии",
             "session_end": "🔴 Конец сессии",
-            "open_screen": "📂 Открытие экрана",
-            "view_build": "🔫 Просмотр сборки",
-            "switch_category": "📑 Переключение категории",
-            "search": "🔍 Поиск"
+            "open_screen": f"📂 Открытие экрана: {details.get('screen','неизвестно')}",
+            "view_build": f"🔫 Просмотр сборки: {details.get('title') or details.get('weapon','неизвестно')}",
+            "switch_category": f"📑 Категория: {details.get('category','')}",
+            "switch_tab": f"📌 Вкладка: {details.get('tab','')}",
+            "click_button": f"🖱 Кнопка: {details.get('button','')}",
+            "search": f"🔍 Поиск: {details.get('query','')}"
         }
         return mapping.get(action, action)
 
     def prettify_platform(details_json):
         try:
-            details = json.loads(details_json)
+            details = json.loads(details_json or "{}")
             platform = details.get("platform", "")
             if platform in ("tdesktop", "web"):
                 return "💻 ПК"
@@ -513,7 +521,11 @@ async def get_latest_analytics():
             return "-"
 
     def prettify_status(action):
-        return "🟢 Онлайн" if action == "session_start" else "⚪ Оффлайн"
+        if action == "session_start":
+            return "🟢 Онлайн"
+        elif action == "session_end":
+            return "⚪ Оффлайн"
+        return "⚪ Оффлайн"
 
     def prettify_time(ts):
         try:
@@ -526,14 +538,15 @@ async def get_latest_analytics():
     for user_id, action, details, timestamp in rows:
         user = users.get(str(user_id), {})
         analytics.append({
-            "user": f"{user_id} - {user.get('first_name', '')} (@{user.get('username','')})",
-            "action": prettify_action(action),
+            "user": f"{user_id} - {user.get('first_name','')} (@{user.get('username','')})",
+            "action": prettify_action(action, details),
             "platform": prettify_platform(details),
             "status": prettify_status(action),
-            "timestamp": prettify_time(timestamp)
+            "time": prettify_time(timestamp)
         })
 
     return {"analytics": analytics}
+
 
 
 
