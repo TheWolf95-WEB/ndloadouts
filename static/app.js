@@ -36,7 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // фиксируем старт сессии
   Analytics.trackEvent('session_start', { 
   platform: tg.platform, 
-  timestamp: new Date().toISOString() 
+  "time": prettify_time(timestamp) 
 });
   
   await loadWeaponTypes(); // Загрузка типов
@@ -69,7 +69,7 @@ document.getElementById('category-filter')?.addEventListener('change', async (e)
 
   Analytics.trackEvent('switch_category', { 
     category,
-    timestamp: new Date().toISOString()
+    "time": prettify_time(timestamp)
   });
 
 
@@ -136,7 +136,7 @@ function showScreen(id) {
   // 👇 сюда добавляем
   Analytics.trackEvent('open_screen', { 
   screen: id,
-  timestamp: new Date().toISOString()
+  "time": prettify_time(timestamp)
 });
 
   
@@ -207,7 +207,7 @@ document.getElementById('show-builds-btn')?.addEventListener('click', async () =
   showScreen('screen-builds');
   Analytics.trackEvent('click_button', { 
   button: 'show-builds',
-  timestamp: new Date().toISOString()
+  "time": prettify_time(timestamp)
 });
 });
 
@@ -216,7 +216,7 @@ document.getElementById('back-to-main')?.addEventListener('click', () => {
   showScreen('screen-warzone-main');
   Analytics.trackEvent('click_button', { 
   button: 'back-to-main',
-  timestamp: new Date().toISOString()
+  "time": prettify_time(timestamp)
 });
 });
 document.getElementById('back-from-builds')?.addEventListener('click', () => showScreen('screen-warzone-main'));
@@ -225,7 +225,7 @@ document.getElementById('help-btn')?.addEventListener('click', () => {
   tg.openLink('https://t.me/ndzone_admin');
   Analytics.trackEvent('click_button', { 
   button: 'help',
-  timestamp: new Date().toISOString()
+  "time": prettify_time(timestamp)
 });
 });
 
@@ -751,7 +751,7 @@ document.querySelectorAll('.loadout__tab').forEach(button => {
     // фиксируем событие переключения вкладки
     Analytics.trackEvent('switch_tab', { 
       tab: button.textContent.trim() || 'Без названия',
-      timestamp: new Date().toISOString()
+      "time": prettify_time(timestamp)
     });
 
 
@@ -786,7 +786,7 @@ document.querySelectorAll('.js-loadout-toggle').forEach(header => {
     Analytics.trackEvent('view_build', { 
       title: finalTitle,
       weapon_name: weaponTypeRu,
-      timestamp: new Date().toISOString()
+      "time": prettify_time(timestamp)
     });
 
 
@@ -828,7 +828,7 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
     // 👇 фиксируем событие фильтрации
     Analytics.trackEvent('switch_category', { 
       category: type,
-      timestamp: new Date().toISOString()
+      "time": prettify_time(timestamp)
     });
 
 });
@@ -1115,7 +1115,7 @@ async function loadAdminList(requesterId) {
 
 tg.onEvent('web_app_close', () => {
   Analytics.trackEvent('session_end', { 
-    timestamp: new Date().toISOString() 
+    "time": prettify_time(timestamp) 
   });
 });
 
