@@ -811,7 +811,6 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
 
     const anyVisible = [...document.querySelectorAll('.js-loadout')].some(el => el.style.display !== 'none');
     let messageEl = document.getElementById('no-results-msg');
-    
     if (!anyVisible) {
       if (!messageEl) {
         messageEl = document.createElement('p');
@@ -825,12 +824,11 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
       document.getElementById('no-results-msg')?.remove();
     }
 
-    // 👇 фиксируем событие фильтрации
-    Analytics.trackEvent('switch_category', { 
+    (window.Analytics?.trackEvent)?.('switch_category', { 
       category: type,
       time: new Date().toISOString()
     });
-
+  });
 });
 
 
@@ -988,6 +986,9 @@ async function loadBuildsTable() {
   }
 }
 
+if (!window.Analytics) {
+  window.Analytics = { trackEvent: () => {} };
+}
 
 
 // Преобразование даты в YYYY-MM-DD (для input type="date")
