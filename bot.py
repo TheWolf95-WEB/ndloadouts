@@ -178,8 +178,10 @@ async def analytics_cmd(message: Message):
         await message.answer("🚫 У тебя нет доступа к аналитике.")
         return
 
-    await message.answer("📊 Ваша страница аналитики: https://ndloadouts.ru/analytics")
-
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📊 Открыть аналитику", web_app=WebAppInfo(url="https://ndloadouts.ru/analytics"))]
+    ])
+    await message.answer("Вот твоя аналитика:", reply_markup=keyboard)
 
 
 # --- запуск бота ---
