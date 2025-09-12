@@ -360,30 +360,88 @@ def init_analytics_db():
         timestamp TEXT
     )
     """)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS user_sessions (
+        user_id TEXT PRIMARY KEY,
+        last_seen TEXT,
+        status TEXT,       -- online/offline
+        platform TEXT
+    )
+    """)
     conn.commit()
     conn.close()
+
 
 init_analytics_db()
 
 @app.post("/api/analytics")
 async def save_analytics(data: dict = Body(...)):
     try:
+        user_id = str(data.get("user_id"))
+        action = data.get("action")
+        details = json.dumps(data.get("details"), ensure_ascii=False)
+        timestamp = data.get("timestamp")
+
         conn = sqlite3.connect(ANALYTICS_DB)
         cur = conn.cursor()
         cur.execute(
             "INSERT INTO analytics (user_id, action, details, timestamp) VALUES (?, ?, ?, ?)",
-            (
-                data.get("user_id"),
-                data.get("action"),
-                json.dumps(data.get("details"), ensure_ascii=False),
-                data.get("timestamp"),
-            )
+            (user_id, action, details, timestamp)
         )
+
+        # === обновляем таблицу user_sessions ===
+        status = "online" if action == "session_start" else "offline" if action == "session_end" else None
+        platform = json.loads(details).get("platform", "") if details else ""
+        if status:
+            cur.execute("""
+                INSERT INTO user_sessions (user_id, last_seen, status, platform)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(user_id) DO UPDATE SET
+                  last_seen=excluded.last_seen,
+                  status=excluded.status,
+                  platform=excluded.platform
+            """, (user_id, timestamp, status, platform))
+        else:
+            # просто обновляем last_seen и платформу
+            cur.execute("""
+                INSERT INTO user_sessions (user_id, last_seen, status, platform)
+                VALUES (?, ?, ?, ?)
+                ON CONFLICT(user_id) DO UPDATE SET
+                  last_seen=excluded.last_seen,
+                  platform=excluded.platform
+            """, (user_id, timestamp, "online", platform))
+
         conn.commit()
         conn.close()
         return {"status": "ok"}
     except Exception as e:
         return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
+
+
+@app.get("/api/analytics/users")
+async def get_users_status():
+    conn = sqlite3.connect(ANALYTICS_DB)
+    cur = conn.cursor()
+    cur.execute("SELECT user_id, last_seen, status, platform FROM user_sessions")
+    rows = cur.fetchall()
+    conn.close()
+
+    users = {str(u["id"]): u for u in get_all_users()}
+
+    result = []
+    for user_id, last_seen, status, platform in rows:
+        u = users.get(str(user_id), {})
+        result.append({
+            "user": f"{user_id} - {u.get('first_name','')} (@{u.get('username','')})",
+            "status": "🟢 Онлайн" if status == "online" else "⚪ Оффлайн",
+            "platform": "💻 ПК" if platform in ("tdesktop", "web") else "📱 Телефон" if platform else "-",
+            "last_seen": last_seen
+        })
+
+    # сортировка: онлайн первыми
+    result.sort(key=lambda x: 0 if "Онлайн" in x["status"] else 1)
+    return {"users": result}
+
 
 
 @app.post("/api/errors")
