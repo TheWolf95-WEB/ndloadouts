@@ -730,24 +730,29 @@ const tabContents = build.tabs.map((tab, i) => {
   });
 
 
+// === Переключение вкладок ===
 document.querySelectorAll('.loadout__tab').forEach(button => {
   button.addEventListener('click', () => {
     const parent = button.closest('.loadout');
     const tab = button.dataset.tab;
 
-    Analytics.trackEvent('switch_tab', { tab: button.textContent });
+    // фиксируем событие переключения вкладки
+    Analytics.trackEvent('switch_tab', { 
+      tab: button.textContent.trim() || 'Без названия' 
+    });
 
     parent.querySelectorAll('.loadout__tab').forEach(b => b.classList.remove('is-active'));
     parent.querySelectorAll('.loadout__tab-content').forEach(c => c.classList.remove('is-active'));
     button.classList.add('is-active');
     parent.querySelector(`[data-tab-content="${tab}"]`)?.classList.add('is-active');
 
-    // ⬇️ Обновление высоты после переключения вкладки
+    // обновление высоты блока при смене вкладки
     const content = parent.querySelector('.loadout__content');
     content.style.maxHeight = content.scrollHeight + 'px';
   });
 });
 
+// === Просмотр сборки ===
 document.querySelectorAll('.js-loadout-toggle').forEach(header => {
   header.addEventListener('click', () => {
     const loadout = header.closest('.js-loadout');
@@ -755,21 +760,22 @@ document.querySelectorAll('.js-loadout-toggle').forEach(header => {
     loadout.classList.toggle('is-open');
     content.style.maxHeight = loadout.classList.contains('is-open') ? content.scrollHeight + 'px' : '0';
 
-    // 👇 фиксируем просмотр сборки
+    // фиксируем просмотр сборки
     const buildIndex = [...document.querySelectorAll('.js-loadout')].indexOf(loadout);
     const build = cachedBuilds[buildIndex];
     const weaponTypeRu = weaponTypeLabels[build.weapon_type] || build.weapon_type;
-    
+
+    const finalTitle = build.title && build.title.trim() !== ""
+      ? build.title
+      : weaponTypeRu; // если нет названия — подставляем тип оружия
+
     Analytics.trackEvent('view_build', { 
-      build_id: build.id,
-      title: build.title || null,        // название сборки (если админ задал)
-      weapon_name: weaponTypeRu          // нормальное название оружия
+      build_id: build.id || null,
+      title: finalTitle
     });
-
-
-
   });
 });
+
 
 }
 
