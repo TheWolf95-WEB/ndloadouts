@@ -474,12 +474,15 @@ async def get_errors():
 
     users = {str(u["id"]): u for u in get_all_users()}
 
-    def prettify_time(ts):
-        try:
-            dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-            return dt.strftime("%d.%m.%Y %H:%M:%S")
-        except:
-            return ts
+def prettify_time(ts: str):
+    if not ts:
+        return "-"
+    try:
+        dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        return dt.strftime("%d.%m.%Y %H:%M:%S")
+    except Exception:
+        return ts
+
 
     errors = []
     for user_id, error, details, timestamp in rows:
