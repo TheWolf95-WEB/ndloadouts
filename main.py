@@ -563,12 +563,6 @@ async def get_latest_analytics():
     def prettify_status(action: str):
         return "⚪ Оффлайн" if action == "session_end" else "🟢 Онлайн"
 
-    def prettify_time(ts: str):
-        try:
-            dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-            return dt.strftime("%d.%m.%Y %H:%M:%S")
-        except:
-            return ts
 
     analytics = []
     for user_id, action, details, timestamp in rows:
