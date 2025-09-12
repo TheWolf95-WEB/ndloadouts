@@ -69,7 +69,7 @@ document.getElementById('category-filter')?.addEventListener('change', async (e)
 
   Analytics.trackEvent('switch_category', { 
     category,
-    "time": prettify_time(timestamp)
+    time: new Date().toISOString()
   });
 
 
@@ -136,7 +136,7 @@ function showScreen(id) {
   // 👇 сюда добавляем
   Analytics.trackEvent('open_screen', { 
   screen: id,
-  "time": prettify_time(timestamp)
+  time: new Date().toISOString()
 });
 
   
@@ -207,7 +207,7 @@ document.getElementById('show-builds-btn')?.addEventListener('click', async () =
   showScreen('screen-builds');
   Analytics.trackEvent('click_button', { 
   button: 'show-builds',
-  "time": prettify_time(timestamp)
+  time: new Date().toISOString()
 });
 });
 
@@ -216,7 +216,7 @@ document.getElementById('back-to-main')?.addEventListener('click', () => {
   showScreen('screen-warzone-main');
   Analytics.trackEvent('click_button', { 
   button: 'back-to-main',
-  "time": prettify_time(timestamp)
+  time: new Date().toISOString()
 });
 });
 document.getElementById('back-from-builds')?.addEventListener('click', () => showScreen('screen-warzone-main'));
@@ -225,7 +225,7 @@ document.getElementById('help-btn')?.addEventListener('click', () => {
   tg.openLink('https://t.me/ndzone_admin');
   Analytics.trackEvent('click_button', { 
   button: 'help',
-  "time": prettify_time(timestamp)
+  time: new Date().toISOString()
 });
 });
 
@@ -751,7 +751,7 @@ document.querySelectorAll('.loadout__tab').forEach(button => {
     // фиксируем событие переключения вкладки
     Analytics.trackEvent('switch_tab', { 
       tab: button.textContent.trim() || 'Без названия',
-      "time": prettify_time(timestamp)
+      time: new Date().toISOString()
     });
 
 
@@ -786,7 +786,7 @@ document.querySelectorAll('.js-loadout-toggle').forEach(header => {
     Analytics.trackEvent('view_build', { 
       title: finalTitle,
       weapon_name: weaponTypeRu,
-      "time": prettify_time(timestamp)
+      time: new Date().toISOString()
     });
 
 
@@ -828,7 +828,7 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
     // 👇 фиксируем событие фильтрации
     Analytics.trackEvent('switch_category', { 
       category: type,
-      "time": prettify_time(timestamp)
+      time: new Date().toISOString()
     });
 
 });
