@@ -771,6 +771,7 @@ document.querySelectorAll('.js-loadout-toggle').forEach(header => {
     
     Analytics.trackEvent('view_build', { 
       title: finalTitle
+      weapon_name: weaponTypeRu
     });
   });
 });
