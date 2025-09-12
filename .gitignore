@@ -20,6 +20,10 @@ __pycache__/
 # MacOS / System
 .DS_Store
 
-# SQLite DB — исключаем только базу, но не всю папку!
+# SQLite DB — исключаем только основную и бэкапы
 data/builds.db
+data/*.db
 
+# Локальные скрипты (не пушим в git)
+deploy.sh
+webhook_server.py
