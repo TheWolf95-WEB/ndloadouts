@@ -134,18 +134,34 @@
 
         if (errData.errors && errData.errors.length > 0) {
           errData.errors.forEach(row => {
+            let detailsHtml = "";
+        
+            try {
+              const details = typeof row.details === "string" ? JSON.parse(row.details) : row.details;
+              if (details && typeof details === "object") {
+                detailsHtml = Object.entries(details)
+                  .map(([k, v]) => `<div><b>${k}:</b> ${v}</div>`)
+                  .join("");
+              } else {
+                detailsHtml = row.details || "-";
+              }
+            } catch {
+              detailsHtml = row.details || "-";
+            }
+        
             errorsBody.innerHTML += `
               <tr>
                 <td>${row.user}</td>
-                <td>${row.error}</td>
-                <td>${row.details}</td>
-                <td>${row.time}</td>
+                <td style="color:#ff5555">${row.error}</td>
+                <td style="color:#ccc">${detailsHtml}</td>
+                <td style="color:#00ccff">${row.time}</td>
               </tr>
             `;
           });
         } else {
           errorsBody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#777">Ошибок пока нет</td></tr>`;
         }
+
 
         document.getElementById("last-update").textContent =
           "⏱ Обновлено: " + new Date().toLocaleTimeString();
