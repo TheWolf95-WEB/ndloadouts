@@ -423,15 +423,18 @@ async def analytics_page(request: Request):
 async def get_latest_analytics():
     conn = sqlite3.connect("/opt/ndloadouts_storage/analytics.db")
     cur = conn.cursor()
+
+    # последние действия
     cur.execute("SELECT user_id, action, details, timestamp FROM analytics ORDER BY id DESC LIMIT 50")
-    rows = cur.fetchall()
+    analytics = [{"user_id": r[0], "action": r[1], "details": r[2], "timestamp": r[3]} for r in cur.fetchall()]
+
+    # последние ошибки
+    cur.execute("SELECT user_id, error, details, timestamp FROM errors ORDER BY id DESC LIMIT 20")
+    errors = [{"user_id": r[0], "error": r[1], "details": r[2], "timestamp": r[3]} for r in cur.fetchall()]
+
     conn.close()
-    return {
-        "analytics": [
-            {"user_id": r[0], "action": r[1], "details": r[2], "timestamp": r[3]}
-            for r in rows
-        ]
-    }
+    return {"analytics": analytics, "errors": errors}
+
 
 
 
