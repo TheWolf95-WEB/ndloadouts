@@ -34,7 +34,10 @@ if (user && userInfoEl) {
 
 document.addEventListener('DOMContentLoaded', async () => {
     // фиксируем старт сессии
-  Analytics.trackEvent('session_start', { platform: tg.platform });
+  Analytics.trackEvent('session_start', { 
+  platform: tg.platform, 
+  timestamp: new Date().toISOString() 
+});
   
   await loadWeaponTypes(); // Загрузка типов
 
@@ -64,9 +67,10 @@ document.getElementById('category-filter')?.addEventListener('change', async (e)
   const category = e.target.value;
   await loadBuilds(category);
 
-  // 👇 добавляем
-  Analytics.trackEvent('switch_category', { category });
-});
+  Analytics.trackEvent('switch_category', { 
+    category,
+    timestamp: new Date().toISOString()
+  });
 
 
 tg.onEvent('web_app_close', () => {
@@ -771,8 +775,10 @@ document.querySelectorAll('.js-loadout-toggle').forEach(header => {
     
     Analytics.trackEvent('view_build', { 
       title: finalTitle,
-      weapon_name: weaponTypeRu
+      weapon_name: weaponTypeRu,
+      timestamp: new Date().toISOString()
     });
+
 
   });
 });
