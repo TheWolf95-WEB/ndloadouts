@@ -10,7 +10,6 @@
       font-family: 'Rubik', 'Segoe UI', sans-serif;
       color: #ffffff;
     }
-
     header {
       text-align: center;
       padding: 20px;
@@ -88,6 +87,7 @@
   <script>
     async function loadData() {
       try {
+        // === Пользователи ===
         const res = await fetch("/api/analytics/latest");
         const data = await res.json();
 
@@ -96,6 +96,9 @@
         onlineBody.innerHTML = "";
         offlineBody.innerHTML = "";
 
+        let hasOnline = false;
+        let hasOffline = false;
+
         data.analytics.forEach(row => {
           const tr = `
             <tr>
@@ -103,15 +106,46 @@
               <td>${row.action}</td>
               <td>${row.platform}</td>
               <td>${row.status}</td>
-              <td>${row.time}</td>
+              <td>${row.timestamp}</td>
             </tr>
           `;
           if (row.status.includes("Онлайн")) {
             onlineBody.innerHTML += tr;
+            hasOnline = true;
           } else {
             offlineBody.innerHTML += tr;
+            hasOffline = true;
           }
         });
+
+        if (!hasOnline) {
+          onlineBody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#777">Нет онлайн пользователей</td></tr>`;
+        }
+        if (!hasOffline) {
+          offlineBody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#777">Нет оффлайн пользователей</td></tr>`;
+        }
+
+        // === Ошибки ===
+        const errRes = await fetch("/api/analytics/errors");
+        const errData = await errRes.json();
+
+        const errorsBody = document.getElementById("errors-body");
+        errorsBody.innerHTML = "";
+
+        if (errData.errors && errData.errors.length > 0) {
+          errData.errors.forEach(row => {
+            errorsBody.innerHTML += `
+              <tr>
+                <td>${row.user}</td>
+                <td>${row.error}</td>
+                <td>${row.details}</td>
+                <td>${row.timestamp}</td>
+              </tr>
+            `;
+          });
+        } else {
+          errorsBody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#777">Ошибок пока нет</td></tr>`;
+        }
 
         document.getElementById("last-update").textContent =
           "⏱ Обновлено: " + new Date().toLocaleTimeString();
@@ -144,9 +178,7 @@
             <th>Время</th>
           </tr>
         </thead>
-        <tbody id="online-body">
-          <tr><td colspan="5" style="text-align:center;color:#777">Нет онлайн пользователей</td></tr>
-        </tbody>
+        <tbody id="online-body"></tbody>
       </table>
     </div>
 
@@ -157,15 +189,13 @@
         <thead>
           <tr>
             <th>Пользователь</th>
-            <th>Действие</th>
+            <th>Последнее действие</th>
             <th>Платформа</th>
             <th>Статус</th>
             <th>Последний раз в сети</th>
           </tr>
         </thead>
-        <tbody id="offline-body">
-          <tr><td colspan="5" style="text-align:center;color:#777">Нет данных</td></tr>
-        </tbody>
+        <tbody id="offline-body"></tbody>
       </table>
     </div>
 
@@ -181,9 +211,7 @@
             <th>Время</th>
           </tr>
         </thead>
-        <tbody id="errors-body">
-          <tr><td colspan="4" style="text-align:center;color:#777">Ошибок пока нет</td></tr>
-        </tbody>
+        <tbody id="errors-body"></tbody>
       </table>
     </div>
   </div>
