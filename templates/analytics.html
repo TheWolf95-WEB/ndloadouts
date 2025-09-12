@@ -99,10 +99,12 @@
               <td>${row.user}</td>
               <td>${row.action}</td>
               <td>${row.platform}</td>
-              <td>${row.time}</td>
+              <td>${row.status}</td>
+              <td>${new Date(row.timestamp).toLocaleString()}</td>
             </tr>
           `;
         });
+
 
         document.getElementById("last-update").textContent =
           "⏱ Обновлено: " + new Date().toLocaleTimeString();
@@ -130,11 +132,13 @@
             <th>Пользователь</th>
             <th>Действие</th>
             <th>Платформа</th>
+            <th>Статус</th>
             <th>Время</th>
           </tr>
         </thead>
         <tbody id="analytics-body"></tbody>
       </table>
+    </div>
     </div>
 
     <h2><span>⚠️</span>Ошибки</h2>
