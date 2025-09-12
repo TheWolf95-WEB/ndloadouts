@@ -170,6 +170,18 @@ async def recheck_subscription(callback: CallbackQuery):
             keyboard
         )
 
+
+@router.message(F.text == "/analytics")
+async def analytics_cmd(message: Message):
+    admin_ids = os.getenv("ADMIN_IDS", "").split(",")
+    if str(message.from_user.id) not in admin_ids:
+        await message.answer("🚫 У тебя нет доступа к аналитике.")
+        return
+
+    await message.answer("📊 Ваша страница аналитики: https://ndloadouts.ru/analytics")
+
+
+
 # --- запуск бота ---
 async def main():
     print("🤖 Бот запускается…")
