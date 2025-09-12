@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Аналитика ND Loadouts</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #171d25;
+      color: #eee;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #fff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 8px 10px;
+      text-align: left;
+    }
+    th {
+      background: #222;
+    }
+    tr:nth-child(even) {
+      background: #1f242e;
+    }
+    tr:hover {
+      background: #2a3545;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 Аналитика пользователей</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>User ID</th>
+          <th>Действие</th>
+          <th>Детали</th>
+          <th>Время</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td>{{ row[0] }}</td>
+          <td>{{ row[1] }}</td>
+          <td>{{ row[2] }}</td>
+          <td>{{ row[3] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
