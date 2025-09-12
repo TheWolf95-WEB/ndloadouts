@@ -4,48 +4,68 @@
   <meta charset="UTF-8">
   <title>Аналитика NDHQ</title>
   <style>
+    body {
+      margin: 0;
+      background-color: #0f111a;
+      font-family: 'Rubik', 'Segoe UI', sans-serif;
+      color: #ffffff;
+    }
+
     header {
-      background: #171d25;
-      padding: 20px;
       text-align: center;
+      padding: 20px;
+      background: #171d25;
       border-bottom: 2px solid #2a3545;
     }
     header h1 {
+      font-size: 22px;
       margin: 0;
-      font-size: 28px;
       color: #00ffcc;
     }
     header p {
-      margin: 5px 0 0;
+      font-size: 14px;
       color: #aaa;
+      margin: 5px 0 0;
     }
     .container {
-      max-width: 1200px;
+      max-width: 1000px;
       margin: 20px auto;
       padding: 0 15px;
     }
     h2 {
-      margin-top: 30px;
+      font-size: 18px;
+      margin: 20px 0 10px;
       color: #00ccff;
+      display: flex;
+      align-items: center;
+    }
+    h2 span {
+      margin-right: 8px;
+    }
+    .card {
+      background: #171d25;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+      padding: 15px;
+      margin-bottom: 25px;
+      overflow-x: auto;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 15px;
       font-size: 14px;
+      min-width: 600px;
     }
     th, td {
-      border: 1px solid #333;
-      padding: 8px 10px;
+      padding: 10px;
       text-align: left;
+      border-bottom: 1px solid #2a3545;
       word-break: break-word;
     }
     th {
       background: #1c222d;
       color: #00ffcc;
-    }
-    tr:nth-child(even) {
-      background: #151b24;
+      font-weight: 600;
     }
     tr:hover {
       background: #223044;
@@ -54,8 +74,15 @@
       text-align: center;
       padding: 15px;
       color: #777;
-      border-top: 1px solid #222;
-      margin-top: 40px;
+      font-size: 13px;
+      border-top: 1px solid #2a3545;
+      margin-top: 30px;
+    }
+    @media (max-width: 600px) {
+      th, td {
+        font-size: 13px;
+        padding: 8px;
+      }
     }
   </style>
   <script>
@@ -64,42 +91,27 @@
         const res = await fetch("/api/analytics/latest");
         const data = await res.json();
 
-        // события
         const analyticsBody = document.getElementById("analytics-body");
         analyticsBody.innerHTML = "";
         data.analytics.forEach(row => {
           analyticsBody.innerHTML += `
             <tr>
-              <td>${row.user_id}</td>
+              <td>${row.user}</td>
               <td>${row.action}</td>
-              <td>${row.details}</td>
-              <td>${row.timestamp}</td>
-            </tr>
-          `;
-        });
-
-        // ошибки
-        const errorsBody = document.getElementById("errors-body");
-        errorsBody.innerHTML = "";
-        data.errors.forEach(row => {
-          errorsBody.innerHTML += `
-            <tr>
-              <td>${row.user_id}</td>
-              <td>${row.error}</td>
-              <td>${row.details}</td>
-              <td>${row.timestamp}</td>
+              <td>${row.platform}</td>
+              <td>${row.time}</td>
             </tr>
           `;
         });
 
         document.getElementById("last-update").textContent =
-          "Обновлено: " + new Date().toLocaleTimeString();
+          "⏱ Обновлено: " + new Date().toLocaleTimeString();
       } catch (e) {
         console.error("Ошибка загрузки аналитики:", e);
       }
     }
 
-    setInterval(loadData, 10000); // автообновление каждые 10 секунд
+    setInterval(loadData, 10000);
     window.onload = loadData;
   </script>
 </head>
@@ -110,31 +122,37 @@
   </header>
 
   <div class="container">
-    <h2>Действия пользователей</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>User ID</th>
-          <th>Действие</th>
-          <th>Детали</th>
-          <th>Время</th>
-        </tr>
-      </thead>
-      <tbody id="analytics-body"></tbody>
-    </table>
+    <h2><span>📂</span>Действия пользователей</h2>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Пользователь</th>
+            <th>Действие</th>
+            <th>Платформа</th>
+            <th>Время</th>
+          </tr>
+        </thead>
+        <tbody id="analytics-body"></tbody>
+      </table>
+    </div>
 
-    <h2>Ошибки</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>User ID</th>
-          <th>Ошибка</th>
-          <th>Детали</th>
-          <th>Время</th>
-        </tr>
-      </thead>
-      <tbody id="errors-body"></tbody>
-    </table>
+    <h2><span>⚠️</span>Ошибки</h2>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Пользователь</th>
+            <th>Ошибка</th>
+            <th>Детали</th>
+            <th>Время</th>
+          </tr>
+        </thead>
+        <tbody id="errors-body">
+          <tr><td colspan="4" style="text-align:center;color:#777">Ошибок пока нет</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <footer>
