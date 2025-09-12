@@ -464,6 +464,36 @@ async def save_error(data: dict = Body(...)):
     except Exception as e:
         return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
 
+@app.get("/api/analytics/errors")
+async def get_errors():
+    conn = sqlite3.connect(ANALYTICS_DB)
+    cur = conn.cursor()
+    cur.execute("SELECT user_id, error, details, timestamp FROM errors ORDER BY id DESC LIMIT 100")
+    rows = cur.fetchall()
+    conn.close()
+
+    users = {str(u["id"]): u for u in get_all_users()}
+
+    def prettify_time(ts):
+        try:
+            dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+            return dt.strftime("%d.%m.%Y %H:%M:%S")
+        except:
+            return ts
+
+    errors = []
+    for user_id, error, details, timestamp in rows:
+        user = users.get(str(user_id), {})
+        errors.append({
+            "user": f"{user_id} - {user.get('first_name','')} (@{user.get('username','')})",
+            "error": error,
+            "details": details,
+            "timestamp": prettify_time(timestamp)
+        })
+
+    return {"errors": errors}
+
+
 
 
 # Получение Аналитики 
@@ -498,7 +528,7 @@ async def get_latest_analytics():
             "session_start": "🔵 Начало сессии",
             "session_end": "🔴 Конец сессии",
             "open_screen": f"📂 Открытие экрана: {details.get('screen','неизвестно')}",
-            "view_build": f"🔫 Просмотр сборки: {details.get('title') or details.get('weapon','неизвестно')}",
+            "view_build": f"🔫 Просмотр сборки ({details.get('weapon','?')}): {details.get('title','')}",
             "switch_category": f"📑 Категория: {details.get('category','')}",
             "switch_tab": f"📌 Вкладка: {details.get('tab','')}",
             "click_button": f"🖱 Кнопка: {details.get('button','')}",
@@ -521,11 +551,9 @@ async def get_latest_analytics():
             return "-"
 
     def prettify_status(action):
-        if action == "session_start":
-            return "🟢 Онлайн"
-        elif action == "session_end":
+        if action == "session_end":
             return "⚪ Оффлайн"
-        return "⚪ Оффлайн"
+        return "🟢 Онлайн"
 
     def prettify_time(ts):
         try:
