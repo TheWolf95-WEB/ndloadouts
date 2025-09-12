@@ -408,6 +408,19 @@ async def save_error(data: dict = Body(...)):
 
 
 
+# Получение Аналитики 
+@app.get("/analytics", response_class=HTMLResponse)
+async def analytics_page(request: Request):
+    conn = sqlite3.connect("/opt/ndloadouts_storage/analytics.db")
+    cur = conn.cursor()
+    cur.execute("SELECT user_id, action, details, timestamp FROM analytics ORDER BY id DESC LIMIT 100")
+    rows = cur.fetchall()
+    conn.close()
+
+    return templates.TemplateResponse("analytics.html", {"request": request, "rows": rows})
+
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)
