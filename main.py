@@ -56,6 +56,17 @@ def extract_user_roles(init_data_str: str):
     except:
         return None, False, False
 
+def prettify_time(ts: str):
+    if not ts:
+        return "-"
+    try:
+        # превращаем ISO строку (2025-09-12T20:15:30.123Z) в datetime
+        dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+        return dt.strftime("%d.%m.%Y %H:%M:%S")   # формат: 12.09.2025 20:15:30
+    except Exception:
+        return ts
+
+
 # --- GitHub Webhook ---
 @app.post("/webhook")
 async def webhook(request: Request, background_tasks: BackgroundTasks):
@@ -466,35 +477,25 @@ async def save_error(data: dict = Body(...)):
 
 @app.get("/api/analytics/errors")
 async def get_errors():
-    conn = sqlite3.connect(ANALYTICS_DB)
-    cur = conn.cursor()
-    cur.execute("SELECT user_id, error, details, timestamp FROM errors ORDER BY id DESC LIMIT 100")
-    rows = cur.fetchall()
-    conn.close()
+ conn = sqlite3.connect(ANALYTICS_DB)
+ cur = conn.cursor()
+ cur.execute("SELECT user_id, error, details, timestamp FROM errors ORDER BY id DESC LIMIT 100")
+ rows = cur.fetchall()
+ conn.close()
 
-    users = {str(u["id"]): u for u in get_all_users()}
+ users = {str(u["id"]): u for u in get_all_users()}
 
-def prettify_time(ts: str):
-    if not ts:
-        return "-"
-    try:
-        dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
-        return dt.strftime("%d.%m.%Y %H:%M:%S")
-    except Exception:
-        return ts
+ errors = []
+ for user_id, error, details, timestamp in rows:
+     user = users.get(str(user_id), {})
+     errors.append({
+         "user": f"{user_id} - {user.get('first_name','')} (@{user.get('username','')})",
+         "error": error,
+         "details": details,
+         "time": prettify_time(timestamp)   # 🔥 здесь форматируем
+     })
 
-
-    errors = []
-    for user_id, error, details, timestamp in rows:
-        user = users.get(str(user_id), {})
-        errors.append({
-            "user": f"{user_id} - {user.get('first_name','')} (@{user.get('username','')})",
-            "error": error,
-            "details": details,
-            "timestamp": prettify_time(timestamp)
-        })
-
-    return {"errors": errors}
+ return {"errors": errors}
 
 
 
