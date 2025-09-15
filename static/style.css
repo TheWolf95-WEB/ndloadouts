@@ -47,6 +47,18 @@ body {
   z-index: 1;
 }
 
+/* 🔹 Анимации для свайпа */
+.screen.slide-out-right {
+  transform: translateX(100%) !important;
+  opacity: 0 !important;
+}
+
+.screen.slide-in-left {
+  transform: translateX(-100%) !important;
+  opacity: 0 !important;
+}
+
+
 /* Кнлопки */
 
 .button-grid.two-column {
