@@ -1131,6 +1131,7 @@ tg.onEvent('web_app_close', () => {
 });
 
 // === Глобальный свайп-назад с анимацией ===
+// === Глобальный свайп-назад с анимацией ===
 function goBack() {
   const prev = screenHistory.pop();
   if (!prev) {
@@ -1139,25 +1140,27 @@ function goBack() {
   }
 
   const current = document.querySelector('.screen.active');
-  const prevScreen = document.getElementById(prev);
-
-  if (!current || !prevScreen) return;
+  if (!current) return;
 
   isGoingBack = true;
 
-  // текущий экран уезжает вправо
+  // уезжаем вправо
   current.classList.add('slide-out-right');
   current.addEventListener('transitionend', () => {
     current.classList.remove('active', 'slide-out-right');
     current.style.display = 'none';
 
-    // предыдущий экран въезжает слева
-    prevScreen.style.display = 'block';
-    prevScreen.classList.add('slide-in-left');
-    requestAnimationFrame(() => {
-      prevScreen.classList.add('active');
-      prevScreen.classList.remove('slide-in-left');
-    });
+    // 👉 используем showScreen, чтобы корректно восстановить кнопки/логику
+    showScreen(prev);
+
+    // заезжаем слева (для красоты)
+    const prevScreen = document.getElementById(prev);
+    if (prevScreen) {
+      prevScreen.classList.add('slide-in-left');
+      requestAnimationFrame(() => {
+        prevScreen.classList.remove('slide-in-left');
+      });
+    }
   }, { once: true });
 }
 
