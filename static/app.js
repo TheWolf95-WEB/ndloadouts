@@ -25,6 +25,7 @@ let ADMIN_IDS = [];
 let currentSubmitHandler = null;
 let cachedBuilds = [];        // кэш всех сборок последней загрузки
 let currentCategory = 'all';  // текущая категория
+let screenHistory = [];
 
 
 // === Приветствие и загрузка админов ===
@@ -138,14 +139,22 @@ async function checkAdminStatus() {
 }
 
 
-function showScreen(id) {
-  // 👇 сюда добавляем
-  Analytics.trackEvent('open_screen', { 
-  screen: id,
-  time: new Date().toISOString()
-});
+let isGoingBack = false;
 
-  
+function showScreen(id) {
+  // 📌 сохраняем текущий экран в историю (только если это не возврат назад)
+  const current = document.querySelector('.screen.active')?.id;
+  if (current && current !== id && !isGoingBack) {
+    screenHistory.push(current);
+  }
+  isGoingBack = false;
+
+  // фиксируем событие открытия экрана
+  Analytics.trackEvent('open_screen', { 
+    screen: id,
+    time: new Date().toISOString()
+  });
+
   const protectedScreens = {
     'screen-form': 'is_admin',
     'screen-edit-builds': 'is_admin',
@@ -174,14 +183,13 @@ function showScreen(id) {
   roleButtons.style.display = (id === 'screen-warzone-main') ? 'flex' : 'none';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  // Показывать кнопку "Главное меню" только на экране с кнопками
+  // Кнопка "Главное меню"
   const globalHomeBtn = document.getElementById('global-home-btn');
   if (id === 'screen-warzone-main') {
     globalHomeBtn.style.display = 'block';
   } else {
     globalHomeBtn.style.display = 'none';
   }
-
 }
 
 
@@ -1122,4 +1130,56 @@ tg.onEvent('web_app_close', () => {
   });
 });
 
-  
+// === Глобальный свайп-назад с анимацией ===
+function goBack() {
+  const prev = screenHistory.pop();
+  if (!prev) {
+    console.log("⬅️ История пуста, возврат невозможен");
+    return;
+  }
+
+  const current = document.querySelector('.screen.active');
+  const prevScreen = document.getElementById(prev);
+
+  if (!current || !prevScreen) return;
+
+  isGoingBack = true;
+
+  // текущий экран уезжает вправо
+  current.classList.add('slide-out-right');
+  current.addEventListener('transitionend', () => {
+    current.classList.remove('active', 'slide-out-right');
+    current.style.display = 'none';
+
+    // предыдущий экран въезжает слева
+    prevScreen.style.display = 'block';
+    prevScreen.classList.add('slide-in-left');
+    requestAnimationFrame(() => {
+      prevScreen.classList.add('active');
+      prevScreen.classList.remove('slide-in-left');
+    });
+  }, { once: true });
+}
+
+let touchStartX = 0;
+let touchStartY = 0;
+
+document.addEventListener('touchstart', (e) => {
+  touchStartX = e.changedTouches[0].screenX;
+  touchStartY = e.changedTouches[0].screenY;
+});
+
+document.addEventListener('touchend', (e) => {
+  const touchEndX = e.changedTouches[0].screenX;
+  const touchEndY = e.changedTouches[0].screenY;
+
+  const deltaX = touchEndX - touchStartX;
+  const deltaY = Math.abs(touchEndY - touchStartY);
+
+  // свайп вправо: движение по X > 70px и Y не больше 50px
+  if (deltaX > 70 && deltaY < 50) {
+    goBack();
+  }
+});
+
+
