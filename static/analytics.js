@@ -1,11 +1,9 @@
-// analytics.js - исправленная версия
+// analytics.js - улучшенная версия для трекинга
 const Analytics = {
   trackEvent(action, details = {}) {
     try {
       const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
       const platform = window.Telegram?.WebApp?.platform || 'unknown';
-      
-      console.log(`📊 Tracking: ${action}`, details); // Лог для отладки
       
       fetch('/api/analytics', {
         method: 'POST',
@@ -22,71 +20,49 @@ const Analytics = {
     }
   },
 
-  trackError(error, details = {}) {
-    try {
-      const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
-      
-      console.error('❌ Tracking error:', error, details);
-      
-      fetch('/api/errors', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: user?.id || 'anonymous',
-          error: error?.toString() || 'Unknown error',
-          details: details,
-          timestamp: new Date().toISOString()
-        })
-      }).catch(err => console.error('Error logging failed:', err));
-    } catch (trackError) {
-      console.error('Error tracking failed:', trackError);
-    }
+  // Трекинг просмотра сборки
+  trackBuildView(buildData) {
+    this.trackEvent('view_build', {
+      title: buildData.title,
+      weapon_name: buildData.weapon,
+      category: buildData.category
+    });
+  },
+
+  // Трекинг поиска
+  trackSearch(query) {
+    this.trackEvent('search', {
+      query: query
+    });
+  },
+
+  // Трекинг открытия экрана
+  trackScreenOpen(screenName) {
+    this.trackEvent('open_screen', {
+      screen: screenName
+    });
   }
 };
 
-// === Автоматические события ===
-
-// Начало сессии (после полной загрузки DOM)
+// Автоматические события
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     Analytics.trackEvent('session_start', {
       platform: window.Telegram?.WebApp?.platform || 'unknown',
-      url: window.location.href,
-      user_agent: navigator.userAgent
+      url: window.location.href
     });
   }, 1000);
 });
 
-// Конец сессии (когда закрывают WebApp)
 if (window.Telegram?.WebApp) {
   window.Telegram.WebApp.onEvent('web_app_close', () => {
     Analytics.trackEvent('session_end');
   });
 }
 
-// Перед закрытием страницы
 window.addEventListener('beforeunload', () => {
   Analytics.trackEvent('session_end');
 });
 
-// Ошибки JS
-window.addEventListener('error', (e) => {
-  Analytics.trackError(e.message, {
-    source: e.filename,
-    line: e.lineno,
-    column: e.colno,
-    url: location.href,
-    stack: e.error?.stack
-  });
-});
-
-window.addEventListener('unhandledrejection', (e) => {
-  Analytics.trackError(e.reason, {
-    type: 'promise_rejection',
-    url: location.href,
-    stack: e.reason?.stack
-  });
-});
-
-// Экспортируем для глобального использования
+// Глобальный экспорт
 window.Analytics = Analytics;
