@@ -1,3 +1,4 @@
+# main.py - исправленная версия
 from fastapi import FastAPI, Request, Body, BackgroundTasks
 from fastapi import Query
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -29,7 +30,8 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://ndloadouts.ru"],
+    allow_origins=["*"],  # Разрешаем все для тестирования
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -37,6 +39,9 @@ app.add_middleware(
 # --- Утилита для проверки прав ---
 def extract_user_roles(init_data_str: str):
     try:
+        if not init_data_str:
+            return None, False, False
+            
         parsed = parse_qs(init_data_str)
         user_data = parsed.get("user", [None])[0]
         if not user_data:
@@ -53,7 +58,8 @@ def extract_user_roles(init_data_str: str):
         is_admin = is_super_admin or user_id in admin_dop
 
         return user_id, is_admin, is_super_admin
-    except:
+    except Exception as e:
+        print(f"Error extracting user roles: {e}")
         return None, False, False
 
 def prettify_time(ts: str):
@@ -65,8 +71,6 @@ def prettify_time(ts: str):
         return dt.strftime("%d.%m.%Y %H:%M:%S")
     except Exception:
         return ts
-
-
 
 # --- GitHub Webhook ---
 @app.post("/webhook")
@@ -131,7 +135,6 @@ async def api_modules_delete(module_id: int, payload: dict = Body(...)):
     module_delete(module_id)
     return {"status": "ok"}
 
-
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
@@ -165,10 +168,9 @@ async def api_builds(category: str = Query("all")):
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
-
 @app.post("/api/builds")
 async def create_build(request: Request, data: dict = Body(...)):
-    user_id, is_admin, _ = extract_user_roles((await request.json()).get("initData", ""))
+    user_id, is_admin, _ = extract_user_roles(data.get("initData", ""))
     if not is_admin:
         return JSONResponse({"error": "Недостаточно прав"}, status_code=403)
 
@@ -346,220 +348,139 @@ async def all_versions():
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
-
-# АНАЛИТИКА
+# АНАЛИТИКА - ИСПРАВЛЕННАЯ ВЕРСИЯ
 
 ANALYTICS_DB = Path("/opt/ndloadouts_storage/analytics.db")
 
 def init_analytics_db():
-    conn = sqlite3.connect(ANALYTICS_DB)
-    cur = conn.cursor()
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS analytics (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id TEXT,
-        action TEXT,
-        details TEXT,
-        timestamp TEXT
-    )
-    """)
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS errors (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id TEXT,
-        error TEXT,
-        details TEXT,
-        timestamp TEXT
-    )
-    """)
-    cur.execute("""
-    CREATE TABLE IF NOT EXISTS user_sessions (
-        user_id TEXT PRIMARY KEY,
-        last_seen TEXT,
-        status TEXT,       -- online/offline
-        platform TEXT,
-        last_activity TEXT
-    )
-    """)
-    conn.commit()
-    conn.close()
+    try:
+        # Создаем директорию если не существует
+        ANALYTICS_DB.parent.mkdir(parents=True, exist_ok=True)
+        
+        conn = sqlite3.connect(ANALYTICS_DB)
+        cur = conn.cursor()
+        
+        # Аналитика событий
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS analytics (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT,
+            action TEXT,
+            details TEXT,
+            timestamp TEXT
+        )
+        """)
+        
+        # Ошибки
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS errors (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT,
+            error TEXT,
+            details TEXT,
+            timestamp TEXT
+        )
+        """)
+        
+        # Сессии пользователей
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS user_sessions (
+            user_id TEXT PRIMARY KEY,
+            last_seen TEXT,
+            status TEXT,
+            platform TEXT
+        )
+        """)
+        
+        conn.commit()
+        conn.close()
+        print("Analytics DB initialized successfully")
+    except Exception as e:
+        print(f"Error initializing analytics DB: {e}")
 
 init_analytics_db()
 
 @app.post("/api/analytics")
 async def save_analytics(data: dict = Body(...)):
     try:
-        user_id = str(data.get("user_id"))
-        action = data.get("action")
-        details = json.dumps(data.get("details"), ensure_ascii=False)
+        print(f"📊 Analytics received: {data}")  # Лог для отладки
+        
+        user_id = data.get("user_id", "anonymous")
+        action = data.get("action", "unknown")
+        details = data.get("details", {})
         timestamp = data.get("timestamp")
-
+        
+        # Преобразуем details в JSON строку
+        details_json = json.dumps(details, ensure_ascii=False) if details else "{}"
+        
         conn = sqlite3.connect(ANALYTICS_DB)
         cur = conn.cursor()
+        
+        # Сохраняем событие
         cur.execute(
             "INSERT INTO analytics (user_id, action, details, timestamp) VALUES (?, ?, ?, ?)",
-            (user_id, action, details, timestamp)
+            (str(user_id), action, details_json, timestamp)
         )
 
-        # === обновляем таблицу user_sessions ===
-        platform = json.loads(details).get("platform", "") if details else ""
+        # Обновляем сессию пользователя
+        status = "online" if action == "session_start" else "offline" if action == "session_end" else "online"
+        platform = details.get("platform", "") if details else ""
         
-        # Определяем статус: онлайн если действие было менее 30 секунд назад
-        current_time = datetime.now(timezone.utc)
-        action_time = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
-        time_diff = (current_time - action_time).total_seconds()
-        
-        status = "online" if time_diff < 30 else "offline"
-        
-        # Для session_end сразу ставим оффлайн
-        if action == "session_end":
-            status = "offline"
-
         cur.execute("""
-            INSERT INTO user_sessions (user_id, last_seen, status, platform, last_activity)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO user_sessions (user_id, last_seen, status, platform)
+            VALUES (?, ?, ?, ?)
             ON CONFLICT(user_id) DO UPDATE SET
-              last_seen=excluded.last_seen,
-              status=excluded.status,
-              platform=excluded.platform,
-              last_activity=excluded.last_activity
-        """, (user_id, timestamp, status, platform, action))
+                last_seen = excluded.last_seen,
+                status = excluded.status,
+                platform = excluded.platform
+        """, (str(user_id), timestamp, status, platform))
 
         conn.commit()
         conn.close()
         return {"status": "ok"}
     except Exception as e:
+        print(f"❌ Analytics save error: {e}")
         return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
 
-# 🔥 НОВЫЙ ЭНДПОИНТ - Автообновление статуса онлайн
-@app.post("/api/analytics/ping")
-async def update_user_ping(data: dict = Body(...)):
-    """Обновляет время последней активности пользователя"""
-    try:
-        user_id = str(data.get("user_id"))
-        platform = data.get("platform", "unknown")
-        timestamp = data.get("timestamp")
-
-        conn = sqlite3.connect(ANALYTICS_DB)
-        cur = conn.cursor()
-        
-        cur.execute("""
-            INSERT INTO user_sessions (user_id, last_seen, status, platform, last_activity)
-            VALUES (?, ?, 'online', ?, 'ping')
-            ON CONFLICT(user_id) DO UPDATE SET
-              last_seen=excluded.last_seen,
-              status='online',
-              platform=excluded.platform,
-              last_activity='ping'
-        """, (user_id, timestamp, platform))
-
-        conn.commit()
-        conn.close()
-        return {"status": "ok"}
-    except Exception as e:
-        return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
-
-# 🔥 ОБНОВЛЕННЫЙ ЭНДПОИНТ - Проверяем время последней активности
 @app.get("/api/analytics/users")
 async def get_users_status():
-    conn = sqlite3.connect(ANALYTICS_DB)
-    cur = conn.cursor()
-    
-    # Сначала обновляем статусы по времени
-    current_time = datetime.now(timezone.utc)
-    cur.execute("SELECT user_id, last_seen FROM user_sessions WHERE status = 'online'")
-    online_users = cur.fetchall()
-    
-    for user_id, last_seen in online_users:
-        try:
-            last_seen_time = datetime.fromisoformat(last_seen.replace('Z', '+00:00'))
-            time_diff = (current_time - last_seen_time).total_seconds()
-            if time_diff > 30:  # 30 секунд без активности = оффлайн
-                cur.execute("UPDATE user_sessions SET status = 'offline' WHERE user_id = ?", (user_id,))
-        except:
-            pass
-    
-    conn.commit()
-    
-    # Теперь получаем актуальные данные
-    cur.execute("SELECT user_id, last_seen, status, platform, last_activity FROM user_sessions")
-    rows = cur.fetchall()
-    conn.close()
+    try:
+        conn = sqlite3.connect(ANALYTICS_DB)
+        cur = conn.cursor()
+        cur.execute("SELECT user_id, last_seen, status, platform FROM user_sessions ORDER BY last_seen DESC")
+        rows = cur.fetchall()
+        conn.close()
 
-    users = {str(u["id"]): u for u in get_all_users()}
+        users = {str(u["id"]): u for u in get_all_users()}
 
-    result = []
-    for user_id, last_seen, status, platform, last_activity in rows:
-        u = users.get(str(user_id), {})
-        result.append({
-            "user": f"{user_id} - {u.get('first_name','')} (@{u.get('username','')})",
-            "status": "🟢 Онлайн" if status == "online" else "⚪ Оффлайн",
-            "platform": "💻 ПК" if platform in ("tdesktop", "web") else "📱 Телефон" if platform else "-",
-            "last_seen": prettify_time(last_seen),
-            "last_activity": last_activity
-        })
-
-    # сортировка: онлайн первыми
-    result.sort(key=lambda x: 0 if "Онлайн" in x["status"] else 1)
-    return {"users": result}
-
-# 🔥 НОВЫЙ ЭНДПОИНТ - Детальная информация о пользователях
-@app.get("/api/analytics/users-detailed")
-async def get_detailed_users():
-    conn = sqlite3.connect(ANALYTICS_DB)
-    cur = conn.cursor()
-    
-    # Получаем пользователей из сессий
-    cur.execute("SELECT user_id, last_seen, status, platform FROM user_sessions")
-    session_rows = cur.fetchall()
-    
-    # Получаем общее количество действий по пользователям
-    cur.execute("SELECT user_id, COUNT(*) as action_count FROM analytics GROUP BY user_id")
-    action_counts = {str(row[0]): row[1] for row in cur.fetchall()}
-    
-    conn.close()
-
-    users = {str(u["id"]): u for u in get_all_users()}
-
-    result = []
-    for user_id, last_seen, status, platform in session_rows:
-        u = users.get(str(user_id), {})
-        result.append({
-            "user_id": user_id,
-            "user": f"{user_id} - {u.get('first_name','')} (@{u.get('username','')})",
-            "status": "🟢 Онлайн" if status == "online" else "⚪ Оффлайн",
-            "platform": "💻 ПК" if platform in ("tdesktop", "web") else "📱 Телефон" if platform else "-",
-            "last_seen": prettify_time(last_seen),
-            "action_count": action_counts.get(user_id, 0)
-        })
-
-    # Добавляем пользователей, у которых есть действия но нет сессий
-    for user_id, count in action_counts.items():
-        if user_id not in [r["user_id"] for r in result]:
+        result = []
+        for user_id, last_seen, status, platform in rows:
             u = users.get(str(user_id), {})
             result.append({
-                "user_id": user_id,
                 "user": f"{user_id} - {u.get('first_name','')} (@{u.get('username','')})",
-                "status": "⚪ Оффлайн",
-                "platform": "-",
-                "last_seen": "Никогда",
-                "action_count": count
+                "status": "🟢 Онлайн" if status == "online" else "⚪ Оффлайн",
+                "platform": "💻 ПК" if platform in ("tdesktop", "web") else "📱 Телефон" if platform else "-",
+                "last_seen": prettify_time(last_seen)
             })
 
-    result.sort(key=lambda x: (0 if "Онлайн" in x["status"] else 1, -x["action_count"]))
-    return {"users": result}
+        return {"users": result}
+    except Exception as e:
+        print(f"Error getting users status: {e}")
+        return {"users": []}
 
 @app.post("/api/errors")
 async def save_error(data: dict = Body(...)):
     try:
+        print(f"❌ Error received: {data}")
+        
         conn = sqlite3.connect(ANALYTICS_DB)
         cur = conn.cursor()
         cur.execute(
             "INSERT INTO errors (user_id, error, details, timestamp) VALUES (?, ?, ?, ?)",
             (
-                data.get("user_id"),
-                data.get("error"),
-                json.dumps(data.get("details"), ensure_ascii=False),
+                data.get("user_id", "anonymous"),
+                data.get("error", "Unknown error"),
+                json.dumps(data.get("details", {}), ensure_ascii=False),
                 data.get("timestamp"),
             )
         )
@@ -567,265 +488,108 @@ async def save_error(data: dict = Body(...)):
         conn.close()
         return {"status": "ok"}
     except Exception as e:
+        print(f"Error saving error: {e}")
         return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
 
 @app.get("/api/analytics/errors")
 async def get_errors():
-    conn = sqlite3.connect(ANALYTICS_DB)
-    cur = conn.cursor()
-    cur.execute("SELECT user_id, error, details, timestamp FROM errors ORDER BY id DESC LIMIT 30")
-    rows = cur.fetchall()
-    conn.close()
+    try:
+        conn = sqlite3.connect(ANALYTICS_DB)
+        cur = conn.cursor()
+        cur.execute("SELECT user_id, error, details, timestamp FROM errors ORDER BY id DESC LIMIT 30")
+        rows = cur.fetchall()
+        conn.close()
 
-    users = {str(u["id"]): u for u in get_all_users()}
+        users = {str(u["id"]): u for u in get_all_users()}
 
-    errors = []
-    for user_id, error, details, timestamp in rows:
-        user = users.get(str(user_id), {})
-        errors.append({
-            "user": f"{user_id} - {user.get('first_name','')} (@{user.get('username','')})",
-            "error": error,
-            "details": details,
-            "time": prettify_time(timestamp)
-        })
+        errors = []
+        for user_id, error, details, timestamp in rows:
+            user = users.get(str(user_id), {})
+            errors.append({
+                "user": f"{user_id} - {user.get('first_name','')} (@{user.get('username','')})",
+                "error": error,
+                "details": details,
+                "time": prettify_time(timestamp)
+            })
 
-    return {"errors": errors}
-
-# Получение Аналитики 
-@app.get("/analytics", response_class=HTMLResponse)
-async def analytics_page(request: Request):
-    return templates.TemplateResponse("analytics.html", {"request": request})
+        return {"errors": errors}
+    except Exception as e:
+        print(f"Error getting errors: {e}")
+        return {"errors": []}
 
 @app.get("/api/analytics/latest")
 async def get_latest_analytics():
-    conn = sqlite3.connect("/opt/ndloadouts_storage/analytics.db")
-    cur = conn.cursor()
-    cur.execute("""
-        SELECT user_id, action, details, timestamp 
-        FROM analytics 
-        ORDER BY timestamp DESC 
-        LIMIT 200
-    """)
-    rows = cur.fetchall()
-    conn.close()
-
-    users = {str(u["id"]): u for u in get_all_users()}
-
-    def prettify_action(action: str, details_json: str):
-        try:
-            details = json.loads(details_json or "{}")
-        except:
-            details = {}
-
-        if action == "view_build":
-            title = details.get("title")
-            weapon = details.get("weapon_name")
-            final = title.strip() if title and title.strip() else weapon or "без названия"
-            return f"🔫 Просмотр сборки: {final}"
-
-        mapping = {
-            "session_start": "🔵 Начало сессии",
-            "session_end": "🔴 Конец сессии",
-            "open_screen": f"📂 Открытие экрана: {details.get('screen','неизвестно')}",
-            "switch_category": f"📑 Категория: {details.get('category','')}",
-            "switch_tab": f"📌 Вкладка: {details.get('tab','')}",
-            "click_button": f"🖱 Кнопка: {details.get('button','')}",
-            "search": f"🔍 Поиск: {details.get('query','')}"
-        }
-        return mapping.get(action, action)
-
-    def prettify_platform(details_json: str):
-        try:
-            details = json.loads(details_json or "{}")
-            platform = details.get("platform", "")
-            if platform in ("tdesktop", "web"):
-                return "💻 ПК"
-            elif platform in ("android", "ios"):
-                return "📱 Телефон"
-            elif platform:
-                return platform
-            return "-"
-        except:
-            return "-"
-
-    analytics = []
-    for user_id, action, details, timestamp in rows:
-        user = users.get(str(user_id), {})
-        user_display = f"{user_id} - {user.get('first_name','')} (@{user.get('username','')})"
-        
-        analytics.append({
-            "user": user_display,
-            "action": prettify_action(action, details),
-            "platform": prettify_platform(details),
-            "time": prettify_time(timestamp)
-        })
-
-    return {"analytics": analytics}
-
-# 🔥 НОВЫЙ ЭНДПОИНТ - Статистика для заголовка
-@app.get("/api/analytics/stats")
-async def get_analytics_stats():
-    conn = sqlite3.connect(ANALYTICS_DB)
-    cur = conn.cursor()
-    
-    # Общее количество пользователей
-    cur.execute("SELECT COUNT(DISTINCT user_id) FROM analytics")
-    total_users = cur.fetchone()[0]
-    
-    # Онлайн пользователи
-    cur.execute("SELECT COUNT(*) FROM user_sessions WHERE status = 'online'")
-    online_users = cur.fetchone()[0]
-    
-    # Сессии сегодня
-    today = datetime.now().strftime("%d.%m.%Y")
-    cur.execute("SELECT COUNT(*) FROM analytics WHERE action = 'session_start' AND timestamp LIKE ?", (f"%{today}%",))
-    today_sessions = cur.fetchone()[0]
-    
-    # Общее количество ошибок
-    cur.execute("SELECT COUNT(*) FROM errors")
-    total_errors = cur.fetchone()[0]
-    
-    conn.close()
-    
-    return {
-        "total_users": total_users,
-        "online_users": online_users,
-        "today_sessions": today_sessions,
-        "total_errors": total_errors
-    }
-
-# 🔥 ДОБАВЬТЕ ЭТИ ЭНДПОИНТЫ ДЛЯ ДИАГНОСТИКИ ПОСЛЕ СУЩЕСТВУЮЩЕГО КОДА АНАЛИТИКИ
-
-@app.get("/api/analytics/debug")
-async def debug_analytics():
-    """Эндпоинт для отладки - проверяем что есть в базе"""
     try:
         conn = sqlite3.connect(ANALYTICS_DB)
         cur = conn.cursor()
-        
-        # Проверяем таблицы
-        cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
-        tables = [table[0] for table in cur.fetchall()]
-        
-        # Проверяем данные в таблицах
-        analytics_count = cur.execute("SELECT COUNT(*) FROM analytics").fetchone()[0]
-        users_count = cur.execute("SELECT COUNT(*) FROM user_sessions").fetchone()[0]
-        errors_count = cur.execute("SELECT COUNT(*) FROM errors").fetchone()[0]
-        
-        # Примеры данных
-        recent_analytics = cur.execute("SELECT * FROM analytics ORDER BY id DESC LIMIT 5").fetchall()
-        recent_users = cur.execute("SELECT * FROM user_sessions ORDER BY last_seen DESC LIMIT 5").fetchall()
-        recent_errors = cur.execute("SELECT * FROM errors ORDER BY id DESC LIMIT 5").fetchall()
-        
+        cur.execute("SELECT user_id, action, details, timestamp FROM analytics ORDER BY id DESC LIMIT 200")
+        rows = cur.fetchall()
         conn.close()
-        
-        return {
-            "tables": tables,
-            "counts": {
-                "analytics": analytics_count,
-                "users": users_count,
-                "errors": errors_count
-            },
-            "recent_analytics": recent_analytics,
-            "recent_users": recent_users,
-            "recent_errors": recent_errors,
-            "database_path": str(ANALYTICS_DB)
-        }
-    except Exception as e:
-        return {"error": str(e)}
 
-@app.post("/api/analytics/test-data")
-async def create_test_data():
-    """Создание тестовых данных для проверки аналитики"""
-    try:
-        conn = sqlite3.connect(ANALYTICS_DB)
-        cur = conn.cursor()
-        
-        # Тестовые пользователи
-        test_users = [
-            {"id": "123456789", "first_name": "Тестовый", "username": "test_user"},
-            {"id": "987654321", "first_name": "Иван", "username": "ivan_pro"},
-            {"id": "555666777", "first_name": "Мария", "username": "maria_gamer"}
-        ]
-        
-        # Добавляем тестовые данные в analytics
-        test_time = datetime.now(timezone.utc).isoformat()
-        
-        test_actions = [
-            ("123456789", "session_start", '{"platform": "android"}', test_time),
-            ("123456789", "open_screen", '{"screen": "screen-home"}', test_time),
-            ("123456789", "view_build", '{"title": "Тестовая сборка", "weapon_name": "AK-47"}', test_time),
-            ("987654321", "session_start", '{"platform": "web"}', test_time),
-            ("987654321", "click_button", '{"button": "show-builds"}', test_time),
-            ("555666777", "session_start", '{"platform": "ios"}', test_time),
-        ]
-        
-        cur.executemany(
-            "INSERT INTO analytics (user_id, action, details, timestamp) VALUES (?, ?, ?, ?)",
-            test_actions
-        )
-        
-        # Добавляем тестовые сессии
-        test_sessions = [
-            ("123456789", test_time, "online", "android", "view_build"),
-            ("987654321", test_time, "online", "web", "click_button"), 
-            ("555666777", test_time, "offline", "ios", "session_start"),
-        ]
-        
-        cur.executemany(
-            "INSERT OR REPLACE INTO user_sessions (user_id, last_seen, status, platform, last_activity) VALUES (?, ?, ?, ?, ?)",
-            test_sessions
-        )
-        
-        # Добавляем тестовую ошибку
-        cur.execute(
-            "INSERT INTO errors (user_id, error, details, timestamp) VALUES (?, ?, ?, ?)",
-            ("123456789", "Test error", '{"url": "/test", "line": 25}', test_time)
-        )
-        
-        conn.commit()
-        conn.close()
-        
-        return {"status": "ok", "message": "Тестовые данные добавлены"}
-        
-    except Exception as e:
-        return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
+        users = {str(u["id"]): u for u in get_all_users()}
 
-@app.get("/api/analytics/check-endpoints")
-async def check_endpoints():
-    """Проверка доступности всех эндпоинтов аналитики"""
-    endpoints = [
-        "/api/analytics/stats",
-        "/api/analytics/users", 
-        "/api/analytics/latest",
-        "/api/analytics/errors",
-        "/api/analytics/users-detailed"
-    ]
-    
-    results = {}
-    
-    for endpoint in endpoints:
-        try:
-            # Имитируем запрос к самому себе
-            if endpoint == "/api/analytics/stats":
-                result = await get_analytics_stats()
-            elif endpoint == "/api/analytics/users":
-                result = await get_users_status()
-            elif endpoint == "/api/analytics/latest":
-                result = await get_latest_analytics()
-            elif endpoint == "/api/analytics/errors":
-                result = await get_errors()
-            elif endpoint == "/api/analytics/users-detailed":
-                result = await get_detailed_users()
-            else:
-                result = {"error": "Unknown endpoint"}
+        def prettify_action(action: str, details_json: str):
+            if not action:
+                return "Неизвестное действие"
                 
-            results[endpoint] = {"status": "success", "data": result}
-        except Exception as e:
-            results[endpoint] = {"status": "error", "error": str(e)}
-    
-    return results
+            try:
+                details = json.loads(details_json) if details_json else {}
+            except:
+                details = {}
 
+            if action == "view_build":
+                title = details.get("title", "")
+                weapon = details.get("weapon_name", "")
+                final = title.strip() if title and title.strip() else weapon or "без названия"
+                return f"🔫 Просмотр сборки: {final}"
+
+            mapping = {
+                "session_start": "🔵 Начало сессии",
+                "session_end": "🔴 Конец сессии",
+                "open_screen": f"📂 Открытие экрана: {details.get('screen','неизвестно')}",
+                "switch_category": f"📑 Категория: {details.get('category','')}",
+                "switch_tab": f"📌 Вкладка: {details.get('tab','')}",
+                "click_button": f"🖱 Кнопка: {details.get('button','')}",
+                "search": f"🔍 Поиск: {details.get('query','')}"
+            }
+            return mapping.get(action, action)
+
+        def prettify_platform(details_json: str):
+            try:
+                details = json.loads(details_json) if details_json else {}
+                platform = details.get("platform", "")
+                if platform in ("tdesktop", "web"):
+                    return "💻 ПК"
+                elif platform in ("android", "ios"):
+                    return "📱 Телефон"
+                elif platform:
+                    return platform
+                return "-"
+            except:
+                return "-"
+
+        def prettify_status(action: str):
+            return "⚪ Оффлайн" if action == "session_end" else "🟢 Онлайн"
+
+        analytics = []
+        for user_id, action, details, timestamp in rows:
+            user = users.get(str(user_id), {})
+            analytics.append({
+                "user": f"{user_id} - {user.get('first_name','')} (@{user.get('username','')})",
+                "action": prettify_action(action, details),
+                "platform": prettify_platform(details),
+                "status": prettify_status(action),
+                "time": prettify_time(timestamp)
+            })
+
+        return {"analytics": analytics}
+    except Exception as e:
+        print(f"Error getting analytics: {e}")
+        return {"analytics": []}
+
+@app.get("/analytics", response_class=HTMLResponse)
+async def analytics_page(request: Request):
+    return templates.TemplateResponse("analytics.html", {"request": request})
 
 if __name__ == "__main__":
     import uvicorn
