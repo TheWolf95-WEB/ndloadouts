@@ -1,272 +1,375 @@
-<!-- analytics.html - исправленная версия -->
+<!-- analytics.html - компактная и красивая версия -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Аналитика NDHQ</title>
+  <title>📊 Аналитика NDHQ</title>
   <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
     body {
-      margin: 0;
-      background-color: #0f111a;
-      font-family: 'Rubik', 'Segoe UI', sans-serif;
+      background: #0f111a;
       color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
     }
-    header {
-      text-align: center;
-      padding: 20px;
-      background: #171d25;
-      border-bottom: 2px solid #2a3545;
-    }
-    header h1 {
-      font-size: 22px;
-      margin: 0;
-      color: #00ffcc;
-    }
-    header p {
-      font-size: 14px;
-      color: #aaa;
-      margin: 5px 0 0;
-    }
+    
     .container {
-      max-width: 1000px;
-      margin: 20px auto;
-      padding: 0 15px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
     }
-    h2 {
-      font-size: 18px;
-      margin: 20px 0 10px;
-      color: #00ccff;
-      display: flex;
-      align-items: center;
+    
+    .header {
+      text-align: center;
+      padding: 30px 0;
+      background: linear-gradient(135deg, #171d25 0%, #1c222d 100%);
+      border-bottom: 2px solid #00ffcc;
+      margin-bottom: 30px;
     }
-    h2 span {
-      margin-right: 8px;
+    
+    .header h1 {
+      font-size: 28px;
+      color: #00ffcc;
+      margin-bottom: 10px;
     }
-    .card {
+    
+    .header p {
+      color: #aaa;
+      font-size: 14px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: #171d25;
+      padding: 25px;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid #2a3545;
+      transition: transform 0.2s;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-2px);
+      border-color: #00ffcc;
+    }
+    
+    .stat-number {
+      font-size: 32px;
+      font-weight: bold;
+      color: #00ffcc;
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      color: #aaa;
+      font-size: 14px;
+    }
+    
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+    
+    @media (max-width: 768px) {
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .panel {
       background: #171d25;
       border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.6);
-      padding: 15px;
-      margin-bottom: 25px;
-      overflow-x: auto;
+      border: 1px solid #2a3545;
+      overflow: hidden;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-      min-width: 600px;
-    }
-    th, td {
-      padding: 10px;
-      text-align: left;
-      border-bottom: 1px solid #2a3545;
-      word-break: break-word;
-    }
-    th {
+    
+    .panel-header {
       background: #1c222d;
-      color: #00ffcc;
-      font-weight: 600;
+      padding: 20px;
+      border-bottom: 1px solid #2a3545;
     }
-    tr:hover {
+    
+    .panel-header h2 {
+      color: #00ccff;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .panel-content {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .user-list, .activity-list {
+      list-style: none;
+    }
+    
+    .user-item, .activity-item {
+      padding: 15px 20px;
+      border-bottom: 1px solid #2a3545;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.2s;
+    }
+    
+    .user-item:hover, .activity-item:hover {
       background: #223044;
     }
+    
+    .user-item:last-child, .activity-item:last-child {
+      border-bottom: none;
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #00ffcc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #0f111a;
+      flex-shrink: 0;
+    }
+    
+    .user-info {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .user-name {
+      font-weight: 500;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .user-meta {
+      display: flex;
+      gap: 15px;
+      font-size: 12px;
+      color: #aaa;
+    }
+    
+    .activity-content {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .activity-text {
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .activity-time {
+      font-size: 12px;
+      color: #00ccff;
+    }
+    
     .status-online {
       color: #00ff88;
     }
+    
     .status-offline {
       color: #888;
     }
-    .error-message {
-      color: #ff5555;
-    }
-    footer {
+    
+    .empty-state {
       text-align: center;
-      padding: 15px;
-      color: #777;
-      font-size: 13px;
+      padding: 40px 20px;
+      color: #666;
+    }
+    
+    .footer {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+      font-size: 14px;
       border-top: 1px solid #2a3545;
       margin-top: 30px;
     }
-    @media (max-width: 600px) {
-      th, td {
-        font-size: 13px;
-        padding: 8px;
-      }
+    
+    .last-update {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #00ccff;
+      font-size: 14px;
+    }
+    
+    .refresh-btn {
+      background: #00ffcc;
+      color: #0f111a;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 10px auto;
+      display: block;
+      transition: background 0.2s;
+    }
+    
+    .refresh-btn:hover {
+      background: #00e6b8;
     }
   </style>
-  <script>
-    async function loadData() {
-      try {
-        console.log('🔄 Loading analytics data...');
-        
-        // === Пользователи ===
-        const res = await fetch("/api/analytics/latest");
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        const data = await res.json();
-
-        const onlineBody = document.getElementById("online-body");
-        const offlineBody = document.getElementById("offline-body");
-        onlineBody.innerHTML = "";
-        offlineBody.innerHTML = "";
-
-        let hasOnline = false;
-        let hasOffline = false;
-
-        if (data.analytics && data.analytics.length > 0) {
-          data.analytics.forEach(row => {
-            const tr = `
-              <tr>
-                <td>${row.user || 'Аноним'}</td>
-                <td>${row.action || 'Неизвестно'}</td>
-                <td>${row.platform || '-'}</td>
-                <td class="${row.status.includes('Онлайн') ? 'status-online' : 'status-offline'}">${row.status}</td>
-                <td>${row.time || '-'}</td>
-              </tr>
-            `;
-            if (row.status.includes("Онлайн")) {
-              onlineBody.innerHTML += tr;
-              hasOnline = true;
-            } else {
-              offlineBody.innerHTML += tr;
-              hasOffline = true;
-            }
-          });
-        }
-
-        if (!hasOnline) {
-          onlineBody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#777">Нет онлайн пользователей</td></tr>`;
-        }
-        if (!hasOffline) {
-          offlineBody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#777">Нет оффлайн пользователей</td></tr>`;
-        }
-
-        // === Ошибки ===
-        const errRes = await fetch("/api/analytics/errors");
-        if (!errRes.ok) throw new Error(`HTTP error! status: ${errRes.status}`);
-        const errData = await errRes.json();
-
-        const errorsBody = document.getElementById("errors-body");
-        errorsBody.innerHTML = "";
-
-        if (errData.errors && errData.errors.length > 0) {
-          errData.errors.forEach(row => {
-            let detailsHtml = "";
-        
-            try {
-              const details = typeof row.details === "string" ? JSON.parse(row.details) : row.details;
-              if (details && typeof details === "object") {
-                detailsHtml = Object.entries(details)
-                  .map(([k, v]) => `<div><b>${k}:</b> ${v}</div>`)
-                  .join("");
-              } else {
-                detailsHtml = row.details || "-";
-              }
-            } catch {
-              detailsHtml = row.details || "-";
-            }
-        
-            errorsBody.innerHTML += `
-              <tr>
-                <td>${row.user || 'Аноним'}</td>
-                <td class="error-message">${row.error || 'Неизвестная ошибка'}</td>
-                <td style="color:#ccc">${detailsHtml}</td>
-                <td style="color:#00ccff">${row.time || '-'}</td>
-              </tr>
-            `;
-          });
-        } else {
-          errorsBody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#777">Ошибок пока нет</td></tr>`;
-        }
-
-        document.getElementById("last-update").textContent =
-          "⏱ Обновлено: " + new Date().toLocaleTimeString();
-          
-        console.log('✅ Analytics data loaded successfully');
-      } catch (e) {
-        console.error("❌ Ошибка загрузки аналитики:", e);
-        document.getElementById("last-update").textContent =
-          "❌ Ошибка загрузки: " + e.message;
-      }
-    }
-
-    // Обновляем каждые 10 секунд
-    setInterval(loadData, 10000);
-    
-    // Загружаем при загрузке страницы
-    window.addEventListener('load', () => {
-      loadData();
-    });
-    
-    // Также загружаем когда DOM готов
-    document.addEventListener('DOMContentLoaded', loadData);
-  </script>
 </head>
 <body>
-  <header>
-    <h1>📊 Аналитика пользователей NDHQ</h1>
-    <p id="last-update">Загрузка...</p>
-  </header>
+  <div class="header">
+    <h1>📊 Аналитика NDHQ</h1>
+    <p>Мониторинг активности пользователей в реальном времени</p>
+  </div>
 
   <div class="container">
-    <!-- Онлайн -->
-    <h2><span>🟢</span>Пользователи онлайн</h2>
-    <div class="card">
-      <table>
-        <thead>
-          <tr>
-            <th>Пользователь</th>
-            <th>Действие</th>
-            <th>Платформа</th>
-            <th>Статус</th>
-            <th>Время</th>
-          </tr>
-        </thead>
-        <tbody id="online-body">
-          <tr><td colspan="5" style="text-align:center;color:#777">Загрузка...</td></tr>
-        </tbody>
-      </table>
+    <div class="last-update" id="last-update">Загрузка...</div>
+    
+    <button class="refresh-btn" onclick="loadData()">🔄 Обновить</button>
+
+    <!-- Статистика -->
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card">
+        <div class="stat-number" id="total-users">0</div>
+        <div class="stat-label">Всего пользователей</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="online-users">0</div>
+        <div class="stat-label">Сейчас онлайн</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="total-actions">0</div>
+        <div class="stat-label">Всего действий</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="total-errors">0</div>
+        <div class="stat-label">Ошибок</div>
+      </div>
     </div>
 
-    <!-- Оффлайн -->
-    <h2><span>⚪</span>Пользователи оффлайн</h2>
-    <div class="card">
-      <table>
-        <thead>
-          <tr>
-            <th>Пользователь</th>
-            <th>Последнее действие</th>
-            <th>Платформа</th>
-            <th>Статус</th>
-            <th>Последний раз в сети</th>
-          </tr>
-        </thead>
-        <tbody id="offline-body">
-          <tr><td colspan="5" style="text-align:center;color:#777">Загрузка...</td></tr>
-        </tbody>
-      </table>
-    </div>
+    <!-- Основная панель -->
+    <div class="dashboard">
+      <!-- Пользователи -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>👥 Все пользователи</h2>
+        </div>
+        <div class="panel-content">
+          <ul class="user-list" id="user-list">
+            <li class="empty-state">Загрузка пользователей...</li>
+          </ul>
+        </div>
+      </div>
 
-    <!-- Ошибки -->
-    <h2><span>⚠️</span>Ошибки</h2>
-    <div class="card">
-      <table>
-        <thead>
-          <tr>
-            <th>Пользователь</th>
-            <th>Ошибка</th>
-            <th>Детали</th>
-            <th>Время</th>
-          </tr>
-        </thead>
-        <tbody id="errors-body">
-          <tr><td colspan="4" style="text-align:center;color:#777">Загрузка...</td></tr>
-        </tbody>
-      </table>
+      <!-- Активность -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>📈 Последняя активность</h2>
+        </div>
+        <div class="panel-content">
+          <ul class="activity-list" id="activity-list">
+            <li class="empty-state">Загрузка активности...</li>
+          </ul>
+        </div>
+      </div>
     </div>
   </div>
 
-  <footer>
-    NDHQ © 2025 — внутренняя аналитика
-  </footer>
+  <div class="footer">
+    NDHQ © 2025 — Система аналитики
+  </div>
+
+  <script>
+    async function loadData() {
+      try {
+        console.log('🔄 Загрузка аналитики...');
+        const response = await fetch("/api/analytics/dashboard");
+        
+        if (!response.ok) {
+          throw new Error(`Ошибка HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Обновляем статистику
+        document.getElementById('total-users').textContent = data.stats.total_users;
+        document.getElementById('online-users').textContent = data.stats.online_users;
+        document.getElementById('total-actions').textContent = data.stats.total_actions;
+        document.getElementById('total-errors').textContent = data.stats.total_errors;
+        
+        // Обновляем список пользователей
+        const userList = document.getElementById('user-list');
+        if (data.all_users.length > 0) {
+          userList.innerHTML = data.all_users.map(user => `
+            <li class="user-item">
+              <div class="user-avatar">${user.user.charAt(0).toUpperCase()}</div>
+              <div class="user-info">
+                <div class="user-name">${user.user}</div>
+                <div class="user-meta">
+                  <span class="${user.status === '🟢' ? 'status-online' : 'status-offline'}">${user.status}</span>
+                  <span>${user.platform}</span>
+                  <span>${user.actions} действий</span>
+                </div>
+              </div>
+              <div class="activity-time">${user.last_seen}</div>
+            </li>
+          `).join('');
+        } else {
+          userList.innerHTML = '<li class="empty-state">Нет данных о пользователях</li>';
+        }
+        
+        // Обновляем активность
+        const activityList = document.getElementById('activity-list');
+        if (data.recent_actions.length > 0) {
+          activityList.innerHTML = data.recent_actions.map(activity => `
+            <li class="activity-item">
+              <div class="activity-platform">${activity.platform}</div>
+              <div class="activity-content">
+                <div class="activity-text">
+                  <strong>${activity.user}</strong> — ${activity.action}
+                </div>
+                <div class="activity-time">${activity.time}</div>
+              </div>
+            </li>
+          `).join('');
+        } else {
+          activityList.innerHTML = '<li class="empty-state">Нет данных об активности</li>';
+        }
+        
+        document.getElementById('last-update').textContent = 
+          `⏱ Последнее обновление: ${new Date().toLocaleTimeString()}`;
+          
+        console.log('✅ Аналитика загружена');
+      } catch (error) {
+        console.error('❌ Ошибка загрузки:', error);
+        document.getElementById('last-update').textContent = 
+          `❌ Ошибка загрузки: ${error.message}`;
+      }
+    }
+
+    // Автообновление каждые 15 секунд
+    setInterval(loadData, 15000);
+    
+    // Загружаем при старте
+    window.addEventListener('load', loadData);
+  </script>
 </body>
 </html>
