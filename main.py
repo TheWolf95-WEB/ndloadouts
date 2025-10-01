@@ -348,22 +348,18 @@ async def all_versions():
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
-# АНАЛИТИКА - ИСПРАВЛЕННАЯ ВЕРСИЯ
-
-# АНАЛИТИКА - УПРОЩЕННАЯ РАБОЧАЯ ВЕРСИЯ
+# АНАЛИТИКА - ПОЛНАЯ И КРАСИВАЯ ВЕРСИЯ
 
 ANALYTICS_DB = Path("/opt/ndloadouts_storage/analytics.db")
 
 def init_analytics_db():
     try:
-        # Создаем директорию если не существует
         ANALYTICS_DB.parent.mkdir(parents=True, exist_ok=True)
-        print(f"📁 DB path: {ANALYTICS_DB}")
         
         conn = sqlite3.connect(ANALYTICS_DB)
         cur = conn.cursor()
         
-        # Таблица аналитики
+        # Основные события
         cur.execute("""
         CREATE TABLE IF NOT EXISTS analytics (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -374,20 +370,34 @@ def init_analytics_db():
         )
         """)
         
-        # Таблица пользователей (упрощенная)
+        # Ошибки
         cur.execute("""
-        CREATE TABLE IF NOT EXISTS users (
+        CREATE TABLE IF NOT EXISTS errors (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT,
+            error TEXT,
+            details TEXT,
+            timestamp TEXT
+        )
+        """)
+        
+        # Пользователи (расширенная информация)
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS user_profiles (
             user_id TEXT PRIMARY KEY,
             first_name TEXT,
             username TEXT,
             last_seen TEXT,
-            platform TEXT
+            platform TEXT,
+            total_actions INTEGER DEFAULT 0,
+            first_seen TEXT,
+            last_action TEXT
         )
         """)
         
         conn.commit()
         conn.close()
-        print("✅ Analytics DB initialized successfully")
+        print("✅ Analytics DB initialized")
     except Exception as e:
         print(f"❌ Analytics DB error: {e}")
 
@@ -396,13 +406,14 @@ init_analytics_db()
 @app.post("/api/analytics")
 async def save_analytics(data: dict = Body(...)):
     try:
-        print(f"📊 Received analytics: {data}")
-        
         user_id = data.get("user_id", "anonymous")
         action = data.get("action", "unknown")
         details = data.get("details", {})
         timestamp = data.get("timestamp")
         
+        if user_id == "anonymous":
+            return {"status": "ok"}  # Пропускаем анонимных
+            
         details_json = json.dumps(details, ensure_ascii=False) if details else "{}"
         
         conn = sqlite3.connect(ANALYTICS_DB)
@@ -414,20 +425,22 @@ async def save_analytics(data: dict = Body(...)):
             (str(user_id), action, details_json, timestamp)
         )
         
-        # Обновляем информацию о пользователе
+        # Обновляем профиль пользователя
         platform = details.get("platform", "unknown")
-        if user_id != "anonymous":
-            cur.execute("""
-                INSERT INTO users (user_id, first_name, username, last_seen, platform)
-                VALUES (?, ?, ?, ?, ?)
-                ON CONFLICT(user_id) DO UPDATE SET
-                    last_seen = excluded.last_seen,
-                    platform = excluded.platform
-            """, (str(user_id), "", "", timestamp, platform))
+        now_iso = datetime.now().isoformat()
+        
+        cur.execute("""
+            INSERT INTO user_profiles (user_id, first_name, username, last_seen, platform, total_actions, first_seen, last_action)
+            VALUES (?, ?, ?, ?, ?, 1, ?, ?)
+            ON CONFLICT(user_id) DO UPDATE SET
+                last_seen = excluded.last_seen,
+                platform = excluded.platform,
+                total_actions = total_actions + 1,
+                last_action = excluded.last_action
+        """, (str(user_id), "", "", timestamp, platform, now_iso, action))
         
         conn.commit()
         conn.close()
-        print("✅ Analytics saved successfully")
         return {"status": "ok"}
     except Exception as e:
         print(f"❌ Analytics save error: {e}")
@@ -436,118 +449,232 @@ async def save_analytics(data: dict = Body(...)):
 @app.get("/api/analytics/dashboard")
 async def get_analytics_dashboard():
     try:
-        print("🔄 Loading dashboard data...")
         conn = sqlite3.connect(ANALYTICS_DB)
         cur = conn.cursor()
         
-        # Базовая статистика
-        cur.execute("SELECT COUNT(DISTINCT user_id) FROM analytics WHERE user_id != 'anonymous'")
-        total_users = cur.fetchone()[0] or 0
+        # Общая статистика
+        cur.execute("SELECT COUNT(*) FROM user_profiles")
+        total_users = cur.fetchone()[0]
+        
+        # Онлайн (активны последние 5 минут)
+        five_min_ago = (datetime.now() - timedelta(minutes=5)).isoformat()
+        cur.execute("SELECT COUNT(*) FROM user_profiles WHERE last_seen > ?", (five_min_ago,))
+        online_users = cur.fetchone()[0]
         
         cur.execute("SELECT COUNT(*) FROM analytics")
-        total_actions = cur.fetchone()[0] or 0
+        total_actions = cur.fetchone()[0]
         
-        # Считаем онлайн пользователей (активны в последние 5 минут)
-        five_min_ago = (datetime.now() - timedelta(minutes=5)).isoformat()
-        cur.execute("SELECT COUNT(DISTINCT user_id) FROM analytics WHERE timestamp > ? AND user_id != 'anonymous'", (five_min_ago,))
-        online_users = cur.fetchone()[0] or 0
+        cur.execute("SELECT COUNT(*) FROM errors")
+        total_errors = cur.fetchone()[0]
         
-        cur.execute("SELECT COUNT(*) FROM analytics WHERE action LIKE '%error%'")
-        total_errors = cur.fetchone()[0] or 0
-        
-        # Все пользователи
+        # Популярные действия
         cur.execute("""
-            SELECT u.user_id, u.first_name, u.username, u.last_seen, u.platform,
-                   COUNT(a.id) as action_count
-            FROM users u
-            LEFT JOIN analytics a ON u.user_id = a.user_id
-            GROUP BY u.user_id
-            ORDER BY u.last_seen DESC
+            SELECT action, COUNT(*) as count 
+            FROM analytics 
+            WHERE action != 'session_start' AND action != 'session_end'
+            GROUP BY action 
+            ORDER BY count DESC 
+            LIMIT 10
+        """)
+        popular_actions = cur.fetchall()
+        
+        # Все пользователи с детальной информацией
+        cur.execute("""
+            SELECT 
+                user_id, first_name, username, last_seen, platform, 
+                total_actions, first_seen, last_action
+            FROM user_profiles 
+            ORDER BY last_seen DESC
+            LIMIT 100
         """)
         users_data = cur.fetchall()
         
-        # Последние действия
+        # Последние действия всех пользователей
         cur.execute("""
             SELECT a.user_id, a.action, a.details, a.timestamp,
-                   u.first_name, u.username
+                   u.first_name, u.username, u.platform
             FROM analytics a
-            LEFT JOIN users u ON a.user_id = u.user_id
+            LEFT JOIN user_profiles u ON a.user_id = u.user_id
+            WHERE a.user_id != 'anonymous'
             ORDER BY a.timestamp DESC
-            LIMIT 20
+            LIMIT 50
         """)
         actions_data = cur.fetchall()
         
         conn.close()
-        
+
+        # Форматируем популярные действия
+        formatted_popular_actions = []
+        for action, count in popular_actions:
+            action_name = {
+                'view_build': '👀 Просмотры сборок',
+                'search': '🔍 Поиски',
+                'open_screen': '📱 Открытия экранов',
+                'switch_category': '📂 Смена категорий'
+            }.get(action, action)
+            formatted_popular_actions.append({"action": action_name, "count": count})
+
         # Форматируем пользователей
         formatted_users = []
-        for user_id, first_name, username, last_seen, platform, action_count in users_data:
-            # Определяем статус онлайн/оффлайн
+        for user_id, first_name, username, last_seen, platform, total_actions, first_seen, last_action in users_data:
+            # Определяем статус
             if last_seen:
                 last_seen_dt = datetime.fromisoformat(last_seen.replace('Z', '+00:00'))
                 time_diff = datetime.now(timezone.utc) - last_seen_dt
                 is_online = time_diff.total_seconds() < 300  # 5 минут
             else:
                 is_online = False
-                
-            user_display = first_name or username or f"User {user_id}"
+            
+            # Форматируем имя пользователя
+            user_display = first_name or username or f"ID: {user_id}"
             if username:
-                user_display += f" (@{username})"
-                
+                user_display = f"{first_name or 'Пользователь'} (@{username})"
+            
+            # Форматируем последнее действие
+            last_action_text = {
+                'session_start': '🟢 Вошел в бот',
+                'view_build': '🔫 Смотрел сборку',
+                'search': '🔍 Искал',
+                'open_screen': '📱 Открыл экран'
+            }.get(last_action, last_action)
+            
             formatted_users.append({
-                "user": user_display,
-                "status": "🟢" if is_online else "⚪",
-                "platform": "💻" if platform in ["tdesktop", "web"] else "📱" if platform in ["android", "ios"] else "❓",
+                "id": user_id,
+                "name": user_display,
+                "status": "online" if is_online else "offline",
+                "platform": platform,
+                "actions_count": total_actions,
                 "last_seen": prettify_time(last_seen),
-                "actions": action_count
+                "first_seen": prettify_time(first_seen),
+                "last_action": last_action_text
             })
-        
+
         # Форматируем действия
         formatted_actions = []
-        for user_id, action, details, timestamp, first_name, username in actions_data:
-            user_display = first_name or username or f"User {user_id}"
+        for user_id, action, details, timestamp, first_name, username, platform in actions_data:
+            user_display = first_name or username or f"ID: {user_id}"
             if username:
-                user_display += f" (@{username})"
-                
-            # Упрощенное форматирование действий
-            action_text = action
-            if action == "session_start":
-                action_text = "🟢 Вошел в бот"
-            elif action == "session_end":
-                action_text = "🔴 Вышел из бота"
-            elif action == "view_build":
-                action_text = "🔫 Смотрел сборку"
-            elif action == "search":
-                action_text = "🔍 Искал сборки"
-                
+                user_display = f"{first_name or 'Пользователь'} (@{username})"
+            
+            # Детали действия
+            action_details = ""
+            try:
+                details_obj = json.loads(details) if details else {}
+                if action == 'view_build':
+                    title = details_obj.get('title', '')
+                    weapon = details_obj.get('weapon_name', '')
+                    action_details = title or weapon or 'сборку'
+                elif action == 'search':
+                    query = details_obj.get('query', '')
+                    action_details = f"«{query}»" if query else ''
+                elif action == 'open_screen':
+                    screen = details_obj.get('screen', '')
+                    action_details = screen
+            except:
+                pass
+            
+            action_text = {
+                'session_start': '🟢 Вошел в бот',
+                'session_end': '🔴 Вышел из бота', 
+                'view_build': f'🔫 Просмотр сборки {action_details}',
+                'search': f'🔍 Поиск {action_details}',
+                'open_screen': f'📱 Открыл {action_details}',
+                'switch_category': f'📂 Сменил категорию {action_details}'
+            }.get(action, action)
+            
             formatted_actions.append({
                 "user": user_display,
                 "action": action_text,
-                "platform": "💻" if "desktop" in str(details) else "📱",
-                "time": prettify_time(timestamp)
+                "platform": "💻" if platform in ["tdesktop", "web"] else "📱",
+                "time": prettify_time(timestamp),
+                "user_id": user_id
             })
-        
-        result = {
+
+        return {
             "stats": {
                 "total_users": total_users,
                 "online_users": online_users,
                 "total_actions": total_actions,
                 "total_errors": total_errors
             },
-            "recent_actions": formatted_actions,
-            "all_users": formatted_users
+            "popular_actions": formatted_popular_actions,
+            "users": formatted_users,
+            "recent_activity": formatted_actions
         }
-        
-        print(f"✅ Dashboard loaded: {total_users} users, {online_users} online")
-        return result
         
     except Exception as e:
         print(f"❌ Dashboard error: {e}")
         return {
             "stats": {"total_users": 0, "online_users": 0, "total_actions": 0, "total_errors": 0},
-            "recent_actions": [],
-            "all_users": []
+            "popular_actions": [],
+            "users": [],
+            "recent_activity": []
         }
+
+@app.get("/api/analytics/user/{user_id}")
+async def get_user_analytics(user_id: str):
+    """Детальная аналитика по конкретному пользователю"""
+    try:
+        conn = sqlite3.connect(ANALYTICS_DB)
+        cur = conn.cursor()
+        
+        # Информация о пользователе
+        cur.execute("SELECT * FROM user_profiles WHERE user_id = ?", (user_id,))
+        user_data = cur.fetchone()
+        
+        # Последние действия пользователя
+        cur.execute("""
+            SELECT action, details, timestamp 
+            FROM analytics 
+            WHERE user_id = ? 
+            ORDER BY timestamp DESC 
+            LIMIT 50
+        """, (user_id,))
+        user_actions = cur.fetchall()
+        
+        conn.close()
+        
+        if not user_data:
+            return {"error": "User not found"}
+            
+        # Форматируем данные пользователя
+        user_info = {
+            "id": user_data[0],
+            "first_name": user_data[1],
+            "username": user_data[2],
+            "last_seen": prettify_time(user_data[3]),
+            "platform": user_data[4],
+            "total_actions": user_data[5],
+            "first_seen": prettify_time(user_data[6]),
+            "last_action": user_data[7]
+        }
+        
+        # Форматируем действия
+        formatted_actions = []
+        for action, details, timestamp in user_actions:
+            action_details = ""
+            try:
+                details_obj = json.loads(details) if details else {}
+                if action == 'view_build':
+                    action_details = details_obj.get('title') or details_obj.get('weapon_name') or ''
+                elif action == 'search':
+                    action_details = details_obj.get('query', '')
+            except:
+                pass
+                
+            formatted_actions.append({
+                "action": action,
+                "details": action_details,
+                "time": prettify_time(timestamp)
+            })
+        
+        return {
+            "user": user_info,
+            "actions": formatted_actions
+        }
+        
+    except Exception as e:
+        return {"error": str(e)}
 
 @app.get("/analytics", response_class=HTMLResponse)
 async def analytics_page(request: Request):
