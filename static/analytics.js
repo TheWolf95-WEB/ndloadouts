@@ -8,6 +8,7 @@ const Analytics = {
       // Только реальные пользователи
       if (!user?.id) return;
       
+      // Быстрая отправка без ожидания ответа
       fetch('/api/analytics', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -17,9 +18,9 @@ const Analytics = {
           details: { ...details, platform },
           timestamp: new Date().toISOString()
         })
-      }).catch(err => console.error('Analytics error:', err));
+      }).catch(() => {}); // Игнорируем ошибки для скорости
     } catch (error) {
-      console.error('Analytics trackEvent error:', error);
+      // Игнорируем ошибки трекинга
     }
   },
 
@@ -41,18 +42,24 @@ const Analytics = {
     this.trackEvent('open_screen', {
       screen: screenName
     });
+  },
+
+  trackButtonClick(buttonName) {
+    this.trackEvent('click_button', {
+      button: buttonName
+    });
   }
 };
 
-// Автоматический трекинг
-document.addEventListener('DOMContentLoaded', () => {
+// Мгновенный трекинг при загрузке
+if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
   setTimeout(() => {
     Analytics.trackEvent('session_start', {
       platform: window.Telegram?.WebApp?.platform || 'unknown',
       url: window.location.href
     });
-  }, 1000);
-});
+  }, 500); // Быстрее старт
+}
 
 if (window.Telegram?.WebApp) {
   window.Telegram.WebApp.onEvent('web_app_close', () => {
