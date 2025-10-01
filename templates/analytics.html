@@ -4,236 +4,571 @@
   <meta charset="UTF-8">
   <title>Аналитика NDHQ</title>
   <style>
+    :root {
+      --bg-primary: #0f111a;
+      --bg-card: #171d25;
+      --bg-hover: #223044;
+      --border: #2a3545;
+      --text-primary: #ffffff;
+      --text-secondary: #aaa;
+      --accent-green: #00ffcc;
+      --accent-blue: #00ccff;
+      --accent-red: #ff5555;
+    }
+    
     body {
       margin: 0;
-      background-color: #0f111a;
+      background-color: var(--bg-primary);
       font-family: 'Rubik', 'Segoe UI', sans-serif;
-      color: #ffffff;
+      color: var(--text-primary);
+      line-height: 1.4;
     }
+    
     header {
       text-align: center;
-      padding: 20px;
-      background: #171d25;
-      border-bottom: 2px solid #2a3545;
+      padding: 15px 20px;
+      background: var(--bg-card);
+      border-bottom: 2px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
+    
     header h1 {
-      font-size: 22px;
+      font-size: 20px;
       margin: 0;
-      color: #00ffcc;
+      color: var(--accent-green);
     }
-    header p {
-      font-size: 14px;
-      color: #aaa;
-      margin: 5px 0 0;
+    
+    .header-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      gap: 10px;
     }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin: 15px 0;
+    }
+    
+    .stat-card {
+      background: var(--bg-hover);
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 24px;
+      font-weight: bold;
+      color: var(--accent-green);
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 5px;
+    }
+    
     .container {
-      max-width: 1000px;
+      max-width: 1200px;
       margin: 20px auto;
       padding: 0 15px;
     }
-    h2 {
-      font-size: 18px;
-      margin: 20px 0 10px;
-      color: #00ccff;
+    
+    .tabs {
       display: flex;
-      align-items: center;
+      gap: 5px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
-    h2 span {
-      margin-right: 8px;
+    
+    .tab {
+      padding: 10px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
     }
+    
+    .tab.active {
+      background: var(--accent-blue);
+      color: var(--bg-primary);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
     .card {
-      background: #171d25;
+      background: var(--bg-card);
       border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.6);
-      padding: 15px;
+      padding: 20px;
       margin-bottom: 25px;
       overflow-x: auto;
     }
+    
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 14px;
-      min-width: 600px;
+      min-width: 800px;
     }
+    
     th, td {
-      padding: 10px;
+      padding: 12px;
       text-align: left;
-      border-bottom: 1px solid #2a3545;
-      word-break: break-word;
+      border-bottom: 1px solid var(--border);
     }
+    
     th {
-      background: #1c222d;
-      color: #00ffcc;
+      background: var(--bg-hover);
+      color: var(--accent-green);
       font-weight: 600;
+      position: sticky;
+      top: 0;
     }
+    
     tr:hover {
-      background: #223044;
+      background: var(--bg-hover);
     }
-    footer {
+    
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      margin-right: 10px;
+      vertical-align: middle;
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+    }
+    
+    .status-online {
+      color: var(--accent-green);
+    }
+    
+    .status-offline {
+      color: var(--text-secondary);
+    }
+    
+    .platform-pc { color: var(--accent-blue); }
+    .platform-mobile { color: var(--accent-green); }
+    
+    .search-box {
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-card);
+      color: var(--text-primary);
+      width: 250px;
+    }
+    
+    .refresh-btn {
+      padding: 10px 15px;
+      background: var(--accent-blue);
+      border: none;
+      border-radius: 8px;
+      color: var(--bg-primary);
+      cursor: pointer;
+    }
+    
+    .empty-state {
       text-align: center;
-      padding: 15px;
-      color: #777;
-      font-size: 13px;
-      border-top: 1px solid #2a3545;
-      margin-top: 30px;
+      padding: 40px;
+      color: var(--text-secondary);
     }
-    @media (max-width: 600px) {
+    
+    @media (max-width: 768px) {
+      .header-controls {
+        flex-direction: column;
+      }
+      
+      .search-box {
+        width: 100%;
+      }
+      
       th, td {
-        font-size: 13px;
         padding: 8px;
+        font-size: 13px;
       }
     }
   </style>
+</head>
+<body>
+  <header>
+    <h1>📊 Аналитика NDHQ</h1>
+    <div class="header-controls">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="total-users">0</div>
+          <div class="stat-label">Всего пользователей</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="online-users">0</div>
+          <div class="stat-label">Сейчас онлайн</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="total-sessions">0</div>
+          <div class="stat-label">Сессии сегодня</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="total-errors">0</div>
+          <div class="stat-label">Ошибок</div>
+        </div>
+      </div>
+      <div>
+        <input type="text" id="search-input" class="search-box" placeholder="Поиск пользователя...">
+        <button class="refresh-btn" onclick="loadData()">🔄 Обновить</button>
+      </div>
+    </div>
+    <p id="last-update">Загрузка...</p>
+  </header>
+
+  <div class="container">
+    <div class="tabs">
+      <div class="tab active" data-tab="online">🟢 Онлайн</div>
+      <div class="tab" data-tab="offline">⚪ Оффлайн</div>
+      <div class="tab" data-tab="all-users">👥 Все пользователи</div>
+      <div class="tab" data-tab="activity">📈 Активность</div>
+      <div class="tab" data-tab="errors">⚠️ Ошибки</div>
+    </div>
+
+    <!-- Онлайн пользователи -->
+    <div class="tab-content active" id="online-tab">
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Пользователь</th>
+              <th>Последнее действие</th>
+              <th>Платформа</th>
+              <th>В сети</th>
+              <th>Время</th>
+            </tr>
+          </thead>
+          <tbody id="online-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Оффлайн пользователи -->
+    <div class="tab-content" id="offline-tab">
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Пользователь</th>
+              <th>Последнее действие</th>
+              <th>Платформа</th>
+              <th>Был в сети</th>
+            </tr>
+          </thead>
+          <tbody id="offline-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Все пользователи -->
+    <div class="tab-content" id="all-users-tab">
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Пользователь</th>
+              <th>Статус</th>
+              <th>Платформа</th>
+              <th>Последняя активность</th>
+              <th>Всего действий</th>
+            </tr>
+          </thead>
+          <tbody id="all-users-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Активность -->
+    <div class="tab-content" id="activity-tab">
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Пользователь</th>
+              <th>Действие</th>
+              <th>Детали</th>
+              <th>Платформа</th>
+              <th>Время</th>
+            </tr>
+          </thead>
+          <tbody id="activity-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Ошибки -->
+    <div class="tab-content" id="errors-tab">
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>Пользователь</th>
+              <th>Ошибка</th>
+              <th>Детали</th>
+              <th>Время</th>
+            </tr>
+          </thead>
+          <tbody id="errors-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <script>
+    let allData = {
+      analytics: [],
+      users: [],
+      errors: []
+    };
+
     async function loadData() {
       try {
-        // === Пользователи ===
-        const res = await fetch("/api/analytics/latest");
-        const data = await res.json();
+        // Загружаем все данные
+        const [analyticsRes, usersRes, errorsRes] = await Promise.all([
+          fetch('/api/analytics/latest'),
+          fetch('/api/analytics/users'),
+          fetch('/api/analytics/errors')
+        ]);
 
-        const onlineBody = document.getElementById("online-body");
-        const offlineBody = document.getElementById("offline-body");
-        onlineBody.innerHTML = "";
-        offlineBody.innerHTML = "";
+        const analyticsData = await analyticsRes.json();
+        const usersData = await usersRes.json();
+        const errorsData = await errorsRes.json();
 
-        let hasOnline = false;
-        let hasOffline = false;
+        allData = {
+          analytics: analyticsData.analytics || [],
+          users: usersData.users || [],
+          errors: errorsData.errors || []
+        };
 
-        data.analytics.forEach(row => {
-          const tr = `
-            <tr>
-              <td>${row.user}</td>
-              <td>${row.action}</td>
-              <td>${row.platform}</td>
-              <td>${row.status}</td>
-              <td>${row.time}</td>
-            </tr>
-          `;
-          if (row.status.includes("Онлайн")) {
-            onlineBody.innerHTML += tr;
-            hasOnline = true;
-          } else {
-            offlineBody.innerHTML += tr;
-            hasOffline = true;
-          }
-        });
-
-        if (!hasOnline) {
-          onlineBody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#777">Нет онлайн пользователей</td></tr>`;
-        }
-        if (!hasOffline) {
-          offlineBody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#777">Нет оффлайн пользователей</td></tr>`;
-        }
-
-        // === Ошибки ===
-        const errRes = await fetch("/api/analytics/errors");
-        const errData = await errRes.json();
-
-        const errorsBody = document.getElementById("errors-body");
-        errorsBody.innerHTML = "";
-
-        if (errData.errors && errData.errors.length > 0) {
-          errData.errors.forEach(row => {
-            let detailsHtml = "";
-        
-            try {
-              const details = typeof row.details === "string" ? JSON.parse(row.details) : row.details;
-              if (details && typeof details === "object") {
-                detailsHtml = Object.entries(details)
-                  .map(([k, v]) => `<div><b>${k}:</b> ${v}</div>`)
-                  .join("");
-              } else {
-                detailsHtml = row.details || "-";
-              }
-            } catch {
-              detailsHtml = row.details || "-";
-            }
-        
-            errorsBody.innerHTML += `
-              <tr>
-                <td>${row.user}</td>
-                <td style="color:#ff5555">${row.error}</td>
-                <td style="color:#ccc">${detailsHtml}</td>
-                <td style="color:#00ccff">${row.time}</td>
-              </tr>
-            `;
-          });
-        } else {
-          errorsBody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#777">Ошибок пока нет</td></tr>`;
-        }
-
-
-        document.getElementById("last-update").textContent =
+        updateStats();
+        renderCurrentTab();
+        document.getElementById("last-update").textContent = 
           "⏱ Обновлено: " + new Date().toLocaleTimeString();
+
       } catch (e) {
         console.error("Ошибка загрузки аналитики:", e);
       }
     }
 
-    setInterval(loadData, 10000);
+    function updateStats() {
+      const onlineCount = allData.users.filter(u => u.status.includes('Онлайн')).length;
+      const totalUsers = allData.users.length;
+      const todaySessions = allData.analytics.filter(a => 
+        a.action.includes('Начало сессии') && 
+        a.time.includes(new Date().toLocaleDateString('ru-RU'))
+      ).length;
+      const errorCount = allData.errors.length;
+
+      document.getElementById('total-users').textContent = totalUsers;
+      document.getElementById('online-users').textContent = onlineCount;
+      document.getElementById('total-sessions').textContent = todaySessions;
+      document.getElementById('total-errors').textContent = errorCount;
+    }
+
+    function renderCurrentTab() {
+      const activeTab = document.querySelector('.tab.active').dataset.tab;
+      const searchTerm = document.getElementById('search-input').value.toLowerCase();
+
+      switch(activeTab) {
+        case 'online':
+          renderOnlineUsers(searchTerm);
+          break;
+        case 'offline':
+          renderOfflineUsers(searchTerm);
+          break;
+        case 'all-users':
+          renderAllUsers(searchTerm);
+          break;
+        case 'activity':
+          renderActivity(searchTerm);
+          break;
+        case 'errors':
+          renderErrors(searchTerm);
+          break;
+      }
+    }
+
+    function renderOnlineUsers(searchTerm = '') {
+      const tbody = document.getElementById('online-body');
+      const onlineUsers = allData.users
+        .filter(u => u.status.includes('Онлайн'))
+        .filter(u => u.user.toLowerCase().includes(searchTerm));
+
+      if (onlineUsers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Нет онлайн пользователей</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = onlineUsers.map(user => `
+        <tr>
+          <td>
+            <div class="user-info">
+              <span>${user.user}</span>
+            </div>
+          </td>
+          <td>${getLastAction(user.user)}</td>
+          <td class="platform-${user.platform.includes('ПК') ? 'pc' : 'mobile'}">${user.platform}</td>
+          <td class="status-online">${user.status}</td>
+          <td>${user.last_seen}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderOfflineUsers(searchTerm = '') {
+      const tbody = document.getElementById('offline-body');
+      const offlineUsers = allData.users
+        .filter(u => u.status.includes('Оффлайн'))
+        .filter(u => u.user.toLowerCase().includes(searchTerm));
+
+      if (offlineUsers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Нет оффлайн пользователей</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = offlineUsers.map(user => `
+        <tr>
+          <td>
+            <div class="user-info">
+              <span>${user.user}</span>
+            </div>
+          </td>
+          <td>${getLastAction(user.user)}</td>
+          <td class="platform-${user.platform.includes('ПК') ? 'pc' : 'mobile'}">${user.platform}</td>
+          <td>${user.last_seen}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderAllUsers(searchTerm = '') {
+      const tbody = document.getElementById('all-users-body');
+      const filteredUsers = allData.users.filter(u => 
+        u.user.toLowerCase().includes(searchTerm)
+      );
+
+      if (filteredUsers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Пользователи не найдены</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filteredUsers.map(user => {
+        const userActions = allData.analytics.filter(a => a.user === user.user);
+        return `
+        <tr>
+          <td>
+            <div class="user-info">
+              <span>${user.user}</span>
+            </div>
+          </td>
+          <td class="${user.status.includes('Онлайн') ? 'status-online' : 'status-offline'}">
+            ${user.status}
+          </td>
+          <td class="platform-${user.platform.includes('ПК') ? 'pc' : 'mobile'}">${user.platform}</td>
+          <td>${user.last_seen}</td>
+          <td>${userActions.length}</td>
+        </tr>
+      `}).join('');
+    }
+
+    function renderActivity(searchTerm = '') {
+      const tbody = document.getElementById('activity-body');
+      const filteredActivity = allData.analytics
+        .filter(a => a.user.toLowerCase().includes(searchTerm))
+        .slice(0, 100); // Ограничиваем для производительности
+
+      if (filteredActivity.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Активность не найдена</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filteredActivity.map(activity => `
+        <tr>
+          <td>${activity.user}</td>
+          <td>${activity.action}</td>
+          <td>${getActionDetails(activity)}</td>
+          <td class="platform-${activity.platform.includes('ПК') ? 'pc' : 'mobile'}">${activity.platform}</td>
+          <td>${activity.time}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderErrors(searchTerm = '') {
+      const tbody = document.getElementById('errors-body');
+      const filteredErrors = allData.errors.filter(e => 
+        e.user.toLowerCase().includes(searchTerm)
+      );
+
+      if (filteredErrors.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Ошибок не найдено</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filteredErrors.map(error => `
+        <tr>
+          <td>${error.user}</td>
+          <td style="color: var(--accent-red)">${error.error}</td>
+          <td style="color: var(--text-secondary); font-size: 12px;">${error.details}</td>
+          <td>${error.time}</td>
+        </tr>
+      `).join('');
+    }
+
+    function getLastAction(username) {
+      const userActions = allData.analytics
+        .filter(a => a.user === username)
+        .sort((a, b) => new Date(b.time) - new Date(a.time));
+      
+      return userActions[0]?.action || 'Нет данных';
+    }
+
+    function getActionDetails(activity) {
+      if (activity.action.includes('сборк')) {
+        return activity.action.split(':')[1] || '';
+      }
+      if (activity.action.includes('экран')) {
+        return activity.action.split(':')[1] || '';
+      }
+      return '';
+    }
+
+    // Обработчики событий
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        tab.classList.add('active');
+        document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
+        renderCurrentTab();
+      });
+    });
+
+    document.getElementById('search-input').addEventListener('input', renderCurrentTab);
+
+    // Автообновление каждые 30 секунд
+    setInterval(loadData, 30000);
+    
+    // Первая загрузка
     window.onload = loadData;
   </script>
-</head>
-<body>
-  <header>
-    <h1>📊 Аналитика пользователей NDHQ</h1>
-    <p id="last-update">Загрузка...</p>
-  </header>
-
-  <div class="container">
-    <!-- Онлайн -->
-    <h2><span>🟢</span>Пользователи онлайн</h2>
-    <div class="card">
-      <table>
-        <thead>
-          <tr>
-            <th>Пользователь</th>
-            <th>Действие</th>
-            <th>Платформа</th>
-            <th>Статус</th>
-            <th>Время</th>
-          </tr>
-        </thead>
-        <tbody id="online-body"></tbody>
-      </table>
-    </div>
-
-    <!-- Оффлайн -->
-    <h2><span>⚪</span>Пользователи оффлайн</h2>
-    <div class="card">
-      <table>
-        <thead>
-          <tr>
-            <th>Пользователь</th>
-            <th>Последнее действие</th>
-            <th>Платформа</th>
-            <th>Статус</th>
-            <th>Последний раз в сети</th>
-          </tr>
-        </thead>
-        <tbody id="offline-body"></tbody>
-      </table>
-    </div>
-
-    <!-- Ошибки -->
-    <h2><span>⚠️</span>Ошибки</h2>
-    <div class="card">
-      <table>
-        <thead>
-          <tr>
-            <th>Пользователь</th>
-            <th>Ошибка</th>
-            <th>Детали</th>
-            <th>Время</th>
-          </tr>
-        </thead>
-        <tbody id="errors-body"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <footer>
-    NDHQ © 2025 — внутренняя аналитика
-  </footer>
 </body>
 </html>
