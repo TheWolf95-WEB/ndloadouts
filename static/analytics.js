@@ -1,110 +1,92 @@
-// analytics.js
-
+// analytics.js - исправленная версия
 const Analytics = {
   trackEvent(action, details = {}) {
-    const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
-    if (!user?.id) return;
-
-    fetch('/api/analytics', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        user_id: user.id,
-        action,
-        details,
-        timestamp: new Date().toISOString()
-      })
-    }).catch(err => console.error('Analytics error:', err));
+    try {
+      const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+      const platform = window.Telegram?.WebApp?.platform || 'unknown';
+      
+      console.log(`📊 Tracking: ${action}`, details); // Лог для отладки
+      
+      fetch('/api/analytics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user?.id || 'anonymous',
+          action: action,
+          details: { ...details, platform },
+          timestamp: new Date().toISOString()
+        })
+      }).catch(err => console.error('Analytics error:', err));
+    } catch (error) {
+      console.error('Analytics trackEvent error:', error);
+    }
   },
 
   trackError(error, details = {}) {
-    const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
-    if (!user?.id) return;
-
-    fetch('/api/errors', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        user_id: user.id,
-        error: error?.toString(),
-        details,
-        timestamp: new Date().toISOString()
-      })
-    }).catch(err => console.error('Error logging failed:', err));
-  },
-
-  // 🔥 НОВЫЙ МЕТОД - отправка пинга каждые 15 секунд
-  startPing() {
-    const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
-    if (!user?.id) return;
-
-    // Отправляем пинг сразу
-    this.sendPing();
-    
-    // И каждые 15 секунд
-    this.pingInterval = setInterval(() => {
-      this.sendPing();
-    }, 15000);
-  },
-
-  sendPing() {
-    const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
-    if (!user?.id) return;
-
-    fetch('/api/analytics/ping', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        user_id: user.id,
-        platform: window.Telegram?.WebApp?.platform || 'unknown',
-        timestamp: new Date().toISOString()
-      })
-    }).catch(err => console.error('Ping error:', err));
-  },
-
-  stopPing() {
-    if (this.pingInterval) {
-      clearInterval(this.pingInterval);
+    try {
+      const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+      
+      console.error('❌ Tracking error:', error, details);
+      
+      fetch('/api/errors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: user?.id || 'anonymous',
+          error: error?.toString() || 'Unknown error',
+          details: details,
+          timestamp: new Date().toISOString()
+        })
+      }).catch(err => console.error('Error logging failed:', err));
+    } catch (trackError) {
+      console.error('Error tracking failed:', trackError);
     }
   }
 };
 
 // === Автоматические события ===
-document.addEventListener('DOMContentLoaded', () => {
-  const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
-  if (!user?.id) return;
 
-  Analytics.trackEvent('session_start', {
-    platform: window.Telegram?.WebApp?.platform || 'unknown'
-  });
-  
-  // 🔥 Запускаем пинг при старте
-  Analytics.startPing();
+// Начало сессии (после полной загрузки DOM)
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    Analytics.trackEvent('session_start', {
+      platform: window.Telegram?.WebApp?.platform || 'unknown',
+      url: window.location.href,
+      user_agent: navigator.userAgent
+    });
+  }, 1000);
 });
 
 // Конец сессии (когда закрывают WebApp)
-window.Telegram?.WebApp?.onEvent('web_app_close', () => {
-  Analytics.trackEvent('session_end');
-  Analytics.stopPing(); // 🔥 Останавливаем пинг
-});
+if (window.Telegram?.WebApp) {
+  window.Telegram.WebApp.onEvent('web_app_close', () => {
+    Analytics.trackEvent('session_end');
+  });
+}
 
-// Также останавливаем пинг при уходе со страницы
+// Перед закрытием страницы
 window.addEventListener('beforeunload', () => {
-  Analytics.stopPing();
+  Analytics.trackEvent('session_end');
 });
 
 // Ошибки JS
-window.addEventListener('error', e => {
+window.addEventListener('error', (e) => {
   Analytics.trackError(e.message, {
     source: e.filename,
     line: e.lineno,
-    url: location.href
+    column: e.colno,
+    url: location.href,
+    stack: e.error?.stack
   });
 });
 
-window.addEventListener('unhandledrejection', e => {
+window.addEventListener('unhandledrejection', (e) => {
   Analytics.trackError(e.reason, {
-    type: 'promise',
-    url: location.href
+    type: 'promise_rejection',
+    url: location.href,
+    stack: e.reason?.stack
   });
 });
+
+// Экспортируем для глобального использования
+window.Analytics = Analytics;
