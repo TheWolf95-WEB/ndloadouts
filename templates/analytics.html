@@ -494,54 +494,75 @@
       stats: {}
     };
 
-    async function loadData() {
-      try {
-        const refreshBtn = document.getElementById('refresh-btn');
-        refreshBtn.classList.add('loading');
-        
-        // Загружаем все данные параллельно
-        const [analyticsRes, usersRes, errorsRes, statsRes] = await Promise.all([
-          fetch('/api/analytics/latest'),
-          fetch('/api/analytics/users'),
-          fetch('/api/analytics/errors'),
-          fetch('/api/analytics/stats')
-        ]);
+async function loadData() {
+  try {
+    const refreshBtn = document.getElementById('refresh-btn');
+    refreshBtn.classList.add('loading');
+    refreshBtn.disabled = true;
+    
+    console.log('Starting data load...');
+    
+    // Загружаем все данные параллельно
+    const [analyticsRes, usersRes, errorsRes, statsRes] = await Promise.all([
+      fetch('/api/analytics/latest'),
+      fetch('/api/analytics/users'),
+      fetch('/api/analytics/errors'),
+      fetch('/api/analytics/stats')
+    ]);
 
-        const analyticsData = await analyticsRes.json();
-        const usersData = await usersRes.json();
-        const errorsData = await errorsRes.json();
-        const statsData = await statsRes.json();
+    // Проверяем статусы ответов
+    if (!analyticsRes.ok) throw new Error('Analytics failed');
+    if (!usersRes.ok) throw new Error('Users failed');
+    if (!errorsRes.ok) throw new Error('Errors failed');
+    if (!statsRes.ok) throw new Error('Stats failed');
 
-        allData = {
-          analytics: analyticsData.analytics || [],
-          users: usersData.users || [],
-          errors: errorsData.errors || [],
-          stats: statsData
-        };
+    const analyticsData = await analyticsRes.json();
+    const usersData = await usersRes.json();
+    const errorsData = await errorsRes.json();
+    const statsData = await statsRes.json();
 
-        updateStats();
-        renderCurrentTab();
-        
-        document.getElementById("last-update").textContent = 
-          "Обновлено: " + new Date().toLocaleTimeString('ru-RU');
-          
-      } catch (e) {
-        console.error("Ошибка загрузки аналитики:", e);
-        document.getElementById("last-update").textContent = "❌ Ошибка загрузки";
-      } finally {
-        const refreshBtn = document.getElementById('refresh-btn');
-        refreshBtn.classList.remove('loading');
-      }
-    }
+    allData = {
+      analytics: analyticsData.analytics || [],
+      users: usersData.users || [],
+      errors: errorsData.errors || [],
+      stats: statsData
+    };
 
-    function updateStats() {
-      const stats = allData.stats;
+    console.log('Loaded data:', allData);
+
+    updateStats();
+    renderCurrentTab();
+    
+    document.getElementById("last-update").textContent = 
+      "Обновлено: " + new Date().toLocaleTimeString('ru-RU');
       
-      document.getElementById('total-users').textContent = stats.total_users || 0;
-      document.getElementById('online-users').textContent = stats.online_users || 0;
-      document.getElementById('total-sessions').textContent = stats.today_sessions || 0;
-      document.getElementById('total-errors').textContent = stats.total_errors || 0;
-    }
+  } catch (e) {
+    console.error("Ошибка загрузки аналитики:", e);
+    document.getElementById("last-update").textContent = "❌ Ошибка загрузки";
+    
+    // Показываем сообщение об ошибке во всех вкладках
+    const bodies = ['online-body', 'offline-body', 'all-users-body', 'activity-body', 'errors-body'];
+    bodies.forEach(bodyId => {
+      const element = document.getElementById(bodyId);
+      if (element) {
+        element.innerHTML = `<tr><td colspan="5" class="empty-state">❌ Ошибка загрузки данных: ${e.message}</td></tr>`;
+      }
+    });
+  } finally {
+    const refreshBtn = document.getElementById('refresh-btn');
+    refreshBtn.classList.remove('loading');
+    refreshBtn.disabled = false;
+  }
+}
+
+function updateStats() {
+  const stats = allData.stats;
+  
+  document.getElementById('total-users').textContent = stats.total_users || 0;
+  document.getElementById('online-users').textContent = stats.online_users || 0;
+  document.getElementById('total-sessions').textContent = stats.today_sessions || 0;
+  document.getElementById('total-errors').textContent = stats.total_errors || 0;
+}
 
     function renderCurrentTab() {
       const activeTab = document.querySelector('.tab.active').dataset.tab;
