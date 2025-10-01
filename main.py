@@ -348,7 +348,7 @@ async def all_versions():
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
-# АНАЛИТИКА - ПОЛНАЯ И КРАСИВАЯ ВЕРСИЯ
+# АНАЛИТИКА - УЛУЧШЕННАЯ ВЕРСИЯ
 
 ANALYTICS_DB = Path("/opt/ndloadouts_storage/analytics.db")
 
@@ -359,7 +359,6 @@ def init_analytics_db():
         conn = sqlite3.connect(ANALYTICS_DB)
         cur = conn.cursor()
         
-        # Основные события
         cur.execute("""
         CREATE TABLE IF NOT EXISTS analytics (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -370,7 +369,6 @@ def init_analytics_db():
         )
         """)
         
-        # Ошибки
         cur.execute("""
         CREATE TABLE IF NOT EXISTS errors (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -381,7 +379,6 @@ def init_analytics_db():
         )
         """)
         
-        # Пользователи (расширенная информация)
         cur.execute("""
         CREATE TABLE IF NOT EXISTS user_profiles (
             user_id TEXT PRIMARY KEY,
@@ -411,23 +408,32 @@ async def save_analytics(data: dict = Body(...)):
         details = data.get("details", {})
         timestamp = data.get("timestamp")
         
-        if user_id == "anonymous":
-            return {"status": "ok"}  # Пропускаем анонимных
+        if user_id == "anonymous" or not user_id:
+            return {"status": "ok"}
             
         details_json = json.dumps(details, ensure_ascii=False) if details else "{}"
         
         conn = sqlite3.connect(ANALYTICS_DB)
         cur = conn.cursor()
         
-        # Сохраняем событие
+        # Быстрое сохранение события
         cur.execute(
             "INSERT INTO analytics (user_id, action, details, timestamp) VALUES (?, ?, ?, ?)",
             (str(user_id), action, details_json, timestamp)
         )
         
-        # Обновляем профиль пользователя
+        # Быстрое обновление профиля пользователя
         platform = details.get("platform", "unknown")
         now_iso = datetime.now().isoformat()
+        
+        # Получаем данные пользователя из Telegram
+        user_info = {}
+        try:
+            if user_id and user_id != "anonymous":
+                users = get_all_users()
+                user_info = next((u for u in users if str(u["id"]) == str(user_id)), {})
+        except:
+            user_info = {}
         
         cur.execute("""
             INSERT INTO user_profiles (user_id, first_name, username, last_seen, platform, total_actions, first_seen, last_action)
@@ -437,7 +443,15 @@ async def save_analytics(data: dict = Body(...)):
                 platform = excluded.platform,
                 total_actions = total_actions + 1,
                 last_action = excluded.last_action
-        """, (str(user_id), "", "", timestamp, platform, now_iso, action))
+        """, (
+            str(user_id), 
+            user_info.get('first_name', ''),
+            user_info.get('username', ''),
+            timestamp, 
+            platform, 
+            now_iso, 
+            action
+        ))
         
         conn.commit()
         conn.close()
@@ -456,9 +470,9 @@ async def get_analytics_dashboard():
         cur.execute("SELECT COUNT(*) FROM user_profiles")
         total_users = cur.fetchone()[0]
         
-        # Онлайн (активны последние 5 минут)
-        five_min_ago = (datetime.now() - timedelta(minutes=5)).isoformat()
-        cur.execute("SELECT COUNT(*) FROM user_profiles WHERE last_seen > ?", (five_min_ago,))
+        # Онлайн (активны последние 2 минуты - быстрее обновление!)
+        two_min_ago = (datetime.now() - timedelta(minutes=2)).isoformat()
+        cur.execute("SELECT COUNT(*) FROM user_profiles WHERE last_seen > ?", (two_min_ago,))
         online_users = cur.fetchone()[0]
         
         cur.execute("SELECT COUNT(*) FROM analytics")
@@ -471,25 +485,24 @@ async def get_analytics_dashboard():
         cur.execute("""
             SELECT action, COUNT(*) as count 
             FROM analytics 
-            WHERE action != 'session_start' AND action != 'session_end'
+            WHERE action NOT IN ('session_start', 'session_end', 'click_button')
             GROUP BY action 
             ORDER BY count DESC 
-            LIMIT 10
+            LIMIT 8
         """)
         popular_actions = cur.fetchall()
         
-        # Все пользователи с детальной информацией
+        # Все пользователи за все время
         cur.execute("""
             SELECT 
                 user_id, first_name, username, last_seen, platform, 
                 total_actions, first_seen, last_action
             FROM user_profiles 
             ORDER BY last_seen DESC
-            LIMIT 100
         """)
         users_data = cur.fetchall()
         
-        # Последние действия всех пользователей
+        # Последние действия (быстрая выборка)
         cur.execute("""
             SELECT a.user_id, a.action, a.details, a.timestamp,
                    u.first_name, u.username, u.platform
@@ -497,7 +510,7 @@ async def get_analytics_dashboard():
             LEFT JOIN user_profiles u ON a.user_id = u.user_id
             WHERE a.user_id != 'anonymous'
             ORDER BY a.timestamp DESC
-            LIMIT 50
+            LIMIT 30
         """)
         actions_data = cur.fetchall()
         
@@ -510,37 +523,46 @@ async def get_analytics_dashboard():
                 'view_build': '👀 Просмотры сборок',
                 'search': '🔍 Поиски',
                 'open_screen': '📱 Открытия экранов',
-                'switch_category': '📂 Смена категорий'
+                'switch_category': '📂 Смена категорий',
+                'click_button': '🖱️ Клики'
             }.get(action, action)
             formatted_popular_actions.append({"action": action_name, "count": count})
 
         # Форматируем пользователей
         formatted_users = []
         for user_id, first_name, username, last_seen, platform, total_actions, first_seen, last_action in users_data:
-            # Определяем статус
+            # Определяем статус (2 минуты для онлайн)
             if last_seen:
-                last_seen_dt = datetime.fromisoformat(last_seen.replace('Z', '+00:00'))
-                time_diff = datetime.now(timezone.utc) - last_seen_dt
-                is_online = time_diff.total_seconds() < 300  # 5 минут
+                try:
+                    last_seen_dt = datetime.fromisoformat(last_seen.replace('Z', '+00:00'))
+                    time_diff = datetime.now(timezone.utc) - last_seen_dt
+                    is_online = time_diff.total_seconds() < 120  # 2 минуты
+                except:
+                    is_online = False
             else:
                 is_online = False
             
-            # Форматируем имя пользователя
-            user_display = first_name or username or f"ID: {user_id}"
+            # Форматируем имя пользователя с ID
+            user_display = f"{first_name or 'Пользователь'}"
             if username:
-                user_display = f"{first_name or 'Пользователь'} (@{username})"
+                user_display += f" (@{username})"
+            user_display += f" | ID: {user_id}"
             
             # Форматируем последнее действие
             last_action_text = {
                 'session_start': '🟢 Вошел в бот',
                 'view_build': '🔫 Смотрел сборку',
                 'search': '🔍 Искал',
-                'open_screen': '📱 Открыл экран'
+                'open_screen': '📱 Открыл экран',
+                'click_button': '🖱️ Кликнул',
+                'switch_category': '📂 Сменил категорию'
             }.get(last_action, last_action)
             
             formatted_users.append({
                 "id": user_id,
                 "name": user_display,
+                "username": username,
+                "first_name": first_name,
                 "status": "online" if is_online else "offline",
                 "platform": platform,
                 "actions_count": total_actions,
@@ -552,9 +574,10 @@ async def get_analytics_dashboard():
         # Форматируем действия
         formatted_actions = []
         for user_id, action, details, timestamp, first_name, username, platform in actions_data:
-            user_display = first_name or username or f"ID: {user_id}"
+            user_display = f"{first_name or 'Пользователь'}"
             if username:
-                user_display = f"{first_name or 'Пользователь'} (@{username})"
+                user_display += f" (@{username})"
+            user_display += f" | ID: {user_id}"
             
             # Детали действия
             action_details = ""
@@ -563,31 +586,36 @@ async def get_analytics_dashboard():
                 if action == 'view_build':
                     title = details_obj.get('title', '')
                     weapon = details_obj.get('weapon_name', '')
-                    action_details = title or weapon or 'сборку'
+                    action_details = f"«{title or weapon or 'сборку'}»"
                 elif action == 'search':
                     query = details_obj.get('query', '')
                     action_details = f"«{query}»" if query else ''
                 elif action == 'open_screen':
                     screen = details_obj.get('screen', '')
                     action_details = screen
+                elif action == 'click_button':
+                    button = details_obj.get('button', '')
+                    action_details = button
             except:
                 pass
             
             action_text = {
                 'session_start': '🟢 Вошел в бот',
                 'session_end': '🔴 Вышел из бота', 
-                'view_build': f'🔫 Просмотр сборки {action_details}',
+                'view_build': f'🔫 Просмотр {action_details}',
                 'search': f'🔍 Поиск {action_details}',
                 'open_screen': f'📱 Открыл {action_details}',
-                'switch_category': f'📂 Сменил категорию {action_details}'
+                'switch_category': f'📂 Сменил категорию {action_details}',
+                'click_button': f'🖱️ Кликнул {action_details}'
             }.get(action, action)
             
             formatted_actions.append({
                 "user": user_display,
+                "user_id": user_id,
+                "username": username,
                 "action": action_text,
                 "platform": "💻" if platform in ["tdesktop", "web"] else "📱",
-                "time": prettify_time(timestamp),
-                "user_id": user_id
+                "time": prettify_time(timestamp)
             })
 
         return {
@@ -611,70 +639,23 @@ async def get_analytics_dashboard():
             "recent_activity": []
         }
 
-@app.get("/api/analytics/user/{user_id}")
-async def get_user_analytics(user_id: str):
-    """Детальная аналитика по конкретному пользователю"""
+@app.delete("/api/analytics/clear")
+async def clear_analytics():
+    """Очистка всей статистики"""
     try:
         conn = sqlite3.connect(ANALYTICS_DB)
         cur = conn.cursor()
         
-        # Информация о пользователе
-        cur.execute("SELECT * FROM user_profiles WHERE user_id = ?", (user_id,))
-        user_data = cur.fetchone()
+        cur.execute("DELETE FROM analytics")
+        cur.execute("DELETE FROM errors")
+        cur.execute("DELETE FROM user_profiles")
         
-        # Последние действия пользователя
-        cur.execute("""
-            SELECT action, details, timestamp 
-            FROM analytics 
-            WHERE user_id = ? 
-            ORDER BY timestamp DESC 
-            LIMIT 50
-        """, (user_id,))
-        user_actions = cur.fetchall()
-        
+        conn.commit()
         conn.close()
         
-        if not user_data:
-            return {"error": "User not found"}
-            
-        # Форматируем данные пользователя
-        user_info = {
-            "id": user_data[0],
-            "first_name": user_data[1],
-            "username": user_data[2],
-            "last_seen": prettify_time(user_data[3]),
-            "platform": user_data[4],
-            "total_actions": user_data[5],
-            "first_seen": prettify_time(user_data[6]),
-            "last_action": user_data[7]
-        }
-        
-        # Форматируем действия
-        formatted_actions = []
-        for action, details, timestamp in user_actions:
-            action_details = ""
-            try:
-                details_obj = json.loads(details) if details else {}
-                if action == 'view_build':
-                    action_details = details_obj.get('title') or details_obj.get('weapon_name') or ''
-                elif action == 'search':
-                    action_details = details_obj.get('query', '')
-            except:
-                pass
-                
-            formatted_actions.append({
-                "action": action,
-                "details": action_details,
-                "time": prettify_time(timestamp)
-            })
-        
-        return {
-            "user": user_info,
-            "actions": formatted_actions
-        }
-        
+        return {"status": "ok", "message": "Вся статистика очищена"}
     except Exception as e:
-        return {"error": str(e)}
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
 
 @app.get("/analytics", response_class=HTMLResponse)
 async def analytics_page(request: Request):
