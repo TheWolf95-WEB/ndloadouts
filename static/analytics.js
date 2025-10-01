@@ -3,11 +3,13 @@
 const Analytics = {
   trackEvent(action, details = {}) {
     const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    if (!user?.id) return;
+
     fetch('/api/analytics', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        user_id: user?.id || null,
+        user_id: user.id,
         action,
         details,
         timestamp: new Date().toISOString()
@@ -17,11 +19,13 @@ const Analytics = {
 
   trackError(error, details = {}) {
     const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    if (!user?.id) return;
+
     fetch('/api/errors', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        user_id: user?.id || null,
+        user_id: user.id,
         error: error?.toString(),
         details,
         timestamp: new Date().toISOString()
@@ -67,6 +71,9 @@ const Analytics = {
 
 // === Автоматические события ===
 document.addEventListener('DOMContentLoaded', () => {
+  const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
+  if (!user?.id) return;
+
   Analytics.trackEvent('session_start', {
     platform: window.Telegram?.WebApp?.platform || 'unknown'
   });
