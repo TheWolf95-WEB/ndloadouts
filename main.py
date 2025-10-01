@@ -570,6 +570,51 @@ async def get_analytics_dashboard():
 async def analytics_page(request: Request):
     return templates.TemplateResponse("analytics.html", {"request": request})
 
+
+@app.get("/api/analytics/debug")
+async def debug_analytics():
+    """Эндпоинт для отладки аналитики"""
+    try:
+        conn = sqlite3.connect(ANALYTICS_DB)
+        cur = conn.cursor()
+        
+        # Проверяем таблицы
+        cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        tables = cur.fetchall()
+        
+        # Проверяем данные в таблицах
+        cur.execute("SELECT COUNT(*) FROM user_sessions")
+        user_sessions_count = cur.fetchone()[0]
+        
+        cur.execute("SELECT COUNT(*) FROM analytics")
+        analytics_count = cur.fetchone()[0]
+        
+        cur.execute("SELECT COUNT(*) FROM errors")
+        errors_count = cur.fetchone()[0]
+        
+        # Показываем несколько последних записей
+        cur.execute("SELECT * FROM user_sessions ORDER BY last_seen DESC LIMIT 5")
+        recent_sessions = cur.fetchall()
+        
+        cur.execute("SELECT * FROM analytics ORDER BY id DESC LIMIT 5")
+        recent_analytics = cur.fetchall()
+        
+        conn.close()
+        
+        return {
+            "database_path": str(ANALYTICS_DB),
+            "tables": tables,
+            "counts": {
+                "user_sessions": user_sessions_count,
+                "analytics": analytics_count,
+                "errors": errors_count
+            },
+            "recent_sessions": recent_sessions,
+            "recent_analytics": recent_analytics
+        }
+    except Exception as e:
+        return {"error": str(e)}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)
