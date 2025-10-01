@@ -1,15 +1,18 @@
-// analytics.js - улучшенная версия для трекинга
+// static/analytics.js
 const Analytics = {
   trackEvent(action, details = {}) {
     try {
       const user = window.Telegram?.WebApp?.initDataUnsafe?.user;
       const platform = window.Telegram?.WebApp?.platform || 'unknown';
       
+      // Только реальные пользователи
+      if (!user?.id) return;
+      
       fetch('/api/analytics', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_id: user?.id || 'anonymous',
+          user_id: user.id,
           action: action,
           details: { ...details, platform },
           timestamp: new Date().toISOString()
@@ -20,7 +23,6 @@ const Analytics = {
     }
   },
 
-  // Трекинг просмотра сборки
   trackBuildView(buildData) {
     this.trackEvent('view_build', {
       title: buildData.title,
@@ -29,14 +31,12 @@ const Analytics = {
     });
   },
 
-  // Трекинг поиска
   trackSearch(query) {
     this.trackEvent('search', {
       query: query
     });
   },
 
-  // Трекинг открытия экрана
   trackScreenOpen(screenName) {
     this.trackEvent('open_screen', {
       screen: screenName
@@ -44,7 +44,7 @@ const Analytics = {
   }
 };
 
-// Автоматические события
+// Автоматический трекинг
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     Analytics.trackEvent('session_start', {
@@ -60,9 +60,4 @@ if (window.Telegram?.WebApp) {
   });
 }
 
-window.addEventListener('beforeunload', () => {
-  Analytics.trackEvent('session_end');
-});
-
-// Глобальный экспорт
 window.Analytics = Analytics;
