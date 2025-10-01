@@ -1,787 +1,272 @@
+<!-- analytics.html - исправленная версия -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Аналитика NDHQ</title>
   <style>
-    :root {
-      --bg-primary: #0f111a;
-      --bg-card: #171d25;
-      --bg-hover: #223044;
-      --border: #2a3545;
-      --text-primary: #ffffff;
-      --text-secondary: #aaa;
-      --accent-green: #00ffcc;
-      --accent-blue: #00ccff;
-      --accent-red: #ff5555;
-      --accent-orange: #ffaa00;
-    }
-    
-    * {
-      box-sizing: border-box;
-    }
-    
     body {
       margin: 0;
-      background-color: var(--bg-primary);
+      background-color: #0f111a;
       font-family: 'Rubik', 'Segoe UI', sans-serif;
-      color: var(--text-primary);
-      line-height: 1.4;
-      font-size: 14px;
-      padding-bottom: 20px;
+      color: #ffffff;
     }
-    
     header {
-      padding: 12px 15px;
-      background: var(--bg-card);
-      border-bottom: 2px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    
-    .header-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    
-    header h1 {
-      font-size: 18px;
-      margin: 0;
-      color: var(--accent-green);
-    }
-    
-    .last-update {
-      font-size: 12px;
-      color: var(--text-secondary);
-    }
-    
-    .header-controls {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-    }
-    
-    .stat-card {
-      background: var(--bg-hover);
-      padding: 10px;
-      border-radius: 8px;
       text-align: center;
+      padding: 20px;
+      background: #171d25;
+      border-bottom: 2px solid #2a3545;
     }
-    
-    .stat-number {
-      font-size: 20px;
-      font-weight: bold;
+    header h1 {
+      font-size: 22px;
+      margin: 0;
+      color: #00ffcc;
     }
-    
-    .stat-number.total { color: var(--accent-blue); }
-    .stat-number.online { color: var(--accent-green); }
-    .stat-number.sessions { color: var(--accent-orange); }
-    .stat-number.errors { color: var(--accent-red); }
-    
-    .stat-label {
-      font-size: 11px;
-      color: var(--text-secondary);
-      margin-top: 4px;
+    header p {
+      font-size: 14px;
+      color: #aaa;
+      margin: 5px 0 0;
     }
-    
-    .search-controls {
-      display: flex;
-      gap: 8px;
-      width: 100%;
-    }
-    
     .container {
-      max-width: 1200px;
-      margin: 15px auto;
-      padding: 0 10px;
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 0 15px;
     }
-    
-    .tabs {
+    h2 {
+      font-size: 18px;
+      margin: 20px 0 10px;
+      color: #00ccff;
       display: flex;
-      gap: 4px;
-      margin-bottom: 15px;
-      flex-wrap: wrap;
-      overflow-x: auto;
-      padding-bottom: 5px;
+      align-items: center;
     }
-    
-    .tab {
-      padding: 8px 12px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.3s;
-      font-size: 12px;
-      white-space: nowrap;
-      flex-shrink: 0;
-      border: none;
-      color: var(--text-secondary);
+    h2 span {
+      margin-right: 8px;
     }
-    
-    .tab.active {
-      background: var(--accent-blue);
-      color: var(--bg-primary);
-    }
-    
-    .tab-content {
-      display: none;
-    }
-    
-    .tab-content.active {
-      display: block;
-    }
-    
     .card {
-      background: var(--bg-card);
-      border-radius: 10px;
+      background: #171d25;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.6);
       padding: 15px;
-      margin-bottom: 20px;
-    }
-    
-    .table-container {
+      margin-bottom: 25px;
       overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      border-radius: 8px;
     }
-    
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 13px;
+      font-size: 14px;
       min-width: 600px;
     }
-    
     th, td {
-      padding: 12px 8px;
+      padding: 10px;
       text-align: left;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid #2a3545;
+      word-break: break-word;
     }
-    
     th {
-      background: var(--bg-hover);
-      color: var(--accent-green);
+      background: #1c222d;
+      color: #00ffcc;
       font-weight: 600;
-      position: sticky;
-      top: 0;
     }
-    
     tr:hover {
-      background: var(--bg-hover);
+      background: #223044;
     }
-    
-    .user-info {
-      display: flex;
-      align-items: center;
-      min-width: 150px;
-    }
-    
     .status-online {
-      color: var(--accent-green);
-      font-weight: bold;
+      color: #00ff88;
     }
-    
     .status-offline {
-      color: var(--text-secondary);
+      color: #888;
     }
-    
-    .platform-pc { color: var(--accent-blue); }
-    .platform-mobile { color: var(--accent-green); }
-    
-    .search-box {
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      background: var(--bg-card);
-      color: var(--text-primary);
-      flex: 1;
-      font-size: 14px;
+    .error-message {
+      color: #ff5555;
     }
-    
-    .search-box::placeholder {
-      color: var(--text-secondary);
-    }
-    
-    .refresh-btn {
-      padding: 10px 15px;
-      background: var(--accent-blue);
-      border: none;
-      border-radius: 8px;
-      color: var(--bg-primary);
-      cursor: pointer;
-      font-size: 14px;
-      white-space: nowrap;
-      font-weight: 600;
-    }
-    
-    .empty-state {
+    footer {
       text-align: center;
-      padding: 40px 20px;
-      color: var(--text-secondary);
-      font-size: 14px;
+      padding: 15px;
+      color: #777;
+      font-size: 13px;
+      border-top: 1px solid #2a3545;
+      margin-top: 30px;
     }
-    
-    .action-cell {
-      max-width: 200px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    
-    .details-cell {
-      max-width: 150px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    
-    /* Мобильная адаптация */
-    @media (max-width: 768px) {
-      .container {
-        padding: 0 8px;
-      }
-      
-      .header-top {
-        flex-direction: column;
-        gap: 8px;
-        align-items: flex-start;
-      }
-      
-      .card {
-        padding: 12px;
-        margin-bottom: 15px;
-        border-radius: 8px;
-      }
-      
-      table {
-        font-size: 12px;
-        min-width: 500px;
-      }
-      
+    @media (max-width: 600px) {
       th, td {
-        padding: 10px 6px;
-      }
-      
-      .tabs {
-        gap: 3px;
-      }
-      
-      .tab {
-        padding: 6px 10px;
-        font-size: 11px;
-      }
-      
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 6px;
-      }
-      
-      .stat-card {
+        font-size: 13px;
         padding: 8px;
       }
-      
-      .stat-number {
-        font-size: 18px;
-      }
-      
-      .stat-label {
-        font-size: 10px;
-      }
-      
-      .search-controls {
-        flex-direction: column;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      header {
-        padding: 10px 8px;
-      }
-      
-      header h1 {
-        font-size: 16px;
-      }
-      
-      .last-update {
-        font-size: 11px;
-      }
-      
-      .search-box, .refresh-btn {
-        width: 100%;
-      }
-    }
-    
-    /* Улучшаем скролл на iOS */
-    .table-container::-webkit-scrollbar {
-      height: 6px;
-    }
-    
-    .table-container::-webkit-scrollbar-track {
-      background: var(--bg-card);
-      border-radius: 3px;
-    }
-    
-    .table-container::-webkit-scrollbar-thumb {
-      background: var(--border);
-      border-radius: 3px;
-    }
-    
-    /* Анимация загрузки */
-    .loading {
-      opacity: 0.7;
-      pointer-events: none;
-    }
-    
-    .loading::after {
-      content: ' 🔄';
     }
   </style>
+  <script>
+    async function loadData() {
+      try {
+        console.log('🔄 Loading analytics data...');
+        
+        // === Пользователи ===
+        const res = await fetch("/api/analytics/latest");
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const data = await res.json();
+
+        const onlineBody = document.getElementById("online-body");
+        const offlineBody = document.getElementById("offline-body");
+        onlineBody.innerHTML = "";
+        offlineBody.innerHTML = "";
+
+        let hasOnline = false;
+        let hasOffline = false;
+
+        if (data.analytics && data.analytics.length > 0) {
+          data.analytics.forEach(row => {
+            const tr = `
+              <tr>
+                <td>${row.user || 'Аноним'}</td>
+                <td>${row.action || 'Неизвестно'}</td>
+                <td>${row.platform || '-'}</td>
+                <td class="${row.status.includes('Онлайн') ? 'status-online' : 'status-offline'}">${row.status}</td>
+                <td>${row.time || '-'}</td>
+              </tr>
+            `;
+            if (row.status.includes("Онлайн")) {
+              onlineBody.innerHTML += tr;
+              hasOnline = true;
+            } else {
+              offlineBody.innerHTML += tr;
+              hasOffline = true;
+            }
+          });
+        }
+
+        if (!hasOnline) {
+          onlineBody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#777">Нет онлайн пользователей</td></tr>`;
+        }
+        if (!hasOffline) {
+          offlineBody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#777">Нет оффлайн пользователей</td></tr>`;
+        }
+
+        // === Ошибки ===
+        const errRes = await fetch("/api/analytics/errors");
+        if (!errRes.ok) throw new Error(`HTTP error! status: ${errRes.status}`);
+        const errData = await errRes.json();
+
+        const errorsBody = document.getElementById("errors-body");
+        errorsBody.innerHTML = "";
+
+        if (errData.errors && errData.errors.length > 0) {
+          errData.errors.forEach(row => {
+            let detailsHtml = "";
+        
+            try {
+              const details = typeof row.details === "string" ? JSON.parse(row.details) : row.details;
+              if (details && typeof details === "object") {
+                detailsHtml = Object.entries(details)
+                  .map(([k, v]) => `<div><b>${k}:</b> ${v}</div>`)
+                  .join("");
+              } else {
+                detailsHtml = row.details || "-";
+              }
+            } catch {
+              detailsHtml = row.details || "-";
+            }
+        
+            errorsBody.innerHTML += `
+              <tr>
+                <td>${row.user || 'Аноним'}</td>
+                <td class="error-message">${row.error || 'Неизвестная ошибка'}</td>
+                <td style="color:#ccc">${detailsHtml}</td>
+                <td style="color:#00ccff">${row.time || '-'}</td>
+              </tr>
+            `;
+          });
+        } else {
+          errorsBody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#777">Ошибок пока нет</td></tr>`;
+        }
+
+        document.getElementById("last-update").textContent =
+          "⏱ Обновлено: " + new Date().toLocaleTimeString();
+          
+        console.log('✅ Analytics data loaded successfully');
+      } catch (e) {
+        console.error("❌ Ошибка загрузки аналитики:", e);
+        document.getElementById("last-update").textContent =
+          "❌ Ошибка загрузки: " + e.message;
+      }
+    }
+
+    // Обновляем каждые 10 секунд
+    setInterval(loadData, 10000);
+    
+    // Загружаем при загрузке страницы
+    window.addEventListener('load', () => {
+      loadData();
+    });
+    
+    // Также загружаем когда DOM готов
+    document.addEventListener('DOMContentLoaded', loadData);
+  </script>
 </head>
 <body>
   <header>
-    <div class="header-top">
-      <h1>📊 Аналитика NDHQ</h1>
-      <div class="last-update" id="last-update">Загрузка...</div>
-    </div>
-    <div class="header-controls">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-number total" id="total-users">0</div>
-          <div class="stat-label">Всего пользователей</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number online" id="online-users">0</div>
-          <div class="stat-label">Сейчас онлайн</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number sessions" id="total-sessions">0</div>
-          <div class="stat-label">Сессии сегодня</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number errors" id="total-errors">0</div>
-          <div class="stat-label">Ошибок</div>
-        </div>
-      </div>
-      <div class="search-controls">
-        <input type="text" id="search-input" class="search-box" placeholder="Поиск по пользователям или действиям...">
-        <button class="refresh-btn" onclick="loadData()" id="refresh-btn">🔄 Обновить</button>
-      </div>
-    </div>
+    <h1>📊 Аналитика пользователей NDHQ</h1>
+    <p id="last-update">Загрузка...</p>
   </header>
 
   <div class="container">
-    <div class="tabs">
-      <div class="tab active" data-tab="online">🟢 Онлайн</div>
-      <div class="tab" data-tab="offline">⚪ Оффлайн</div>
-      <div class="tab" data-tab="all-users">👥 Все пользователи</div>
-      <div class="tab" data-tab="activity">📈 Активность</div>
-      <div class="tab" data-tab="errors">⚠️ Ошибки</div>
+    <!-- Онлайн -->
+    <h2><span>🟢</span>Пользователи онлайн</h2>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Пользователь</th>
+            <th>Действие</th>
+            <th>Платформа</th>
+            <th>Статус</th>
+            <th>Время</th>
+          </tr>
+        </thead>
+        <tbody id="online-body">
+          <tr><td colspan="5" style="text-align:center;color:#777">Загрузка...</td></tr>
+        </tbody>
+      </table>
     </div>
 
-    <!-- Онлайн пользователи -->
-    <div class="tab-content active" id="online-tab">
-      <div class="card">
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Пользователь</th>
-                <th>Последнее действие</th>
-                <th>Платформа</th>
-                <th>Время</th>
-              </tr>
-            </thead>
-            <tbody id="online-body"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Оффлайн пользователи -->
-    <div class="tab-content" id="offline-tab">
-      <div class="card">
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Пользователь</th>
-                <th>Последнее действие</th>
-                <th>Платформа</th>
-                <th>Был в сети</th>
-              </tr>
-            </thead>
-            <tbody id="offline-body"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Все пользователи -->
-    <div class="tab-content" id="all-users-tab">
-      <div class="card">
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Пользователь</th>
-                <th>Статус</th>
-                <th>Платформа</th>
-                <th>Последняя активность</th>
-                <th>Всего действий</th>
-              </tr>
-            </thead>
-            <tbody id="all-users-body"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- Активность -->
-    <div class="tab-content" id="activity-tab">
-      <div class="card">
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Пользователь</th>
-                <th>Действие</th>
-                <th>Детали</th>
-                <th>Платформа</th>
-                <th>Время</th>
-              </tr>
-            </thead>
-            <tbody id="activity-body"></tbody>
-          </table>
-        </div>
-      </div>
+    <!-- Оффлайн -->
+    <h2><span>⚪</span>Пользователи оффлайн</h2>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Пользователь</th>
+            <th>Последнее действие</th>
+            <th>Платформа</th>
+            <th>Статус</th>
+            <th>Последний раз в сети</th>
+          </tr>
+        </thead>
+        <tbody id="offline-body">
+          <tr><td colspan="5" style="text-align:center;color:#777">Загрузка...</td></tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- Ошибки -->
-    <div class="tab-content" id="errors-tab">
-      <div class="card">
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Пользователь</th>
-                <th>Ошибка</th>
-                <th>Детали</th>
-                <th>Время</th>
-              </tr>
-            </thead>
-            <tbody id="errors-body"></tbody>
-          </table>
-        </div>
-      </div>
+    <h2><span>⚠️</span>Ошибки</h2>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Пользователь</th>
+            <th>Ошибка</th>
+            <th>Детали</th>
+            <th>Время</th>
+          </tr>
+        </thead>
+        <tbody id="errors-body">
+          <tr><td colspan="4" style="text-align:center;color:#777">Загрузка...</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <script>
-    let allData = {
-      analytics: [],
-      users: [],
-      errors: [],
-      stats: {}
-    };
-
-async function loadData() {
-  try {
-    const refreshBtn = document.getElementById('refresh-btn');
-    refreshBtn.classList.add('loading');
-    refreshBtn.disabled = true;
-    
-    console.log('Starting data load...');
-    
-    // Загружаем все данные параллельно
-    const [analyticsRes, usersRes, errorsRes, statsRes] = await Promise.all([
-      fetch('/api/analytics/latest'),
-      fetch('/api/analytics/users'),
-      fetch('/api/analytics/errors'),
-      fetch('/api/analytics/stats')
-    ]);
-
-    // Проверяем статусы ответов
-    if (!analyticsRes.ok) throw new Error('Analytics failed');
-    if (!usersRes.ok) throw new Error('Users failed');
-    if (!errorsRes.ok) throw new Error('Errors failed');
-    if (!statsRes.ok) throw new Error('Stats failed');
-
-    const analyticsData = await analyticsRes.json();
-    const usersData = await usersRes.json();
-    const errorsData = await errorsRes.json();
-    const statsData = await statsRes.json();
-
-    allData = {
-      analytics: analyticsData.analytics || [],
-      users: usersData.users || [],
-      errors: errorsData.errors || [],
-      stats: statsData
-    };
-
-    console.log('Loaded data:', allData);
-
-    updateStats();
-    renderCurrentTab();
-    
-    document.getElementById("last-update").textContent = 
-      "Обновлено: " + new Date().toLocaleTimeString('ru-RU');
-      
-  } catch (e) {
-    console.error("Ошибка загрузки аналитики:", e);
-    document.getElementById("last-update").textContent = "❌ Ошибка загрузки";
-    
-    // Показываем сообщение об ошибке во всех вкладках
-    const bodies = ['online-body', 'offline-body', 'all-users-body', 'activity-body', 'errors-body'];
-    bodies.forEach(bodyId => {
-      const element = document.getElementById(bodyId);
-      if (element) {
-        element.innerHTML = `<tr><td colspan="5" class="empty-state">❌ Ошибка загрузки данных: ${e.message}</td></tr>`;
-      }
-    });
-  } finally {
-    const refreshBtn = document.getElementById('refresh-btn');
-    refreshBtn.classList.remove('loading');
-    refreshBtn.disabled = false;
-  }
-}
-
-function updateStats() {
-  const stats = allData.stats;
-  
-  document.getElementById('total-users').textContent = stats.total_users || 0;
-  document.getElementById('online-users').textContent = stats.online_users || 0;
-  document.getElementById('total-sessions').textContent = stats.today_sessions || 0;
-  document.getElementById('total-errors').textContent = stats.total_errors || 0;
-}
-
-    function renderCurrentTab() {
-      const activeTab = document.querySelector('.tab.active').dataset.tab;
-      const searchTerm = document.getElementById('search-input').value.toLowerCase();
-
-      switch(activeTab) {
-        case 'online':
-          renderOnlineUsers(searchTerm);
-          break;
-        case 'offline':
-          renderOfflineUsers(searchTerm);
-          break;
-        case 'all-users':
-          renderAllUsers(searchTerm);
-          break;
-        case 'activity':
-          renderActivity(searchTerm);
-          break;
-        case 'errors':
-          renderErrors(searchTerm);
-          break;
-      }
-    }
-
-    function renderOnlineUsers(searchTerm = '') {
-      const tbody = document.getElementById('online-body');
-      const onlineUsers = allData.users
-        .filter(u => u.status.includes('Онлайн'))
-        .filter(u => 
-          u.user.toLowerCase().includes(searchTerm) ||
-          u.platform.toLowerCase().includes(searchTerm)
-        );
-
-      if (onlineUsers.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="empty-state">${searchTerm ? 'Ничего не найдено' : 'Нет онлайн пользователей'}</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = onlineUsers.map(user => {
-        const lastAction = getLastAction(user.user);
-        return `
-        <tr>
-          <td>
-            <div class="user-info">
-              <span>${formatUserDisplay(user.user)}</span>
-            </div>
-          </td>
-          <td class="action-cell">${lastAction}</td>
-          <td class="platform-${user.platform.includes('ПК') ? 'pc' : 'mobile'}">${user.platform}</td>
-          <td>${user.last_seen}</td>
-        </tr>
-      `}).join('');
-    }
-
-    function renderOfflineUsers(searchTerm = '') {
-      const tbody = document.getElementById('offline-body');
-      const offlineUsers = allData.users
-        .filter(u => u.status.includes('Оффлайн'))
-        .filter(u => 
-          u.user.toLowerCase().includes(searchTerm) ||
-          u.platform.toLowerCase().includes(searchTerm)
-        );
-
-      if (offlineUsers.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="empty-state">${searchTerm ? 'Ничего не найдено' : 'Нет оффлайн пользователей'}</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = offlineUsers.map(user => `
-        <tr>
-          <td>
-            <div class="user-info">
-              <span>${formatUserDisplay(user.user)}</span>
-            </div>
-          </td>
-          <td class="action-cell">${getLastAction(user.user)}</td>
-          <td class="platform-${user.platform.includes('ПК') ? 'pc' : 'mobile'}">${user.platform}</td>
-          <td>${user.last_seen}</td>
-        </tr>
-      `).join('');
-    }
-
-    function renderAllUsers(searchTerm = '') {
-      const tbody = document.getElementById('all-users-body');
-      const filteredUsers = allData.users.filter(u => 
-        u.user.toLowerCase().includes(searchTerm) ||
-        u.platform.toLowerCase().includes(searchTerm) ||
-        u.status.toLowerCase().includes(searchTerm)
-      );
-
-      if (filteredUsers.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Пользователи не найдены</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = filteredUsers.map(user => {
-        const userActions = allData.analytics.filter(a => a.user === user.user);
-        return `
-        <tr>
-          <td>
-            <div class="user-info">
-              <span>${formatUserDisplay(user.user)}</span>
-            </div>
-          </td>
-          <td class="${user.status.includes('Онлайн') ? 'status-online' : 'status-offline'}">
-            ${user.status}
-          </td>
-          <td class="platform-${user.platform.includes('ПК') ? 'pc' : 'mobile'}">${user.platform}</td>
-          <td>${user.last_seen}</td>
-          <td><strong>${userActions.length}</strong></td>
-        </tr>
-      `}).join('');
-    }
-
-    function renderActivity(searchTerm = '') {
-      const tbody = document.getElementById('activity-body');
-      const filteredActivity = allData.analytics
-        .filter(a => 
-          a.user.toLowerCase().includes(searchTerm) ||
-          a.action.toLowerCase().includes(searchTerm) ||
-          a.platform.toLowerCase().includes(searchTerm)
-        )
-        .slice(0, 100);
-
-      if (filteredActivity.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="empty-state">Активность не найдена</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = filteredActivity.map(activity => `
-        <tr>
-          <td>${formatUserDisplay(activity.user)}</td>
-          <td class="action-cell">${activity.action}</td>
-          <td class="details-cell">${getActionDetails(activity)}</td>
-          <td class="platform-${activity.platform.includes('ПК') ? 'pc' : 'mobile'}">${activity.platform}</td>
-          <td>${activity.time}</td>
-        </tr>
-      `).join('');
-    }
-
-    function renderErrors(searchTerm = '') {
-      const tbody = document.getElementById('errors-body');
-      const filteredErrors = allData.errors.filter(e => 
-        e.user.toLowerCase().includes(searchTerm) ||
-        e.error.toLowerCase().includes(searchTerm)
-      );
-
-      if (filteredErrors.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="empty-state">Ошибок не найдено</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = filteredErrors.map(error => `
-        <tr>
-          <td>${formatUserDisplay(error.user)}</td>
-          <td style="color: var(--accent-red)">${error.error}</td>
-          <td class="details-cell" style="color: var(--text-secondary);">${error.details}</td>
-          <td>${error.time}</td>
-        </tr>
-      `).join('');
-    }
-
-    function getLastAction(username) {
-      const userActions = allData.analytics
-        .filter(a => a.user === username)
-        .sort((a, b) => new Date(b.time) - new Date(a.time));
-      
-      return userActions[0]?.action || 'Нет данных';
-    }
-
-    function getActionDetails(activity) {
-      if (activity.action.includes('сборк')) {
-        return activity.action.split(':')[1]?.trim() || '';
-      }
-      if (activity.action.includes('экран')) {
-        return activity.action.split(':')[1]?.trim() || '';
-      }
-      if (activity.action.includes('Категория')) {
-        return activity.action.split(':')[1]?.trim() || '';
-      }
-      if (activity.action.includes('Кнопка')) {
-        return activity.action.split(':')[1]?.trim() || '';
-      }
-      return '';
-    }
-
-    function formatUserDisplay(userString) {
-      // Упрощаем отображение пользователя для мобильных
-      if (window.innerWidth <= 768) {
-        const parts = userString.split(' - ');
-        if (parts.length >= 2) {
-          return parts[1]; // Показываем только имя
-        }
-      }
-      return userString;
-    }
-
-    // Обработчики событий
-    document.querySelectorAll('.tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        
-        tab.classList.add('active');
-        document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
-        renderCurrentTab();
-      });
-    });
-
-    document.getElementById('search-input').addEventListener('input', renderCurrentTab);
-
-    // Автообновление каждые 30 секунд
-    setInterval(loadData, 30000);
-    
-    // Первая загрузка
-    window.addEventListener('DOMContentLoaded', loadData);
-
-    // Обработка изменения ориентации экрана
-    window.addEventListener('resize', renderCurrentTab);
-  </script>
+  <footer>
+    NDHQ © 2025 — внутренняя аналитика
+  </footer>
 </body>
 </html>
