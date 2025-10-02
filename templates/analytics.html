@@ -681,6 +681,160 @@
             background: #00b8e6;
             transform: translateY(-2px);
         }
+
+                /* Broadcast Modal Styles */
+        .broadcast-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+        }
+        
+        .broadcast-modal-content {
+            background: var(--bg-card);
+            margin: 2% auto;
+            padding: 0;
+            border-radius: 12px;
+            border: 2px solid var(--accent);
+            width: 80%;
+            max-width: 800px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 20px 60px rgba(0, 255, 204, 0.2);
+        }
+        
+        /* Window Controls */
+        .broadcast-modal-header {
+            background: var(--bg-secondary);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+            user-select: none;
+            border-radius: 12px 12px 0 0;
+        }
+        
+        .broadcast-modal-title {
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .broadcast-window-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .window-control-btn {
+            width: 30px;
+            height: 30px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        
+        .minimize-btn {
+            background: var(--warning);
+            color: var(--bg-primary);
+        }
+        
+        .minimize-btn:hover {
+            background: #e69900;
+        }
+        
+        .maximize-btn {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+        
+        .maximize-btn:hover {
+            background: #00e6b8;
+        }
+        
+        .close-btn {
+            background: var(--error);
+            color: var(--bg-primary);
+        }
+        
+        .close-btn:hover {
+            background: #ff3333;
+        }
+        
+        /* Modal Body */
+        .broadcast-modal-body {
+            padding: 25px;
+            flex: 1;
+            overflow-y: auto;
+            max-height: calc(90vh - 120px);
+        }
+        
+        /* Maximized State */
+        .broadcast-modal.maximized .broadcast-modal-content {
+            width: 95%;
+            height: 95vh;
+            margin: 2.5vh auto;
+            max-width: none;
+            max-height: none;
+        }
+        
+        .broadcast-modal.minimized .broadcast-modal-content {
+            transform: scale(0.8);
+            opacity: 0.7;
+        }
+        
+        /* Resize Handle */
+        .broadcast-modal-content {
+            resize: both;
+            overflow: auto;
+            min-width: 500px;
+            min-height: 400px;
+        }
+        
+        .resize-handle {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 20px;
+            height: 20px;
+            cursor: nwse-resize;
+            background: linear-gradient(135deg, transparent 50%, var(--accent) 50%);
+            border-radius: 0 0 12px 0;
+        }
+        
+        /* Mobile - disable resize and window controls */
+        @media (max-width: 768px) {
+            .broadcast-modal-content {
+                resize: none;
+                width: 95% !important;
+                height: auto !important;
+                max-height: 80vh;
+            }
+            
+            .broadcast-window-controls {
+                display: none;
+            }
+            
+            .resize-handle {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -810,42 +964,63 @@
     </div>
 
 
-    <!-- Broadcast Modal -->
-<div id="broadcastModal" class="modal">
-    <div class="modal-content" style="max-width: 600px;">
-        <h3 style="color: var(--accent); margin-bottom: 20px;">📢 Рассылка пользователям</h3>
-        
-        <div style="margin-bottom: 20px;">
-            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary);">
-                Выбрано пользователей: <span id="selected-users-count">0</span>
-            </label>
-            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                <button class="message-btn" onclick="selectAllUsers()" style="flex: 1;">✅ Выбрать всех</button>
-                <button class="clear-btn" onclick="deselectAllUsers()" style="flex: 1;">❌ Очистить выбор</button>
+<!-- Broadcast Modal -->
+<div id="broadcastModal" class="modal broadcast-modal">
+    <div class="broadcast-modal-content">
+        <!-- Window Header with Controls -->
+        <div class="broadcast-modal-header" id="broadcast-modal-header">
+            <div class="broadcast-modal-title">
+                📢 Рассылка пользователям
+            </div>
+            <div class="broadcast-window-controls">
+                <button class="window-control-btn minimize-btn" onclick="minimizeBroadcastModal()" title="Свернуть">
+                    ➖
+                </button>
+                <button class="window-control-btn maximize-btn" onclick="maximizeBroadcastModal()" title="Развернуть">
+                    ⛶
+                </button>
+                <button class="window-control-btn close-btn" onclick="hideBroadcastModal()" title="Закрыть">
+                    ✕
+                </button>
             </div>
         </div>
         
-        <div style="margin-bottom: 20px;">
-            <textarea 
-                id="broadcast-message" 
-                placeholder="Введите сообщение для рассылки..." 
-                style="width: 100%; height: 150px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); font-family: inherit; resize: vertical;"
-            ></textarea>
+        <!-- Modal Body -->
+        <div class="broadcast-modal-body">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; color: var(--text-secondary);">
+                    Выбрано пользователей: <span id="selected-users-count">0</span>
+                </label>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <button class="message-btn" onclick="selectAllUsers()" style="flex: 1;">✅ Выбрать всех</button>
+                    <button class="clear-btn" onclick="deselectAllUsers()" style="flex: 1;">❌ Очистить выбор</button>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <textarea 
+                    id="broadcast-message" 
+                    placeholder="Введите сообщение для рассылки..." 
+                    style="width: 100%; height: 150px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); font-family: inherit; resize: vertical;"
+                ></textarea>
+            </div>
+            
+            <div class="modal-buttons">
+                <button class="refresh-btn" onclick="sendBroadcast()" id="send-broadcast-btn">
+                    📤 Отправить рассылку
+                </button>
+                <button class="modal-btn-cancel" onclick="hideBroadcastModal()">
+                    ❌ Отмена
+                </button>
+            </div>
+            
+            <div id="broadcast-results" style="margin-top: 20px; display: none;"></div>
         </div>
         
-        <div class="modal-buttons">
-            <button class="refresh-btn" onclick="sendBroadcast()" id="send-broadcast-btn">
-                📤 Отправить рассылку
-            </button>
-            <button class="modal-btn-cancel" onclick="hideBroadcastModal()">
-                ❌ Отмена
-            </button>
-        </div>
-        
-        <div id="broadcast-results" style="margin-top: 20px; display: none;"></div>
+        <!-- Resize Handle -->
+        <div class="resize-handle"></div>
     </div>
 </div>
-
     <div class="footer">
         NDHQ © 2025 — Система расширенной аналитики
     </div>
@@ -1360,6 +1535,171 @@ window.onclick = function(event) {
             hideClearModal();
         }
     }
+
+
+// управление окном рассылки
+
+    // Window Management for Broadcast Modal
+let isBroadcastMaximized = false;
+let isBroadcastMinimized = false;
+
+function maximizeBroadcastModal() {
+    const modal = document.getElementById('broadcastModal');
+    const content = modal.querySelector('.broadcast-modal-content');
+    
+    if (isBroadcastMaximized) {
+        // Restore
+        modal.classList.remove('maximized');
+        content.style.width = '80%';
+        content.style.height = 'auto';
+        isBroadcastMaximized = false;
+    } else {
+        // Maximize
+        modal.classList.add('maximized');
+        content.style.width = '95%';
+        content.style.height = '95vh';
+        isBroadcastMaximized = true;
+        isBroadcastMinimized = false;
+        modal.classList.remove('minimized');
+    }
+}
+
+function minimizeBroadcastModal() {
+    const modal = document.getElementById('broadcastModal');
+    
+    if (isBroadcastMinimized) {
+        // Restore
+        modal.classList.remove('minimized');
+        isBroadcastMinimized = false;
+    } else {
+        // Minimize
+        modal.classList.add('minimized');
+        isBroadcastMinimized = true;
+        isBroadcastMaximized = false;
+        modal.classList.remove('maximized');
+    }
+}
+
+function hideBroadcastModal() {
+    const modal = document.getElementById('broadcastModal');
+    modal.style.display = 'none';
+    modal.classList.remove('maximized', 'minimized');
+    isBroadcastMaximized = false;
+    isBroadcastMinimized = false;
+    
+    const content = modal.querySelector('.broadcast-modal-content');
+    content.style.width = '80%';
+    content.style.height = 'auto';
+}
+
+// Make modal draggable
+function makeModalDraggable() {
+    const modal = document.getElementById('broadcastModal');
+    const header = document.getElementById('broadcast-modal-header');
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+    let xOffset = 0;
+    let yOffset = 0;
+
+    header.addEventListener("mousedown", dragStart);
+    header.addEventListener("touchstart", dragStart);
+    
+    function dragStart(e) {
+        if (e.type === "touchstart") {
+            initialX = e.touches[0].clientX - xOffset;
+            initialY = e.touches[0].clientY - yOffset;
+        } else {
+            initialX = e.clientX - xOffset;
+            initialY = e.clientY - yOffset;
+        }
+
+        if (e.target === header) {
+            isDragging = true;
+        }
+    }
+
+    document.addEventListener("mousemove", drag);
+    document.addEventListener("touchmove", drag);
+    
+    function drag(e) {
+        if (isDragging) {
+            e.preventDefault();
+            
+            if (e.type === "touchmove") {
+                currentX = e.touches[0].clientX - initialX;
+                currentY = e.touches[0].clientY - initialY;
+            } else {
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+            }
+
+            xOffset = currentX;
+            yOffset = currentY;
+            
+            setTranslate(currentX, currentY, modal.querySelector('.broadcast-modal-content'));
+        }
+    }
+
+    document.addEventListener("mouseup", dragEnd);
+    document.addEventListener("touchend", dragEnd);
+    
+    function dragEnd() {
+        initialX = currentX;
+        initialY = currentY;
+        isDragging = false;
+    }
+
+    function setTranslate(xPos, yPos, el) {
+        el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+    }
+}
+
+// Initialize when modal is shown
+async function showBroadcastModal() {
+    try {
+        const response = await fetch('/api/analytics/broadcast-users');
+        const data = await response.json();
+        
+        if (data.error) {
+            alert('Ошибка: ' + data.error);
+            return;
+        }
+        
+        if (data.users) {
+            broadcastUsers = data.users;
+            selectedUserIds = new Set(data.users.map(user => user.id));
+            updateSelectedUsersCount();
+        }
+        
+        document.getElementById('broadcast-message').value = '';
+        document.getElementById('broadcast-results').style.display = 'none';
+        
+        const modal = document.getElementById('broadcastModal');
+        modal.style.display = 'block';
+        
+        // Reset position and size
+        const content = modal.querySelector('.broadcast-modal-content');
+        content.style.transform = 'translate3d(0, 0, 0)';
+        content.style.width = '80%';
+        content.style.height = 'auto';
+        modal.classList.remove('maximized', 'minimized');
+        isBroadcastMaximized = false;
+        isBroadcastMinimized = false;
+        
+    } catch (error) {
+        alert('Ошибка загрузки пользователей: ' + error.message);
+    }
+}
+
+// Initialize dragging when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    makeModalDraggable();
+});
+
+    
 </script>
 </body>
 </html>
