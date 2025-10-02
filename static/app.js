@@ -783,22 +783,26 @@ cachedBuilds = sorted;
       </div>
     `;
 
-    // бейджи по категориям
-    const cats = build.categories || [];
+    const cats = Array.isArray(build.categories) ? build.categories : [];
     const headerTop = wrapper.querySelector('.loadout__header--top');
     
-    if (cats.includes("Новинки")) {
-      const badge = document.createElement('span');
-      badge.className = 'badge-new';
-      badge.textContent = 'Новинка';
-      headerTop?.appendChild(badge);
+    // показываем только один бэйдж с приоритетом: Новинки > Популярное
+    let badgeText = null;
+    let badgeClass = null;
+    
+    if (cats.includes('Новинки')) {
+      badgeText = 'Новинка';
+      badgeClass = 'badge-new';
+    } else if (cats.includes('Популярное')) {
+      badgeText = 'Популярное';
+      badgeClass = 'badge-popular';
     }
     
-    if (cats.includes("Популярное")) {
+    if (badgeText && headerTop) {
       const badge = document.createElement('span');
-      badge.className = 'badge-popular';
-      badge.textContent = 'Популярное';
-      headerTop?.appendChild(badge);
+      badge.className = `badge ${badgeClass}`;
+      badge.textContent = badgeText;
+      headerTop.appendChild(badge);
     }
 
     buildsList.appendChild(wrapper);
