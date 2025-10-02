@@ -819,14 +819,6 @@ buildsList.appendChild(wrapper);
     if (content) content.style.maxHeight = '0';
   });
 
-  // сброс раскрытия
-  document.querySelectorAll('.js-loadout').forEach(el => {
-    el.classList.remove('is-open');
-    const content = el.querySelector('.loadout__content');
-    if (content) content.style.maxHeight = '0';
-  });
-
-
 // === Переключение вкладок ===
 document.querySelectorAll('.loadout__tab').forEach(button => {
   button.addEventListener('click', () => {
