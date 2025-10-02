@@ -792,273 +792,268 @@
         NDHQ © 2025 — Система расширенной аналитики
     </div>
 
-    <script>
-        let currentData = null;
+  <script>
+    let currentData = null;
 
-        async function loadData() {
-            const btn = document.getElementById('refresh-btn');
-            btn.classList.add('loading', 'pulse');
-            btn.innerHTML = '⏳ Загрузка...';
+    async function loadData() {
+        const btn = document.getElementById('refresh-btn');
+        btn.classList.add('loading', 'pulse');
+        btn.innerHTML = '⏳ Загрузка...';
 
-            try {
-                console.log('🔄 Загрузка данных аналитики...');
-                const response = await fetch('/api/analytics/dashboard');
-                
-                if (!response.ok) {
-                    throw new Error(`Ошибка сервера: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                currentData = data;
-                
-                updateStats(data.stats);
-                updateUsers(data.users);
-                updateActivity(data.recent_activity);
-                updatePopularActions(data.popular_actions);
-                updateAllUsers(data.users);
-                
-                document.getElementById('last-update').textContent = 
-                    `✅ Обновлено: ${new Date().toLocaleTimeString()}`;
-                
-                console.log('✅ Данные успешно загружены');
-                
-            } catch (error) {
-                console.error('❌ Ошибка загрузки:', error);
-                document.getElementById('last-update').textContent = 
-                    `❌ Ошибка: ${error.message}`;
-                
-                document.getElementById('user-list').innerHTML = `
-                    <li class="empty-state">
-                        <div class="empty-icon">❌</div>
-                        <div>Ошибка загрузки: ${error.message}</div>
-                    </li>
-                `;
-            } finally {
-                btn.classList.remove('loading', 'pulse');
-                btn.innerHTML = '🔄 Обновить';
+        try {
+            console.log('🔄 Загрузка данных аналитики...');
+            const response = await fetch('/api/analytics/dashboard');
+            
+            if (!response.ok) {
+                throw new Error(`Ошибка сервера: ${response.status}`);
             }
-        }
-
-        function updateStats(stats) {
-            document.getElementById('total-users').textContent = stats.total_users;
-            document.getElementById('online-users').textContent = stats.online_users;
-            document.getElementById('total-actions').textContent = stats.total_actions;
-            document.getElementById('total-errors').textContent = stats.total_errors;
-        }
-
-        function updateUsers(users) {
-            const usersList = document.getElementById('user-list');
-            const usersCount = document.getElementById('users-count');
             
-            // Только активные пользователи (онлайн + недавние)
-            const activeUsers = users.filter(user => 
-                user.status === 'online' || 
-                user.last_seen.includes('03.10.2025') || // Сегодня
-                user.last_seen.includes('02.10.2025')    // Вчера
-            );
+            const data = await response.json();
+            currentData = data;
             
-            usersCount.textContent = activeUsers.length;
+            updateStats(data.stats);
+            updateUsers(data.users);
+            updateActivity(data.recent_activity);
+            updatePopularActions(data.popular_actions);
+            updateAllUsers(data.users);
             
-            if (activeUsers.length === 0) {
-                usersList.innerHTML = `
-                    <li class="empty-state">
-                        <div class="empty-icon">👤</div>
-                        <div>Нет активных пользователей</div>
-                    </li>
-                `;
-                return;
-            }
-
-            usersList.innerHTML = activeUsers.map(user => `
-                <li class="user-item">
-                    <div class="user-header">
-                        <div class="user-avatar">${user.first_name ? user.first_name.charAt(0).toUpperCase() : 'U'}</div>
-                        <div class="user-info">
-                            <div class="user-name">${user.name.split(' | ')[0]}</div>
-                            <div class="user-id">ID: ${user.id}</div>
-                            <div class="user-meta">
-                                <span class="status-${user.status}">
-                                    ${user.status === 'online' ? '🟢 Онлайн' : '⚪ Оффлайн'}
-                                </span>
-                                <span>${user.platform === 'android' || user.platform === 'ios' ? '📱 Телефон' : '💻 ПК'}</span>
-                                <span>${user.actions_count} действий</span>
-                                ${user.username ? `<button class="message-btn" onclick="sendMessage('${user.id}', '${user.username}')">✉️ Написать</button>` : ''}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="user-stats">
-                        <div class="stat-item">
-                            <div class="stat-value">${user.actions_count}</div>
-                            <div class="stat-label-small">Действий</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${user.last_seen.split(' ')[0]}</div>
-                            <div class="stat-label-small">Последний раз</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${user.last_action}</div>
-                            <div class="stat-label-small">Действие</div>
-                        </div>
-                    </div>
+            document.getElementById('last-update').textContent = 
+                `✅ Обновлено: ${new Date().toLocaleTimeString()}`;
+            
+            console.log('✅ Данные успешно загружены');
+            
+        } catch (error) {
+            console.error('❌ Ошибка загрузки:', error);
+            document.getElementById('last-update').textContent = 
+                `❌ Ошибка: ${error.message}`;
+            
+            document.getElementById('user-list').innerHTML = `
+                <li class="empty-state">
+                    <div class="empty-icon">❌</div>
+                    <div>Ошибка загрузки: ${error.message}</div>
                 </li>
-            `).join('');
+            `;
+        } finally {
+            btn.classList.remove('loading', 'pulse');
+            btn.innerHTML = '🔄 Обновить';
         }
+    }
 
-        function updateActivity(activities) {
-            const activityList = document.getElementById('activity-list');
-            const activityCount = document.getElementById('activity-count');
-            
-            activityCount.textContent = activities.length;
-            
-            if (activities.length === 0) {
-                activityList.innerHTML = `
-                    <li class="empty-state">
-                        <div class="empty-icon">📊</div>
-                        <div>Активность не найдена</div>
-                    </li>
-                `;
-                return;
-            }
+    function updateStats(stats) {
+        document.getElementById('total-users').textContent = stats.total_users;
+        document.getElementById('online-users').textContent = stats.online_users;
+        document.getElementById('total-actions').textContent = stats.total_actions;
+        document.getElementById('total-errors').textContent = stats.total_errors;
+    }
 
-            activityList.innerHTML = activities.map(activity => `
-                <li class="activity-item">
-                    <div class="activity-content">
-                        <div class="activity-icon">${activity.platform}</div>
-                        <div class="activity-text">
-                            <div class="activity-user">${activity.user}</div>
-                            <div class="activity-desc">${activity.action}</div>
-                            <div class="activity-meta">
-                                <span>${activity.time}</span>
-                                ${activity.username ? `<button class="message-btn" onclick="sendMessage('${activity.user_id}', '${activity.username}')">✉️ Написать</button>` : ''}
-                            </div>
-                        </div>
-                    </div>
+    function updateUsers(users) {
+        const usersList = document.getElementById('user-list');
+        const usersCount = document.getElementById('users-count');
+        
+        // Только активные пользователи (онлайн + недавние)
+        const activeUsers = users.filter(user => 
+            user.status === 'online' || 
+            user.last_seen.includes('03.10.2025') || // Сегодня
+            user.last_seen.includes('02.10.2025')    // Вчера
+        );
+        
+        usersCount.textContent = activeUsers.length;
+        
+        if (activeUsers.length === 0) {
+            usersList.innerHTML = `
+                <li class="empty-state">
+                    <div class="empty-icon">👤</div>
+                    <div>Нет активных пользователей</div>
                 </li>
-            `).join('');
+            `;
+            return;
         }
 
-        function updatePopularActions(actions) {
-            const popularContainer = document.getElementById('popular-actions');
-            
-            if (actions.length === 0) {
-                popularContainer.innerHTML = `
-                    <div class="empty-state" style="padding: 30px;">
-                        <div class="empty-icon">🔥</div>
-                        <div>Нет данных о популярных действиях</div>
-                    </div>
-                `;
-                return;
-            }
-
-            popularContainer.innerHTML = actions.map(action => `
-                <div class="popular-item">
-                    <div class="popular-count">${action.count}</div>
-                    <div class="popular-label">${action.action}</div>
-                </div>
-            `).join('');
-        }
-
-        function updateAllUsers(users) {
-            const allUsersGrid = document.getElementById('all-users-grid');
-            const allUsersCount = document.getElementById('all-users-count');
-            
-            allUsersCount.textContent = users.length;
-            
-            if (users.length === 0) {
-                allUsersGrid.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">👥</div>
-                        <div>Пользователи не найдены</div>
-                    </div>
-                `;
-                return;
-            }
-
-            allUsersGrid.innerHTML = users.map(user => `
-                <div class="user-card">
-                    <div class="user-card-header">
-                        <div class="user-card-avatar">${user.first_name ? user.first_name.charAt(0).toUpperCase() : 'U'}</div>
-                        <div class="user-card-info">
-                            <div class="user-card-name">${user.first_name || 'Пользователь'}</div>
-                            ${user.username ? `<div class="user-card-username">@${user.username}</div>` : ''}
-                            <div class="user-card-id">ID: ${user.id}</div>
+        usersList.innerHTML = activeUsers.map(user => `
+            <li class="user-item">
+                <div class="user-header">
+                    <div class="user-avatar">${user.first_name ? user.first_name.charAt(0).toUpperCase() : 'U'}</div>
+                    <div class="user-info">
+                        <div class="user-name">${user.name.split(' | ')[0]}</div>
+                        <div class="user-id">ID: ${user.id}</div>
+                        <div class="user-meta">
+                            <span class="status-${user.status}">
+                                ${user.status === 'online' ? '🟢 Онлайн' : '⚪ Оффлайн'}
+                            </span>
+                            <span>${user.platform === 'android' || user.platform === 'ios' ? '📱 Телефон' : '💻 ПК'}</span>
+                            <span>${user.actions_count} действий</span>
+                            ${user.username ? `<a href="https://t.me/${user.username}" target="_blank" style="color: var(--accent-secondary); text-decoration: none;">@${user.username}</a>` : ''}
                         </div>
-                    </div>
-                    <div class="user-card-stats">
-                        <div class="user-card-stat">
-                            <div class="user-card-stat-value">${user.actions_count}</div>
-                            <div class="user-card-stat-label">Действий</div>
-                        </div>
-                        <div class="user-card-stat">
-                            <div class="user-card-stat-value">${user.status === 'online' ? '🟢' : '⚪'}</div>
-                            <div class="user-card-stat-label">${user.status === 'online' ? 'Онлайн' : 'Оффлайн'}</div>
-                        </div>
-                    </div>
-                    <div style="display: flex; gap: 10px; margin-top: 10px;">
-                        <button class="message-btn" onclick="sendMessage('${user.id}', '${user.username}')" style="flex: 1;">
-                            ✉️ Написать
-                        </button>
                     </div>
                 </div>
-            `).join('');
-        }
+                <div class="user-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">${user.actions_count}</div>
+                        <div class="stat-label-small">Действий</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${user.last_seen.split(' ')[0]}</div>
+                        <div class="stat-label-small">Последний раз</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">${user.last_action}</div>
+                        <div class="stat-label-small">Действие</div>
+                    </div>
+                </div>
+            </li>
+        `).join('');
+    }
 
-        function sendMessage(userId, username) {
-            const message = prompt(`Написать пользователю ${username ? '@' + username : 'ID: ' + userId}:\n\nВведите сообщение:`);
-            if (message) {
-                alert(`Сообщение отправлено пользователю ${username ? '@' + username : 'ID: ' + userId}:\n\n"${message}"\n\n(Функция отправки будет реализована в боте)`);
-                // Здесь будет вызов API для отправки сообщения через бота
-            }
-        }
-
-        function showClearModal() {
-            document.getElementById('clearModal').style.display = 'block';
-        }
-
-        function hideClearModal() {
-            document.getElementById('clearModal').style.display = 'none';
-        }
-
-        async function clearStatistics() {
-            try {
-                const response = await fetch('/api/analytics/clear', {
-                    method: 'DELETE'
-                });
-                
-                const result = await response.json();
-                
-                if (result.status === 'ok') {
-                    alert('✅ Статистика успешно очищена!');
-                    hideClearModal();
-                    loadData();
-                } else {
-                    alert('❌ Ошибка при очистке: ' + result.message);
-                }
-            } catch (error) {
-                alert('❌ Ошибка при очистке: ' + error.message);
-            }
-        }
-
-        // Быстрое обновление каждые 5 секунд
-        setInterval(loadData, 5000);
+    function updateActivity(activities) {
+        const activityList = document.getElementById('activity-list');
+        const activityCount = document.getElementById('activity-count');
         
-        // Загружаем данные при старте
-        document.addEventListener('DOMContentLoaded', loadData);
+        activityCount.textContent = activities.length;
         
-        // Обновляем при возвращении на вкладку
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) {
-                loadData();
-            }
-        });
+        if (activities.length === 0) {
+            activityList.innerHTML = `
+                <li class="empty-state">
+                    <div class="empty-icon">📊</div>
+                    <div>Активность не найдена</div>
+                </li>
+            `;
+            return;
+        }
 
-        // Закрытие модального окна при клике вне его
-        window.onclick = function(event) {
-            const modal = document.getElementById('clearModal');
-            if (event.target === modal) {
+        activityList.innerHTML = activities.map(activity => `
+            <li class="activity-item">
+                <div class="activity-content">
+                    <div class="activity-icon">${activity.platform}</div>
+                    <div class="activity-text">
+                        <div class="activity-user">
+                            ${activity.user}
+                            ${activity.username ? `<a href="https://t.me/${activity.username}" target="_blank" style="color: var(--accent-secondary); margin-left: 8px; text-decoration: none;">💬</a>` : ''}
+                        </div>
+                        <div class="activity-desc">${activity.action}</div>
+                        <div class="activity-meta">
+                            <span>${activity.time}</span>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        `).join('');
+    }
+
+    function updatePopularActions(actions) {
+        const popularContainer = document.getElementById('popular-actions');
+        
+        if (actions.length === 0) {
+            popularContainer.innerHTML = `
+                <div class="empty-state" style="padding: 30px;">
+                    <div class="empty-icon">🔥</div>
+                    <div>Нет данных о популярных действиях</div>
+                </div>
+            `;
+            return;
+        }
+
+        popularContainer.innerHTML = actions.map(action => `
+            <div class="popular-item">
+                <div class="popular-count">${action.count}</div>
+                <div class="popular-label">${action.action}</div>
+            </div>
+        `).join('');
+    }
+
+    function updateAllUsers(users) {
+        const allUsersGrid = document.getElementById('all-users-grid');
+        const allUsersCount = document.getElementById('all-users-count');
+        
+        allUsersCount.textContent = users.length;
+        
+        if (users.length === 0) {
+            allUsersGrid.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">👥</div>
+                    <div>Пользователи не найдены</div>
+                </div>
+            `;
+            return;
+        }
+
+        allUsersGrid.innerHTML = users.map(user => `
+            <div class="user-card">
+                <div class="user-card-header">
+                    <div class="user-card-avatar">${user.first_name ? user.first_name.charAt(0).toUpperCase() : 'U'}</div>
+                    <div class="user-card-info">
+                        <div class="user-card-name">${user.first_name || 'Пользователь'}</div>
+                        ${user.username ? `
+                            <div class="user-card-username">
+                                <a href="https://t.me/${user.username}" target="_blank" style="color: var(--accent-secondary); text-decoration: none;">
+                                    @${user.username}
+                                </a>
+                            </div>
+                        ` : ''}
+                        <div class="user-card-id">ID: ${user.id}</div>
+                    </div>
+                </div>
+                <div class="user-card-stats">
+                    <div class="user-card-stat">
+                        <div class="user-card-stat-value">${user.actions_count}</div>
+                        <div class="user-card-stat-label">Действий</div>
+                    </div>
+                    <div class="user-card-stat">
+                        <div class="user-card-stat-value">${user.status === 'online' ? '🟢' : '⚪'}</div>
+                        <div class="user-card-stat-label">${user.status === 'online' ? 'Онлайн' : 'Оффлайн'}</div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function showClearModal() {
+        document.getElementById('clearModal').style.display = 'block';
+    }
+
+    function hideClearModal() {
+        document.getElementById('clearModal').style.display = 'none';
+    }
+
+    async function clearStatistics() {
+        try {
+            const response = await fetch('/api/analytics/clear', {
+                method: 'DELETE'
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'ok') {
+                alert('✅ Статистика успешно очищена!');
                 hideClearModal();
+                loadData();
+            } else {
+                alert('❌ Ошибка при очистке: ' + result.message);
             }
+        } catch (error) {
+            alert('❌ Ошибка при очистке: ' + error.message);
         }
-    </script>
+    }
+
+    // Быстрое обновление каждые 5 секунд
+    setInterval(loadData, 5000);
+    
+    // Загружаем данные при старте
+    document.addEventListener('DOMContentLoaded', loadData);
+    
+    // Обновляем при возвращении на вкладку
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            loadData();
+        }
+    });
+
+    // Закрытие модального окна при клике вне его
+    window.onclick = function(event) {
+        const modal = document.getElementById('clearModal');
+        if (event.target === modal) {
+            hideClearModal();
+        }
+    }
+</script>
 </body>
 </html>
