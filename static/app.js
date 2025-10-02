@@ -26,6 +26,7 @@ let currentSubmitHandler = null;
 let cachedBuilds = [];        // кэш всех сборок последней загрузки
 let currentCategory = 'all';  // текущая категория
 let screenHistory = [];
+let latestBuildId = null; // ID самой свежей сборки
 
 
 // === Приветствие и загрузка админов ===
@@ -56,6 +57,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const today = new Date().toISOString().split('T')[0];
     dateInput.value = today;
   }
+
+  // ❶ Узнаём ID самой свежей сборки (из всех категорий)
+try {
+  const resAll = await fetch('/api/builds?category=all');
+  const allBuilds = await resAll.json();
+  latestBuildId = getLatestBuildId(allBuilds);
+} catch (e) {
+  console.warn('Не удалось определить новинку:', e);
+}
 
   // 👉 Добавить ожидание checkAdminStatus
   await checkAdminStatus();
@@ -477,27 +487,43 @@ async function handleSubmitBuild() {
   const method = currentEditId ? 'PUT' : 'POST';
   const url = currentEditId ? `/api/builds/${currentEditId}` : '/api/builds';
 
-  try {
-    const res = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
+try {
+  const res = await fetch(url, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
 
-    if (res.ok) {
-      alert(currentEditId ? 'Сборка обновлена!' : 'Сборка добавлена!');
-      showScreen('screen-edit-builds');
-      await loadBuildsTable();
-      currentEditId = null;
-      document.getElementById('submit-build').textContent = '➕ Добавить';
-    } else {
-      const errorText = await res.text();
-      alert(`Ошибка при сохранении:\n${errorText}`);
+  if (res.ok) {
+    alert(currentEditId ? 'Сборка обновлена!' : 'Сборка добавлена!');
+    showScreen('screen-edit-builds');
+    await loadBuildsTable();
+    currentEditId = null;
+    document.getElementById('submit-build').textContent = '➕ Добавить';
+
+    // 🔁 Пересчитываем "Новинку"
+    try {
+      const resAll = await fetch('/api/builds?category=all');
+      const allBuilds = await resAll.json();
+      latestBuildId = getLatestBuildId(allBuilds);
+    } catch (e) {
+      console.warn("Не удалось обновить новинку:", e);
     }
-  } catch (err) {
-    console.error('Сетевая ошибка:', err);
-    alert('Ошибка подключения к серверу.');
+
+    // 👁 Если открыт экран сборок — обновляем его
+    if (document.getElementById('screen-builds')?.classList.contains('active')) {
+      await loadBuilds(currentCategory || 'all');
+    }
+
+  } else {
+    const errorText = await res.text();
+    alert(`Ошибка при сохранении:\n${errorText}`);
   }
+} catch (err) {
+  console.error('Сетевая ошибка:', err);
+  alert('Ошибка подключения к серверу.');
+}
+
 }
 
 document.getElementById('submit-build').addEventListener('click', handleSubmitBuild);
@@ -745,6 +771,16 @@ const tabContents = build.tabs.map((tab, i) => {
         </div>
       </div>
     `;
+
+    // ❷ Подсветка "Новинка"
+if (String(build.id) === String(latestBuildId)) {
+   wrapper.classList.add('is-new');
+   const badge = document.createElement('span');
+   badge.className = 'badge-new';
+   badge.textContent = 'Новинка';
+   wrapper.querySelector('.loadout__header--top')?.appendChild(badge);
+ }
+
 
     buildsList.appendChild(wrapper);
   });
@@ -999,6 +1035,37 @@ async function loadBuildsTable() {
     console.error('Ошибка загрузки сборок:', e);
   }
 }
+
+// === Помощники для новинки ===
+// Парсер "ДД.ММ.ГГГГ" -> Date (если нет created_at)
+function parseRuDate(d) {
+  if (!d) return null;
+  const [dd, mm, yyyy] = String(d).split('.');
+  if (!dd || !mm || !yyyy) return null;
+  return new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+}
+
+// По массиву сборок находим самую свежую (created_at или date)
+function getLatestBuildId(builds) {
+  if (!Array.isArray(builds) || builds.length === 0) return null;
+  let best = builds[0], bestTime = -Infinity;
+
+  for (const b of builds) {
+    // 1) если есть created_at — используем его
+    let t = b.created_at ? Date.parse(b.created_at) : NaN;
+    // 2) иначе пытаемся из поля date "ДД.ММ.ГГГГ"
+    if (Number.isNaN(t)) {
+      const dt = parseRuDate(b.date);
+      t = dt ? dt.getTime() : 0;
+    }
+    if (t > bestTime) {
+      bestTime = t;
+      best = b;
+    }
+  }
+  return best?.id ?? null;
+}
+
 
 
 // Преобразование даты в YYYY-MM-DD (для input type="date")
