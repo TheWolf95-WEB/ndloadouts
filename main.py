@@ -16,7 +16,7 @@ import sqlite3
 import asyncio
 from typing import List
 from pathlib import Path
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, unquote
 from datetime import datetime, timezone, timedelta
 from database import (
     init_db, get_all_builds, add_build, delete_build_by_id, get_all_users,
@@ -25,6 +25,9 @@ from database import (
 )
 
 load_dotenv()
+
+ANALYTICS_DB = Path("/opt/ndloadouts_storage/analytics.db")
+
 WEBAPP_URL = os.getenv("WEBAPP_URL")
 GITHUB_SECRET = os.getenv("WEBHOOK_SECRET", "")
 
@@ -43,14 +46,15 @@ def extract_user_roles(init_data_str: str):
     try:
         if not init_data_str:
             return None, False, False
-            
+
         parsed = parse_qs(init_data_str)
         user_data = parsed.get("user", [None])[0]
         if not user_data:
             return None, False, False
 
-        user = json.loads(user_data)
-        user_id = str(user.get("id"))
+        # Декодируем %7B%22id%22%3A... → {"id":...}
+        user_json = json.loads(unquote(user_data))
+        user_id = str(user_json.get("id"))
 
         env_vars = dotenv_values(".env")
         admin_ids = set(map(str.strip, env_vars.get("ADMIN_IDS", "").split(",")))
@@ -446,8 +450,6 @@ async def send_broadcast(data: dict = Body(...)):
 
 
 # АНАЛИТИКА - УЛУЧШЕННАЯ ВЕРСИЯ
-
-ANALYTICS_DB = Path("/opt/ndloadouts_storage/analytics.db")
 
 def init_analytics_db():
     try:
