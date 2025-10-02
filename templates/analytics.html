@@ -662,6 +662,25 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
+
+        .broadcast-btn {
+            background: var(--accent-secondary);
+            color: var(--bg-primary);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .broadcast-btn:hover {
+            background: #00b8e6;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -838,6 +857,121 @@
         newUsers: new Set(),
         startOfDay: new Date().setHours(0, 0, 0, 0)
     };
+
+    let broadcastUsers = [];
+    let selectedUserIds = new Set();
+
+    async function showBroadcastModal() {
+    try {
+        const response = await fetch('/api/analytics/broadcast-users');
+        const data = await response.json();
+        
+        if (data.users) {
+            broadcastUsers = data.users;
+            selectedUserIds = new Set(data.users.map(user => user.id));
+            updateSelectedUsersCount();
+        }
+        
+        document.getElementById('broadcast-message').value = '';
+        document.getElementById('broadcast-results').style.display = 'none';
+        document.getElementById('broadcastModal').style.display = 'block';
+        
+    } catch (error) {
+        alert('Ошибка загрузки пользователей: ' + error.message);
+    }
+}
+
+function hideBroadcastModal() {
+    document.getElementById('broadcastModal').style.display = 'none';
+    selectedUserIds.clear();
+}
+
+function selectAllUsers() {
+    selectedUserIds = new Set(broadcastUsers.map(user => user.id));
+    updateSelectedUsersCount();
+    alert(`✅ Выбраны все пользователи: ${broadcastUsers.length} чел.`);
+}
+
+function deselectAllUsers() {
+    selectedUserIds.clear();
+    updateSelectedUsersCount();
+    alert('❌ Выбор очищен');
+}
+
+function updateSelectedUsersCount() {
+    document.getElementById('selected-users-count').textContent = selectedUserIds.size;
+}
+
+async function sendBroadcast() {
+    const message = document.getElementById('broadcast-message').value.trim();
+    const btn = document.getElementById('send-broadcast-btn');
+    
+    if (!message) {
+        alert('Введите сообщение для рассылки');
+        return;
+    }
+    
+    if (selectedUserIds.size === 0) {
+        alert('Выберите хотя бы одного пользователя');
+        return;
+    }
+    
+    if (!confirm(`Отправить рассылку ${selectedUserIds.size} пользователям?\n\nСообщение: ${message.substring(0, 100)}${message.length > 100 ? '...' : ''}`)) {
+        return;
+    }
+    
+    btn.classList.add('loading');
+    btn.innerHTML = '⏳ Отправка...';
+    
+    try {
+        const response = await fetch('/api/analytics/broadcast', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                initData: window.Telegram?.WebApp?.initData,
+                message: message,
+                user_ids: Array.from(selectedUserIds)
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'ok') {
+            document.getElementById('broadcast-results').innerHTML = `
+                <div style="background: var(--bg-secondary); padding: 15px; border-radius: 8px; border: 1px solid var(--accent);">
+                    <div style="color: var(--accent); font-weight: bold; margin-bottom: 10px;">✅ Рассылка завершена!</div>
+                    <div>Успешно: ${result.success_count} пользователей</div>
+                    <div>С ошибками: ${result.failed_count} пользователей</div>
+                    ${result.failed_count > 0 ? '<div style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);">Некоторые пользователи могли заблокировать бота</div>' : ''}
+                </div>
+            `;
+            document.getElementById('broadcast-results').style.display = 'block';
+        } else {
+            alert('Ошибка рассылки: ' + result.error);
+        }
+        
+    } catch (error) {
+        alert('Ошибка отправки: ' + error.message);
+    } finally {
+        btn.classList.remove('loading');
+        btn.innerHTML = '📤 Отправить рассылку';
+    }
+}
+
+    
+// Закрытие модального окна при клике вне его
+window.onclick = function(event) {
+    const modal = document.getElementById('clearModal');
+    const broadcastModal = document.getElementById('broadcastModal');
+    
+    if (event.target === modal) {
+        hideClearModal();
+    }
+    if (event.target === broadcastModal) {
+        hideBroadcastModal();
+    }
+}
+
 
     async function loadData() {
         const btn = document.getElementById('refresh-btn');
