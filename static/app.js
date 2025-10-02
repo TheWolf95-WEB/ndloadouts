@@ -591,9 +591,9 @@ async function loadModulesForType(weaponType, label) {
   }
 }
 
-async function loadModulesList(typeKey, typeLabel) {
-  await loadModulesForType(typeKey, typeLabel);
-}
+// async function loadModulesList(typeKey, typeLabel) {
+//   await loadModulesForType(typeKey, typeLabel);
+// }
 
 // Добавление нового модуля (кнопка "➕ Добавить")
 document.getElementById('mod-add-btn')?.addEventListener('click', async () => {
@@ -810,9 +810,14 @@ if (badgeText && headerTop) {
 }
 
 buildsList.appendChild(wrapper);
+  }); // закрытие forEach для sorted.forEach((build, buildIndex)
 
-    }); // закрытие forEach для sorted.forEach((build, buildIndex)
-});
+  // сброс раскрытия
+  document.querySelectorAll('.js-loadout').forEach(el => {
+    el.classList.remove('is-open');
+    const content = el.querySelector('.loadout__content');
+    if (content) content.style.maxHeight = '0';
+  });
 
   // сброс раскрытия
   document.querySelectorAll('.js-loadout').forEach(el => {
