@@ -1073,24 +1073,38 @@
     }
 
     function calculateAverageTime(user) {
-        if (!user.first_seen || !user.actions_count) return '0м';
+        if (!user.first_seen) return '0м';
         
         try {
-            const firstSeen = new Date(user.first_seen.split(' ').reverse().join('-'));
+            const firstSeenStr = user.first_seen;
+            let firstSeen;
+            
+            // Парсим дату в формате DD.MM.YYYY HH:MM:SS
+            if (firstSeenStr.includes('.')) {
+                const [datePart, timePart] = firstSeenStr.split(' ');
+                const [day, month, year] = datePart.split('.');
+                firstSeen = new Date(`${year}-${month}-${day}T${timePart}`);
+            } else {
+                firstSeen = new Date(firstSeenStr);
+            }
+            
+            if (isNaN(firstSeen.getTime())) {
+                return '0м';
+            }
+            
             const now = new Date();
-            const totalMinutes = (now - firstSeen) / (1000 * 60);
+            const totalMinutes = Math.round((now - firstSeen) / (1000 * 60));
             
-            if (user.actions_count < 2) return '0м';
+            if (totalMinutes < 1) return '<1м';
+            if (totalMinutes < 60) return `${totalMinutes}м`;
             
-            // Среднее время между действиями
-            const avgTimePerAction = totalMinutes / user.actions_count;
+            const hours = Math.round(totalMinutes / 60);
+            if (hours < 24) return `${hours}ч`;
             
-            if (avgTimePerAction < 1) return '<1м';
-            if (avgTimePerAction < 60) return `${Math.round(avgTimePerAction)}м`;
+            const days = Math.round(hours / 24);
+            return `${days}д`;
             
-            const hours = Math.round(avgTimePerAction / 60);
-            return `${hours}ч`;
-        } catch {
+        } catch (error) {
             return '0м';
         }
     }
