@@ -74,6 +74,34 @@ async def whoami(message: Message):
     member = await bot.get_chat_member(chat_id=CHANNEL_ID, user_id=message.from_user.id)
     await message.answer(f"Ты: {message.from_user.id}\nСтатус: {member.status}")
 
+# для проверки прав в боте:
+@router.message(F.text == "/myrights")
+async def check_my_rights(message: Message):
+    user_id = str(message.from_user.id)
+    
+    # Получаем оба списка админов
+    admin_ids = os.getenv("ADMIN_IDS", "").split(",")
+    admin_dop = os.getenv("ADMIN_DOP", "").split(",")
+    
+    # Объединяем и очищаем от пустых значений
+    all_admins = [admin.strip() for admin in admin_ids + admin_dop if admin.strip()]
+    
+    is_super_admin = user_id in [admin.strip() for admin in admin_ids if admin.strip()]
+    is_admin = user_id in all_admins
+    
+    rights_info = f"""
+👤 Ваш ID: {user_id}
+🔐 Права администратора: {'✅ ДА' if is_admin else '❌ НЕТ'}
+🎯 Супер-админ: {'✅ ДА' if is_super_admin else '❌ НЕТ'}
+📊 Доступ к аналитике: {'✅ ДА' if is_admin else '❌ НЕТ'}
+
+Списки админов:
+• ADMIN_IDS: {admin_ids}
+• ADMIN_DOP: {admin_dop}
+"""
+    await message.answer(rights_info)
+
+
 # --- доступ разрешён ---
 async def grant_access(callback: CallbackQuery):
     text = (
