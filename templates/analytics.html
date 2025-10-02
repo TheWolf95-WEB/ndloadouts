@@ -682,159 +682,196 @@
             transform: translateY(-2px);
         }
 
-                /* Broadcast Modal Styles */
-        .broadcast-modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.8);
-        }
-        
-        .broadcast-modal-content {
-            background: var(--bg-card);
-            margin: 2% auto;
-            padding: 0;
-            border-radius: 12px;
-            border: 2px solid var(--accent);
-            width: 80%;
-            max-width: 800px;
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            transition: all 0.3s ease;
-            box-shadow: 0 20px 60px rgba(0, 255, 204, 0.2);
-        }
-        
-        /* Window Controls */
-        .broadcast-modal-header {
-            background: var(--bg-secondary);
-            padding: 15px 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: move;
-            user-select: none;
-            border-radius: 12px 12px 0 0;
-        }
-        
-        .broadcast-modal-title {
-            color: var(--accent);
-            font-weight: 600;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .broadcast-window-controls {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .window-control-btn {
-            width: 30px;
-            height: 30px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-        }
-        
-        .minimize-btn {
-            background: var(--warning);
-            color: var(--bg-primary);
-        }
-        
-        .minimize-btn:hover {
-            background: #e69900;
-        }
-        
-        .maximize-btn {
-            background: var(--accent);
-            color: var(--bg-primary);
-        }
-        
-        .maximize-btn:hover {
-            background: #00e6b8;
-        }
-        
-        .close-btn {
-            background: var(--error);
-            color: var(--bg-primary);
-        }
-        
-        .close-btn:hover {
-            background: #ff3333;
-        }
-        
-        /* Modal Body */
-        .broadcast-modal-body {
-            padding: 25px;
-            flex: 1;
-            overflow-y: auto;
-            max-height: calc(90vh - 120px);
-        }
-        
-        /* Maximized State */
-        .broadcast-modal.maximized .broadcast-modal-content {
-            width: 95%;
-            height: 95vh;
-            margin: 2.5vh auto;
-            max-width: none;
-            max-height: none;
-        }
-        
-        .broadcast-modal.minimized .broadcast-modal-content {
-            transform: scale(0.8);
-            opacity: 0.7;
-        }
-        
-        /* Resize Handle */
-        .broadcast-modal-content {
-            resize: both;
-            overflow: auto;
-            min-width: 500px;
-            min-height: 400px;
-        }
-        
-        .resize-handle {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 20px;
-            height: 20px;
-            cursor: nwse-resize;
-            background: linear-gradient(135deg, transparent 50%, var(--accent) 50%);
-            border-radius: 0 0 12px 0;
-        }
-        
-        /* Mobile - disable resize and window controls */
-        @media (max-width: 768px) {
-            .broadcast-modal-content {
-                resize: none;
-                width: 95% !important;
-                height: auto !important;
-                max-height: 80vh;
-            }
-            
-            .broadcast-window-controls {
-                display: none;
-            }
-            
-            .resize-handle {
-                display: none;
-            }
-        }
+/* Broadcast Modal Styles */
+.broadcast-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.9);
+}
+
+.broadcast-modal-content {
+    background: var(--bg-card);
+    margin: 2% auto;
+    padding: 0;
+    border-radius: 8px;
+    border: 2px solid var(--accent);
+    width: 80%;
+    max-width: 800px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+/* Window Controls */
+.broadcast-modal-header {
+    background: var(--bg-secondary);
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: move;
+    user-select: none;
+}
+
+.broadcast-modal-title {
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.broadcast-window-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.window-control-btn {
+    width: 25px;
+    height: 25px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+.close-btn {
+    background: var(--error);
+    color: var(--bg-primary);
+}
+
+.close-btn:hover {
+    background: #ff3333;
+}
+
+/* Modal Body */
+.broadcast-modal-body {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+    max-height: calc(90vh - 120px);
+}
+
+/* Selection Controls */
+.selection-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.selection-btn {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.8rem;
+    transition: background 0.2s;
+}
+
+.selection-btn:hover {
+    background: var(--accent-secondary);
+    color: var(--bg-primary);
+}
+
+.selection-btn.active {
+    background: var(--accent);
+    color: var(--bg-primary);
+}
+
+/* Users List for Selective Mode */
+.broadcast-users-list {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg-secondary);
+    margin-bottom: 15px;
+    display: none;
+}
+
+.user-select-item {
+    padding: 10px 15px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.user-select-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.user-select-item:last-child {
+    border-bottom: none;
+}
+
+.user-select-checkbox {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--accent);
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-select-checkbox.checked {
+    background: var(--accent);
+}
+
+.user-select-checkbox.checked::after {
+    content: "✓";
+    color: var(--bg-primary);
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.user-select-info {
+    flex: 1;
+}
+
+.user-select-name {
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.user-select-id {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    font-family: monospace;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .broadcast-modal-content {
+        width: 95% !important;
+        margin: 5% auto;
+    }
+    
+    .broadcast-window-controls {
+        display: none;
+    }
+    
+    .selection-controls {
+        flex-direction: column;
+    }
+}
     </style>
 </head>
 <body>
@@ -965,20 +1002,15 @@
 
 
 <!-- Broadcast Modal -->
+<!-- Broadcast Modal -->
 <div id="broadcastModal" class="modal broadcast-modal">
     <div class="broadcast-modal-content">
-        <!-- Window Header with Controls -->
+        <!-- Window Header -->
         <div class="broadcast-modal-header" id="broadcast-modal-header">
             <div class="broadcast-modal-title">
                 📢 Рассылка пользователям
             </div>
             <div class="broadcast-window-controls">
-                <button class="window-control-btn minimize-btn" onclick="minimizeBroadcastModal()" title="Свернуть">
-                    ➖
-                </button>
-                <button class="window-control-btn maximize-btn" onclick="maximizeBroadcastModal()" title="Развернуть">
-                    ⛶
-                </button>
                 <button class="window-control-btn close-btn" onclick="hideBroadcastModal()" title="Закрыть">
                     ✕
                 </button>
@@ -987,24 +1019,41 @@
         
         <!-- Modal Body -->
         <div class="broadcast-modal-body">
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 8px; color: var(--text-secondary);">
-                    Выбрано пользователей: <span id="selected-users-count">0</span>
-                </label>
-                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                    <button class="message-btn" onclick="selectAllUsers()" style="flex: 1;">✅ Выбрать всех</button>
-                    <button class="clear-btn" onclick="deselectAllUsers()" style="flex: 1;">❌ Очистить выбор</button>
-                </div>
+            <!-- Selection Controls -->
+            <div class="selection-controls">
+                <button class="selection-btn active" onclick="selectAllUsers()" id="btn-select-all">
+                    ✅ Выбрать всех
+                </button>
+                <button class="selection-btn" onclick="showSelectiveMode()" id="btn-select-selective">
+                    🔘 Выборочно
+                </button>
+                <button class="selection-btn" onclick="deselectAllUsers()" id="btn-deselect-all">
+                    ❌ Очистить выбор
+                </button>
             </div>
             
+            <!-- Users List (for selective mode) -->
+            <div class="broadcast-users-list" id="broadcast-users-list">
+                <!-- Users will be populated here -->
+            </div>
+            
+            <!-- Selection Info -->
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; margin-bottom: 8px; color: var(--text-secondary);">
+                    Выбрано пользователей: <span id="selected-users-count">0</span> из <span id="total-users-count">0</span>
+                </label>
+            </div>
+            
+            <!-- Message Input -->
             <div style="margin-bottom: 20px;">
                 <textarea 
                     id="broadcast-message" 
                     placeholder="Введите сообщение для рассылки..." 
-                    style="width: 100%; height: 150px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); font-family: inherit; resize: vertical;"
+                    style="width: 100%; height: 120px; padding: 12px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); font-family: inherit; resize: vertical;"
                 ></textarea>
             </div>
             
+            <!-- Action Buttons -->
             <div class="modal-buttons">
                 <button class="refresh-btn" onclick="sendBroadcast()" id="send-broadcast-btn">
                     📤 Отправить рассылку
@@ -1014,11 +1063,9 @@
                 </button>
             </div>
             
+            <!-- Results -->
             <div id="broadcast-results" style="margin-top: 20px; display: none;"></div>
         </div>
-        
-        <!-- Resize Handle -->
-        <div class="resize-handle"></div>
     </div>
 </div>
     <div class="footer">
@@ -1033,131 +1080,171 @@
         startOfDay: new Date().setHours(0, 0, 0, 0)
     };
 
-let broadcastUsers = [];
-let selectedUserIds = new Set();
+    let broadcastUsers = [];
+    let selectedUserIds = new Set();
+    let currentSelectionMode = 'all';
 
-async function showBroadcastModal() {
-    try {
-        const response = await fetch('/api/analytics/broadcast-users');
-        const data = await response.json();
+    // ========== BROADCAST SYSTEM ==========
+    async function showBroadcastModal() {
+        try {
+            const response = await fetch('/api/analytics/broadcast-users');
+            const data = await response.json();
+            
+            if (data.error) {
+                alert('Ошибка: ' + data.error);
+                return;
+            }
+            
+            if (data.users) {
+                broadcastUsers = data.users;
+                selectedUserIds = new Set(data.users.map(user => user.id));
+                currentSelectionMode = 'all';
+                updateSelectionUI();
+                populateUsersList();
+            }
+            
+            document.getElementById('broadcast-message').value = '';
+            document.getElementById('broadcast-results').style.display = 'none';
+            
+            const modal = document.getElementById('broadcastModal');
+            modal.style.display = 'block';
+            
+        } catch (error) {
+            alert('Ошибка загрузки пользователей: ' + error.message);
+        }
+    }
+
+    function hideBroadcastModal() {
+        document.getElementById('broadcastModal').style.display = 'none';
+        selectedUserIds.clear();
+    }
+
+    function selectAllUsers() {
+        selectedUserIds = new Set(broadcastUsers.map(user => user.id));
+        currentSelectionMode = 'all';
+        updateSelectionUI();
+        document.getElementById('broadcast-users-list').style.display = 'none';
+    }
+
+    function showSelectiveMode() {
+        currentSelectionMode = 'selective';
+        updateSelectionUI();
+        document.getElementById('broadcast-users-list').style.display = 'block';
+    }
+
+    function deselectAllUsers() {
+        selectedUserIds.clear();
+        currentSelectionMode = 'none';
+        updateSelectionUI();
+        document.getElementById('broadcast-users-list').style.display = 'none';
+    }
+
+    function updateSelectionUI() {
+        // Update buttons
+        document.getElementById('btn-select-all').classList.toggle('active', currentSelectionMode === 'all');
+        document.getElementById('btn-select-selective').classList.toggle('active', currentSelectionMode === 'selective');
+        document.getElementById('btn-deselect-all').classList.toggle('active', currentSelectionMode === 'none');
         
-        if (data.error) {
-            alert('Ошибка: ' + data.error);
+        // Update counters
+        document.getElementById('selected-users-count').textContent = selectedUserIds.size;
+        document.getElementById('total-users-count').textContent = broadcastUsers.length;
+        
+        // Update checkboxes in selective mode
+        if (currentSelectionMode === 'selective') {
+            broadcastUsers.forEach(user => {
+                const checkbox = document.querySelector(`[data-user-id="${user.id}"] .user-select-checkbox`);
+                if (checkbox) {
+                    checkbox.classList.toggle('checked', selectedUserIds.has(user.id));
+                }
+            });
+        }
+    }
+
+    function populateUsersList() {
+        const usersList = document.getElementById('broadcast-users-list');
+        usersList.innerHTML = '';
+        
+        broadcastUsers.forEach(user => {
+            const userItem = document.createElement('div');
+            userItem.className = 'user-select-item';
+            userItem.setAttribute('data-user-id', user.id);
+            userItem.innerHTML = `
+                <div class="user-select-checkbox ${selectedUserIds.has(user.id) ? 'checked' : ''}"></div>
+                <div class="user-select-info">
+                    <div class="user-select-name">${user.name}</div>
+                    <div class="user-select-id">ID: ${user.id}</div>
+                </div>
+            `;
+            
+            userItem.addEventListener('click', () => {
+                if (selectedUserIds.has(user.id)) {
+                    selectedUserIds.delete(user.id);
+                } else {
+                    selectedUserIds.add(user.id);
+                }
+                updateSelectionUI();
+            });
+            
+            usersList.appendChild(userItem);
+        });
+    }
+
+    async function sendBroadcast() {
+        const message = document.getElementById('broadcast-message').value.trim();
+        const btn = document.getElementById('send-broadcast-btn');
+        
+        if (!message) {
+            alert('Введите сообщение для рассылки');
             return;
         }
         
-        if (data.users) {
-            broadcastUsers = data.users;
-            selectedUserIds = new Set(data.users.map(user => user.id));
-            updateSelectedUsersCount();
+        if (selectedUserIds.size === 0) {
+            alert('Выберите хотя бы одного пользователя');
+            return;
         }
         
-        document.getElementById('broadcast-message').value = '';
-        document.getElementById('broadcast-results').style.display = 'none';
-        document.getElementById('broadcastModal').style.display = 'block';
-        
-    } catch (error) {
-        alert('Ошибка загрузки пользователей: ' + error.message);
-    }
-}
-
-function hideBroadcastModal() {
-    document.getElementById('broadcastModal').style.display = 'none';
-    selectedUserIds.clear();
-}
-
-function selectAllUsers() {
-    if (broadcastUsers.length === 0) {
-        alert('Нет пользователей для выбора');
-        return;
-    }
-    selectedUserIds = new Set(broadcastUsers.map(user => user.id));
-    updateSelectedUsersCount();
-    alert(`✅ Выбраны все пользователи: ${broadcastUsers.length} чел.`);
-}
-
-function deselectAllUsers() {
-    selectedUserIds.clear();
-    updateSelectedUsersCount();
-    alert('❌ Выбор очищен');
-}
-
-function updateSelectedUsersCount() {
-    const countElement = document.getElementById('selected-users-count');
-    if (countElement) {
-        countElement.textContent = selectedUserIds.size;
-    }
-}
-
-async function sendBroadcast() {
-    const message = document.getElementById('broadcast-message').value.trim();
-    const btn = document.getElementById('send-broadcast-btn');
-    
-    if (!message) {
-        alert('Введите сообщение для рассылки');
-        return;
-    }
-    
-    if (selectedUserIds.size === 0) {
-        alert('Выберите хотя бы одного пользователя');
-        return;
-    }
-    
-    if (!confirm(`Отправить рассылку ${selectedUserIds.size} пользователям?\n\nСообщение: ${message.substring(0, 100)}${message.length > 100 ? '...' : ''}`)) {
-        return;
-    }
-    
-    btn.classList.add('loading');
-    btn.innerHTML = '⏳ Отправка...';
-    
-    try {
-        const response = await fetch('/api/analytics/broadcast', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                message: message,
-                user_ids: Array.from(selectedUserIds)
-            })
-        });
-        
-        const result = await response.json();
-        
-        if (result.status === 'ok') {
-            document.getElementById('broadcast-results').innerHTML = `
-                <div style="background: var(--bg-secondary); padding: 15px; border-radius: 8px; border: 1px solid var(--accent);">
-                    <div style="color: var(--accent); font-weight: bold; margin-bottom: 10px;">✅ Рассылка завершена!</div>
-                    <div>Успешно: ${result.success_count} пользователей</div>
-                    <div>С ошибками: ${result.failed_count} пользователей</div>
-                    ${result.failed_count > 0 ? '<div style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);">Некоторые пользователи могли заблокировать бота</div>' : ''}
-                </div>
-            `;
-            document.getElementById('broadcast-results').style.display = 'block';
-        } else {
-            alert('Ошибка рассылки: ' + result.error);
+        if (!confirm(`Отправить рассылку ${selectedUserIds.size} пользователям?\n\nСообщение: ${message.substring(0, 100)}${message.length > 100 ? '...' : ''}`)) {
+            return;
         }
         
-    } catch (error) {
-        alert('Ошибка отправки: ' + error.message);
-    } finally {
-        btn.classList.remove('loading');
-        btn.innerHTML = '📤 Отправить рассылку';
+        btn.classList.add('loading');
+        btn.innerHTML = '⏳ Отправка...';
+        
+        try {
+            const response = await fetch('/api/analytics/broadcast', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: message,
+                    user_ids: Array.from(selectedUserIds)
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'ok') {
+                document.getElementById('broadcast-results').innerHTML = `
+                    <div style="background: var(--bg-secondary); padding: 15px; border-radius: 8px; border: 1px solid var(--accent);">
+                        <div style="color: var(--accent); font-weight: bold; margin-bottom: 10px;">✅ Рассылка завершена!</div>
+                        <div>Успешно: ${result.success_count} пользователей</div>
+                        <div>С ошибками: ${result.failed_count} пользователей</div>
+                        ${result.failed_count > 0 ? '<div style="margin-top: 10px; font-size: 0.9em; color: var(--text-secondary);">Некоторые пользователи могли заблокировать бота</div>' : ''}
+                    </div>
+                `;
+                document.getElementById('broadcast-results').style.display = 'block';
+            } else {
+                alert('Ошибка рассылки: ' + result.error);
+            }
+            
+        } catch (error) {
+            alert('Ошибка отправки: ' + error.message);
+        } finally {
+            btn.classList.remove('loading');
+            btn.innerHTML = '📤 Отправить рассылку';
+        }
     }
-}
 
-// Обнови функцию window.onclick для обеих модалок
-window.onclick = function(event) {
-    const modal = document.getElementById('clearModal');
-    const broadcastModal = document.getElementById('broadcastModal');
-    
-    if (event.target === modal) {
-        hideClearModal();
-    }
-    if (event.target === broadcastModal) {
-        hideBroadcastModal();
-    }
-}
-
-
+    // ========== ANALYTICS DASHBOARD ==========
     async function loadData() {
         const btn = document.getElementById('refresh-btn');
         btn.classList.add('loading', 'pulse');
@@ -1174,9 +1261,7 @@ window.onclick = function(event) {
             const data = await response.json();
             currentData = data;
             
-            // Обновляем статистику за сегодня
             updateTodayStats(data.users, data.recent_activity);
-            
             updateStats(data.stats, data.users);
             updateUsers(data.users);
             updateActivity(data.recent_activity);
@@ -1208,14 +1293,12 @@ window.onclick = function(event) {
     function updateTodayStats(users, activities) {
         const today = new Date().setHours(0, 0, 0, 0);
         
-        // Сбрасываем статистику если начался новый день
         if (today !== todayStats.startOfDay) {
             todayStats.activeUsers.clear();
             todayStats.newUsers.clear();
             todayStats.startOfDay = today;
         }
         
-        // Добавляем активных пользователей за сегодня
         users.forEach(user => {
             if (isToday(user.last_seen)) {
                 todayStats.activeUsers.add(user.id);
@@ -1225,7 +1308,6 @@ window.onclick = function(event) {
             }
         });
         
-        // Добавляем из активности
         activities.forEach(activity => {
             if (isToday(activity.time)) {
                 todayStats.activeUsers.add(activity.user_id);
@@ -1236,12 +1318,8 @@ window.onclick = function(event) {
     function updateStats(stats, users) {
         document.getElementById('total-users').textContent = stats.total_users;
         document.getElementById('online-users').textContent = stats.online_users;
-        
-        // Активность за сегодня (обновляемая)
         document.getElementById('total-actions').textContent = todayStats.activeUsers.size;
         document.getElementById('total-actions').parentNode.querySelector('.stat-label').textContent = '📊 Активность сегодня';
-        
-        // Новые пользователи за сегодня
         document.getElementById('total-errors').textContent = todayStats.newUsers.size;
         document.getElementById('total-errors').parentNode.querySelector('.stat-label').textContent = '🆕 Новые сегодня';
     }
@@ -1250,7 +1328,6 @@ window.onclick = function(event) {
         const usersList = document.getElementById('user-list');
         const usersCount = document.getElementById('users-count');
         
-        // Правильно считаем онлайн пользователей
         const onlineUsers = users.filter(user => user.status === 'online');
         const activeUsers = users.filter(user => 
             user.status === 'online' || 
@@ -1258,8 +1335,6 @@ window.onclick = function(event) {
         );
         
         usersCount.textContent = activeUsers.length;
-        
-        // Обновляем счетчик онлайн в статистике
         document.getElementById('online-users').textContent = onlineUsers.length;
         
         if (activeUsers.length === 0) {
@@ -1284,7 +1359,7 @@ window.onclick = function(event) {
                                 ${user.status === 'online' ? '🟢 Онлайн' : '⚪ Оффлайн'}
                             </span>
                             <span>${user.platform === 'android' || user.platform === 'ios' ? '📱 Телефон' : '💻 ПК'}</span>
-                            <span>${calculateAverageTime(user)} в боте за все время</span>
+                            <span>${calculateAverageTime(user)} в боте</span>
                             ${user.username ? `<a href="https://t.me/${user.username}" target="_blank" style="color: var(--accent-secondary); text-decoration: none;">@${user.username}</a>` : ''}
                         </div>
                     </div>
@@ -1414,7 +1489,7 @@ window.onclick = function(event) {
         `).join('');
     }
 
-    // Вспомогательные функции
+    // ========== UTILITY FUNCTIONS ==========
     function isToday(dateString) {
         if (!dateString) return false;
         try {
@@ -1437,7 +1512,6 @@ window.onclick = function(event) {
             const firstSeenStr = user.first_seen;
             let firstSeen;
             
-            // Парсим дату в формате DD.MM.YYYY HH:MM:SS
             if (firstSeenStr.includes('.')) {
                 const [datePart, timePart] = firstSeenStr.split(' ');
                 const [day, month, year] = datePart.split('.');
@@ -1471,7 +1545,6 @@ window.onclick = function(event) {
         if (!lastSeen) return false;
         
         try {
-            // Проверяем активность за последние 24 часа
             const now = new Date();
             const activityDate = new Date(lastSeen.split(' ').reverse().join('-'));
             const diffHours = (now - activityDate) / (1000 * 60 * 60);
@@ -1483,7 +1556,6 @@ window.onclick = function(event) {
     }
 
     function formatUserName(userString) {
-        // Убираем ID из отображения в активности
         return userString.split(' | ')[0];
     }
 
@@ -1515,191 +1587,28 @@ window.onclick = function(event) {
         }
     }
 
-    // Быстрое обновление каждые 5 секунд
+    // ========== EVENT LISTENERS ==========
     setInterval(loadData, 5000);
     
-    // Загружаем данные при старте
     document.addEventListener('DOMContentLoaded', loadData);
     
-    // Обновляем при возвращении на вкладку
     document.addEventListener('visibilitychange', function() {
         if (!document.hidden) {
             loadData();
         }
     });
 
-    // Закрытие модального окна при клике вне его
     window.onclick = function(event) {
         const modal = document.getElementById('clearModal');
+        const broadcastModal = document.getElementById('broadcastModal');
+        
         if (event.target === modal) {
             hideClearModal();
         }
-    }
-
-
-// управление окном рассылки
-
-    // Window Management for Broadcast Modal
-let isBroadcastMaximized = false;
-let isBroadcastMinimized = false;
-
-function maximizeBroadcastModal() {
-    const modal = document.getElementById('broadcastModal');
-    const content = modal.querySelector('.broadcast-modal-content');
-    
-    if (isBroadcastMaximized) {
-        // Restore
-        modal.classList.remove('maximized');
-        content.style.width = '80%';
-        content.style.height = 'auto';
-        isBroadcastMaximized = false;
-    } else {
-        // Maximize
-        modal.classList.add('maximized');
-        content.style.width = '95%';
-        content.style.height = '95vh';
-        isBroadcastMaximized = true;
-        isBroadcastMinimized = false;
-        modal.classList.remove('minimized');
-    }
-}
-
-function minimizeBroadcastModal() {
-    const modal = document.getElementById('broadcastModal');
-    
-    if (isBroadcastMinimized) {
-        // Restore
-        modal.classList.remove('minimized');
-        isBroadcastMinimized = false;
-    } else {
-        // Minimize
-        modal.classList.add('minimized');
-        isBroadcastMinimized = true;
-        isBroadcastMaximized = false;
-        modal.classList.remove('maximized');
-    }
-}
-
-function hideBroadcastModal() {
-    const modal = document.getElementById('broadcastModal');
-    modal.style.display = 'none';
-    modal.classList.remove('maximized', 'minimized');
-    isBroadcastMaximized = false;
-    isBroadcastMinimized = false;
-    
-    const content = modal.querySelector('.broadcast-modal-content');
-    content.style.width = '80%';
-    content.style.height = 'auto';
-}
-
-// Make modal draggable
-function makeModalDraggable() {
-    const modal = document.getElementById('broadcastModal');
-    const header = document.getElementById('broadcast-modal-header');
-    let isDragging = false;
-    let currentX;
-    let currentY;
-    let initialX;
-    let initialY;
-    let xOffset = 0;
-    let yOffset = 0;
-
-    header.addEventListener("mousedown", dragStart);
-    header.addEventListener("touchstart", dragStart);
-    
-    function dragStart(e) {
-        if (e.type === "touchstart") {
-            initialX = e.touches[0].clientX - xOffset;
-            initialY = e.touches[0].clientY - yOffset;
-        } else {
-            initialX = e.clientX - xOffset;
-            initialY = e.clientY - yOffset;
-        }
-
-        if (e.target === header) {
-            isDragging = true;
+        if (event.target === broadcastModal) {
+            hideBroadcastModal();
         }
     }
-
-    document.addEventListener("mousemove", drag);
-    document.addEventListener("touchmove", drag);
-    
-    function drag(e) {
-        if (isDragging) {
-            e.preventDefault();
-            
-            if (e.type === "touchmove") {
-                currentX = e.touches[0].clientX - initialX;
-                currentY = e.touches[0].clientY - initialY;
-            } else {
-                currentX = e.clientX - initialX;
-                currentY = e.clientY - initialY;
-            }
-
-            xOffset = currentX;
-            yOffset = currentY;
-            
-            setTranslate(currentX, currentY, modal.querySelector('.broadcast-modal-content'));
-        }
-    }
-
-    document.addEventListener("mouseup", dragEnd);
-    document.addEventListener("touchend", dragEnd);
-    
-    function dragEnd() {
-        initialX = currentX;
-        initialY = currentY;
-        isDragging = false;
-    }
-
-    function setTranslate(xPos, yPos, el) {
-        el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
-    }
-}
-
-// Initialize when modal is shown
-async function showBroadcastModal() {
-    try {
-        const response = await fetch('/api/analytics/broadcast-users');
-        const data = await response.json();
-        
-        if (data.error) {
-            alert('Ошибка: ' + data.error);
-            return;
-        }
-        
-        if (data.users) {
-            broadcastUsers = data.users;
-            selectedUserIds = new Set(data.users.map(user => user.id));
-            updateSelectedUsersCount();
-        }
-        
-        document.getElementById('broadcast-message').value = '';
-        document.getElementById('broadcast-results').style.display = 'none';
-        
-        const modal = document.getElementById('broadcastModal');
-        modal.style.display = 'block';
-        
-        // Reset position and size
-        const content = modal.querySelector('.broadcast-modal-content');
-        content.style.transform = 'translate3d(0, 0, 0)';
-        content.style.width = '80%';
-        content.style.height = 'auto';
-        modal.classList.remove('maximized', 'minimized');
-        isBroadcastMaximized = false;
-        isBroadcastMinimized = false;
-        
-    } catch (error) {
-        alert('Ошибка загрузки пользователей: ' + error.message);
-    }
-}
-
-// Initialize dragging when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    makeModalDraggable();
-});
-
-    
 </script>
 </body>
 </html>
