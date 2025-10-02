@@ -173,8 +173,18 @@ async def recheck_subscription(callback: CallbackQuery):
 
 @router.message(F.text == "/analytics")
 async def analytics_cmd(message: Message):
+    # Получаем все ID админов из обеих переменных
     admin_ids = os.getenv("ADMIN_IDS", "").split(",")
-    if str(message.from_user.id) not in admin_ids:
+    admin_dop = os.getenv("ADMIN_DOP", "").split(",")
+    
+    # Объединяем списки админов
+    all_admins = admin_ids + admin_dop
+    
+    user_id = str(message.from_user.id)
+    print(f"[DEBUG] /analytics запрошен | user_id={user_id} | all_admins={all_admins}")
+    
+    if user_id not in all_admins:
+        print(f"[DEBUG] Отказано в доступе к аналитике | user_id={user_id}")
         await message.answer("🚫 У тебя нет доступа к аналитике.")
         return
 
