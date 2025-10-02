@@ -694,61 +694,75 @@ function rebuildModuleSelects() {
 
 
 // === Загрузка сборок ===
+// === Загрузка сборок ===
 async function loadBuilds(category = 'all') {
   const res = await fetch(`/api/builds?category=${category}`);
   const builds = await res.json();
-  buildsList.innerHTML = '';
 
-  cachedBuilds = builds; 
-
-  if (builds.length === 0) {
+  // если пусто
+  if (!Array.isArray(builds) || builds.length === 0) {
     buildsList.innerHTML = '<p>Сборок пока нет.</p>';
+    cachedBuilds = [];
     return;
   }
 
-  const topColors = ["#FFD700", "#B0B0B0", "#FF8C00"];
-  const uniqueTypes = [...new Set(builds.map(b => b.weapon_type))];
+  // сортируем новые вверх
+  const getTime = (b) => {
+    let t = b.created_at ? Date.parse(b.created_at) : NaN;
+    if (Number.isNaN(t)) {
+      const dt = parseRuDate(b.date);
+      t = dt ? dt.getTime() : 0;
+    }
+    return t || 0;
+  };
+
+  const buildsSorted = [...builds].sort((a, b) => getTime(b) - getTime(a));
+
+  // кэш именно в отсортированном порядке
+  cachedBuilds = buildsSorted;
+
+  // загрузим справочники модулей только для типов, которые реально есть
+  const uniqueTypes = [...new Set(buildsSorted.map(b => b.weapon_type))];
   await Promise.all(uniqueTypes.map(loadModules));
 
-  builds.forEach((build, buildIndex) => {
+  // рендер по отсортированному массиву
+  buildsList.innerHTML = '';
+  const topColors = ['#FFD700', '#B0B0B0', '#FF8C00'];
+
+  buildsSorted.forEach((build, buildIndex) => {
     const wrapper = document.createElement('div');
     wrapper.className = 'loadout js-loadout';
 
     const weaponTypeRu = weaponTypeLabels[build.weapon_type] || build.weapon_type;
-    const tops = [build.top1, build.top2, build.top3].map((mod, i) => mod ? `<span class="loadout__top" style="background:${topColors[i]}">#${i+1} ${moduleNameMap[mod] || mod}</span>` : '').join('');
+    const tops = [build.top1, build.top2, build.top3]
+      .map((mod, i) => mod
+        ? `<span class="loadout__top" style="background:${topColors[i]}">#${i + 1} ${moduleNameMap[mod] || mod}</span>`
+        : '')
+      .join('');
 
-    const tabBtns = build.tabs.map((tab, i) => 
-        `<button class="loadout__tab ${i === 0 ? 'is-active' : ''}" data-tab="tab-${buildIndex}-${i}">${tab.label}</button>`
-      ).join('');
-      
-const tabContents = build.tabs.map((tab, i) => {
-  return `
-    <div class="loadout__tab-content ${i === 0 ? 'is-active' : ''}" data-tab-content="tab-${buildIndex}-${i}">
-      <div class="loadout__modules">
-      ${tab.items.map(itemKey => {
-        const wrap = modulesByType[build.weapon_type];
-        const norm = s => String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
-        const mod  = wrap?.byKey?.[itemKey] || wrap?.byKey?.[norm(itemKey)] || null;
-      
-        const slot = mod?.category || '—';  // категория из справочника (у тебя по-русски)
-        const ru   = mod?.ru || itemKey;    // русское название из справочника
-      
-        return `
-          <div class="loadout__module">
-            <span class="loadout__module-slot">${slot}</span>
-            <span class="loadout__module-name">${ru}</span>
-          </div>
-        `;
-      }).join('')}
+    const tabBtns = build.tabs.map((tab, i) =>
+      `<button class="loadout__tab ${i === 0 ? 'is-active' : ''}" data-tab="tab-${buildIndex}-${i}">${tab.label}</button>`
+    ).join('');
 
-
-
+    const tabContents = build.tabs.map((tab, i) => `
+      <div class="loadout__tab-content ${i === 0 ? 'is-active' : ''}" data-tab-content="tab-${buildIndex}-${i}">
+        <div class="loadout__modules">
+          ${tab.items.map(itemKey => {
+            const wrap = modulesByType[build.weapon_type];
+            const norm = s => String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
+            const mod  = wrap?.byKey?.[itemKey] || wrap?.byKey?.[norm(itemKey)] || null;
+            const slot = mod?.category || '—';
+            const ru   = mod?.ru || itemKey;
+            return `
+              <div class="loadout__module">
+                <span class="loadout__module-slot">${slot}</span>
+                <span class="loadout__module-name">${ru}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
       </div>
-    </div>
-  `;
-}).join('');
-
-
+    `).join('');
 
     wrapper.innerHTML = `
       <div class="loadout__header js-loadout-toggle">
@@ -772,19 +786,19 @@ const tabContents = build.tabs.map((tab, i) => {
       </div>
     `;
 
-    // ❷ Подсветка "Новинка"
-if (String(build.id) === String(latestBuildId)) {
-   wrapper.classList.add('is-new');
-   const badge = document.createElement('span');
-   badge.className = 'badge-new';
-   badge.textContent = 'Новинка';
-   wrapper.querySelector('.loadout__header--top')?.appendChild(badge);
- }
-
+    // бейдж "Новинка"
+    if (String(build.id) === String(latestBuildId)) {
+      wrapper.classList.add('is-new');
+      const badge = document.createElement('span');
+      badge.className = 'badge-new';
+      badge.textContent = 'Новинка';
+      wrapper.querySelector('.loadout__header--top')?.appendChild(badge);
+    }
 
     buildsList.appendChild(wrapper);
   });
 
+  // сброс раскрытия
   document.querySelectorAll('.js-loadout').forEach(el => {
     el.classList.remove('is-open');
     const content = el.querySelector('.loadout__content');
