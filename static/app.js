@@ -872,7 +872,6 @@ document.querySelectorAll('.js-loadout-toggle').forEach(header => {
 });
 
 
-}
 
 
 document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -1279,5 +1278,4 @@ document.addEventListener('touchend', (e) => {
     goBack();
   }
 });
-
-
+  })}
