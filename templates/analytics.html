@@ -926,7 +926,7 @@
                                 ${user.status === 'online' ? '🟢 Онлайн' : '⚪ Оффлайн'}
                             </span>
                             <span>${user.platform === 'android' || user.platform === 'ios' ? '📱 Телефон' : '💻 ПК'}</span>
-                            <span>${calculateAverageTime(user)} в боте</span>
+                            <span>${calculateAverageTime(user)} в боте за все время</span>
                             ${user.username ? `<a href="https://t.me/${user.username}" target="_blank" style="color: var(--accent-secondary); text-decoration: none;">@${user.username}</a>` : ''}
                         </div>
                     </div>
