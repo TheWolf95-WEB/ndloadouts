@@ -356,16 +356,9 @@ async def all_versions():
 
 # Эндпоинты для рассылки
 @app.get("/api/analytics/broadcast-users")
-async def get_broadcast_users(request: Request):
+async def get_broadcast_users():
     """Получить всех пользователей для рассылки"""
     try:
-        # Проверяем права через query параметры (для GET запроса)
-        init_data = request.query_params.get("initData", "")
-        user_id, is_admin, _ = extract_user_roles(init_data)
-        
-        if not is_admin:
-            return JSONResponse({"error": "Недостаточно прав"}, status_code=403)
-        
         conn = sqlite3.connect(ANALYTICS_DB)
         cur = conn.cursor()
         
@@ -392,16 +385,9 @@ async def get_broadcast_users(request: Request):
         return JSONResponse({"error": str(e)}, status_code=500)
 
 @app.post("/api/analytics/broadcast")
-async def send_broadcast(request: Request, data: dict = Body(...)):
+async def send_broadcast(data: dict = Body(...)):
     """Отправить рассылку пользователям"""
     try:
-        # Получаем initData из тела запроса
-        init_data = data.get("initData", "")
-        user_id, is_admin, _ = extract_user_roles(init_data)
-        
-        if not is_admin:
-            return JSONResponse({"error": "Недостаточно прав"}, status_code=403)
-        
         message = data.get("message", "").strip()
         user_ids = data.get("user_ids", [])
         
@@ -427,7 +413,7 @@ async def send_broadcast(request: Request, data: dict = Body(...)):
                     f"https://api.telegram.org/bot{bot_token}/sendMessage",
                     json={
                         "chat_id": target_user_id,
-                        "text": f"📢 Рассылка от ND Loadouts:\n\n{message}",
+                        "text": f"📢 Рассылка от NDHQ:\n\n{message}",
                         "parse_mode": "HTML"
                     },
                     timeout=10
