@@ -180,6 +180,8 @@ async def api_builds(category: str = Query("all")):
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
+
+
 @app.post("/api/builds")
 async def create_build(request: Request, data: dict = Body(...)):
     user_id, is_admin, _ = extract_user_roles(data.get("initData", ""))
@@ -187,10 +189,32 @@ async def create_build(request: Request, data: dict = Body(...)):
         return JSONResponse({"error": "Недостаточно прав"}, status_code=403)
 
     try:
+        # === Уникальные категории: снимаем с других сборок "Новинки" и "Популярное" ===
+        conn = sqlite3.connect("/opt/ndloadouts_storage/builds.db")
+        cursor = conn.cursor()
+
+        for unique_cat in ["Новинки", "Популярное"]:
+            if unique_cat in data.get("categories", []):
+                cursor.execute("SELECT id, categories FROM builds")
+                for row in cursor.fetchall():
+                    b_id, cats_raw = row
+                    try:
+                        cats = eval(cats_raw) if isinstance(cats_raw, str) else cats_raw
+                    except:
+                        cats = []
+                    if unique_cat in cats:
+                        cats = [c for c in cats if c != unique_cat]
+                        cursor.execute("UPDATE builds SET categories = ? WHERE id = ?", (str(cats), b_id))
+
+        conn.commit()
+        conn.close()
+
+        # === Сохраняем сборку ===
         add_build(data)
         return JSONResponse({"status": "ok"})
     except Exception as e:
         return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
+
 
 @app.put("/api/builds/{build_id}")
 async def update_build(build_id: str, request: Request):
@@ -200,10 +224,32 @@ async def update_build(build_id: str, request: Request):
         return JSONResponse({"error": "Недостаточно прав"}, status_code=403)
 
     try:
+        # === Уникальные категории: снимаем с других сборок "Новинки" и "Популярное" ===
+        conn = sqlite3.connect("/opt/ndloadouts_storage/builds.db")
+        cursor = conn.cursor()
+
+        for unique_cat in ["Новинки", "Популярное"]:
+            if unique_cat in body.get("categories", []):
+                cursor.execute("SELECT id, categories FROM builds")
+                for row in cursor.fetchall():
+                    b_id, cats_raw = row
+                    try:
+                        cats = eval(cats_raw) if isinstance(cats_raw, str) else cats_raw
+                    except:
+                        cats = []
+                    if unique_cat in cats and str(b_id) != str(build_id):
+                        cats = [c for c in cats if c != unique_cat]
+                        cursor.execute("UPDATE builds SET categories = ? WHERE id = ?", (str(cats), b_id))
+
+        conn.commit()
+        conn.close()
+
+        # === Обновляем сборку ===
         update_build_by_id(build_id, body)
         return JSONResponse({"status": "ok"})
     except Exception as e:
         return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
+
 
 @app.delete("/api/builds/{build_id}")
 async def delete_build(build_id: str, request: Request):
