@@ -681,9 +681,11 @@
                 <button class="clear-btn" onclick="showClearModal()" id="clear-btn">
                     🗑️ Очистить статистику
                 </button>
+                <button class="refresh-btn" onclick="showBroadcastModal()" id="broadcast-btn" style="background: var(--accent-secondary);">
+                    📢 Сделать рассылку
+                </button>
             </div>
         </div>
-
         <!-- Statistics -->
         <div class="stats-grid" id="stats-grid">
             <div class="stat-card">
@@ -787,6 +789,43 @@
             </div>
         </div>
     </div>
+
+
+    <!-- Broadcast Modal -->
+<div id="broadcastModal" class="modal">
+    <div class="modal-content" style="max-width: 600px;">
+        <h3 style="color: var(--accent); margin-bottom: 20px;">📢 Рассылка пользователям</h3>
+        
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; color: var(--text-secondary);">
+                Выбрано пользователей: <span id="selected-users-count">0</span>
+            </label>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <button class="message-btn" onclick="selectAllUsers()" style="flex: 1;">✅ Выбрать всех</button>
+                <button class="clear-btn" onclick="deselectAllUsers()" style="flex: 1;">❌ Очистить выбор</button>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <textarea 
+                id="broadcast-message" 
+                placeholder="Введите сообщение для рассылки..." 
+                style="width: 100%; height: 150px; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-primary); font-family: inherit; resize: vertical;"
+            ></textarea>
+        </div>
+        
+        <div class="modal-buttons">
+            <button class="refresh-btn" onclick="sendBroadcast()" id="send-broadcast-btn">
+                📤 Отправить рассылку
+            </button>
+            <button class="modal-btn-cancel" onclick="hideBroadcastModal()">
+                ❌ Отмена
+            </button>
+        </div>
+        
+        <div id="broadcast-results" style="margin-top: 20px; display: none;"></div>
+    </div>
+</div>
 
     <div class="footer">
         NDHQ © 2025 — Система расширенной аналитики
