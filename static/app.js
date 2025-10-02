@@ -741,6 +741,23 @@ cachedBuilds = sorted;
       `<button class="loadout__tab ${i === 0 ? 'is-active' : ''}" data-tab="tab-${buildIndex}-${i}">${tab.label}</button>`
     ).join('');
 
+      // Нормализуем categories в массив строк
+      let cats = [];
+      if (Array.isArray(build.categories)) {
+        cats = build.categories;
+      } else if (typeof build.categories === 'string') {
+        try {
+          cats = JSON.parse(build.categories.replace(/'/g, '"'));
+        } catch {
+          cats = [];
+        }
+      } else {
+        cats = [];
+      }
+    
+      const headerTop = wrapper.querySelector('.loadout__header--top');
+
+
     const tabContents = build.tabs.map((tab, i) => `
       <div class="loadout__tab-content ${i === 0 ? 'is-active' : ''}" data-tab-content="tab-${buildIndex}-${i}">
         <div class="loadout__modules">
