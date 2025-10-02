@@ -13,6 +13,8 @@ import hashlib
 import requests
 import subprocess
 import sqlite3
+import asyncio
+from typing import List
 from pathlib import Path
 from urllib.parse import parse_qs
 from datetime import datetime, timezone, timedelta
@@ -347,6 +349,105 @@ async def all_versions():
         return {"versions": versions}
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
+
+
+### РАССЫЛКА
+
+
+# Эндпоинты для рассылки
+@app.get("/api/analytics/broadcast-users")
+async def get_broadcast_users():
+    """Получить всех пользователей для рассылки"""
+    try:
+        conn = sqlite3.connect(ANALYTICS_DB)
+        cur = conn.cursor()
+        
+        cur.execute("""
+            SELECT user_id, first_name, username 
+            FROM user_profiles 
+            WHERE user_id != 'anonymous'
+            ORDER BY last_seen DESC
+        """)
+        users = cur.fetchall()
+        conn.close()
+        
+        formatted_users = []
+        for user_id, first_name, username in users:
+            formatted_users.append({
+                "id": user_id,
+                "name": f"{first_name or 'Пользователь'}" + (f" (@{username})" if username else ""),
+                "username": username
+            })
+        
+        return {"users": formatted_users}
+        
+    except Exception as e:
+        return {"users": [], "error": str(e)}
+
+@app.post("/api/analytics/broadcast")
+async def send_broadcast(data: dict = Body(...)):
+    """Отправить рассылку пользователям"""
+    try:
+        user_id, is_admin, _ = extract_user_roles(data.get("initData", ""))
+        if not is_admin:
+            return JSONResponse({"error": "Недостаточно прав"}, status_code=403)
+        
+        message = data.get("message", "").strip()
+        user_ids = data.get("user_ids", [])
+        
+        if not message:
+            return JSONResponse({"error": "Сообщение не может быть пустым"}, status_code=400)
+        
+        if not user_ids:
+            return JSONResponse({"error": "Не выбраны пользователи"}, status_code=400)
+        
+        # Отправка сообщений через бота
+        bot_token = os.getenv("TOKEN")
+        if not bot_token:
+            return JSONResponse({"error": "Токен бота не настроен"}, status_code=500)
+        
+        success_count = 0
+        failed_count = 0
+        results = []
+        
+        for target_user_id in user_ids:
+            try:
+                # Отправляем сообщение через Telegram Bot API
+                response = requests.post(
+                    f"https://api.telegram.org/bot{bot_token}/sendMessage",
+                    json={
+                        "chat_id": target_user_id,
+                        "text": f"📢 Рассылка от NDHQ:\n\n{message}",
+                        "parse_mode": "HTML"
+                    },
+                    timeout=10
+                )
+                
+                if response.status_code == 200:
+                    success_count += 1
+                    results.append({"user_id": target_user_id, "status": "success"})
+                else:
+                    failed_count += 1
+                    results.append({"user_id": target_user_id, "status": "failed", "error": response.text})
+                
+                # Небольшая задержка чтобы не превысить лимиты Telegram
+                await asyncio.sleep(0.1)
+                
+            except Exception as e:
+                failed_count += 1
+                results.append({"user_id": target_user_id, "status": "failed", "error": str(e)})
+        
+        return {
+            "status": "ok",
+            "message": f"Рассылка отправлена: {success_count} успешно, {failed_count} с ошибками",
+            "success_count": success_count,
+            "failed_count": failed_count,
+            "results": results
+        }
+        
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
 
 # АНАЛИТИКА - УЛУЧШЕННАЯ ВЕРСИЯ
 
