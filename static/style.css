@@ -162,24 +162,29 @@ body {
   background-color: #1f2631;
 }
 
+.badge {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 10px;
+  line-height: 1;
+  vertical-align: middle;
+}
+
 .badge-new {
-  display:inline-block;
-  margin-left:8px;
-  padding:2px 8px;
-  font-size:12px;
-  border-radius:12px;
-  background:#ff3b30;
-  color:#fff;
+  background: #ff3b30;  /* ярко-красный */
+  color: #fff;
+  box-shadow: 0 0 0 2px rgba(255,59,48,0.15) inset;
 }
+
 .badge-popular {
-  display:inline-block;
-  margin-left:8px;
-  padding:2px 8px;
-  font-size:12px;
-  border-radius:12px;
-  background:#ff9500;
-  color:#fff;
+  background: #ff9500;  /* оранжевый */
+  color: #fff;
+  box-shadow: 0 0 0 2px rgba(255,149,0,0.15) inset;
 }
+
 
 
 
