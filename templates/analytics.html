@@ -858,8 +858,8 @@
         startOfDay: new Date().setHours(0, 0, 0, 0)
     };
 
-    let broadcastUsers = [];
-    let selectedUserIds = new Set();
+let broadcastUsers = [];
+let selectedUserIds = new Set();
 
 async function showBroadcastModal() {
     try {
@@ -883,6 +883,34 @@ async function showBroadcastModal() {
         
     } catch (error) {
         alert('Ошибка загрузки пользователей: ' + error.message);
+    }
+}
+
+function hideBroadcastModal() {
+    document.getElementById('broadcastModal').style.display = 'none';
+    selectedUserIds.clear();
+}
+
+function selectAllUsers() {
+    if (broadcastUsers.length === 0) {
+        alert('Нет пользователей для выбора');
+        return;
+    }
+    selectedUserIds = new Set(broadcastUsers.map(user => user.id));
+    updateSelectedUsersCount();
+    alert(`✅ Выбраны все пользователи: ${broadcastUsers.length} чел.`);
+}
+
+function deselectAllUsers() {
+    selectedUserIds.clear();
+    updateSelectedUsersCount();
+    alert('❌ Выбор очищен');
+}
+
+function updateSelectedUsersCount() {
+    const countElement = document.getElementById('selected-users-count');
+    if (countElement) {
+        countElement.textContent = selectedUserIds.size;
     }
 }
 
@@ -940,7 +968,8 @@ async function sendBroadcast() {
         btn.innerHTML = '📤 Отправить рассылку';
     }
 }
-// Закрытие модального окна при клике вне его
+
+// Обнови функцию window.onclick для обеих модалок
 window.onclick = function(event) {
     const modal = document.getElementById('clearModal');
     const broadcastModal = document.getElementById('broadcastModal');
