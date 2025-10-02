@@ -756,8 +756,26 @@ async def clear_analytics():
 
 @app.get("/analytics", response_class=HTMLResponse)
 async def analytics_page(request: Request):
+    # Получаем initData из Telegram Web App
+    init_data_str = request.query_params.get("tgWebAppData", "")
+    
+    # Проверяем права пользователя
+    user_id, is_admin, is_super_admin = extract_user_roles(init_data_str)
+    
+    if not is_admin:
+        # Показываем страницу с ошибкой
+        return HTMLResponse("""
+        <html>
+            <head><title>Доступ запрещен</title></head>
+            <body style="text-align: center; padding: 50px; font-family: Arial;">
+                <h1>🚫 Доступ запрещен</h1>
+                <p>У вас нет прав для просмотра аналитики</p>
+                <button onclick="window.Telegram.WebApp.close()">Закрыть</button>
+            </body>
+        </html>
+        """)
+    
     return templates.TemplateResponse("analytics.html", {"request": request})
-
 
 
 
