@@ -41,6 +41,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+@app.get("/")
+async def index(request: Request):
+    version = int(datetime.utcnow().timestamp())  # каждая загрузка — новый timestamp
+    return templates.TemplateResponse("index.html", {"request": request, "version": version})
+
 # --- Утилита для проверки прав ---
 def extract_user_roles(init_data_str: str):
     try:
