@@ -52,20 +52,20 @@ def extract_user_roles(init_data_str: str):
         if not user_data:
             return None, False, False
 
-        # Декодируем %7B%22id%22%3A... → {"id":...}
+        # Декодируем строку
         user_json = json.loads(unquote(user_data))
         user_id = str(user_json.get("id"))
 
-        env_vars = dotenv_values(".env")
-        admin_ids = set(map(str.strip, env_vars.get("ADMIN_IDS", "").split(",")))
-        admin_dop = set(map(str.strip, env_vars.get("ADMIN_DOP", "").split(",")))
+        env_vars = dotenv_values("/opt/ndloadouts/.env")
+        admin_ids = set(x.strip() for x in env_vars.get("ADMIN_IDS", "").split(",") if x.strip())
+        admin_dop = set(x.strip() for x in env_vars.get("ADMIN_DOP", "").split(",") if x.strip())
 
         is_super_admin = user_id in admin_ids
         is_admin = is_super_admin or user_id in admin_dop
 
         return user_id, is_admin, is_super_admin
     except Exception as e:
-        print(f"Error extracting user roles: {e}")
+        print(f"[extract_user_roles ERROR] {e}")
         return None, False, False
 
 def prettify_time(ts: str):
