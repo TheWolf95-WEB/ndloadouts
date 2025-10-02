@@ -861,10 +861,17 @@
     let broadcastUsers = [];
     let selectedUserIds = new Set();
 
-    async function showBroadcastModal() {
+async function showBroadcastModal() {
     try {
-        const response = await fetch('/api/analytics/broadcast-users');
+        // Передаем initData в query параметре
+        const initData = window.Telegram?.WebApp?.initData || '';
+        const response = await fetch(`/api/analytics/broadcast-users?initData=${encodeURIComponent(initData)}`);
         const data = await response.json();
+        
+        if (data.error) {
+            alert('Ошибка: ' + data.error);
+            return;
+        }
         
         if (data.users) {
             broadcastUsers = data.users;
@@ -879,27 +886,6 @@
     } catch (error) {
         alert('Ошибка загрузки пользователей: ' + error.message);
     }
-}
-
-function hideBroadcastModal() {
-    document.getElementById('broadcastModal').style.display = 'none';
-    selectedUserIds.clear();
-}
-
-function selectAllUsers() {
-    selectedUserIds = new Set(broadcastUsers.map(user => user.id));
-    updateSelectedUsersCount();
-    alert(`✅ Выбраны все пользователи: ${broadcastUsers.length} чел.`);
-}
-
-function deselectAllUsers() {
-    selectedUserIds.clear();
-    updateSelectedUsersCount();
-    alert('❌ Выбор очищен');
-}
-
-function updateSelectedUsersCount() {
-    document.getElementById('selected-users-count').textContent = selectedUserIds.size;
 }
 
 async function sendBroadcast() {
@@ -924,11 +910,12 @@ async function sendBroadcast() {
     btn.innerHTML = '⏳ Отправка...';
     
     try {
+        const initData = window.Telegram?.WebApp?.initData || '';
         const response = await fetch('/api/analytics/broadcast', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                initData: window.Telegram?.WebApp?.initData,
+                initData: initData,
                 message: message,
                 user_ids: Array.from(selectedUserIds)
             })
@@ -957,7 +944,6 @@ async function sendBroadcast() {
         btn.innerHTML = '📤 Отправить рассылку';
     }
 }
-
     
 // Закрытие модального окна при клике вне его
 window.onclick = function(event) {
