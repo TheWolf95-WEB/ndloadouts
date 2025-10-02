@@ -811,7 +811,7 @@
             const data = await response.json();
             currentData = data;
             
-            updateStats(data.stats);
+            updateStats(data.stats, data.users);
             updateUsers(data.users);
             updateActivity(data.recent_activity);
             updatePopularActions(data.popular_actions);
@@ -839,11 +839,30 @@
         }
     }
 
-    function updateStats(stats) {
+    function updateStats(stats, users) {
         document.getElementById('total-users').textContent = stats.total_users;
         document.getElementById('online-users').textContent = stats.online_users;
-        document.getElementById('total-actions').textContent = stats.total_actions;
+        
+        // Вместо "Всего действий" показываем статистику по устройствам
+        const deviceStats = calculateDeviceStats(users);
+        document.getElementById('total-actions').textContent = deviceStats;
+        document.getElementById('total-actions').parentNode.querySelector('.stat-label').textContent = '📱 Устройства';
+        
         document.getElementById('total-errors').textContent = stats.total_errors;
+    }
+
+    function calculateDeviceStats(users) {
+        if (!users || users.length === 0) return '0/0';
+        
+        const mobileUsers = users.filter(user => 
+            user.platform === 'android' || user.platform === 'ios'
+        ).length;
+        
+        const desktopUsers = users.filter(user => 
+            user.platform === 'tdesktop' || user.platform === 'web'
+        ).length;
+        
+        return `${mobileUsers}📱/${desktopUsers}💻`;
     }
 
     function updateUsers(users) {
@@ -885,7 +904,7 @@
                             </span>
                             <span>${user.platform === 'android' || user.platform === 'ios' ? '📱 Телефон' : '💻 ПК'}</span>
                             <span>${user.actions_count} действий</span>
-                            ${user.username ? `<a href="https://t.me/${user.username}" target="_blank" style="color: var(--accent-secondary); text-decoration: none;">@${user.username}</a>` : ''}
+                            ${user.username ? `<a href="https://t.me/${user.username}" target="_blank" style="color: var(--accent-secondary; text-decoration: none;">@${user.username}</a>` : ''}
                         </div>
                     </div>
                 </div>
@@ -930,7 +949,6 @@
                     <div class="activity-text">
                         <div class="activity-user">
                             ${formatUserName(activity.user)}
-                            ${activity.username ? `<a href="https://t.me/${activity.username}" target="_blank" style="color: var(--accent-secondary); margin-left: 8px; text-decoration: none;">💬</a>` : ''}
                         </div>
                         <div class="activity-desc">${activity.action}</div>
                         <div class="activity-meta">
