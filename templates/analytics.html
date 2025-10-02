@@ -792,7 +792,7 @@
         NDHQ © 2025 — Система расширенной аналитики
     </div>
 
-  <script>
+<script>
     let currentData = null;
 
     async function loadData() {
@@ -850,14 +850,17 @@
         const usersList = document.getElementById('user-list');
         const usersCount = document.getElementById('users-count');
         
-        // Только активные пользователи (онлайн + недавние)
+        // Правильно считаем онлайн пользователей
+        const onlineUsers = users.filter(user => user.status === 'online');
         const activeUsers = users.filter(user => 
             user.status === 'online' || 
-            user.last_seen.includes('03.10.2025') || // Сегодня
-            user.last_seen.includes('02.10.2025')    // Вчера
+            isRecentActivity(user.last_seen)
         );
         
         usersCount.textContent = activeUsers.length;
+        
+        // Обновляем счетчик онлайн в статистике
+        document.getElementById('online-users').textContent = onlineUsers.length;
         
         if (activeUsers.length === 0) {
             usersList.innerHTML = `
@@ -926,7 +929,7 @@
                     <div class="activity-icon">${activity.platform}</div>
                     <div class="activity-text">
                         <div class="activity-user">
-                            ${activity.user}
+                            ${formatUserName(activity.user)}
                             ${activity.username ? `<a href="https://t.me/${activity.username}" target="_blank" style="color: var(--accent-secondary); margin-left: 8px; text-decoration: none;">💬</a>` : ''}
                         </div>
                         <div class="activity-desc">${activity.action}</div>
@@ -1004,6 +1007,27 @@
                 </div>
             </div>
         `).join('');
+    }
+
+    // Вспомогательные функции
+    function isRecentActivity(lastSeen) {
+        if (!lastSeen) return false;
+        
+        try {
+            // Проверяем активность за последние 24 часа
+            const now = new Date();
+            const activityDate = new Date(lastSeen.split(' ').reverse().join('-'));
+            const diffHours = (now - activityDate) / (1000 * 60 * 60);
+            
+            return diffHours < 24;
+        } catch {
+            return false;
+        }
+    }
+
+    function formatUserName(userString) {
+        // Убираем ID из отображения в активности
+        return userString.split(' | ')[0];
     }
 
     function showClearModal() {
