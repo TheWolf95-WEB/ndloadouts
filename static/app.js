@@ -758,72 +758,79 @@ cachedBuilds = sorted;
       const headerTop = wrapper.querySelector('.loadout__header--top');
 
 
-    const tabContents = build.tabs.map((tab, i) => `
-      <div class="loadout__tab-content ${i === 0 ? 'is-active' : ''}" data-tab-content="tab-${buildIndex}-${i}">
-        <div class="loadout__modules">
-          ${tab.items.map(itemKey => {
-            const wrap = modulesByType[build.weapon_type];
-            const norm = s => String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
-            const mod  = wrap?.byKey?.[itemKey] || wrap?.byKey?.[norm(itemKey)] || null;
-            const slot = mod?.category || '—';
-            const ru   = mod?.ru || itemKey;
-            return `
-              <div class="loadout__module">
-                <span class="loadout__module-slot">${slot}</span>
-                <span class="loadout__module-name">${ru}</span>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      </div>
-    `).join('');
+const tabBtns = build.tabs.map((tab, i) =>
+  `<button class="loadout__tab ${i === 0 ? 'is-active' : ''}" data-tab="tab-${buildIndex}-${i}">${tab.label}</button>`
+).join('');
 
-    wrapper.innerHTML = `
-      <div class="loadout__header js-loadout-toggle">
-        <div class="loadout__header--top">
-          <button class="loadout__toggle-icon" type="button"><i class="fa-solid fa-chevron-down"></i></button>
-          <h3 class="loadout__title">${build.title}</h3>
-          <span class="loadout__date">${build.date || ''}</span>
-        </div>
-        <div class="loadout__meta">
-          <div class="loadout__tops">${tops}</div>
-          <div class="loadout__type">${weaponTypeRu}</div>
-        </div>
-      </div>
-      <div class="loadout__content" style="max-height: 0; overflow: hidden;">
-        <div class="loadout__inner">
-          <div class="loadout__tabs">
-            <div class="loadout__tab-buttons">${tabBtns}</div>
-            <div class="loadout__tab-contents">${tabContents}</div>
+const tabContents = build.tabs.map((tab, i) => `
+  <div class="loadout__tab-content ${i === 0 ? 'is-active' : ''}" data-tab-content="tab-${buildIndex}-${i}">
+    <div class="loadout__modules">
+      ${tab.items.map(itemKey => {
+        const wrap = modulesByType[build.weapon_type];
+        const norm = s => String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
+        const mod  = wrap?.byKey?.[itemKey] || wrap?.byKey?.[norm(itemKey)] || null;
+        const slot = mod?.category || '—';
+        const ru   = mod?.ru || itemKey;
+        return `
+          <div class="loadout__module">
+            <span class="loadout__module-slot">${slot}</span>
+            <span class="loadout__module-name">${ru}</span>
           </div>
-        </div>
+        `;
+      }).join('')}
+    </div>
+  </div>
+`).join('');
+
+wrapper.innerHTML = `
+  <div class="loadout__header js-loadout-toggle">
+    <div class="loadout__header--top">
+      <button class="loadout__toggle-icon" type="button"><i class="fa-solid fa-chevron-down"></i></button>
+      <h3 class="loadout__title">${build.title}</h3>
+      <span class="loadout__date">${build.date || ''}</span>
+    </div>
+    <div class="loadout__meta">
+      <div class="loadout__tops">${tops}</div>
+      <div class="loadout__type">${weaponTypeRu}</div>
+    </div>
+  </div>
+  <div class="loadout__content" style="max-height: 0; overflow: hidden;">
+    <div class="loadout__inner">
+      <div class="loadout__tabs">
+        <div class="loadout__tab-buttons">${tabBtns}</div>
+        <div class="loadout__tab-contents">${tabContents}</div>
       </div>
-    `;
+    </div>
+  </div>
+`;
 
-    const cats = Array.isArray(build.categories) ? build.categories : [];
-    const headerTop = wrapper.querySelector('.loadout__header--top');
-    
-    // показываем только один бэйдж с приоритетом: Новинки > Популярное
-    let badgeText = null;
-    let badgeClass = null;
-    
-    if (cats.includes('Новинки')) {
-      badgeText = 'Новинка';
-      badgeClass = 'badge-new';
-    } else if (cats.includes('Популярное')) {
-      badgeText = 'Популярное';
-      badgeClass = 'badge-popular';
-    }
-    
-    if (badgeText && headerTop) {
-      const badge = document.createElement('span');
-      badge.className = `badge ${badgeClass}`;
-      badge.textContent = badgeText;
-      headerTop.appendChild(badge);
-    }
+// ---- БЕЙДЖИ (после вставки HTML) ----
+let cats = [];
+if (Array.isArray(build.categories)) {
+  cats = build.categories;
+} else if (typeof build.categories === 'string') {
+  try { cats = JSON.parse(build.categories.replace(/'/g, '"')); } catch { cats = []; }
+}
 
-    buildsList.appendChild(wrapper);
-  });
+const headerTop = wrapper.querySelector('.loadout__header--top');
+
+let badgeText = null;
+let badgeClass = null;
+if (cats.includes('Новинки')) {
+  badgeText = 'Новинка';
+  badgeClass = 'badge-new';
+} else if (cats.includes('Популярное')) {
+  badgeText = 'Популярное';
+  badgeClass = 'badge-popular';
+}
+if (badgeText && headerTop) {
+  const badge = document.createElement('span');
+  badge.className = `badge ${badgeClass}`;
+  badge.textContent = badgeText;
+  headerTop.appendChild(badge);
+}
+
+buildsList.appendChild(wrapper);
 
   // сброс раскрытия
   document.querySelectorAll('.js-loadout').forEach(el => {
