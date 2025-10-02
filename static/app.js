@@ -26,7 +26,6 @@ let currentSubmitHandler = null;
 let cachedBuilds = [];        // кэш всех сборок последней загрузки
 let currentCategory = 'all';  // текущая категория
 let screenHistory = [];
-let latestBuildId = null; // ID самой свежей сборки
 
 
 // === Приветствие и загрузка админов ===
@@ -58,14 +57,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     dateInput.value = today;
   }
 
-  // ❶ Узнаём ID самой свежей сборки (из всех категорий)
-try {
-  const resAll = await fetch('/api/builds?category=all');
-  const allBuilds = await resAll.json();
-  latestBuildId = getLatestBuildId(allBuilds);
-} catch (e) {
-  console.warn('Не удалось определить новинку:', e);
-}
 
   // 👉 Добавить ожидание checkAdminStatus
   await checkAdminStatus();
@@ -501,14 +492,6 @@ try {
     currentEditId = null;
     document.getElementById('submit-build').textContent = '➕ Добавить';
 
-    // 🔁 Пересчитываем "Новинку"
-    try {
-      const resAll = await fetch('/api/builds?category=all');
-      const allBuilds = await resAll.json();
-      latestBuildId = getLatestBuildId(allBuilds);
-    } catch (e) {
-      console.warn("Не удалось обновить новинку:", e);
-    }
 
     // 👁 Если открыт экран сборок — обновляем его
     if (document.getElementById('screen-builds')?.classList.contains('active')) {
@@ -706,30 +689,44 @@ async function loadBuilds(category = 'all') {
     return;
   }
 
-  // сортируем новые вверх
-  const getTime = (b) => {
-    let t = b.created_at ? Date.parse(b.created_at) : NaN;
-    if (Number.isNaN(t)) {
-      const dt = parseRuDate(b.date);
-      t = dt ? dt.getTime() : 0;
-    }
-    return t || 0;
-  };
+  function getTime(b) {
+  let t = b.created_at ? Date.parse(b.created_at) : NaN;
+  if (Number.isNaN(t)) {
+    const dt = parseRuDate(b.date);
+    t = dt ? dt.getTime() : 0;
+  }
+  return t || 0;
+}
 
-  const buildsSorted = [...builds].sort((a, b) => getTime(b) - getTime(a));
+function prioritySort(a, b) {
+  const A = a.categories || [];
+  const B = b.categories || [];
 
-  // кэш именно в отсортированном порядке
-  cachedBuilds = buildsSorted;
+  // 1) "Новинки" всегда выше остальных
+  if (A.includes("Новинки") && !B.includes("Новинки")) return -1;
+  if (!A.includes("Новинки") && B.includes("Новинки")) return 1;
+
+  // 2) "Популярное" сразу после "Новинки"
+  if (A.includes("Популярное") && !B.includes("Популярное")) return -1;
+  if (!A.includes("Популярное") && B.includes("Популярное")) return 1;
+
+  // 3) далее по дате: новее выше
+  return getTime(b) - getTime(a);
+}
+
+const sorted = [...builds].sort(prioritySort);
+cachedBuilds = sorted;
+
 
   // загрузим справочники модулей только для типов, которые реально есть
-  const uniqueTypes = [...new Set(buildsSorted.map(b => b.weapon_type))];
+  const uniqueTypes = [...new Set(sorted.map(b => b.weapon_type))];
   await Promise.all(uniqueTypes.map(loadModules));
 
   // рендер по отсортированному массиву
   buildsList.innerHTML = '';
   const topColors = ['#FFD700', '#B0B0B0', '#FF8C00'];
 
-  buildsSorted.forEach((build, buildIndex) => {
+  sorted.forEach((build, buildIndex) => {
     const wrapper = document.createElement('div');
     wrapper.className = 'loadout js-loadout';
 
@@ -786,13 +783,22 @@ async function loadBuilds(category = 'all') {
       </div>
     `;
 
-    // бейдж "Новинка"
-    if (String(build.id) === String(latestBuildId)) {
-      wrapper.classList.add('is-new');
+    // бейджи по категориям
+    const cats = build.categories || [];
+    const headerTop = wrapper.querySelector('.loadout__header--top');
+    
+    if (cats.includes("Новинки")) {
       const badge = document.createElement('span');
       badge.className = 'badge-new';
       badge.textContent = 'Новинка';
-      wrapper.querySelector('.loadout__header--top')?.appendChild(badge);
+      headerTop?.appendChild(badge);
+    }
+    
+    if (cats.includes("Популярное")) {
+      const badge = document.createElement('span');
+      badge.className = 'badge-popular';
+      badge.textContent = 'Популярное';
+      headerTop?.appendChild(badge);
     }
 
     buildsList.appendChild(wrapper);
