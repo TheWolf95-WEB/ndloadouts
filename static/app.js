@@ -689,7 +689,7 @@ async function loadBuilds(category = 'all') {
     return;
   }
 
-  function getTime(b) {
+function getTime(b) {
   let t = b.created_at ? Date.parse(b.created_at) : NaN;
   if (Number.isNaN(t)) {
     const dt = parseRuDate(b.date);
@@ -736,7 +736,6 @@ cachedBuilds = sorted;
         ? `<span class="loadout__top" style="background:${topColors[i]}">#${i + 1} ${moduleNameMap[mod] || mod}</span>`
         : '')
       .join('');
-
 
 const tabBtns = build.tabs.map((tab, i) =>
   `<button class="loadout__tab ${i === 0 ? 'is-active' : ''}" data-tab="tab-${buildIndex}-${i}">${tab.label}</button>`
@@ -811,6 +810,9 @@ if (badgeText && headerTop) {
 }
 
 buildsList.appendChild(wrapper);
+
+    }); // закрытие forEach для sorted.forEach((build, buildIndex)
+});
 
   // сброс раскрытия
   document.querySelectorAll('.js-loadout').forEach(el => {
@@ -1278,4 +1280,3 @@ document.addEventListener('touchend', (e) => {
     goBack();
   }
 });
-  })}
