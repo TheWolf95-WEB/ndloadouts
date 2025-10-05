@@ -1142,8 +1142,4 @@ select:disabled {
   .challenges-grid {
     grid-template-columns: 1fr;
   }
-  .stats-bar {
-    flex-direction: column;
-    gap: 10px;
-  }
 }
