@@ -1,5 +1,10 @@
 // === Battlefield WebApp (stable) ===
 document.addEventListener("DOMContentLoaded", async () => {
+  if (window.__bfLoaded) return;
+  window.__bfLoaded = true;
+
+
+  
   const BF_API_BASE = "/api/bf";
   let bfCategories = [];
   let bfChallenges = [];
@@ -75,6 +80,7 @@ async function populateCategorySelect(selectedId = null) {
       if (selectedId && Number(selectedId) === cat.id) opt.selected = true;
       select.appendChild(opt);
     });
+    
   } catch (e) {
     console.error("Ошибка при загрузке категорий:", e);
   }
@@ -83,7 +89,6 @@ async function populateCategorySelect(selectedId = null) {
   
 
   // Кнопки "Назад" + страховка делегированием
-  const hookBack = () => showBfMain();
   document.getElementById("bf-back-from-add")?.addEventListener("click", showBfMain);
   document.getElementById("bf-back-to-bfmain")?.addEventListener("click", showBfMain);
   document.getElementById("bf-back-from-challenges")?.addEventListener("click", showBfMain);
@@ -135,7 +140,7 @@ document.getElementById("bf-add-category-btn")?.addEventListener("click", async 
       el.classList.remove("active"); 
       el.style.display = "none"; 
     });
-    document.getElementById("screen-battlefield-main").style.display = "none";
+    document.getElementById("screen-battlefield-main")?.style?.setProperty("display", "none");
   
     const target = bfScreens[screenId];
     if (target) { 
@@ -448,7 +453,7 @@ async function updateProgress(id, delta) {
   }
 }
 
-
+}
   
 
 function setupUserChallengeSearch() {
