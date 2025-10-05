@@ -889,6 +889,27 @@ select:disabled {
   box-shadow: 0 0 8px rgba(0,200,255,0.25);
 }
 
+.status-tabs {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.status-btn {
+  background: var(--bf-card);
+  color: var(--bf-subtext);
+  border: 1px solid var(--bf-border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.status-btn.active {
+  background: linear-gradient(90deg, var(--bf-accent), var(--bf-accent-dim));
+  color: #fff;
+  border: none;
+}
 
 
 /* === Пользовательский экран испытаний (единый стиль с базой) === */
