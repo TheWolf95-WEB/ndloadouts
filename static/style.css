@@ -850,6 +850,7 @@ select:disabled {
   padding-bottom: 6px;
   scrollbar-width: thin;
   scroll-behavior: smooth;
+  margin-bottom: 12px;
 }
 
 #bf-tabs::-webkit-scrollbar {
@@ -887,6 +888,12 @@ select:disabled {
   color: #fff;
   border: none;
   box-shadow: 0 0 8px rgba(0,200,255,0.25);
+}
+
+.challenge-card-user.completed {
+  opacity: 0.4;
+  transform: scale(0.98);
+  transition: all 0.5s ease;
 }
 
 /* === Кнопки статусов === */
