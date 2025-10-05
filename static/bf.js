@@ -579,8 +579,6 @@ async function loadBfChallengesTable() {
     }
 
     gridEl.innerHTML = bfChallenges.map(ch => {
-      const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
-      
       return `
         <div class="challenge-card-admin" data-category="${ch.category_name || ''}">
           <div class="challenge-card-header">
@@ -592,17 +590,7 @@ async function loadBfChallengesTable() {
             <div class="challenge-title-en">${ch.title_en || 'Без названия'}</div>
             <div class="challenge-title-ru">${ch.title_ru || 'Без названия'}</div>
           </div>
-          
-          <div class="challenge-progress-admin">
-            <div class="progress-text">
-              <span>Прогресс</span>
-              <span>${ch.current} / ${ch.goal}</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" style="width: ${percent}%"></div>
-            </div>
-          </div>
-          
+    
           <div class="challenge-actions">
             <button class="btn-small btn-edit" onclick="editBfChallenge(${ch.id})">
               ✏️ Редактировать
@@ -614,6 +602,7 @@ async function loadBfChallengesTable() {
         </div>
       `;
     }).join('');
+
 
     // Добавляем функциональность поиска и фильтрации
     setupSearchAndFilter();
@@ -686,8 +675,9 @@ async function addBfChallenge() {
 
   const title_en = document.getElementById("bf-title-en")?.value?.trim() || "";
   const title_ru = document.getElementById("bf-title-ru")?.value?.trim() || "";
-  const current  = Number(document.getElementById("bf-current")?.value) || 0;
+  const current  = 0; // всегда ноль
   const goal     = Number(document.getElementById("bf-goal")?.value) || 0;
+
 
   if (!categoryName) return alert("Введите категорию");
   if (!title_en || !title_ru) return alert("Введите названия EN и RU");
