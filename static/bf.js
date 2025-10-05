@@ -259,50 +259,115 @@ async function loadBfChallengesTable() {
     const res = await fetch(`${BF_API_BASE}/challenges`);
     bfChallenges = await res.json();
 
-    const tableEl = document.getElementById("bf-challenges-table");
-    if (!tableEl) return;
+    const gridEl = document.getElementById("bf-challenges-grid");
+    if (!gridEl) return;
+
+    // Обновляем статистику
+    document.getElementById("bf-total-challenges").textContent = bfChallenges.length;
+    
+    // Получаем уникальные категории для фильтра
+    const categories = [...new Set(bfChallenges.map(ch => ch.category_name).filter(Boolean))];
+    const filterSelect = document.getElementById("bf-filter-category");
+    filterSelect.innerHTML = '<option value="">Все категории</option>' + 
+      categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+    
+    document.getElementById("bf-total-categories").textContent = categories.length;
 
     if (!bfChallenges.length) {
-      tableEl.innerHTML = "<p style='text-align:center;color:#888;'>Пока нет испытаний</p>";
+      gridEl.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1;">
+          <div class="icon">🎯</div>
+          <h3>Пока нет испытаний</h3>
+          <p>Добавьте первое испытание, чтобы начать</p>
+          <button class="btn btn-primary" onclick="document.getElementById('bf-add-challenge-db-btn').click()">
+            ➕ Добавить испытание
+          </button>
+        </div>
+      `;
       return;
     }
 
-    // ✅ правильная разметка таблицы
-    tableEl.innerHTML = `
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Категория</th>
-            <th>EN</th>
-            <th>RU</th>
-            <th>Прогресс</th>
-            <th>Действия</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${bfChallenges.map(ch => `
-            <tr>
-              <td>${ch.id}</td>
-              <td>${ch.category_name || "-"}</td>
-              <td>${ch.title_en}</td>
-              <td>${ch.title_ru}</td>
-              <td>${ch.current}/${ch.goal}</td>
-              <td>
-                <button class="btn-small" onclick="editBfChallenge(${ch.id})">✏️</button>
-                <button class="btn-small" onclick="deleteBfChallenge(${ch.id})">🗑</button>
-              </td>
-            </tr>
-          `).join("")}
-        </tbody>
-      </table>
-    `;
+    gridEl.innerHTML = bfChallenges.map(ch => {
+      const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
+      
+      return `
+        <div class="challenge-card-admin" data-category="${ch.category_name || ''}">
+          <div class="challenge-card-header">
+            <span class="challenge-id">#${ch.id}</span>
+            <span class="challenge-category">${ch.category_name || 'Без категории'}</span>
+          </div>
+          
+          <div class="challenge-titles">
+            <div class="challenge-title-en">${ch.title_en || 'Без названия'}</div>
+            <div class="challenge-title-ru">${ch.title_ru || 'Без названия'}</div>
+          </div>
+          
+          <div class="challenge-progress-admin">
+            <div class="progress-text">
+              <span>Прогресс</span>
+              <span>${ch.current} / ${ch.goal}</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: ${percent}%"></div>
+            </div>
+          </div>
+          
+          <div class="challenge-actions">
+            <button class="btn-small btn-edit" onclick="editBfChallenge(${ch.id})">
+              ✏️ Редактировать
+            </button>
+            <button class="btn-small btn-delete" onclick="deleteBfChallenge(${ch.id})">
+              🗑 Удалить
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Добавляем функциональность поиска и фильтрации
+    setupSearchAndFilter();
+
   } catch (e) {
-    console.error("Ошибка при загрузке таблицы испытаний:", e);
-    const tableEl = document.getElementById("bf-challenges-table");
-    if (tableEl)
-      tableEl.innerHTML = "<p style='text-align:center;color:#e66;'>Ошибка загрузки</p>";
+    console.error("Ошибка при загрузке испытаний:", e);
+    const gridEl = document.getElementById("bf-challenges-grid");
+    if (gridEl) {
+      gridEl.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1;">
+          <div class="icon">❌</div>
+          <h3>Ошибка загрузки</h3>
+          <p>Не удалось загрузить испытания</p>
+          <button class="btn btn-secondary" onclick="loadBfChallengesTable()">
+            🔄 Повторить
+          </button>
+        </div>
+      `;
+    }
   }
+}
+
+// Функция для поиска и фильтрации
+function setupSearchAndFilter() {
+  const searchInput = document.getElementById('bf-search-challenges');
+  const filterSelect = document.getElementById('bf-filter-category');
+  
+  const filterChallenges = () => {
+    const searchTerm = searchInput.value.toLowerCase();
+    const selectedCategory = filterSelect.value;
+    
+    document.querySelectorAll('.challenge-card-admin').forEach(card => {
+      const titleEn = card.querySelector('.challenge-title-en').textContent.toLowerCase();
+      const titleRu = card.querySelector('.challenge-title-ru').textContent.toLowerCase();
+      const category = card.getAttribute('data-category');
+      
+      const matchesSearch = titleEn.includes(searchTerm) || titleRu.includes(searchTerm);
+      const matchesCategory = !selectedCategory || category === selectedCategory;
+      
+      card.style.display = (matchesSearch && matchesCategory) ? 'block' : 'none';
+    });
+  };
+  
+  searchInput.addEventListener('input', filterChallenges);
+  filterSelect.addEventListener('change', filterChallenges);
 }
 
 
