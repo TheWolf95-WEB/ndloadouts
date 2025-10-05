@@ -904,80 +904,26 @@ select:disabled {
 }
 
 
-/* Темная тема для базы испытаний */
-#screen-bf-challenges-db {
-  background: #1a1a1a;
-  color: #ffffff;
-  min-height: 100vh;
-  padding: 20px;
-}
-
+/* Стили для экрана базы испытаний */
 .screen-header {
   text-align: center;
   margin-bottom: 25px;
-  border-bottom: 1px solid #333;
-  padding-bottom: 15px;
-}
-
-.screen-header h2 {
-  color: #ffffff;
-  margin: 0 0 5px 0;
-  font-size: 24px;
-  font-weight: 600;
 }
 
 .screen-subtitle {
-  color: #888;
+  color: #666;
   font-size: 14px;
-  margin: 0;
+  margin-top: -10px;
 }
 
-/* Кнопки */
-.btn-group {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.btn {
-  padding: 12px 20px;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  flex: 1;
-}
-
-.btn-back {
-  background: #333;
-  color: #fff;
-  max-width: 120px;
-}
-
-.btn-back:hover {
-  background: #444;
-}
-
-.btn-primary {
-  background: #4CAF50;
-  color: white;
-}
-
-.btn-primary:hover {
-  background: #45a049;
-}
-
-/* Статистика */
 .stats-bar {
   display: flex;
-  gap: 15px;
+  gap: 20px;
   margin-bottom: 20px;
   padding: 15px;
-  background: #2d2d2d;
-  border-radius: 10px;
-  border: 1px solid #333;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  color: white;
 }
 
 .stat-item {
@@ -990,50 +936,35 @@ select:disabled {
   font-size: 24px;
   font-weight: bold;
   margin-bottom: 5px;
-  color: #4CAF50;
 }
 
 .stat-label {
   font-size: 12px;
-  color: #888;
+  opacity: 0.9;
 }
 
-/* Поиск и фильтры */
 .search-box {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
 }
 
-.search-input-wrapper {
-  flex: 1;
-  position: relative;
-}
-
 .search-input {
-  width: 100%;
-  padding: 12px 15px;
-  border: 1px solid #333;
+  flex: 1;
+  padding: 10px 15px;
+  border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 14px;
-  background: #2d2d2d;
-  color: #fff;
-}
-
-.search-input::placeholder {
-  color: #666;
 }
 
 .filter-select {
-  padding: 12px 15px;
-  border: 1px solid #333;
+  padding: 10px 15px;
+  border: 1px solid #ddd;
   border-radius: 8px;
-  background: #2d2d2d;
-  color: #fff;
+  background: white;
   min-width: 150px;
 }
 
-/* Сетка карточек */
 .challenges-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -1042,40 +973,40 @@ select:disabled {
 }
 
 .challenge-card-admin {
-  background: #2d2d2d;
-  border-radius: 10px;
+  background: white;
+  border-radius: 12px;
   padding: 18px;
-  border: 1px solid #333;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 1px solid #e0e0e0;
   transition: all 0.3s ease;
   position: relative;
 }
 
 .challenge-card-admin:hover {
-  border-color: #4CAF50;
   transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.1);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
 }
 
 .challenge-card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .challenge-id {
-  background: #333;
-  color: #888;
-  padding: 4px 10px;
-  border-radius: 12px;
+  background: #f0f0f0;
+  color: #666;
+  padding: 2px 8px;
+  border-radius: 10px;
   font-size: 11px;
   font-weight: bold;
 }
 
 .challenge-category {
-  background: rgba(76, 175, 80, 0.2);
-  color: #4CAF50;
-  padding: 4px 12px;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 10px;
   border-radius: 12px;
   font-size: 11px;
   font-weight: 500;
@@ -1086,15 +1017,15 @@ select:disabled {
 }
 
 .challenge-title-en {
-  font-weight: 600;
+  font-weight: bold;
   font-size: 16px;
   margin-bottom: 5px;
-  color: #fff;
+  color: #333;
 }
 
 .challenge-title-ru {
   font-size: 14px;
-  color: #888;
+  color: #666;
   margin-bottom: 10px;
 }
 
@@ -1106,13 +1037,13 @@ select:disabled {
   display: flex;
   justify-content: space-between;
   font-size: 12px;
-  color: #888;
-  margin-bottom: 8px;
+  color: #666;
+  margin-bottom: 5px;
 }
 
 .progress-bar {
   height: 6px;
-  background: #333;
+  background: #f0f0f0;
   border-radius: 3px;
   overflow: hidden;
 }
@@ -1131,51 +1062,36 @@ select:disabled {
 }
 
 .btn-small {
-  padding: 8px 15px;
+  padding: 6px 12px;
   border: none;
   border-radius: 6px;
   font-size: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-weight: 500;
 }
 
 .btn-edit {
-  background: rgba(33, 150, 243, 0.2);
-  color: #2196F3;
-  border: 1px solid rgba(33, 150, 243, 0.3);
+  background: #2196F3;
+  color: white;
 }
 
 .btn-edit:hover {
-  background: rgba(33, 150, 243, 0.3);
+  background: #1976d2;
 }
 
 .btn-delete {
-  background: rgba(244, 67, 54, 0.2);
-  color: #f44336;
-  border: 1px solid rgba(244, 67, 54, 0.3);
+  background: #f44336;
+  color: white;
 }
 
 .btn-delete:hover {
-  background: rgba(244, 67, 54, 0.3);
-}
-
-/* Состояния загрузки и пустые состояния */
-.loading-spinner {
-  text-align: center;
-  padding: 40px;
-  color: #666;
-  grid-column: 1 / -1;
+  background: #d32f2f;
 }
 
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 40px 20px;
   color: #666;
-  grid-column: 1 / -1;
-  background: #2d2d2d;
-  border-radius: 10px;
-  border: 1px solid #333;
 }
 
 .empty-state .icon {
@@ -1184,12 +1100,9 @@ select:disabled {
   opacity: 0.5;
 }
 
-.empty-state h3 {
-  color: #888;
-  margin-bottom: 10px;
-}
-
-.empty-state p {
+.loading-spinner {
+  text-align: center;
+  padding: 40px;
   color: #666;
-  margin-bottom: 20px;
+  grid-column: 1 / -1;
 }
