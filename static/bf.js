@@ -72,13 +72,28 @@ async function populateCategorySelect(selectedId = null) {
     if (!select) return;
 
     select.innerHTML = `<option value="">Выберите категорию...</option>`;
-    bfCategories.forEach(cat => {
-      const opt = document.createElement("option");
-      opt.value = cat.id;
-      opt.textContent = cat.name;
-      if (selectedId && Number(selectedId) === cat.id) opt.selected = true;
-      select.appendChild(opt);
+    bfCategories.forEach((cat, i) => {
+      const btn = document.createElement("div");
+      btn.className = "tab-btn";
+      btn.textContent = cat.name;
+      btn.dataset.id = cat.id;
+      btn.onclick = () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        loadBfChallenges(cat.id);
+      };
+      tabsEl.appendChild(btn);
     });
+    
+    // активируем только первую вкладку (без статусов)
+    if (bfCategories.length) {
+      const firstTab = document.querySelector(".tab-btn");
+      if (firstTab) {
+        firstTab.classList.add("active");
+        await loadBfChallenges(bfCategories[0].id);
+      }
+    }
+
   } catch (e) {
     console.error("Ошибка при загрузке категорий:", e);
   }
@@ -275,18 +290,26 @@ document.getElementById("bf-add-category-btn")?.addEventListener("click", async 
   }
 
 // JS фильтрацию по статусу:
+// === Фильтрация по статусу (Активные / Завершённые) ===
 document.querySelectorAll('.status-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', async () => {
+    const listEl = document.getElementById("bf-challenges-list");
     const alreadyActive = btn.classList.contains('active');
+
+    // Снимаем подсветку со всех
     document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
 
     if (alreadyActive) {
-      document.getElementById("bf-challenges-list").innerHTML = "";
-      return; // если повторно нажали — очистить экран
+      // Если повторный клик — возвращаем текущую категорию
+      const activeTab = document.querySelector("#bf-tabs .tab-btn.active");
+      const categoryId = activeTab?.dataset?.id || null;
+      await loadBfChallenges(categoryId);
+      return;
     }
 
+    // Подсвечиваем текущую кнопку
     btn.classList.add('active');
-    renderChallengesByStatus(btn.dataset.status);
+    await renderChallengesByStatus(btn.dataset.status);
   });
 });
 
