@@ -254,52 +254,57 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  async function loadBfChallengesTable() {
-    try {
-      const res = await fetch(`${BF_API_BASE}/challenges`);
-      bfChallenges = await res.json();
+async function loadBfChallengesTable() {
+  try {
+    const res = await fetch(`${BF_API_BASE}/challenges`);
+    bfChallenges = await res.json();
 
-      const tableEl = document.getElementById("bf-challenges-table");
-      if (!tableEl) return;
+    const tableEl = document.getElementById("bf-challenges-table");
+    if (!tableEl) return;
 
-      if (!bfChallenges.length) {
-        tableEl.innerHTML = "<p style='text-align:center;color:#888;'>Пока нет испытаний</p>";
-        return;
-      }
-
-      tableEl.innerHTML = `
-        <table class="data-table">
-          <thead>
-            <tr>
-              <td data-label="ID">${ch.id}</td>
-              <td data-label="Категория">${ch.category_name || "-"}</td>
-              <td data-label="EN">${ch.title_en}</td>
-              <td data-label="RU">${ch.title_ru}</td>
-              <td data-label="Прогресс">${ch.current}/${ch.goal}</td>
-              <td data-label="Действия">
-            </tr>
-          </thead>
-          <tbody>
-            ${bfChallenges.map(ch => `
-              <tr>
-                <td>${ch.id}</td>
-                <td>${ch.category_name || "-"}</td>
-                <td>${ch.title_en}</td>
-                <td>${ch.title_ru}</td>
-                <td>${ch.current}/${ch.goal}</td>
-                <td>
-                  <button class="btn-small" onclick="editBfChallenge(${ch.id})">✏️</button>
-                  <button class="btn-small" onclick="deleteBfChallenge(${ch.id})">🗑</button>
-                </td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-      `;
-    } catch (e) {
-      console.error("Ошибка при загрузке таблицы испытаний:", e);
+    if (!bfChallenges.length) {
+      tableEl.innerHTML = "<p style='text-align:center;color:#888;'>Пока нет испытаний</p>";
+      return;
     }
+
+    // ✅ правильная разметка таблицы
+    tableEl.innerHTML = `
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Категория</th>
+            <th>EN</th>
+            <th>RU</th>
+            <th>Прогресс</th>
+            <th>Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${bfChallenges.map(ch => `
+            <tr>
+              <td>${ch.id}</td>
+              <td>${ch.category_name || "-"}</td>
+              <td>${ch.title_en}</td>
+              <td>${ch.title_ru}</td>
+              <td>${ch.current}/${ch.goal}</td>
+              <td>
+                <button class="btn-small" onclick="editBfChallenge(${ch.id})">✏️</button>
+                <button class="btn-small" onclick="deleteBfChallenge(${ch.id})">🗑</button>
+              </td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  } catch (e) {
+    console.error("Ошибка при загрузке таблицы испытаний:", e);
+    const tableEl = document.getElementById("bf-challenges-table");
+    if (tableEl)
+      tableEl.innerHTML = "<p style='text-align:center;color:#e66;'>Ошибка загрузки</p>";
   }
+}
+
 
   // ===== CRUD испытаний =====
 async function addBfChallenge() {
