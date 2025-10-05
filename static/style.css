@@ -903,5 +903,33 @@ select:disabled {
   transition: width 0.3s ease;
 }
 
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+.data-table th, .data-table td {
+  border: 1px solid #333;
+  padding: 8px 10px;
+  text-align: center;
+}
+.data-table th {
+  background: #1f2733;
+  color: #fff;
+}
+.data-table tr:nth-child(even) {
+  background: #2b3445;
+}
+.btn-small {
+  background: #444;
+  color: #fff;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.btn-small:hover {
+  background: #666;
+}
 
 
