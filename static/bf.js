@@ -273,22 +273,69 @@ document.getElementById("bf-add-category-btn")?.addEventListener("click", async 
 // JS фильтрацию по статусу:
 document.querySelectorAll('.status-btn').forEach(btn => {
   btn.addEventListener('click', () => {
+    const alreadyActive = btn.classList.contains('active');
     document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+
+    if (alreadyActive) {
+      document.getElementById("bf-challenges-list").innerHTML = "";
+      return; // если повторно нажали — очистить экран
+    }
+
     btn.classList.add('active');
-    const status = btn.dataset.status;
-    renderChallengesByStatus(status);
+    renderChallengesByStatus(btn.dataset.status);
   });
 });
 
-function renderChallengesByStatus(status) {
+
+async function renderChallengesByStatus(status) {
   const listEl = document.getElementById("bf-challenges-list");
   if (!listEl) return;
-  const filtered = bfChallenges.filter(ch => {
+
+  // Загружаем все испытания со всех категорий
+  const res = await fetch(`${BF_API_BASE}/challenges`);
+  const all = await res.json();
+
+  // Фильтрация
+  const filtered = all.filter(ch => {
     const completed = ch.goal > 0 && ch.current >= ch.goal;
-    return status === "completed" ? completed : !completed;
+    if (status === "completed") return completed;
+    if (status === "active") return ch.current > 0 && !completed;
+    return false;
   });
-  renderChallenges(filtered);
+
+  // Вывод
+  if (!filtered.length) {
+    listEl.innerHTML = `<p style="text-align:center;color:#8ea2b6;">Нет испытаний</p>`;
+    return;
+  }
+
+  listEl.innerHTML = filtered.map(ch => {
+    const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
+    return `
+      <div class="challenge-card-user" data-id="${ch.id}">
+        ${ch.category_name ? `<div class="challenge-category">${ch.category_name}</div>` : ""}
+        <div class="challenge-title-en">${ch.title_en}</div>
+        <div class="challenge-title-ru">${ch.title_ru}</div>
+        <div class="progress-text">
+          <span>Прогресс</span>
+          <span>${ch.current} / ${ch.goal}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${percent}%; transition: width 0.3s ease;"></div>
+        </div>
+        <div class="progress-controls">
+          <button class="btn-mini" data-action="minus" data-id="${ch.id}">
+            <i class="fas fa-minus"></i>
+          </button>
+          <button class="btn-mini" data-action="plus" data-id="${ch.id}">
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
+
 
 function renderChallenges(list) {
   const listEl = document.getElementById("bf-challenges-list");
@@ -601,7 +648,7 @@ async function addBfChallenge() {
   let category_id = null;
   try {
     category_id = await ensureCategory(categoryName);
-    await loadBfCategories(); // сразу обновляем список категорий, чтобы убрать старые
+    //await loadBfCategories(); // сразу обновляем список категорий, чтобы убрать старые
   } catch (e) {
     return alert("❌ Не удалось создать/получить категорию:\n" + (e?.message || ""));
   }
