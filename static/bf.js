@@ -128,11 +128,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       const exists = bfCategories.find(c => (c.name || "").trim().toLowerCase() === name.trim().toLowerCase());
       if (exists) return exists.id;
 
-      const res = await fetch(`${BF_API_BASE}/categories?user_id=${window.userInfo?.id ?? ""}`, {
+      const res = await fetch(`${BF_API_BASE}/categories`, {
         method: "POST",
         headers: { "Content-Type":"application/json" },
-        body: JSON.stringify({ name })
+        body: JSON.stringify({
+          name,
+          initData: tg?.initData || ""
+        })
       });
+
 
       if (!res.ok) {
         const text = await res.text().catch(()=>"");
@@ -270,53 +274,56 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // ===== CRUD испытаний =====
-  async function addBfChallenge() {
-    const categoryName = document.getElementById("bf-category-input")?.value?.trim() || "";
-    const title_en = document.getElementById("bf-title-en")?.value?.trim() || "";
-    const title_ru = document.getElementById("bf-title-ru")?.value?.trim() || "";
-    const current  = Number(document.getElementById("bf-current")?.value) || 0;
-    const goal     = Number(document.getElementById("bf-goal")?.value) || 0;
+async function addBfChallenge() {
+  const categoryName = document.getElementById("bf-category-input")?.value?.trim() || "";
+  const title_en = document.getElementById("bf-title-en")?.value?.trim() || "";
+  const title_ru = document.getElementById("bf-title-ru")?.value?.trim() || "";
+  const current  = Number(document.getElementById("bf-current")?.value) || 0;
+  const goal     = Number(document.getElementById("bf-goal")?.value) || 0;
 
-    if (!categoryName) return alert("Введите категорию");
-    if (!title_en || !title_ru) return alert("Введите названия EN и RU");
-    if (goal <= 0) return alert("Цель должна быть > 0");
+  if (!categoryName) return alert("Введите категорию");
+  if (!title_en || !title_ru) return alert("Введите названия EN и RU");
+  if (goal <= 0) return alert("Цель должна быть > 0");
 
-    // Гарантируем, что категория существует и получим её ID
-    let category_id = null;
-    try {
-      category_id = await ensureCategory(categoryName);
-    } catch (e) {
-      return alert("❌ Не удалось создать/получить категорию:\n" + (e?.message || ""));
-    }
-
-    const payload = { category_id, category_name: categoryName, title_en, title_ru, current, goal };
-    const method  = editingChallengeId ? "PUT" : "POST";
-    const url     = editingChallengeId
-      ? `${BF_API_BASE}/challenges/${editingChallengeId}?user_id=${window.userInfo?.id ?? ""}`
-      : `${BF_API_BASE}/challenges?user_id=${window.userInfo?.id ?? ""}`;
-
-    try {
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type":"application/json" },
-        body: JSON.stringify(payload)
-      });
-
-      if (!res.ok) {
-        const text = await res.text().catch(()=> "");
-        alert(`❌ Ошибка при сохранении испытания\nHTTP ${res.status} ${res.statusText}\n${text}`);
-        return;
-      }
-
-      alert(editingChallengeId ? "✅ Испытание обновлено" : "✅ Испытание добавлено");
-      editingChallengeId = null;
-      showBfScreen("db");
-      await loadBfChallengesTable();
-    } catch (err) {
-      console.error("Ошибка при сохранении испытания:", err);
-      alert("❌ Не удалось сохранить испытание");
-    }
+  let category_id = null;
+  try {
+    category_id = await ensureCategory(categoryName);
+  } catch (e) {
+    return alert("❌ Не удалось создать/получить категорию:\n" + (e?.message || ""));
   }
+
+  const payload = { category_id, category_name: categoryName, title_en, title_ru, current, goal };
+  const method  = editingChallengeId ? "PUT" : "POST";
+  const url = editingChallengeId
+    ? `${BF_API_BASE}/challenges/${editingChallengeId}`
+    : `${BF_API_BASE}/challenges`;
+
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type":"application/json" },
+      body: JSON.stringify({
+        ...payload,
+        initData: tg?.initData || ""
+      })
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(()=> "");
+      alert(`❌ Ошибка при сохранении испытания\nHTTP ${res.status} ${res.statusText}\n${text}`);
+      return;
+    }
+
+    alert(editingChallengeId ? "✅ Испытание обновлено" : "✅ Испытание добавлено");
+    editingChallengeId = null;
+    showBfScreen("db");
+    await loadBfChallengesTable();
+  } catch (err) {
+    console.error("Ошибка при сохранении испытания:", err);
+    alert("❌ Не удалось сохранить испытание");
+  }
+}
+
 
   window.deleteBfChallenge = async function(id) {
     if (!confirm("Удалить испытание?")) return;
