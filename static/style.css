@@ -1227,3 +1227,88 @@ select:disabled {
     grid-template-columns: 1fr;
   }
 }
+
+
+
+/* === Экран добавления испытания === */
+#screen-bf-add-challenge {
+  background: var(--bf-bg);
+  color: var(--bf-text);
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+#screen-bf-add-challenge .form-section {
+  margin-bottom: 18px;
+}
+
+#screen-bf-add-challenge label {
+  display: block;
+  font-size: 13px;
+  color: var(--bf-subtext);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-input {
+  width: 100%;
+  background: var(--bf-card);
+  border: 1px solid var(--bf-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--bf-text);
+  font-size: 14px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.form-input:focus {
+  border-color: var(--bf-accent);
+  outline: none;
+}
+
+.btn-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, var(--bf-accent), var(--bf-accent-dim));
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-back {
+  background: rgba(255,255,255,0.08);
+  color: var(--bf-text);
+  border: 1px solid var(--bf-border);
+}
+
+.btn-secondary {
+  background: rgba(0,200,255,0.15);
+  color: var(--bf-accent);
+  border: 1px solid var(--bf-accent-dim);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.btn-secondary:hover {
+  background: rgba(0,200,255,0.3);
+}
+
+.form-col {
+  flex: 1;
+}
