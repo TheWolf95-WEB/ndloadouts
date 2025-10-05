@@ -715,8 +715,10 @@ async function addBfChallenge() {
 
     alert(editingChallengeId ? "✅ Испытание обновлено" : "✅ Испытание добавлено");
     editingChallengeId = null;
-    showBfScreen("db");
-    await loadBfChallengesTable();
+    
+    // Остаёмся на этом экране и очищаем форму
+    prepAddForm();
+    await populateCategorySelect();
   } catch (err) {
     console.error("Ошибка при сохранении испытания:", err);
     alert("❌ Не удалось сохранить испытание");
