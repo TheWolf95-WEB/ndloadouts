@@ -1,154 +1,170 @@
-// === Battlefield WebApp ===
+// === Battlefield WebApp (stable) ===
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log("📦 Battlefield DOM загружен");
-
-  const tg = window.Telegram?.WebApp;
-  if (tg) tg.expand();
-  console.log("🚀 Battlefield WebApp запущен");
-
-  // === Константы и глобальные переменные ===
   const BF_API_BASE = "/api/bf";
   let bfCategories = [];
   let bfChallenges = [];
   let editingChallengeId = null;
 
-  // === Экраны ===
+  const tg = window.Telegram?.WebApp;
+  if (tg) tg.expand();
+
   const bfScreens = {
     main: document.getElementById("screen-bf-challenges"),
     db: document.getElementById("screen-bf-challenges-db"),
     add: document.getElementById("screen-bf-add-challenge")
   };
 
-  const globalHome = document.querySelector("#screen-battlefield-main .global-home-button");
+  const userBtns  = ["bf-show-builds-btn","bf-challenges-btn","bf-search-btn"];
+  const adminBtns = ["bf-weapons-db-btn","bf-challenges-db-btn","bf-modules-dict-btn","bf-add-build-btn","bf-add-challenge-btn"];
 
-  const userBtns = ["bf-show-builds-btn", "bf-challenges-btn", "bf-search-btn"];
-  const adminBtns = [
-    "bf-weapons-db-btn",
-    "bf-challenges-db-btn",
-    "bf-modules-dict-btn",
-    "bf-add-build-btn",
-    "bf-add-challenge-btn"
-  ];
-
-  /* === Проверка роли пользователя === */
+  // -------- Роль пользователя (не критично для UI, ошибки не ломают UI)
   try {
-    const res = await fetch("/api/me", {
+    const res  = await fetch("/api/me", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type":"application/json" },
       body: JSON.stringify({ initData: tg?.initData || "" })
     });
-
     const data = await res.json();
     window.userInfo = data.user || data;
 
-    // Скрываем всё, потом показываем нужное
     [...userBtns, ...adminBtns].forEach(id => document.getElementById(id)?.classList.remove("is-visible"));
+    if (data.is_admin) [...userBtns, ...adminBtns].forEach(id => document.getElementById(id)?.classList.add("is-visible"));
+    else userBtns.forEach(id => document.getElementById(id)?.classList.add("is-visible"));
 
-    if (data.is_admin) {
-      [...userBtns, ...adminBtns].forEach(id => document.getElementById(id)?.classList.add("is-visible"));
-      console.log("👑 Battlefield: админ");
-    } else {
-      userBtns.forEach(id => document.getElementById(id)?.classList.add("is-visible"));
-      console.log("👤 Battlefield: пользователь");
-    }
-
-    if (globalHome) globalHome.style.display = "block";
-  } catch (err) {
-    console.warn("⚠️ Не удалось проверить пользователя:", err);
+    document.querySelector("#screen-battlefield-main .global-home-button")?.style?.setProperty("display","block");
+  } catch(e) {
+    console.warn("⚠️ /api/me недоступен (OK для локального теста)", e);
   }
 
-  /* === Навигация === */
+  // -------- Навигация
   document.getElementById("bf-challenges-btn")?.addEventListener("click", async () => {
     showBfScreen("main");
     await loadBfCategories();
   });
-
   document.getElementById("bf-challenges-db-btn")?.addEventListener("click", async () => {
     showBfScreen("db");
     await loadBfChallengesTable();
   });
-
-  document.getElementById("bf-add-challenge-btn")?.addEventListener("click", async () => {
+  document.getElementById("bf-add-challenge-btn")?.addEventListener("click", () => {
     editingChallengeId = null;
     showBfScreen("add");
-    await loadBfCategories();
+    prepAddForm(); // включаем инпуты/сбрасываем форму
   });
-
-  document.getElementById("bf-add-challenge-db-btn")?.addEventListener("click", async () => {
+  document.getElementById("bf-add-challenge-db-btn")?.addEventListener("click", () => {
     editingChallengeId = null;
     showBfScreen("add");
-    await loadBfCategories();
+    prepAddForm();
   });
 
-  // === Страховка для кнопок "Назад" ===
-document.addEventListener("click", e => {
-  if (e.target.id === "bf-back-from-add" || e.target.id === "bf-back-to-bfmain" || e.target.id === "bf-back-from-challenges") {
-    showBfMain();
-  }
-});
+  // Кнопки "Назад" + страховка делегированием
+  const hookBack = () => showBfMain();
+  document.getElementById("bf-back-from-add")?.addEventListener("click", hookBack);
+  document.getElementById("bf-back-to-bfmain")?.addEventListener("click", hookBack);
+  document.getElementById("bf-back-from-challenges")?.addEventListener("click", hookBack);
+  document.addEventListener("click", (e) => {
+    if (["bf-back-from-add","bf-back-to-bfmain","bf-back-from-challenges"].includes(e.target?.id)) showBfMain();
+  });
 
+  // Добавление категории вручную (кнопка под полем "Категория")
+  document.getElementById("bf-add-category-btn")?.addEventListener("click", async () => {
+    const name = document.getElementById("bf-category-input")?.value?.trim();
+    if (!name) return alert("Введите название категории");
+    try {
+      const createdId = await ensureCategory(name); // создаст, если нет
+      if (createdId) {
+        alert("✅ Вкладка добавлена");
+        await loadBfCategories();
+      }
+    } catch (err) {
+      alert("❌ Ошибка при добавлении вкладки\n" + (err?.message || ""));
+    }
+  });
 
-  // Назад
-  document.getElementById("bf-back-from-add")?.addEventListener("click", showBfMain);
-  document.getElementById("bf-back-to-bfmain")?.addEventListener("click", showBfMain);
-  document.getElementById("bf-back-from-challenges")?.addEventListener("click", showBfMain);
-
-  // Добавление вкладки / испытания
-  document.getElementById("bf-add-category-btn")?.addEventListener("click", addBfCategory);
+  // Сохранение испытания
   document.getElementById("bf-submit-challenge")?.addEventListener("click", addBfChallenge);
 
+  // Стартовая загрузка вкладок для пользовательского экрана
   await loadBfCategories();
 
-  /* ==========================
-     ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-     ========================== */
-
-function showBfScreen(screenId) {
-  // Скрываем все battlefield-экраны
-  document.querySelectorAll(".screen").forEach(el => {
-    el.classList.remove("active");
-    el.style.display = "none";
-  });
-
-  // Скрываем главный экран Battlefield
-  document.getElementById("screen-battlefield-main").style.display = "none";
-
-  // Показываем нужный экран
-  const target = bfScreens[screenId];
-  if (target) {
-    target.style.display = "block";
-    target.classList.add("active");
-    console.log(`🧭 Открыт экран Battlefield: ${screenId}`);
+  // ===== Helpers =====
+  function showBfScreen(screenId) {
+    document.querySelectorAll(".screen").forEach(el => { el.classList.remove("active"); el.style.display = "none"; });
+    document.getElementById("screen-battlefield-main").style.display = "none";
+    const target = bfScreens[screenId];
+    if (target) { target.style.display = "block"; target.classList.add("active"); }
   }
-}
 
-function showBfMain() {
-  // Скрываем внутренние экраны
-  Object.values(bfScreens).forEach(el => (el.style.display = "none"));
-  
-  // Показываем главный экран Battlefield
-  const mainEl = document.getElementById("screen-battlefield-main");
-  if (mainEl) {
-    mainEl.style.display = "block";
-    mainEl.classList.add("active");
+  function showBfMain() {
+    Object.values(bfScreens).forEach(el => (el.style.display = "none"));
+    const mainEl = document.getElementById("screen-battlefield-main");
+    if (mainEl) { mainEl.style.display = "block"; mainEl.classList.add("active"); }
   }
-  console.log("🏠 Возврат в главное меню Battlefield");
-}
 
+  function prepAddForm(ch = null) {
+    // Включаем инпуты на всякий случай и чистим значения
+    ["bf-category-input","bf-title-en","bf-title-ru","bf-current","bf-goal"].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.disabled = false;
+      el.readOnly = false;
+      el.style.pointerEvents = "auto";
+      if (!ch) {
+        if (id === "bf-current") el.value = 0;
+        else if (id === "bf-goal") el.value = 0;
+        else el.value = "";
+      }
+    });
+  }
 
+  // Создаёт категорию, если её нет. Возвращает id категории.
+  async function ensureCategory(name) {
+    try {
+      // Обновляем локальный список категорий
+      if (!bfCategories.length) {
+        const r = await fetch(`${BF_API_BASE}/categories`);
+        bfCategories = await r.json();
+      }
 
-  /* === Категории === */
-  async function loadBfCategories(selectedId = null) {
+      const exists = bfCategories.find(c => (c.name || "").trim().toLowerCase() === name.trim().toLowerCase());
+      if (exists) return exists.id;
+
+      const res = await fetch(`${BF_API_BASE}/categories?user_id=${window.userInfo?.id ?? ""}`, {
+        method: "POST",
+        headers: { "Content-Type":"application/json" },
+        body: JSON.stringify({ name })
+      });
+
+      if (!res.ok) {
+        const text = await res.text().catch(()=>"");
+        throw new Error(`HTTP ${res.status} ${res.statusText} | ${text}`);
+      }
+
+      const created = await res.json().catch(() => ({}));
+      const newId = created?.id ?? created?.category_id ?? null;
+
+      // Обновляем кэш категорий
+      try {
+        const r2 = await fetch(`${BF_API_BASE}/categories`);
+        bfCategories = await r2.json();
+      } catch {}
+
+      return newId;
+    } catch (e) {
+      console.error("ensureCategory error:", e);
+      throw e;
+    }
+  }
+
+  // ===== Категории / Испытания =====
+  async function loadBfCategories() {
     try {
       const res = await fetch(`${BF_API_BASE}/categories`);
       bfCategories = await res.json();
-      console.log("📦 Категории:", bfCategories);
 
-      // --- вкладки для пользователя ---
       const tabsEl = document.getElementById("bf-tabs");
       if (tabsEl) {
         tabsEl.innerHTML = "";
-        if (bfCategories.length === 0) {
+        if (!bfCategories.length) {
           tabsEl.innerHTML = "<p style='text-align:center;color:#777;'>Нет категорий</p>";
         } else {
           bfCategories.forEach(cat => {
@@ -162,11 +178,9 @@ function showBfMain() {
             };
             tabsEl.appendChild(btn);
           });
-
-          // Автоматически подгружаем первую категорию
-          const first = bfCategories[0];
+          // авто-подгрузка первой категории
           document.querySelector(".tab-btn")?.classList.add("active");
-          await loadBfChallenges(first.id);
+          await loadBfChallenges(bfCategories[0].id);
         }
       }
     } catch (e) {
@@ -174,38 +188,11 @@ function showBfMain() {
     }
   }
 
-  /* === Добавление категории === */
-  async function addBfCategory() {
-    const name = prompt("Введите название новой вкладки:");
-    if (!name) return;
-
-    try {
-      const res = await fetch(`${BF_API_BASE}/categories?user_id=${window.userInfo?.id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name })
-      });
-
-      if (res.ok) {
-        alert("✅ Вкладка добавлена");
-        await loadBfCategories();
-      } else {
-        alert("❌ Ошибка при добавлении вкладки");
-      }
-    } catch (err) {
-      console.error("Ошибка добавления вкладки:", err);
-    }
-  }
-
-  /* === Загрузка испытаний === */
   async function loadBfChallenges(categoryId = null) {
     try {
-      const url = categoryId
-        ? `${BF_API_BASE}/challenges?category_id=${categoryId}`
-        : `${BF_API_BASE}/challenges`;
+      const url = categoryId ? `${BF_API_BASE}/challenges?category_id=${categoryId}` : `${BF_API_BASE}/challenges`;
       const res = await fetch(url);
       bfChallenges = await res.json();
-      console.log("🎯 Испытания:", bfChallenges);
 
       const listEl = document.getElementById("bf-challenges-list");
       if (!listEl) return;
@@ -235,7 +222,6 @@ function showBfMain() {
     }
   }
 
-  /* === Таблица испытаний для админа === */
   async function loadBfChallengesTable() {
     try {
       const res = await fetch(`${BF_API_BASE}/challenges`);
@@ -262,9 +248,7 @@ function showBfMain() {
             </tr>
           </thead>
           <tbody>
-            ${bfChallenges
-              .map(
-                ch => `
+            ${bfChallenges.map(ch => `
               <tr>
                 <td>${ch.id}</td>
                 <td>${ch.category_name || "-"}</td>
@@ -275,9 +259,8 @@ function showBfMain() {
                   <button class="btn-small" onclick="editBfChallenge(${ch.id})">✏️</button>
                   <button class="btn-small" onclick="deleteBfChallenge(${ch.id})">🗑</button>
                 </td>
-              </tr>`
-              )
-              .join("")}
+              </tr>
+            `).join("")}
           </tbody>
         </table>
       `;
@@ -286,63 +269,71 @@ function showBfMain() {
     }
   }
 
-  /* === Добавление / Редактирование испытаний === */
+  // ===== CRUD испытаний =====
   async function addBfChallenge() {
-    const data = {
-      category_id: 0, // если бек не требует ID — можно оставить 0
-      category_name: document.getElementById("bf-category-input")?.value.trim(),
-      title_en: document.getElementById("bf-title-en")?.value.trim(),
-      title_ru: document.getElementById("bf-title-ru")?.value.trim(),
-      current: Number(document.getElementById("bf-current")?.value) || 0,
-      goal: Number(document.getElementById("bf-goal")?.value) || 0
-    };
+    const categoryName = document.getElementById("bf-category-input")?.value?.trim() || "";
+    const title_en = document.getElementById("bf-title-en")?.value?.trim() || "";
+    const title_ru = document.getElementById("bf-title-ru")?.value?.trim() || "";
+    const current  = Number(document.getElementById("bf-current")?.value) || 0;
+    const goal     = Number(document.getElementById("bf-goal")?.value) || 0;
 
-    if (!data.title_en || !data.title_ru) return alert("Введите название EN и RU");
+    if (!categoryName) return alert("Введите категорию");
+    if (!title_en || !title_ru) return alert("Введите названия EN и RU");
+    if (goal <= 0) return alert("Цель должна быть > 0");
 
-    const method = editingChallengeId ? "PUT" : "POST";
-    const url = editingChallengeId
-      ? `${BF_API_BASE}/challenges/${editingChallengeId}?user_id=${window.userInfo?.id}`
-      : `${BF_API_BASE}/challenges?user_id=${window.userInfo?.id}`;
+    // Гарантируем, что категория существует и получим её ID
+    let category_id = null;
+    try {
+      category_id = await ensureCategory(categoryName);
+    } catch (e) {
+      return alert("❌ Не удалось создать/получить категорию:\n" + (e?.message || ""));
+    }
+
+    const payload = { category_id, category_name: categoryName, title_en, title_ru, current, goal };
+    const method  = editingChallengeId ? "PUT" : "POST";
+    const url     = editingChallengeId
+      ? `${BF_API_BASE}/challenges/${editingChallengeId}?user_id=${window.userInfo?.id ?? ""}`
+      : `${BF_API_BASE}/challenges?user_id=${window.userInfo?.id ?? ""}`;
 
     try {
       const res = await fetch(url, {
         method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
+        headers: { "Content-Type":"application/json" },
+        body: JSON.stringify(payload)
       });
 
-      if (res.ok) {
-        alert(editingChallengeId ? "✅ Испытание обновлено" : "✅ Испытание добавлено");
-        editingChallengeId = null;
-        showBfScreen("db");
-        await loadBfChallengesTable();
-      } else {
-        alert("❌ Ошибка при сохранении испытания");
+      if (!res.ok) {
+        const text = await res.text().catch(()=> "");
+        alert(`❌ Ошибка при сохранении испытания\nHTTP ${res.status} ${res.statusText}\n${text}`);
+        return;
       }
+
+      alert(editingChallengeId ? "✅ Испытание обновлено" : "✅ Испытание добавлено");
+      editingChallengeId = null;
+      showBfScreen("db");
+      await loadBfChallengesTable();
     } catch (err) {
       console.error("Ошибка при сохранении испытания:", err);
+      alert("❌ Не удалось сохранить испытание");
     }
   }
 
-  /* === Удаление испытания === */
-  window.deleteBfChallenge = async function (id) {
+  window.deleteBfChallenge = async function(id) {
     if (!confirm("Удалить испытание?")) return;
-    await fetch(`${BF_API_BASE}/challenges/${id}?user_id=${window.userInfo?.id}`, { method: "DELETE" });
+    await fetch(`${BF_API_BASE}/challenges/${id}?user_id=${window.userInfo?.id ?? ""}`, { method: "DELETE" });
     await loadBfChallengesTable();
   };
 
-  /* === Редактирование испытания === */
-  window.editBfChallenge = function (id) {
+  window.editBfChallenge = function(id) {
     const ch = bfChallenges.find(c => c.id === id);
     if (!ch) return;
-
     editingChallengeId = id;
     showBfScreen("add");
-
-    document.getElementById("bf-title-en").value = ch.title_en;
-    document.getElementById("bf-title-ru").value = ch.title_ru;
-    document.getElementById("bf-current").value = ch.current;
-    document.getElementById("bf-goal").value = ch.goal;
-    loadBfCategories(ch.category_id);
+    prepAddForm(ch);
+    document.getElementById("bf-category-input").value = ch.category_name || "";
+    document.getElementById("bf-title-en").value = ch.title_en || "";
+    document.getElementById("bf-title-ru").value = ch.title_ru || "";
+    document.getElementById("bf-current").value  = ch.current ?? 0;
+    document.getElementById("bf-goal").value     = ch.goal ?? 0;
   };
 });
