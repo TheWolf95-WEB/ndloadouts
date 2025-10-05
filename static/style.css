@@ -1066,6 +1066,18 @@ select:disabled {
 }
 
 
+.no-active-message {
+  text-align: center;
+  color: #9fb6cc;
+  font-size: 15px;
+  line-height: 1.5;
+  padding: 30px 10px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+
 
 /* === Пользовательский экран испытаний (единый стиль с базой) === */
 #screen-bf-challenges {
