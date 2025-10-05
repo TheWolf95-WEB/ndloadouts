@@ -140,34 +140,31 @@ document.getElementById("bf-add-category-btn")?.addEventListener("click", async 
 
   // ===== Helpers =====
 function showBfScreen(screenId) {
-  const allScreens = document.querySelectorAll(".screen");
+  const target = bfScreens[screenId];
+  if (!target) return;
 
-  allScreens.forEach(el => {
-    if (el === bfScreens[screenId]) {
-      el.style.display = "block";
-      el.classList.add("active");
-    } else {
-      el.classList.remove("active");
-      el.style.display = "none";
-    }
+  // Не скрываем остальные через display:none, просто убираем active
+  Object.values(bfScreens).forEach(screen => {
+    if (screen) screen.classList.remove("active");
   });
 
-  document.getElementById("screen-battlefield-main")?.style?.setProperty("display", "none");
+  // Активируем нужный экран
+  target.classList.add("active");
+
+  // Прячем главный экран Battlefield
+  const mainBF = document.getElementById("screen-battlefield-main");
+  if (mainBF && target !== mainBF) mainBF.classList.remove("active");
+
   toggleBfBackButton(screenId);
 }
 
-
 function showBfMain() {
-  Object.values(bfScreens).forEach(el => {
-    el.classList.remove("active");
-    el.style.display = "none";
-  });
+  Object.values(bfScreens).forEach(el => el.classList.remove("active"));
   const mainEl = document.getElementById("screen-battlefield-main");
-  if (mainEl) {
-    mainEl.classList.add("active");
-    mainEl.style.display = "block";
-  }
+  if (mainEl) mainEl.classList.add("active");
 }
+
+
 
 
   // === Управление кнопкой "Назад" Battlefield ===
