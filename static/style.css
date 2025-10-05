@@ -867,7 +867,7 @@ select:disabled {
 
 
 #bf-tabs .tab-btn {
-  background: var(--bf-accent);
+  background: rgba(255,255,255,0.05);
   color: var(--bf-text);
   border: 1px solid var(--bf-border);
   border-radius: 8px;
