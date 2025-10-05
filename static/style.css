@@ -841,7 +841,7 @@ select:disabled {
 }
 
 
-/* === Пользовательский экран испытаний === */
+/* === Пользовательский экран испытаний (единый стиль с базой) === */
 #screen-bf-challenges {
   background: var(--bf-bg);
   color: var(--bf-text);
@@ -849,34 +849,15 @@ select:disabled {
   padding-bottom: 80px;
 }
 
-/* Полоска вкладок */
-.tabs-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 20px;
+/* Сетка карточек */
+#bf-challenges-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
 }
 
-.tab-btn {
-  background: var(--bf-card);
-  border: 1px solid var(--bf-border);
-  border-radius: 8px;
-  padding: 10px 16px;
-  color: var(--bf-subtext);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-transform: uppercase;
-  font-size: 13px;
-  letter-spacing: 0.5px;
-}
-
-.tab-btn.active {
-  background: linear-gradient(90deg, var(--bf-accent), var(--bf-accent-dim));
-  color: #fff;
-  border: none;
-}
-
-/* Карточки испытаний (тот же стиль, что и у админа, но мягче) */
+/* Карточка испытания — общий стиль с базой, но без кнопок */
 .challenge-card-user {
   background: var(--bf-card);
   border: 1px solid var(--bf-border);
@@ -884,61 +865,89 @@ select:disabled {
   padding: 18px;
   color: var(--bf-text);
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
 }
 
 .challenge-card-user:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   border-color: var(--bf-accent-dim);
-  box-shadow: 0 4px 10px rgba(0,200,255,0.15);
+  box-shadow: 0 4px 14px rgba(0,200,255,0.15);
 }
 
-.challenge-card-user h3 {
-  font-size: 16px;
-  font-weight: 600;
+/* Верх карточки */
+.challenge-card-user .challenge-category {
+  background: rgba(0,200,255,0.1);
   color: var(--bf-accent);
-  margin-bottom: 6px;
-}
-
-.challenge-card-user p {
-  color: var(--bf-subtext);
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  text-transform: uppercase;
+  display: inline-block;
   margin-bottom: 10px;
 }
 
-.challenge-progress {
-  margin-top: 10px;
+/* Названия */
+.challenge-card-user .challenge-title-en {
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--bf-accent);
+  margin-bottom: 4px;
 }
 
-.challenge-progress span {
-  font-size: 12px;
+.challenge-card-user .challenge-title-ru {
+  font-size: 14px;
+  color: var(--bf-subtext);
+  margin-bottom: 12px;
+}
+
+/* Прогресс */
+.challenge-card-user .progress-text {
   display: flex;
   justify-content: space-between;
+  font-size: 12px;
   color: var(--bf-subtext);
+  margin-bottom: 5px;
 }
 
-.challenge-bar {
+.challenge-card-user .progress-bar {
   height: 7px;
   background: #1c2532;
   border-radius: 4px;
   overflow: hidden;
-  margin-top: 4px;
 }
 
-.challenge-fill {
+.challenge-card-user .progress-fill {
   height: 100%;
   background: linear-gradient(90deg, var(--bf-accent), var(--bf-accent-dim));
-  transition: width 0.3s ease;
   border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* === Поиск === */
+#screen-bf-challenges .search-box {
+  display: flex;
+  margin-bottom: 16px;
+}
+
+#screen-bf-challenges .search-input {
+  background: var(--bf-card);
+  border: 1px solid var(--bf-border);
+  color: var(--bf-text);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  flex: 1;
+}
+
+#screen-bf-challenges .search-input:focus {
+  border-color: var(--bf-accent);
+  outline: none;
 }
 
 /* Мобильная адаптация */
 @media (max-width: 480px) {
-  #screen-bf-challenges .challenges-grid {
+  #bf-challenges-list {
     grid-template-columns: 1fr;
-  }
-  .tab-btn {
-    flex: 1;
-    text-align: center;
   }
 }
 
