@@ -866,36 +866,38 @@ window.editBfChallenge = async function(id) { // ← Добавить async
 // === Двойной клик по карточке — начать выполнение ===
 document.addEventListener("dblclick", async (e) => {
   const card = e.target.closest(".challenge-card-user");
-  if (!card) return;
+  if (!card || card.classList.contains("completed")) return;
 
   const id = Number(card.dataset.id);
   if (!id) return;
 
+  const progressText = card.querySelector(".progress-text span:last-child");
+  const [current, goal] = progressText.textContent.split("/").map(n => parseInt(n.trim()));
+
+  if (current >= goal) return;
+
   try {
-    // при старте ставим current = 1
     const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ delta: 1, initData: tg?.initData || "" })
     });
-
     if (!res.ok) throw new Error("Ошибка начала испытания");
 
-    // Визуальный отклик
-    card.style.boxShadow = "0 0 15px rgba(0,255,100,0.4)";
-    card.style.transform = "scale(1.02)";
+    card.style.boxShadow = "0 0 20px rgba(0,255,120,0.5)";
+    card.style.transform = "scale(1.03)";
     setTimeout(() => {
       card.style.transition = "all 0.5s ease";
       card.style.boxShadow = "";
       card.style.transform = "";
-    }, 800);
+    }, 700);
 
-    // Обновляем список активных
-    setTimeout(() => renderChallengesByStatus("active"), 500);
+    setTimeout(() => renderChallengesByStatus("active"), 400);
   } catch (err) {
     console.error("Ошибка при запуске испытания:", err);
   }
 });
+
 
   
 }); 
