@@ -314,8 +314,7 @@ async function loadBfChallenges(categoryId = null) {
       return;
     }
 
-listEl.innerHTML = bfChallenges
-  .map(ch => {
+  listEl.innerHTML = bfChallenges.map(ch => {
     const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
     return `
       <div class="challenge-card-user" data-id="${ch.id}">
@@ -329,20 +328,18 @@ listEl.innerHTML = bfChallenges
         <div class="progress-bar">
           <div class="progress-fill" style="width:${percent}%;"></div>
         </div>
-
-        <!-- 🎯 Кнопки управления -->
+  
         <div class="progress-controls">
-          <button class="btn-mini btn-minus" onclick="updateProgress(${ch.id}, -1)">
+          <button class="btn-mini" data-action="minus" data-id="${ch.id}">
             <i class="fas fa-minus"></i>
           </button>
-          <button class="btn-mini btn-plus" onclick="updateProgress(${ch.id}, 1)">
+          <button class="btn-mini" data-action="plus" data-id="${ch.id}">
             <i class="fas fa-plus"></i>
           </button>
         </div>
       </div>
     `;
-  })
-  .join("");
+  }).join("");
   } catch (e) {
     console.error("Ошибка при загрузке испытаний:", e);
   }
@@ -543,6 +540,20 @@ async function loadBfChallengesTable() {
     }
   }
 }
+
+// === Управление прогрессом через делегирование ===
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".btn-mini");
+  if (!btn) return;
+
+  const id = Number(btn.dataset.id);
+  const action = btn.dataset.action;
+  if (!id || !action) return;
+
+  const delta = action === "plus" ? 1 : -1;
+  updateProgress(id, delta);
+});
+  
 
 // Функция для поиска и фильтрации
 function setupSearchAndFilter() {
