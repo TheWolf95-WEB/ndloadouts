@@ -1,15 +1,13 @@
+
+
+
+
 // === Battlefield WebApp (stable) ===
 document.addEventListener("DOMContentLoaded", async () => {
-  if (window.__bfLoaded) return;
-  window.__bfLoaded = true;
-
-
-  
   const BF_API_BASE = "/api/bf";
   let bfCategories = [];
   let bfChallenges = [];
   let editingChallengeId = null;
-  let bfMainLoaded = false;
 
   const tg = window.Telegram?.WebApp;
   if (tg) tg.expand();
@@ -45,10 +43,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // -------- Навигация
   document.getElementById("bf-challenges-btn")?.addEventListener("click", async () => {
     showBfScreen("main");
-    if (!bfMainLoaded) {
-      await loadBfCategories();
-      bfMainLoaded = true;
-    }
+    await loadBfCategories();
   });
   document.getElementById("bf-challenges-db-btn")?.addEventListener("click", async () => {
     showBfScreen("db");
@@ -84,7 +79,6 @@ async function populateCategorySelect(selectedId = null) {
       if (selectedId && Number(selectedId) === cat.id) opt.selected = true;
       select.appendChild(opt);
     });
-    
   } catch (e) {
     console.error("Ошибка при загрузке категорий:", e);
   }
@@ -93,11 +87,13 @@ async function populateCategorySelect(selectedId = null) {
   
 
   // Кнопки "Назад" + страховка делегированием
-  document.getElementById("bf-back-from-add")?.addEventListener("click", showBfMain);
-  document.getElementById("bf-back-to-bfmain")?.addEventListener("click", showBfMain);
-  document.getElementById("bf-back-from-challenges")?.addEventListener("click", showBfMain);
-
-
+  const hookBack = () => showBfMain();
+  document.getElementById("bf-back-from-add")?.addEventListener("click", hookBack);
+  document.getElementById("bf-back-to-bfmain")?.addEventListener("click", hookBack);
+  document.getElementById("bf-back-from-challenges")?.addEventListener("click", hookBack);
+  document.addEventListener("click", (e) => {
+    if (["bf-back-from-add","bf-back-to-bfmain","bf-back-from-challenges"].includes(e.target?.id)) showBfMain();
+  });
 
   // Добавление категории вручную (кнопка под полем "Категория")
 document.getElementById("bf-add-category-btn")?.addEventListener("click", async () => {
@@ -139,33 +135,28 @@ document.getElementById("bf-add-category-btn")?.addEventListener("click", async 
   await loadBfCategories();
 
   // ===== Helpers =====
-function showBfScreen(screenId) {
-  const target = bfScreens[screenId];
-  if (!target) return;
+  function showBfScreen(screenId) {
+    document.querySelectorAll(".screen").forEach(el => { 
+      el.classList.remove("active"); 
+      el.style.display = "none"; 
+    });
+    document.getElementById("screen-battlefield-main").style.display = "none";
+  
+    const target = bfScreens[screenId];
+    if (target) { 
+      target.style.display = "block"; 
+      target.classList.add("active"); 
+    }
+  
+    // 👇 вот это добавляем
+    toggleBfBackButton(screenId);
+  }
 
-  // Не скрываем остальные через display:none, просто убираем active
-  Object.values(bfScreens).forEach(screen => {
-    if (screen) screen.classList.remove("active");
-  });
-
-  // Активируем нужный экран
-  target.classList.add("active");
-
-  // Прячем главный экран Battlefield
-  const mainBF = document.getElementById("screen-battlefield-main");
-  if (mainBF && target !== mainBF) mainBF.classList.remove("active");
-
-  toggleBfBackButton(screenId);
-}
-
-function showBfMain() {
-  Object.values(bfScreens).forEach(el => el.classList.remove("active"));
-  const mainEl = document.getElementById("screen-battlefield-main");
-  if (mainEl) mainEl.classList.add("active");
-}
-
-
-
+  function showBfMain() {
+    Object.values(bfScreens).forEach(el => (el.style.display = "none"));
+    const mainEl = document.getElementById("screen-battlefield-main");
+    if (mainEl) { mainEl.style.display = "block"; mainEl.classList.add("active"); }
+  }
 
   // === Управление кнопкой "Назад" Battlefield ===
   function toggleBfBackButton(screenId) {
@@ -414,38 +405,15 @@ async function updateProgress(id, delta) {
 
   ch.current = newValue;
 
+  // 🔄 Обновляем визуально без перезагрузки
   const card = document.querySelector(`.challenge-card-user[data-id="${id}"]`);
-  if (!card) return;
-
-  const bar = card.querySelector(".progress-fill");
-  const text = card.querySelector(".progress-text span:last-child");
-  const percent = ch.goal > 0 ? Math.min((newValue / ch.goal) * 100, 100) : 0;
-  bar.style.width = `${percent}%`;
-  text.textContent = `${newValue} / ${ch.goal}`;
-
-  // 💥 Проверка на завершение
-  const isCompleted = newValue >= ch.goal && ch.goal > 0;
-  if (isCompleted) {
-    card.classList.add("completed");
-    if (!card.querySelector(".completed-overlay")) {
-      const overlay = document.createElement("div");
-      overlay.className = "completed-overlay";
-      overlay.innerHTML = "✅ Завершено";
-      card.appendChild(overlay);
-    }
-
-    // Через 1 сек — переносим в "Завершённые"
-    if (!document.querySelector(".completed-overlay")) {
-      setTimeout(() => {
-        const activeTab = document.querySelector(".status-btn.active");
-        if (activeTab?.dataset.status !== "completed") {
-          renderChallengesByStatus("completed");
-          document.querySelector('.status-btn[data-status="completed"]')?.classList.add("active");
-          document.querySelector('.status-btn[data-status="active"]')?.classList.remove("active");
-        }
-      }, 800);
-    }
-
+  if (card) {
+    const bar = card.querySelector(".progress-fill");
+    const text = card.querySelector(".progress-text span:last-child");
+    const percent = ch.goal > 0 ? Math.min((newValue / ch.goal) * 100, 100) : 0;
+    bar.style.width = `${percent}%`;
+    text.textContent = `${newValue} / ${ch.goal}`;
+  }
 
   // 💾 Отправляем на сервер
   try {
@@ -462,7 +430,6 @@ async function updateProgress(id, delta) {
   }
 }
 
-}
   
 
 function setupUserChallengeSearch() {
@@ -759,4 +726,4 @@ window.editBfChallenge = async function(id) { // ← Добавить async
     document.getElementById("bf-current").value  = ch.current ?? 0;
     document.getElementById("bf-goal").value     = ch.goal ?? 0;
 };
-});
+}); 
