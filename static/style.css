@@ -841,67 +841,107 @@ select:disabled {
 }
 
 
+/* === Пользовательский экран испытаний === */
+#screen-bf-challenges {
+  background: var(--bf-bg);
+  color: var(--bf-text);
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
 
+/* Полоска вкладок */
 .tabs-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+  margin-bottom: 20px;
 }
 
-.tabs-grid .tab-btn {
-  background: #1f2937;
-  border-radius: 10px;
+.tab-btn {
+  background: var(--bf-card);
+  border: 1px solid var(--bf-border);
+  border-radius: 8px;
   padding: 10px 16px;
-  font-weight: 500;
-  color: #bdefff;
+  color: var(--bf-subtext);
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 0.5px;
 }
 
-.tabs-grid .tab-btn.active {
-  background: linear-gradient(90deg, #008cff, #00eaff);
+.tab-btn.active {
+  background: linear-gradient(90deg, var(--bf-accent), var(--bf-accent-dim));
   color: #fff;
+  border: none;
 }
 
-.challenge-card {
-  background: #1a202c;
-  border-radius: 10px;
-  padding: 16px;
-  color: #bdefff;
-  margin-bottom: 14px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.4);
+/* Карточки испытаний (тот же стиль, что и у админа, но мягче) */
+.challenge-card-user {
+  background: var(--bf-card);
+  border: 1px solid var(--bf-border);
+  border-radius: 12px;
+  padding: 18px;
+  color: var(--bf-text);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
-.challenge-header {
+.challenge-card-user:hover {
+  transform: translateY(-2px);
+  border-color: var(--bf-accent-dim);
+  box-shadow: 0 4px 10px rgba(0,200,255,0.15);
+}
+
+.challenge-card-user h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--bf-accent);
+  margin-bottom: 6px;
+}
+
+.challenge-card-user p {
+  color: var(--bf-subtext);
+  margin-bottom: 10px;
+}
+
+.challenge-progress {
+  margin-top: 10px;
+}
+
+.challenge-progress span {
+  font-size: 12px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-}
-
-.challenge-title {
-  font-size: 1.1rem;
-  color: #60d1ff;
-  margin: 0;
-}
-
-.challenge-subtitle {
-  font-size: 0.9rem;
-  color: #9dc1ce;
-  margin: 4px 0 10px;
+  color: var(--bf-subtext);
 }
 
 .challenge-bar {
-  background: #0d141d;
+  height: 7px;
+  background: #1c2532;
   border-radius: 4px;
-  height: 6px;
   overflow: hidden;
+  margin-top: 4px;
 }
 
 .challenge-fill {
-  background: linear-gradient(90deg, #5fd3ff, #1e90ff);
   height: 100%;
+  background: linear-gradient(90deg, var(--bf-accent), var(--bf-accent-dim));
   transition: width 0.3s ease;
+  border-radius: 4px;
 }
+
+/* Мобильная адаптация */
+@media (max-width: 480px) {
+  #screen-bf-challenges .challenges-grid {
+    grid-template-columns: 1fr;
+  }
+  .tab-btn {
+    flex: 1;
+    text-align: center;
+  }
+}
+
 
 
 /* === Общие цвета Battlefield UI === */
