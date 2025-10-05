@@ -64,16 +64,30 @@
 </div>
 
 <!-- 👥 Пользовательский экран испытаний -->
+<!-- 👥 Пользовательский экран испытаний -->
 <div id="screen-bf-challenges" class="screen" style="display:none;">
-  <h2>⚔️ Battlefield | Испытания</h2>
+  <div class="screen-header">
+    <h2>⚔️ Battlefield | Испытания</h2>
+    <p class="screen-subtitle">Выполняй испытания и отслеживай прогресс</p>
+  </div>
+
+  <!-- 🔍 Поиск и вкладки -->
+  <div class="search-box">
+    <input type="text" id="bf-search-user" placeholder="🔍 Поиск испытаний..." class="search-input">
+  </div>
+
   <div id="bf-tabs" class="tabs-grid"></div>
 
-  <div id="bf-challenges-list">
-    <p>Загрузка испытаний...</p>
+  <!-- 🧩 Список испытаний -->
+  <div id="bf-challenges-list" class="challenges-grid">
+    <div class="loading-spinner">Загрузка испытаний...</div>
   </div>
-  
+
+  <div class="global-home-button">
     <button class="btn" id="bf-back-from-challenges">⬅ Назад</button>
   </div>
+</div>
+
 
 <!-- 🛡 Экран базы испытаний (для админа) -->
 <div id="screen-bf-challenges-db" class="screen" style="display:none;">
