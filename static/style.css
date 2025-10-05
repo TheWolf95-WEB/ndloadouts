@@ -987,7 +987,7 @@ select:disabled {
 /* Прогресс и кнопки */
 .progress-controls {
   display: flex;
-  justify-content: center;
+  justify-content: right;
   gap: 10px;
   margin-top: 8px;
 }
