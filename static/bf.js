@@ -270,6 +270,33 @@ document.getElementById("bf-add-category-btn")?.addEventListener("click", async 
     }
   }
 
+// JS фильтрацию по статусу:
+document.querySelectorAll('.status-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const status = btn.dataset.status;
+    renderChallengesByStatus(status);
+  });
+});
+
+function renderChallengesByStatus(status) {
+  const listEl = document.getElementById("bf-challenges-list");
+  if (!listEl) return;
+  const filtered = bfChallenges.filter(ch => {
+    const completed = ch.goal > 0 && ch.current >= ch.goal;
+    return status === "completed" ? completed : !completed;
+  });
+  renderChallenges(filtered);
+}
+
+function renderChallenges(list) {
+  const listEl = document.getElementById("bf-challenges-list");
+  listEl.innerHTML = list.map(ch => createChallengeCard(ch)).join('');
+}
+  
+  
+
 async function loadBfChallenges(categoryId = null) {
   try {
     const url = categoryId
@@ -287,29 +314,75 @@ async function loadBfChallenges(categoryId = null) {
       return;
     }
 
-    listEl.innerHTML = bfChallenges
-      .map(ch => {
-        const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
-        return `
-          <div class="challenge-card-user">
-            ${ch.category_name ? `<div class="challenge-category">${ch.category_name}</div>` : ""}
-            <div class="challenge-title-en">${ch.title_en}</div>
-            <div class="challenge-title-ru">${ch.title_ru}</div>
-            <div class="progress-text">
-              <span>Прогресс</span>
-              <span>${ch.current} / ${ch.goal}</span>
-            </div>
-            <div class="progress-bar">
-              <div class="progress-fill" style="width:${percent}%;"></div>
-            </div>
-          </div>
-        `;
-      })
-      .join("");
+listEl.innerHTML = bfChallenges
+  .map(ch => {
+    const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
+    return `
+      <div class="challenge-card-user" data-id="${ch.id}">
+        ${ch.category_name ? `<div class="challenge-category">${ch.category_name}</div>` : ""}
+        <div class="challenge-title-en">${ch.title_en}</div>
+        <div class="challenge-title-ru">${ch.title_ru}</div>
+        <div class="progress-text">
+          <span>Прогресс</span>
+          <span>${ch.current} / ${ch.goal}</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${percent}%;"></div>
+        </div>
+
+        <!-- 🎯 Кнопки управления -->
+        <div class="progress-controls">
+          <button class="btn-mini btn-minus" onclick="updateProgress(${ch.id}, -1)">
+            <i class="fas fa-minus"></i>
+          </button>
+          <button class="btn-mini btn-plus" onclick="updateProgress(${ch.id}, 1)">
+            <i class="fas fa-plus"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  })
+  .join("");
   } catch (e) {
     console.error("Ошибка при загрузке испытаний:", e);
   }
 }
+
+async function updateProgress(id, delta) {
+  const ch = bfChallenges.find(c => c.id === id);
+  if (!ch) return;
+
+  const newValue = Math.max(0, Math.min(ch.goal, ch.current + delta));
+  if (newValue === ch.current) return;
+
+  ch.current = newValue;
+
+  // 🔄 Обновляем визуально без перезагрузки
+  const card = document.querySelector(`.challenge-card-user[data-id="${id}"]`);
+  if (card) {
+    const bar = card.querySelector(".progress-fill");
+    const text = card.querySelector(".progress-text span:last-child");
+    const percent = ch.goal > 0 ? Math.min((newValue / ch.goal) * 100, 100) : 0;
+    bar.style.width = `${percent}%`;
+    text.textContent = `${newValue} / ${ch.goal}`;
+  }
+
+  // 💾 Отправляем на сервер
+  try {
+    await fetch(`/api/bf/challenges/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        current: newValue,
+        initData: tg?.initData || ""
+      })
+    });
+  } catch (e) {
+    console.error("Ошибка при обновлении прогресса:", e);
+  }
+}
+
+  
 
 function setupUserChallengeSearch() {
   const searchInput = document.getElementById("bf-search-user");
