@@ -903,6 +903,7 @@ select:disabled {
   transition: width 0.3s ease;
 }
 
+
 /* Темная тема для базы испытаний */
 #screen-bf-challenges-db {
   background: #1a1a1a;
