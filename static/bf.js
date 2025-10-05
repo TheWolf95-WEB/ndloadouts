@@ -220,39 +220,47 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  async function loadBfChallenges(categoryId = null) {
-    try {
-      const url = categoryId ? `${BF_API_BASE}/challenges?category_id=${categoryId}` : `${BF_API_BASE}/challenges`;
-      const res = await fetch(url);
-      bfChallenges = await res.json();
+async function loadBfChallenges(categoryId = null) {
+  try {
+    const url = categoryId
+      ? `${BF_API_BASE}/challenges?category_id=${categoryId}`
+      : `${BF_API_BASE}/challenges`;
+    const res = await fetch(url);
+    bfChallenges = await res.json();
 
-      const listEl = document.getElementById("bf-challenges-list");
-      if (!listEl) return;
-      listEl.innerHTML = "";
+    const listEl = document.getElementById("bf-challenges-list");
+    if (!listEl) return;
+    listEl.innerHTML = "";
 
-      if (!bfChallenges.length) {
-        listEl.innerHTML = "<p style='text-align:center;color:#888;'>Пока нет испытаний</p>";
-        return;
-      }
-
-      bfChallenges.forEach(ch => {
-        const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
-        const card = document.createElement("div");
-        card.className = "challenge-card";
-        card.innerHTML = `
-          <div class="challenge-header">
-            <h3 class="challenge-title">${ch.title_en}</h3>
-            <span class="challenge-progress">${ch.current}/${ch.goal}</span>
-          </div>
-          <p class="challenge-subtitle">${ch.title_ru}</p>
-          <div class="challenge-bar"><div class="challenge-fill" style="width:${percent}%;"></div></div>
-        `;
-        listEl.appendChild(card);
-      });
-    } catch (e) {
-      console.error("Ошибка при загрузке испытаний:", e);
+    if (!bfChallenges.length) {
+      listEl.innerHTML = `<p style="text-align:center;color:#8ea2b6;">Пока нет испытаний</p>`;
+      return;
     }
+
+    listEl.innerHTML = bfChallenges
+      .map(ch => {
+        const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
+        return `
+          <div class="challenge-card-user">
+            ${ch.category_name ? `<div class="challenge-category">${ch.category_name}</div>` : ""}
+            <div class="challenge-title-en">${ch.title_en}</div>
+            <div class="challenge-title-ru">${ch.title_ru}</div>
+            <div class="progress-text">
+              <span>Прогресс</span>
+              <span>${ch.current} / ${ch.goal}</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width:${percent}%;"></div>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+  } catch (e) {
+    console.error("Ошибка при загрузке испытаний:", e);
   }
+}
+
 
 async function loadBfChallengesTable() {
   try {
