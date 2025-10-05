@@ -420,33 +420,56 @@ async function loadBfChallenges(categoryId = null) {
 }
 
 // === Обновление прогресса ===
+// === Обновление прогресса (боевой режим) ===
 async function updateProgress(id, delta) {
+  const card = document.querySelector(`.challenge-card-user[data-id="${id}"]`);
+  if (!card) return;
+
   try {
+    // PATCH-запрос на сервер
     const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ delta, initData: tg?.initData || "" })
     });
 
-    if (!res.ok) throw new Error("Ошибка обновления");
-
+    if (!res.ok) throw new Error("Ошибка обновления прогресса");
     const updated = await res.json();
 
-    // Обновляем карточку на экране
-    const card = document.querySelector(`.challenge-card-user[data-id="${id}"]`);
-    if (card) {
-      const progressText = card.querySelector(".progress-text span:last-child");
-      const fill = card.querySelector(".progress-fill");
+    // Обновляем визуально
+    const progressText = card.querySelector(".progress-text span:last-child");
+    const fill = card.querySelector(".progress-fill");
 
-      progressText.textContent = `${updated.current} / ${updated.goal}`;
-      const percent = updated.goal > 0 ? Math.min((updated.current / updated.goal) * 100, 100) : 0;
-      fill.style.width = `${percent}%`;
+    const percent = updated.goal > 0 ? Math.min((updated.current / updated.goal) * 100, 100) : 0;
+    fill.style.width = `${percent}%`;
+    progressText.textContent = `${updated.current} / ${updated.goal}`;
+
+    // Проверяем, завершено ли испытание
+    if (updated.current >= updated.goal) {
+      card.classList.add("completed");
+      if (!card.querySelector(".completed-overlay")) {
+        const overlay = document.createElement("div");
+        overlay.className = "completed-overlay";
+        overlay.textContent = "ЗАВЕРШЕНО!";
+        card.appendChild(overlay);
+      }
+
+      // Анимация исчезновения и перенос во вкладку "Завершённые"
+      setTimeout(async () => {
+        card.style.transition = "all 0.6s ease";
+        card.style.transform = "scale(0.95)";
+        card.style.opacity = "0";
+        setTimeout(async () => {
+          card.remove();
+          await renderChallengesByStatus("completed");
+        }, 600);
+      }, 1000);
     }
   } catch (e) {
     console.error("Ошибка при обновлении прогресса:", e);
   }
 }
-  
+
 // === Поиск испытаний (для пользователя) ===
 function setupUserChallengeSearch() {
   const searchInput = document.getElementById("bf-search-user");
