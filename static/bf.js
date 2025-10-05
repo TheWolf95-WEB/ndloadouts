@@ -318,19 +318,19 @@ async function renderChallengesByStatus(status) {
   const listEl = document.getElementById("bf-challenges-list");
   if (!listEl) return;
 
-  // Загружаем все испытания со всех категорий
   const res = await fetch(`${BF_API_BASE}/challenges`);
   const all = await res.json();
 
-  // Фильтрация
-  const filtered = all.filter(ch => {
-    const completed = ch.goal > 0 && ch.current >= ch.goal;
-    if (status === "completed") return completed;
-    if (status === "active") return ch.current > 0 && !completed;
-    return false;
-  });
+  const active = all.filter(ch => ch.goal > 0 && ch.current < ch.goal);
+  const completed = all.filter(ch => ch.goal > 0 && ch.current >= ch.goal);
 
-  // Вывод
+  // ✅ обновляем счетчики во вкладках
+  updateStatusCounters(active.length, completed.length);
+
+  let filtered = [];
+  if (status === "completed") filtered = completed;
+  else if (status === "active") filtered = active;
+
   if (!filtered.length) {
     listEl.innerHTML = `<p style="text-align:center;color:#8ea2b6;">Нет испытаний</p>`;
     return;
@@ -338,8 +338,9 @@ async function renderChallengesByStatus(status) {
 
   listEl.innerHTML = filtered.map(ch => {
     const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
+    const isDone = ch.current >= ch.goal;
     return `
-      <div class="challenge-card-user" data-id="${ch.id}">
+      <div class="challenge-card-user ${isDone ? "completed" : ""}" data-id="${ch.id}">
         ${ch.category_name ? `<div class="challenge-category">${ch.category_name}</div>` : ""}
         <div class="challenge-title-en">${ch.title_en}</div>
         <div class="challenge-title-ru">${ch.title_ru}</div>
@@ -348,19 +349,35 @@ async function renderChallengesByStatus(status) {
           <span>${ch.current} / ${ch.goal}</span>
         </div>
         <div class="progress-bar">
-          <div class="progress-fill" style="width:${percent}%; transition: width 0.3s ease;"></div>
+          <div class="progress-fill" style="width:${percent}%;"></div>
         </div>
-        <div class="progress-controls">
-          <button class="btn-mini" data-action="minus" data-id="${ch.id}">
-            <i class="fas fa-minus"></i>
-          </button>
-          <button class="btn-mini" data-action="plus" data-id="${ch.id}">
-            <i class="fas fa-plus"></i>
-          </button>
-        </div>
+        ${!isDone ? `
+          <div class="progress-controls">
+            <button class="btn-mini" data-action="minus" data-id="${ch.id}">
+              <i class="fas fa-minus"></i>
+            </button>
+            <button class="btn-mini" data-action="plus" data-id="${ch.id}">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>` 
+        : `<div class="completed-overlay">ЗАВЕРШЕНО!</div>`}
       </div>
     `;
   }).join('');
+}
+
+// === обновляем счетчики ===
+function updateStatusCounters(activeCount, completedCount) {
+  document.querySelector('[data-status="active"]')?.querySelector("span.count")?.remove();
+  document.querySelector('[data-status="completed"]')?.querySelector("span.count")?.remove();
+
+  const activeBtn = document.querySelector('[data-status="active"]');
+  const completedBtn = document.querySelector('[data-status="completed"]');
+
+  if (activeBtn)
+    activeBtn.insertAdjacentHTML("beforeend", `<span class="count">(${activeCount})</span>`);
+  if (completedBtn)
+    completedBtn.insertAdjacentHTML("beforeend", `<span class="count">(${completedCount})</span>`);
 }
 
 
@@ -379,45 +396,48 @@ async function loadBfChallenges(categoryId = null) {
     const res = await fetch(url);
     bfChallenges = await res.json();
 
+    // 🧩 фильтруем завершённые
+    bfChallenges = bfChallenges.filter(ch => ch.goal > 0 && ch.current < ch.goal);
+
     const listEl = document.getElementById("bf-challenges-list");
     if (!listEl) return;
     listEl.innerHTML = "";
 
     if (!bfChallenges.length) {
-      listEl.innerHTML = `<p style="text-align:center;color:#8ea2b6;">Пока нет испытаний</p>`;
+      listEl.innerHTML = `<p style="text-align:center;color:#8ea2b6;">Пока нет активных испытаний</p>`;
       return;
     }
 
-  listEl.innerHTML = bfChallenges.map(ch => {
-    const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
-    return `
-      <div class="challenge-card-user" data-id="${ch.id}">
-        ${ch.category_name ? `<div class="challenge-category">${ch.category_name}</div>` : ""}
-        <div class="challenge-title-en">${ch.title_en}</div>
-        <div class="challenge-title-ru">${ch.title_ru}</div>
-        <div class="progress-text">
-          <span>Прогресс</span>
-          <span>${ch.current} / ${ch.goal}</span>
+    listEl.innerHTML = bfChallenges.map(ch => {
+      const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
+      return `
+        <div class="challenge-card-user" data-id="${ch.id}">
+          ${ch.category_name ? `<div class="challenge-category">${ch.category_name}</div>` : ""}
+          <div class="challenge-title-en">${ch.title_en}</div>
+          <div class="challenge-title-ru">${ch.title_ru}</div>
+          <div class="progress-text">
+            <span>Прогресс</span>
+            <span>${ch.current} / ${ch.goal}</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:${percent}%;"></div>
+          </div>
+          <div class="progress-controls">
+            <button class="btn-mini" data-action="minus" data-id="${ch.id}">
+              <i class="fas fa-minus"></i>
+            </button>
+            <button class="btn-mini" data-action="plus" data-id="${ch.id}">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
         </div>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width:${percent}%;"></div>
-        </div>
-  
-        <div class="progress-controls">
-          <button class="btn-mini" data-action="minus" data-id="${ch.id}">
-            <i class="fas fa-minus"></i>
-          </button>
-          <button class="btn-mini" data-action="plus" data-id="${ch.id}">
-            <i class="fas fa-plus"></i>
-          </button>
-        </div>
-      </div>
-    `;
-  }).join("");
+      `;
+    }).join("");
   } catch (e) {
     console.error("Ошибка при загрузке испытаний:", e);
   }
 }
+
 
 // === Обновление прогресса ===
 // === Обновление прогресса (боевой режим) ===
