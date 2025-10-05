@@ -908,31 +908,38 @@ async def bf_update_progress(challenge_id: int, data: dict = Body(...)):
         delta = int(data.get("delta", 0))
         init_data = data.get("initData", "")
 
-        # Проверка пользователя (не обязательно админ)
+        # Проверка (пользователь может быть любым)
         user_id, is_admin, _ = extract_user_roles(init_data or "")
 
-        conn = sqlite3.connect("/opt/ndloadouts_storage/bf_challenges.db")
+        db_path = "/opt/ndloadouts_storage/bf_challenges.db"
+        if not os.path.exists(db_path):
+            raise HTTPException(status_code=500, detail=f"База данных не найдена: {db_path}")
+
+        conn = sqlite3.connect(db_path)
         cur = conn.cursor()
 
-        cur.execute("SELECT id, current, goal FROM bf_challenges WHERE id = ?", (challenge_id,))
+        # Проверяем, существует ли испытание
+        cur.execute("SELECT id, current, goal FROM challenges WHERE id = ?", (challenge_id,))
         row = cur.fetchone()
         if not row:
             conn.close()
-            raise HTTPException(status_code=404, detail="Challenge not found")
+            raise HTTPException(status_code=404, detail="Испытание не найдено")
 
         current = row[1] or 0
         goal = row[2] or 0
         new_value = max(0, min(goal, current + delta))
 
-        cur.execute("UPDATE bf_challenges SET current = ? WHERE id = ?", (new_value, challenge_id))
+        # Обновляем значение
+        cur.execute("UPDATE challenges SET current = ? WHERE id = ?", (new_value, challenge_id))
         conn.commit()
         conn.close()
 
+        print(f"✅ Battlefield progress updated: id={challenge_id}, {current} → {new_value}/{goal}")
         return {"id": challenge_id, "current": new_value, "goal": goal}
 
     except Exception as e:
-        print(f"[❌ BF PROGRESS ERROR] {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"[❌ Battlefield Progress Error] {e}")
+        raise HTTPException(status_code=500, detail=f"Ошибка при обновлении прогресса: {e}")
 
 
 
