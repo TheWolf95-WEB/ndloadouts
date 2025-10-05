@@ -288,6 +288,7 @@ async function addBfChallenge() {
   let category_id = null;
   try {
     category_id = await ensureCategory(categoryName);
+    await loadBfCategories(); // сразу обновляем список категорий, чтобы убрать старые
   } catch (e) {
     return alert("❌ Не удалось создать/получить категорию:\n" + (e?.message || ""));
   }
@@ -324,12 +325,30 @@ async function addBfChallenge() {
   }
 }
 
+window.deleteBfChallenge = async function (id) {
+  if (!confirm("Удалить испытание?")) return;
 
-  window.deleteBfChallenge = async function(id) {
-    if (!confirm("Удалить испытание?")) return;
-    await fetch(`${BF_API_BASE}/challenges/${id}?user_id=${window.userInfo?.id ?? ""}`, { method: "DELETE" });
+  try {
+    const res = await fetch(`/api/bf/challenges/${id}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ initData: tg?.initData || "" })
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      alert(`❌ Ошибка при удалении испытания\nHTTP ${res.status}\n${text}`);
+      return;
+    }
+
+    alert("✅ Испытание удалено");
     await loadBfChallengesTable();
-  };
+  } catch (e) {
+    console.error("Ошибка при удалении испытания:", e);
+    alert("❌ Не удалось удалить испытание");
+  }
+};
+
 
   window.editBfChallenge = function(id) {
     const ch = bfChallenges.find(c => c.id === id);
