@@ -261,6 +261,32 @@ async function loadBfChallenges(categoryId = null) {
   }
 }
 
+function setupUserChallengeSearch() {
+  const searchInput = document.getElementById('bf-search-user');
+  if (!searchInput) return;
+
+  const filterChallenges = () => {
+    const searchTerm = searchInput.value.toLowerCase();
+    document.querySelectorAll('.challenge-card-user').forEach(card => {
+      const titleEn = card.querySelector('.challenge-title-en')?.textContent.toLowerCase() || "";
+      const titleRu = card.querySelector('.challenge-title-ru')?.textContent.toLowerCase() || "";
+      const category = card.querySelector('.challenge-category')?.textContent.toLowerCase() || "";
+
+      const matchesSearch = 
+        titleEn.includes(searchTerm) ||
+        titleRu.includes(searchTerm) ||
+        category.includes(searchTerm);
+
+      card.style.display = matchesSearch ? "block" : "none";
+    });
+  };
+
+  searchInput.addEventListener("input", filterChallenges);
+}
+
+
+setupUserChallengeSearch();
+    
 
 async function loadBfChallengesTable() {
   try {
