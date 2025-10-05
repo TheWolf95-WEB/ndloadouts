@@ -68,34 +68,40 @@
 </div>
 
 
-<!-- ⚔️ Экран испытаний Battlefield -->
+<!-- 👥 Пользовательский экран испытаний -->
 <div id="screen-bf-challenges" class="screen" style="display:none;">
   <h2>⚔️ Battlefield | Испытания</h2>
 
-  <!-- 🔹 Вкладки -->
-  <div id="bf-tabs" class="button-grid tabs-grid" style="margin-bottom: 20px;">
-    <!-- вкладки подгружаются из API -->
-  </div>
+  <!-- Вкладки -->
+  <div id="bf-tabs" class="tabs-grid"></div>
 
-  <!-- 🔹 Список испытаний -->
+  <!-- Список испытаний -->
   <div id="bf-challenges-list">
     <p>Загрузка испытаний...</p>
   </div>
 
-  <!-- 🔹 Кнопки администратора -->
-  <div id="bf-admin-panel" style="margin-top: 24px; display:none;">
-    <button class="btn" id="bf-add-challenge-btn">➕ Добавить испытание</button>
-    <button class="btn" id="bf-back-to-bfmain">⬅ Назад</button>
-  </div>
-
-  <!-- 🔹 Кнопка назад (для пользователя) -->
-  <div id="bf-user-back" class="global-home-button">
-    <button class="btn" id="bf-back-home">⬅ Назад</button>
+  <div class="global-home-button">
+    <button class="btn" onclick="showScreen('screen-battlefield-main')">⬅ Назад</button>
   </div>
 </div>
 
 
-<!-- ⚙️ Экран добавления испытания -->
+<!-- 🛡 Экран базы испытаний (для админа) -->
+<div id="screen-bf-challenges-db" class="screen" style="display:none;">
+  <h2>🧩 База испытаний Battlefield</h2>
+
+  <div class="btn-group" style="margin-bottom: 20px;">
+    <button class="btn" id="bf-add-challenge-btn">➕ Добавить испытание</button>
+    <button class="btn" id="bf-back-to-bfmain">⬅ Назад</button>
+  </div>
+
+  <div id="bf-challenges-table" class="table-wrapper">
+    <p>Загрузка испытаний...</p>
+  </div>
+</div>
+
+
+<!-- 🧱 Экран добавления/редактирования испытания -->
 <div id="screen-bf-add-challenge" class="screen" style="display:none;">
   <h2>🛠 Добавить испытание</h2>
 
@@ -131,4 +137,5 @@
     <button class="btn btn-back" id="bf-back-from-add">⬅ Назад</button>
   </div>
 </div>
+
 
