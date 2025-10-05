@@ -66,3 +66,69 @@
 
   </div>
 </div>
+
+
+<!-- ⚔️ Экран испытаний Battlefield -->
+<div id="screen-bf-challenges" class="screen" style="display:none;">
+  <h2>⚔️ Battlefield | Испытания</h2>
+
+  <!-- 🔹 Вкладки -->
+  <div id="bf-tabs" class="button-grid tabs-grid" style="margin-bottom: 20px;">
+    <!-- вкладки подгружаются из API -->
+  </div>
+
+  <!-- 🔹 Список испытаний -->
+  <div id="bf-challenges-list">
+    <p>Загрузка испытаний...</p>
+  </div>
+
+  <!-- 🔹 Кнопки администратора -->
+  <div id="bf-admin-panel" style="margin-top: 24px; display:none;">
+    <button class="btn" id="bf-add-challenge-btn">➕ Добавить испытание</button>
+    <button class="btn" id="bf-back-to-bfmain">⬅ Назад</button>
+  </div>
+
+  <!-- 🔹 Кнопка назад (для пользователя) -->
+  <div id="bf-user-back" class="global-home-button">
+    <button class="btn" id="bf-back-home">⬅ Назад</button>
+  </div>
+</div>
+
+
+<!-- ⚙️ Экран добавления испытания -->
+<div id="screen-bf-add-challenge" class="screen" style="display:none;">
+  <h2>🛠 Добавить испытание</h2>
+
+  <div class="form-section">
+    <label>Категория:</label>
+    <select id="bf-category-select" class="form-input"></select>
+    <button class="btn" id="bf-add-category-btn" style="margin-top:8px;">➕ Добавить вкладку</button>
+  </div>
+
+  <div class="form-section">
+    <label>Название (EN):</label>
+    <input type="text" id="bf-title-en" class="form-input" placeholder="Get 30 kills">
+  </div>
+
+  <div class="form-section">
+    <label>Название (RU):</label>
+    <input type="text" id="bf-title-ru" class="form-input" placeholder="Сделайте 30 устранений">
+  </div>
+
+  <div class="form-section flex-row" style="display:flex;gap:10px;">
+    <div style="flex:1">
+      <label>Текущее значение:</label>
+      <input type="number" id="bf-current" class="form-input" value="0">
+    </div>
+    <div style="flex:1">
+      <label>Цель:</label>
+      <input type="number" id="bf-goal" class="form-input" value="0">
+    </div>
+  </div>
+
+  <div class="form-section btn-group">
+    <button class="btn" id="bf-submit-challenge">✅ Сохранить</button>
+    <button class="btn btn-back" id="bf-back-from-add">⬅ Назад</button>
+  </div>
+</div>
+
