@@ -842,13 +842,28 @@ select:disabled {
 
 
 /* === Battlefield Tabs === */
+/* === Горизонтальный скролл вкладок === */
 #bf-tabs {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
-  justify-content: flex-start;
-  margin-bottom: 18px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+  scroll-behavior: smooth;
 }
+
+#bf-tabs::-webkit-scrollbar {
+  height: 6px;
+}
+#bf-tabs::-webkit-scrollbar-thumb {
+  background: var(--bf-border);
+  border-radius: 4px;
+}
+.tab-btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 
 #bf-tabs .tab-btn {
   background: rgba(255,255,255,0.05);
