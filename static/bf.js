@@ -5,15 +5,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   console.log("🚀 Battlefield JS загружен");
 
-  // === Элементы ===
-  const globalHome = document.querySelector("#screen-battlefield-main .global-home-button");
-
-  const userBtns = [
-    "bf-show-builds-btn",
-    "bf-challenges-btn",
-    "bf-search-btn"
-  ];
-
+  /* -----------------------------
+      Элементы и роли
+  ------------------------------ */
+  const userBtns = ["bf-show-builds-btn", "bf-challenges-btn", "bf-search-btn"];
   const adminBtns = [
     "bf-weapons-db-btn",
     "bf-challenges-db-btn",
@@ -22,7 +17,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     "bf-add-challenge-btn"
   ];
 
-  // --- Проверка статуса пользователя ---
+  const globalHome = document.querySelector("#screen-battlefield-main .global-home-button");
+
+  // --- Проверка прав пользователя ---
   try {
     const res = await fetch("/api/me", {
       method: "POST",
@@ -33,13 +30,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     const data = await res.json();
     console.log("👤 Battlefield user:", data);
 
-    // Скрыть все
+    // Скрываем всё
     [...userBtns, ...adminBtns].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.classList.remove("is-visible");
     });
 
-    // Показать по роли
+    // Показываем по роли
     if (data.is_admin) {
       [...userBtns, ...adminBtns].forEach(id => {
         const el = document.getElementById(id);
@@ -59,7 +56,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("❌ Ошибка проверки статуса Battlefield:", err);
   }
 
-  // --- Навигация ---
+  /* -----------------------------
+      Навигация между экранами
+  ------------------------------ */
+
+  // Кнопки
   const btnChallenges = document.getElementById("bf-challenges-btn");
   const btnChallengesDB = document.getElementById("bf-challenges-db-btn");
   const btnAddChallengeDB = document.getElementById("bf-add-challenge-db-btn");
@@ -99,7 +100,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (btnBackMain)
     btnBackMain.addEventListener("click", () => showScreen("screen-battlefield-main"));
 
-  // Инициализация
   await loadBfCategories();
 });
 
@@ -112,18 +112,30 @@ let bfCategories = [];
 let bfChallenges = [];
 let editingChallengeId = null;
 
-/* === Экраны === */
+/* === Экраны Battlefield === */
 const bfScreens = {
   main: document.getElementById("screen-bf-challenges"),
   db: document.getElementById("screen-bf-challenges-db"),
   add: document.getElementById("screen-bf-add-challenge")
 };
 
-function showBfScreen(screenId) {
-  Object.values(bfScreens).forEach(el => el && (el.style.display = "none"));
-  if (bfScreens[screenId]) {
-    bfScreens[screenId].style.display = "block";
-    console.log(`🧭 Battlefield → ${screenId}`);
+/* === Плавное переключение между экранами === */
+function showBfScreen(screenKey) {
+  console.log(`🧭 Battlefield → ${screenKey}`);
+
+  // Скрываем все экраны Battlefield
+  Object.values(bfScreens).forEach(screen => {
+    if (screen) {
+      screen.style.display = "none";
+      screen.classList.remove("active");
+    }
+  });
+
+  // Показываем выбранный
+  const target = bfScreens[screenKey];
+  if (target) {
+    target.style.display = "block";
+    setTimeout(() => target.classList.add("active"), 20);
   }
 }
 
@@ -132,7 +144,6 @@ async function loadBfCategories(selectedId = null) {
   try {
     const res = await fetch(`${BF_API_BASE}/categories`);
     bfCategories = await res.json();
-    console.log("📁 Категории:", bfCategories);
 
     const tabsEl = document.getElementById("bf-tabs");
     if (tabsEl) {
@@ -148,6 +159,7 @@ async function loadBfCategories(selectedId = null) {
         };
         tabsEl.appendChild(btn);
       });
+
       if (bfCategories.length > 0 && !selectedId) document.querySelector(".tab-btn")?.click();
     }
 
@@ -249,7 +261,7 @@ async function loadBfChallengesTable() {
       </table>
     `;
   } catch (e) {
-    console.error("Ошибка таблицы:", e);
+    console.error("Ошибка таблицы испытаний:", e);
   }
 }
 
