@@ -78,12 +78,12 @@
 <!-- 🛡 Экран базы испытаний (для админа) -->
 <div id="screen-bf-challenges-db" class="screen" style="display:none;">
   <div class="screen-header">
-    <h2>🧩 База испытаний Battlefield</h2>
+    <h2>База испытаний Battlefield</h2>
     <p class="screen-subtitle">Управление всеми испытаниями системы</p>
   </div>
 
   <div class="btn-group" style="margin-bottom:20px;">
-    <button class="btn btn-secondary" id="bf-back-to-bfmain">⬅ Назад</button>
+    <button class="btn btn-back" id="bf-back-to-bfmain">⬅ Назад</button>
     <button class="btn btn-primary" id="bf-add-challenge-db-btn">➕ Добавить испытание</button>
   </div>
 
@@ -99,7 +99,9 @@
   </div>
 
   <div class="search-box">
-    <input type="text" id="bf-search-challenges" placeholder="🔍 Поиск по названию..." class="search-input">
+    <div class="search-input-wrapper">
+      <input type="text" id="bf-search-challenges" placeholder="Поиск по названию..." class="search-input">
+    </div>
     <select id="bf-filter-category" class="filter-select">
       <option value="">Все категории</option>
     </select>
