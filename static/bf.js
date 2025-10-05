@@ -396,9 +396,35 @@ async function loadBfChallenges(categoryId = null) {
   }
 }
 
+// === Обновление прогресса ===
 async function updateProgress(id, delta) {
-  
+  try {
+    const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ delta, initData: tg?.initData || "" })
+    });
 
+    if (!res.ok) throw new Error("Ошибка обновления");
+
+    const updated = await res.json();
+
+    // Обновляем карточку на экране
+    const card = document.querySelector(`.challenge-card-user[data-id="${id}"]`);
+    if (card) {
+      const progressText = card.querySelector(".progress-text span:last-child");
+      const fill = card.querySelector(".progress-fill");
+
+      progressText.textContent = `${updated.current} / ${updated.goal}`;
+      const percent = updated.goal > 0 ? Math.min((updated.current / updated.goal) * 100, 100) : 0;
+      fill.style.width = `${percent}%`;
+    }
+  } catch (e) {
+    console.error("Ошибка при обновлении прогресса:", e);
+  }
+}
+  
+// === Поиск испытаний (для пользователя) ===
 function setupUserChallengeSearch() {
   const searchInput = document.getElementById("bf-search-user");
   if (!searchInput) return;
@@ -412,7 +438,6 @@ function setupUserChallengeSearch() {
       const listEl = document.getElementById("bf-challenges-list");
       if (!listEl) return;
 
-      // Если поле пустое — вернуть текущую категорию
       if (!term) {
         const activeTab = document.querySelector("#bf-tabs .tab-btn.active");
         const categoryId = activeTab?.dataset?.id || null;
@@ -420,7 +445,6 @@ function setupUserChallengeSearch() {
         return;
       }
 
-      // Загружаем все испытания
       try {
         const res = await fetch(`${BF_API_BASE}/challenges`);
         const all = await res.json();
@@ -432,40 +456,35 @@ function setupUserChallengeSearch() {
           return en.includes(term) || ru.includes(term) || cat.includes(term);
         });
 
-        // Вывод
-        listEl.innerHTML = "";
-        if (!filtered.length) {
-          listEl.innerHTML = `<p style="text-align:center;color:#8ea2b6;">Ничего не найдено</p>`;
-          return;
-        }
-
-        listEl.innerHTML = filtered.map(ch => {
-          const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
-          return `
-            <div class="challenge-card-user">
-              ${ch.category_name ? `<div class="challenge-category">${ch.category_name}</div>` : ""}
-              <div class="challenge-title-en">${ch.title_en}</div>
-              <div class="challenge-title-ru">${ch.title_ru}</div>
-              <div class="progress-text">
-                <span>Прогресс</span>
-                <span>${ch.current} / ${ch.goal}</span>
-              </div>
-              <div class="progress-bar">
-                <div class="progress-fill" style="width:${percent}%;"></div>
-              </div>
-            </div>
-          `;
-        }).join("");
+        listEl.innerHTML = filtered.length
+          ? filtered.map(ch => {
+              const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
+              return `
+                <div class="challenge-card-user">
+                  ${ch.category_name ? `<div class="challenge-category">${ch.category_name}</div>` : ""}
+                  <div class="challenge-title-en">${ch.title_en}</div>
+                  <div class="challenge-title-ru">${ch.title_ru}</div>
+                  <div class="progress-text">
+                    <span>Прогресс</span>
+                    <span>${ch.current} / ${ch.goal}</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width:${percent}%;"></div>
+                  </div>
+                </div>
+              `;
+            }).join("")
+          : `<p style="text-align:center;color:#8ea2b6;">Ничего не найдено</p>`;
       } catch (e) {
         console.error("Ошибка при поиске испытаний:", e);
         listEl.innerHTML = `<p style="text-align:center;color:#8ea2b6;">Ошибка при поиске</p>`;
       }
-    }, 300); // задержка 300мс для плавного поиска
+    }, 300);
   });
 }
 
-
 setupUserChallengeSearch();
+
     
 
 async function loadBfChallengesTable() {
