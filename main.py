@@ -953,6 +953,27 @@ def bf_update_category(category_id: int, data: dict, request: Request):
     return {"status": "updated"}
 
 
+@app.patch("/api/bf/challenges/{challenge_id}/progress")
+def bf_update_progress(challenge_id: int, data: dict, request: Request):
+    delta = int(data.get("delta", 0))
+    user_id, is_admin, _ = extract_user_roles(data.get("initData", ""))
+
+    # Получаем текущее значение
+    with get_bf_conn(row_mode=True) as conn:
+        row = conn.execute("SELECT * FROM challenges WHERE id = ?", (challenge_id,)).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Challenge not found")
+
+        current = int(row["current"])
+        goal = int(row["goal"])
+
+        # Обновляем current
+        new_current = max(0, current + delta)
+        conn.execute("UPDATE challenges SET current = ? WHERE id = ?", (new_current, challenge_id))
+
+    return {"id": challenge_id, "current": new_current, "goal": goal}
+
+
 
 if __name__ == "__main__":
     import uvicorn
