@@ -215,7 +215,13 @@ document.getElementById("bf-add-category-btn")?.addEventListener("click", async 
         throw new Error(`HTTP ${res.status} ${res.statusText} | ${text}`);
       }
 
-      const created = await res.json().catch(() => ({}));
+      let created;
+      try {
+          created = await res.json();
+      } catch (e) {
+          console.error("Ошибка парсинга JSON:", e);
+          created = {};
+      }
       const newId = created?.id ?? created?.category_id ?? null;
 
       // Обновляем кэш категорий
@@ -573,7 +579,7 @@ window.deleteBfChallenge = async function (id) {
 };
 
 
-  window.editBfChallenge = function(id) {
+window.editBfChallenge = async function(id) { // ← Добавить async
     const ch = bfChallenges.find(c => c.id === id);
     if (!ch) return;
     editingChallengeId = id;
@@ -584,5 +590,5 @@ window.deleteBfChallenge = async function (id) {
     document.getElementById("bf-title-ru").value = ch.title_ru || "";
     document.getElementById("bf-current").value  = ch.current ?? 0;
     document.getElementById("bf-goal").value     = ch.goal ?? 0;
-  };
+};
 });
