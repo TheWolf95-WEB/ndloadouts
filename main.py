@@ -898,6 +898,43 @@ def bf_delete_challenge(challenge_id: int, request: Request, data: dict | None =
     return {"status": "deleted"}
 
 
+# === Battlefield: обновление прогресса ===
+@app.patch("/api/bf/challenges/{challenge_id}/progress")
+async def bf_update_progress(challenge_id: int, data: dict = Body(...)):
+    """
+    Обновление прогресса испытания (+1 / -1)
+    """
+    try:
+        delta = int(data.get("delta", 0))
+        init_data = data.get("initData", "")
+
+        # Проверка пользователя (не обязательно админ)
+        user_id, is_admin, _ = extract_user_roles(init_data or "")
+
+        conn = sqlite3.connect("/opt/ndloadouts_storage/bf_challenges.db")
+        cur = conn.cursor()
+
+        cur.execute("SELECT id, current, goal FROM bf_challenges WHERE id = ?", (challenge_id,))
+        row = cur.fetchone()
+        if not row:
+            conn.close()
+            raise HTTPException(status_code=404, detail="Challenge not found")
+
+        current = row[1] or 0
+        goal = row[2] or 0
+        new_value = max(0, min(goal, current + delta))
+
+        cur.execute("UPDATE bf_challenges SET current = ? WHERE id = ?", (new_value, challenge_id))
+        conn.commit()
+        conn.close()
+
+        return {"id": challenge_id, "current": new_value, "goal": goal}
+
+    except Exception as e:
+        print(f"[❌ BF PROGRESS ERROR] {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 
 if __name__ == "__main__":
     import uvicorn
