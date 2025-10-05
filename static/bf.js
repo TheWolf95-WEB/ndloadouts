@@ -84,12 +84,11 @@ async function populateCategorySelect(selectedId = null) {
 
   // Кнопки "Назад" + страховка делегированием
   const hookBack = () => showBfMain();
-  document.getElementById("bf-back-from-add")?.addEventListener("click", hookBack);
-  document.getElementById("bf-back-to-bfmain")?.addEventListener("click", hookBack);
-  document.getElementById("bf-back-from-challenges")?.addEventListener("click", hookBack);
-  document.addEventListener("click", (e) => {
-    if (["bf-back-from-add","bf-back-to-bfmain","bf-back-from-challenges"].includes(e.target?.id)) showBfMain();
-  });
+  document.getElementById("bf-back-from-add")?.addEventListener("click", showBfMain);
+  document.getElementById("bf-back-to-bfmain")?.addEventListener("click", showBfMain);
+  document.getElementById("bf-back-from-challenges")?.addEventListener("click", showBfMain);
+
+
 
   // Добавление категории вручную (кнопка под полем "Категория")
 document.getElementById("bf-add-category-btn")?.addEventListener("click", async () => {
@@ -422,12 +421,17 @@ async function updateProgress(id, delta) {
     }
 
     // Через 1 сек — переносим в "Завершённые"
-    setTimeout(() => {
-      renderChallengesByStatus("completed");
-      document.querySelector('.status-btn[data-status="completed"]')?.classList.add("active");
-      document.querySelector('.status-btn[data-status="active"]')?.classList.remove("active");
-    }, 1000);
-  }
+    if (!document.querySelector(".completed-overlay")) {
+      setTimeout(() => {
+        const activeTab = document.querySelector(".status-btn.active");
+        if (activeTab?.dataset.status !== "completed") {
+          renderChallengesByStatus("completed");
+          document.querySelector('.status-btn[data-status="completed"]')?.classList.add("active");
+          document.querySelector('.status-btn[data-status="active"]')?.classList.remove("active");
+        }
+      }, 800);
+    }
+
 
   // 💾 Отправляем на сервер
   try {
