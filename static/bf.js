@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   let bfCategories = [];
   let bfChallenges = [];
   let editingChallengeId = null;
+  let bfMainLoaded = false;
 
   const tg = window.Telegram?.WebApp;
   if (tg) tg.expand();
@@ -44,7 +45,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   // -------- Навигация
   document.getElementById("bf-challenges-btn")?.addEventListener("click", async () => {
     showBfScreen("main");
-    await loadBfCategories();
+    if (!bfMainLoaded) {
+      await loadBfCategories();
+      bfMainLoaded = true;
+    }
   });
   document.getElementById("bf-challenges-db-btn")?.addEventListener("click", async () => {
     showBfScreen("db");
@@ -135,28 +139,36 @@ document.getElementById("bf-add-category-btn")?.addEventListener("click", async 
   await loadBfCategories();
 
   // ===== Helpers =====
-  function showBfScreen(screenId) {
-    document.querySelectorAll(".screen").forEach(el => { 
-      el.classList.remove("active"); 
-      el.style.display = "none"; 
-    });
-    document.getElementById("screen-battlefield-main")?.style?.setProperty("display", "none");
-  
-    const target = bfScreens[screenId];
-    if (target) { 
-      target.style.display = "block"; 
-      target.classList.add("active"); 
-    }
-  
-    // 👇 вот это добавляем
-    toggleBfBackButton(screenId);
-  }
+function showBfScreen(screenId) {
+  const allScreens = document.querySelectorAll(".screen");
 
-  function showBfMain() {
-    Object.values(bfScreens).forEach(el => (el.style.display = "none"));
-    const mainEl = document.getElementById("screen-battlefield-main");
-    if (mainEl) { mainEl.style.display = "block"; mainEl.classList.add("active"); }
+  allScreens.forEach(el => {
+    if (el === bfScreens[screenId]) {
+      el.style.display = "block";
+      el.classList.add("active");
+    } else {
+      el.classList.remove("active");
+      el.style.display = "none";
+    }
+  });
+
+  document.getElementById("screen-battlefield-main")?.style?.setProperty("display", "none");
+  toggleBfBackButton(screenId);
+}
+
+
+function showBfMain() {
+  Object.values(bfScreens).forEach(el => {
+    el.classList.remove("active");
+    el.style.display = "none";
+  });
+  const mainEl = document.getElementById("screen-battlefield-main");
+  if (mainEl) {
+    mainEl.classList.add("active");
+    mainEl.style.display = "block";
   }
+}
+
 
   // === Управление кнопкой "Назад" Battlefield ===
   function toggleBfBackButton(screenId) {
