@@ -65,6 +65,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ЛОГИКА ДОБАЛВЕНИЯ ИСПЫТАНИЙ
 
+// === Навигация Battlefield ===
+document.getElementById('bf-challenges-btn')?.addEventListener('click', () => {
+  showBfScreen('main');
+  loadBfCategories();
+});
+
+document.getElementById('bf-challenges-db-btn')?.addEventListener('click', () => {
+  showBfScreen('db');
+  loadBfChallengesTable();
+});
+
+document.getElementById('bf-add-challenge-db-btn')?.addEventListener('click', () => {
+  editingChallengeId = null;
+  showBfScreen('add');
+  loadBfCategories();
+});
+
+document.getElementById('bf-back-from-add')?.addEventListener('click', () => showBfScreen('db'));
+document.getElementById('bf-back-to-bfmain')?.addEventListener('click', () => showScreen('screen-battlefield-main'));
+
+
 
 /* ============================
    Battlefield | Challenges
