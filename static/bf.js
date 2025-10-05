@@ -505,7 +505,7 @@ async function loadBfChallenges(categoryId = null) {
     bfChallenges = await res.json();
 
     // ❌ исключаем завершённые испытания
-    // bfChallenges = bfChallenges.filter(ch => ch.goal > 0 && ch.current < ch.goal);
+    bfChallenges = bfChallenges.filter(ch => ch.goal > 0 && ch.current < ch.goal);
 
     const listEl = document.getElementById("bf-challenges-list");
     if (!listEl) return;
