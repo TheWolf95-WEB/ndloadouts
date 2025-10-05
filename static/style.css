@@ -867,11 +867,11 @@ select:disabled {
 
 
 #bf-tabs .tab-btn {
-  background: rgba(255,255,255,0.05);
+  background: var(--bf-accent);
   color: var(--bf-text);
   border: 1px solid var(--bf-border);
   border-radius: 8px;
-  padding: 8px 14px;
+  padding: 10px 16px;
   font-size: 13px;
   letter-spacing: 0.3px;
   cursor: pointer;
@@ -989,7 +989,7 @@ select:disabled {
   display: flex;
   justify-content: right;
   gap: 10px;
-  margin-top: 8px;
+  margin-top: 12px;
 }
 
 .btn-mini {
