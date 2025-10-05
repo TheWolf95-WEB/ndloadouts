@@ -299,6 +299,22 @@ document.getElementById("bf-add-category-btn")?.addEventListener("click", async 
     }
   }
 
+// === Автообновление счётчиков статусов при загрузке ===
+async function updateStatusCountersAuto() {
+  try {
+    const res = await fetch(`${BF_API_BASE}/challenges`);
+    const all = await res.json();
+
+    const active = all.filter(ch => ch.goal > 0 && ch.current < ch.goal);
+    const completed = all.filter(ch => ch.goal > 0 && ch.current >= ch.goal);
+    updateStatusCounters(active.length, completed.length);
+  } catch (e) {
+    console.warn("Ошибка при обновлении счётчиков:", e);
+  }
+}
+
+  
+
   // ===== Категории / Испытания =====
 async function loadBfCategories() {
   try {
@@ -318,6 +334,7 @@ async function loadBfCategories() {
       document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
       allBtn.classList.add("active");
       await loadBfChallenges(null);
+      await updateStatusCountersAuto();
     };
     tabsEl.appendChild(allBtn);
 
@@ -335,6 +352,16 @@ async function loadBfCategories() {
       tabsEl.appendChild(btn);
     });
 
+    async function updateStatusCountersAuto() {
+      const res = await fetch(`${BF_API_BASE}/challenges`);
+      const all = await res.json();
+    
+      const active = all.filter(ch => ch.goal > 0 && ch.current < ch.goal);
+      const completed = all.filter(ch => ch.goal > 0 && ch.current >= ch.goal);
+      updateStatusCounters(active.length, completed.length);
+}
+
+
     await loadBfChallenges(null);
   } catch (e) {
     console.error("Ошибка при загрузке категорий:", e);
@@ -342,29 +369,39 @@ async function loadBfCategories() {
 }
 
 
-// JS фильтрацию по статусу:
 // === Фильтрация по статусу (Активные / Завершённые) ===
 document.querySelectorAll('.status-btn').forEach(btn => {
   btn.addEventListener('click', async () => {
-    const listEl = document.getElementById("bf-challenges-list");
-    const alreadyActive = btn.classList.contains('active');
-
-    // Снимаем подсветку со всех
     document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
-
-    if (alreadyActive) {
-      // Если повторный клик — возвращаем текущую категорию
-      const activeTab = document.querySelector("#bf-tabs .tab-btn.active");
-      const categoryId = activeTab?.dataset?.id || null;
-      await loadBfChallenges(categoryId);
-      return;
-    }
-
-    // Подсвечиваем текущую кнопку
     btn.classList.add('active');
     await renderChallengesByStatus(btn.dataset.status);
   });
 });
+
+// Счётчики статусов показываем сразу при старте
+async function refreshStatusCounters() {
+  try {
+    const res = await fetch(`${BF_API_BASE}/challenges`);
+    const all = await res.json();
+    const active = all.filter(ch => ch.goal > 0 && ch.current < ch.goal).length;
+    const completed = all.filter(ch => ch.goal > 0 && ch.current >= ch.goal).length;
+    setStatusCounter('active', active);
+    setStatusCounter('completed', completed);
+  } catch {}
+}
+
+function setStatusCounter(status, n) {
+  const btn = document.querySelector(`.status-btn[data-status="${status}"]`);
+  if (!btn) return;
+  let badge = btn.querySelector('.count');
+  if (!badge) {
+    badge = document.createElement('span');
+    badge.className = 'count';
+    btn.appendChild(badge);
+  }
+  badge.textContent = `(${n})`;
+}
+
 
 
 async function renderChallengesByStatus(status) {
@@ -468,7 +505,7 @@ async function loadBfChallenges(categoryId = null) {
     bfChallenges = await res.json();
 
     // ❌ исключаем завершённые испытания
-    bfChallenges = bfChallenges.filter(ch => ch.goal > 0 && ch.current < ch.goal);
+    // bfChallenges = bfChallenges.filter(ch => ch.goal > 0 && ch.current < ch.goal);
 
     const listEl = document.getElementById("bf-challenges-list");
     if (!listEl) return;
@@ -894,6 +931,7 @@ document.addEventListener("dblclick", async (e) => {
     });
     if (!res.ok) throw new Error("Ошибка начала испытания");
 
+    // 🔆 визуальная анимация
     card.style.boxShadow = "0 0 20px rgba(0,255,120,0.5)";
     card.style.transform = "scale(1.03)";
     setTimeout(() => {
@@ -902,11 +940,17 @@ document.addEventListener("dblclick", async (e) => {
       card.style.transform = "";
     }, 700);
 
-    setTimeout(() => renderChallengesByStatus("active"), 400);
+    // 🔁 обновляем вкладку "Активные"
+    setTimeout(async () => {
+      document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector('.status-btn[data-status="active"]')?.classList.add("active");
+      await renderChallengesByStatus("active");
+    }, 500);
   } catch (err) {
     console.error("Ошибка при запуске испытания:", err);
   }
 });
+
 
 
   
