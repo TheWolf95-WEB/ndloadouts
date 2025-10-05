@@ -77,14 +77,36 @@
 
 <!-- 🛡 Экран базы испытаний (для админа) -->
 <div id="screen-bf-challenges-db" class="screen" style="display:none;">
-  <h2>🧩 База испытаний Battlefield</h2>
-
-  <div class="btn-group" style="margin-bottom:20px;">
-    <button class="btn" id="bf-back-to-bfmain">⬅ Назад</button>
+  <div class="screen-header">
+    <h2>🧩 База испытаний Battlefield</h2>
+    <p class="screen-subtitle">Управление всеми испытаниями системы</p>
   </div>
 
-  <div id="bf-challenges-table" class="table-wrapper">
-    <p>Загрузка испытаний...</p>
+  <div class="btn-group" style="margin-bottom:20px;">
+    <button class="btn btn-secondary" id="bf-back-to-bfmain">⬅ Назад</button>
+    <button class="btn btn-primary" id="bf-add-challenge-db-btn">➕ Добавить испытание</button>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-value" id="bf-total-challenges">0</span>
+      <span class="stat-label">Всего испытаний</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value" id="bf-total-categories">0</span>
+      <span class="stat-label">Категорий</span>
+    </div>
+  </div>
+
+  <div class="search-box">
+    <input type="text" id="bf-search-challenges" placeholder="🔍 Поиск по названию..." class="search-input">
+    <select id="bf-filter-category" class="filter-select">
+      <option value="">Все категории</option>
+    </select>
+  </div>
+
+  <div id="bf-challenges-grid" class="challenges-grid">
+    <div class="loading-spinner">Загрузка испытаний...</div>
   </div>
 </div>
 
