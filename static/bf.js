@@ -397,39 +397,6 @@ async function loadBfChallenges(categoryId = null) {
 }
 
 async function updateProgress(id, delta) {
-  const ch = bfChallenges.find(c => c.id === id);
-  if (!ch) return;
-
-  const newValue = Math.max(0, Math.min(ch.goal, ch.current + delta));
-  if (newValue === ch.current) return;
-
-  ch.current = newValue;
-
-  // 🔄 Обновляем визуально без перезагрузки
-  const card = document.querySelector(`.challenge-card-user[data-id="${id}"]`);
-  if (card) {
-    const bar = card.querySelector(".progress-fill");
-    const text = card.querySelector(".progress-text span:last-child");
-    const percent = ch.goal > 0 ? Math.min((newValue / ch.goal) * 100, 100) : 0;
-    bar.style.width = `${percent}%`;
-    text.textContent = `${newValue} / ${ch.goal}`;
-  }
-
-  // 💾 Отправляем на сервер
-  try {
-    await fetch(`/api/bf/challenges/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        current: newValue,
-        initData: tg?.initData || ""
-      })
-    });
-  } catch (e) {
-    console.error("Ошибка при обновлении прогресса:", e);
-  }
-}
-
   
 
 function setupUserChallengeSearch() {
