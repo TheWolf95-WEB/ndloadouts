@@ -25,6 +25,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
     const data = await res.json();
 
+    // Сохраняем данные пользователя глобально
+    window.userInfo = data.user || data;
+
     // Скрываем все кнопки
     [...userBtns, ...adminBtns].forEach(id => document.getElementById(id)?.classList.remove("is-visible"));
 
@@ -43,26 +46,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   /* === Навигация === */
-  document.getElementById("bf-challenges-btn")?.addEventListener("click", () => {
+  document.getElementById("bf-challenges-btn")?.addEventListener("click", async () => {
     showBfScreen("main");
-    loadBfCategories();
+    await loadBfCategories();
   });
 
-  document.getElementById("bf-challenges-db-btn")?.addEventListener("click", () => {
+  document.getElementById("bf-challenges-db-btn")?.addEventListener("click", async () => {
     showBfScreen("db");
-    loadBfChallengesTable();
+    await loadBfChallengesTable();
   });
 
-  document.getElementById("bf-add-challenge-btn")?.addEventListener("click", () => {
+  document.getElementById("bf-add-challenge-btn")?.addEventListener("click", async () => {
     editingChallengeId = null;
     showBfScreen("add");
-    loadBfCategories();
+    await loadBfCategories();
   });
 
-  document.getElementById("bf-add-challenge-db-btn")?.addEventListener("click", () => {
+  document.getElementById("bf-add-challenge-db-btn")?.addEventListener("click", async () => {
     editingChallengeId = null;
     showBfScreen("add");
-    loadBfCategories();
+    await loadBfCategories();
   });
 
   // Кнопки "Назад"
@@ -130,7 +133,13 @@ async function loadBfCategories(selectedId = null) {
         };
         tabsEl.appendChild(btn);
       });
-      if (bfCategories.length > 0 && !selectedId) document.querySelector(".tab-btn")?.click();
+
+      // Автоматически загружаем первую категорию
+      if (bfCategories.length > 0) {
+        const first = bfCategories[0];
+        document.querySelector(".tab-btn")?.classList.add("active");
+        await loadBfChallenges(first.id);
+      }
     }
 
     // --- категории для формы ---
@@ -210,6 +219,11 @@ async function loadBfChallengesTable() {
 
     const tableEl = document.getElementById("bf-challenges-table");
     if (!tableEl) return;
+
+    if (bfChallenges.length === 0) {
+      tableEl.innerHTML = "<p style='text-align:center;color:#888;'>Пока нет испытаний</p>";
+      return;
+    }
 
     tableEl.innerHTML = `
       <table class="data-table">
