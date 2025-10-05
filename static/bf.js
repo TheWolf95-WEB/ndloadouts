@@ -401,14 +401,32 @@ async function updateProgress(id, delta) {
 
   ch.current = newValue;
 
-  // 🔄 Обновляем визуально без перезагрузки
   const card = document.querySelector(`.challenge-card-user[data-id="${id}"]`);
-  if (card) {
-    const bar = card.querySelector(".progress-fill");
-    const text = card.querySelector(".progress-text span:last-child");
-    const percent = ch.goal > 0 ? Math.min((newValue / ch.goal) * 100, 100) : 0;
-    bar.style.width = `${percent}%`;
-    text.textContent = `${newValue} / ${ch.goal}`;
+  if (!card) return;
+
+  const bar = card.querySelector(".progress-fill");
+  const text = card.querySelector(".progress-text span:last-child");
+  const percent = ch.goal > 0 ? Math.min((newValue / ch.goal) * 100, 100) : 0;
+  bar.style.width = `${percent}%`;
+  text.textContent = `${newValue} / ${ch.goal}`;
+
+  // 💥 Проверка на завершение
+  const isCompleted = newValue >= ch.goal && ch.goal > 0;
+  if (isCompleted) {
+    card.classList.add("completed");
+    if (!card.querySelector(".completed-overlay")) {
+      const overlay = document.createElement("div");
+      overlay.className = "completed-overlay";
+      overlay.innerHTML = "✅ Завершено";
+      card.appendChild(overlay);
+    }
+
+    // Через 1 сек — переносим в "Завершённые"
+    setTimeout(() => {
+      renderChallengesByStatus("completed");
+      document.querySelector('.status-btn[data-status="completed"]')?.classList.add("active");
+      document.querySelector('.status-btn[data-status="active"]')?.classList.remove("active");
+    }, 1000);
   }
 
   // 💾 Отправляем на сервер
@@ -425,6 +443,7 @@ async function updateProgress(id, delta) {
     console.error("Ошибка при обновлении прогресса:", e);
   }
 }
+
 
   
 
