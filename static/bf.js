@@ -91,6 +91,57 @@ async function populateCategorySelect(selectedId = null) {
   }
 }
 
+
+ // === Редактировать категорию ===
+document.getElementById("bf-edit-category-btn")?.addEventListener("click", async () => {
+  const select = document.getElementById("bf-category-select");
+  const id = select.value;
+  if (!id) return alert("Выберите категорию для редактирования.");
+
+  const oldName = bfCategories.find(c => c.id == id)?.name || "";
+  const newName = prompt("Введите новое название категории:", oldName);
+  if (!newName || newName.trim() === oldName) return;
+
+  try {
+    const res = await fetch(`${BF_API_BASE}/categories/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newName.trim(), initData: tg?.initData || "" })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    alert("✅ Категория обновлена!");
+    await populateCategorySelect(id);
+  } catch (e) {
+    console.error("Ошибка при обновлении категории:", e);
+    alert("❌ Не удалось обновить категорию");
+  }
+});
+
+
+// === Удалить категорию ===
+document.getElementById("bf-delete-category-btn")?.addEventListener("click", async () => {
+  const select = document.getElementById("bf-category-select");
+  const id = select.value;
+  if (!id) return alert("Выберите категорию для удаления.");
+
+  const name = bfCategories.find(c => c.id == id)?.name || "категорию";
+  if (!confirm(`Удалить "${name}" вместе со всеми испытаниями?`)) return;
+
+  try {
+    const res = await fetch(`${BF_API_BASE}/categories/${id}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ initData: tg?.initData || "" })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    alert("🗑 Категория удалена!");
+    await populateCategorySelect();
+  } catch (e) {
+    console.error("Ошибка при удалении категории:", e);
+    alert("❌ Не удалось удалить категорию");
+  }
+});
+ 
   
 
   // Кнопки "Назад" + страховка делегированием
