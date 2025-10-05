@@ -911,6 +911,41 @@ select:disabled {
   border: none;
 }
 
+/* === Управление прогрессом === */
+.progress-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.btn-mini {
+  background: rgba(0,200,255,0.12);
+  border: 1px solid var(--bf-border);
+  border-radius: 8px;
+  color: var(--bf-text);
+  padding: 6px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 4px rgba(0,200,255,0.2);
+}
+
+.btn-mini:hover {
+  background: var(--bf-accent);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 0 8px var(--bf-accent);
+}
+
+.btn-plus i {
+  color: #00eaff;
+}
+.btn-minus i {
+  color: #ff3c50;
+}
+
+
 
 /* === Пользовательский экран испытаний (единый стиль с базой) === */
 #screen-bf-challenges {
