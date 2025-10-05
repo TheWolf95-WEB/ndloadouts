@@ -827,14 +827,13 @@ select:disabled {
 
 /* BATTLEFIELD */
 
-
-/* === Battlefield spacing fix === */
+/* === Battlefield layout balance fix === */
 #screen-battlefield-main .button-grid {
-  margin-bottom: 12px !important;
+  margin-bottom: 14px !important; /* единый ритм между строками */
 }
 
-#screen-battlefield-main .button-grid:last-of-type {
-  margin-bottom: 0 !important;
+#screen-battlefield-main .global-home-button {
+  margin-top: 14px !important; /* ровно тот же шаг */
 }
 
 
