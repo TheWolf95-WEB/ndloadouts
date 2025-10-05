@@ -83,6 +83,10 @@ body {
   padding: 0 8px;
 }
 
+#screen-battlefield-main .button-grid {
+  margin-bottom: 12px !important;
+}
+
 .card-btn {
   display: none !important;
   flex-direction: column;
