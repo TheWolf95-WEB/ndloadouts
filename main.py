@@ -942,6 +942,17 @@ async def bf_update_progress(challenge_id: int, data: dict = Body(...)):
         raise HTTPException(status_code=500, detail=f"Ошибка при обновлении прогресса: {e}")
 
 
+@app.put("/api/bf/categories/{category_id}")
+def bf_update_category(category_id: int, data: dict, request: Request):
+    ensure_bf_admin(request, data)
+    name = data.get("name", "").strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Name required")
+    with get_bf_conn() as conn:
+        conn.execute("UPDATE challenge_categories SET name = ? WHERE id = ?", (name, category_id))
+    return {"status": "updated"}
+
+
 
 if __name__ == "__main__":
     import uvicorn
