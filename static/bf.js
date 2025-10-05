@@ -449,49 +449,57 @@ async function loadBfChallenges(categoryId = null) {
     const res = await fetch(url);
     bfChallenges = await res.json();
 
-    // 🧩 фильтруем завершённые
-    bfChallenges = bfChallenges.filter(ch => ch.goal > 0 && ch.current < ch.goal);
-
     const listEl = document.getElementById("bf-challenges-list");
     if (!listEl) return;
+
     listEl.innerHTML = "";
 
     if (!bfChallenges.length) {
-      listEl.innerHTML = `<p style="text-align:center;color:#8ea2b6;">Пока нет активных испытаний</p>`;
+      listEl.innerHTML = `<p style="text-align:center;color:#8ea2b6;">Пока нет испытаний</p>`;
       return;
     }
 
-  listEl.innerHTML = bfChallenges.map(ch => {
-    const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
-    const isCompleted = ch.goal > 0 && ch.current >= ch.goal;
-    return `
-      <div class="challenge-card-user ${isCompleted ? "completed" : ""}" data-id="${ch.id}">
-        ${ch.category_name ? `<div class="challenge-category">${ch.category_name}</div>` : ""}
-        <div class="challenge-title-en">${ch.title_en}</div>
-        <div class="challenge-title-ru">${ch.title_ru}</div>
-        <div class="progress-text">
-          <span>Прогресс</span>
-          <span>${ch.current} / ${ch.goal}</span>
+    // ✅ не фильтруем — показываем всё (для вкладки "Все")
+    const activeTab = document.querySelector("#bf-tabs .tab-btn.active");
+    const isAllTab = !activeTab?.dataset?.id;
+    const visibleChallenges = isAllTab
+      ? bfChallenges
+      : bfChallenges.filter(ch => ch.goal > 0 && ch.current < ch.goal);
+
+    listEl.innerHTML = visibleChallenges.map(ch => {
+      const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
+      const isCompleted = ch.goal > 0 && ch.current >= ch.goal;
+      return `
+        <div class="challenge-card-user ${isCompleted ? "completed" : ""}" data-id="${ch.id}">
+          ${ch.category_name ? `<div class="challenge-category">${ch.category_name}</div>` : ""}
+          <div class="challenge-title-en">${ch.title_en}</div>
+          <div class="challenge-title-ru">${ch.title_ru}</div>
+          <div class="progress-text">
+            <span>Прогресс</span>
+            <span>${ch.current} / ${ch.goal}</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:${percent}%;"></div>
+          </div>
+          ${!isCompleted ? `
+            <div class="progress-controls">
+              <button class="btn-mini" data-action="minus" data-id="${ch.id}">
+                <i class="fas fa-minus"></i>
+              </button>
+              <button class="btn-mini" data-action="plus" data-id="${ch.id}">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>` : `
+            <div class="completed-overlay">ЗАВЕРШЕНО!</div>
+          `}
         </div>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width:${percent}%;"></div>
-        </div>
-        <div class="progress-controls">
-          <button class="btn-mini" data-action="minus" data-id="${ch.id}">
-            <i class="fas fa-minus"></i>
-          </button>
-          <button class="btn-mini" data-action="plus" data-id="${ch.id}">
-            <i class="fas fa-plus"></i>
-          </button>
-        </div>
-        ${isCompleted ? `<div class="completed-overlay">ЗАВЕРШЕНО!</div>` : ""}
-      </div>
-    `;
-  }).join("");
+      `;
+    }).join("");
   } catch (e) {
     console.error("Ошибка при загрузке испытаний:", e);
   }
 }
+
 
 
 // === Обновление прогресса ===
@@ -616,21 +624,24 @@ setupUserChallengeSearch();
 
 
 // === Подсказка пользователю (через 5 секунд после загрузки испытаний) ===
-setTimeout(() => {
-  const tip = document.createElement("div");
-  tip.className = "bf-tip-popup";
-  tip.textContent = "💡 Нажмите дважды на карточку, чтобы начать выполнение испытания";
-  document.body.appendChild(tip);
-
-  tip.style.opacity = "0";
-  setTimeout(() => (tip.style.opacity = "1"), 100);
-
-  // исчезает через 7 секунд
+if (!localStorage.getItem("bf_tip_shown")) {
   setTimeout(() => {
-    tip.style.opacity = "0";
-    setTimeout(() => tip.remove(), 500);
-  }, 7000);
-}, 5000);
+    const tip = document.createElement("div");
+    tip.className = "bf-tip-popup";
+    tip.textContent = "💡 Нажмите дважды на карточку, чтобы начать выполнение испытания";
+    document.body.appendChild(tip);
+
+    setTimeout(() => tip.classList.add("show"), 100);
+
+    setTimeout(() => {
+      tip.classList.remove("show");
+      setTimeout(() => tip.remove(), 500);
+    }, 7000);
+
+    localStorage.setItem("bf_tip_shown", "1");
+  }, 5000);
+}
+
       
 
 async function loadBfChallengesTable() {
