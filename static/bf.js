@@ -63,6 +63,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
 // === Загрузка категорий в выпадающий список ===
+// === Загрузка категорий в выпадающий список ===
 async function populateCategorySelect(selectedId = null) {
   try {
     const res = await fetch(`${BF_API_BASE}/categories`);
@@ -71,29 +72,20 @@ async function populateCategorySelect(selectedId = null) {
     const select = document.getElementById("bf-category-select");
     if (!select) return;
 
+    // очищаем список
     select.innerHTML = `<option value="">Выберите категорию...</option>`;
-    bfCategories.forEach((cat, i) => {
-      const btn = document.createElement("div");
-      btn.className = "tab-btn";
-      btn.textContent = cat.name;
-      btn.dataset.id = cat.id;
-      btn.onclick = () => {
-        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        loadBfChallenges(cat.id);
-      };
-      tabsEl.appendChild(btn);
-    });
-    
-    // активируем только первую вкладку (без статусов)
-    if (bfCategories.length) {
-      const firstTab = document.querySelector(".tab-btn");
-      if (firstTab) {
-        firstTab.classList.add("active");
-        await loadBfChallenges(bfCategories[0].id);
-      }
-    }
 
+    // добавляем каждую категорию
+    bfCategories.forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat.id;
+      opt.textContent = cat.name;
+      if (selectedId && selectedId == cat.id) opt.selected = true;
+      select.appendChild(opt);
+    });
+
+    // если есть выбранная — ставим
+    if (selectedId) select.value = selectedId;
   } catch (e) {
     console.error("Ошибка при загрузке категорий:", e);
   }
