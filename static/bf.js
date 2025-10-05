@@ -249,37 +249,47 @@ document.getElementById("bf-add-category-btn")?.addEventListener("click", async 
   }
 
   // ===== Категории / Испытания =====
-  async function loadBfCategories() {
-    try {
-      const res = await fetch(`${BF_API_BASE}/categories`);
-      bfCategories = await res.json();
+async function loadBfCategories() {
+  try {
+    const res = await fetch(`${BF_API_BASE}/categories`);
+    bfCategories = await res.json();
 
-      const tabsEl = document.getElementById("bf-tabs");
-      if (tabsEl) {
-        tabsEl.innerHTML = "";
-        if (!bfCategories.length) {
-          tabsEl.innerHTML = "<p style='text-align:center;color:#777;'>Нет категорий</p>";
-        } else {
-          bfCategories.forEach(cat => {
-            const btn = document.createElement("div");
-            btn.className = "tab-btn";
-            btn.textContent = cat.name;
-            btn.onclick = () => {
-              document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-              btn.classList.add("active");
-              loadBfChallenges(cat.id);
-            };
-            tabsEl.appendChild(btn);
-          });
-          // авто-подгрузка первой категории
-          document.querySelector(".tab-btn")?.classList.add("active");
-          await loadBfChallenges(bfCategories[0].id);
-        }
-      }
-    } catch (e) {
-      console.error("Ошибка при загрузке категорий:", e);
-    }
+    const tabsEl = document.getElementById("bf-tabs");
+    if (!tabsEl) return;
+
+    tabsEl.innerHTML = "";
+
+    // Добавляем вкладку "Все"
+    const allBtn = document.createElement("div");
+    allBtn.className = "tab-btn active";
+    allBtn.textContent = "Все";
+    allBtn.onclick = async () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      allBtn.classList.add("active");
+      await loadBfChallenges(null);
+    };
+    tabsEl.appendChild(allBtn);
+
+    // Добавляем остальные категории
+    bfCategories.forEach(cat => {
+      const btn = document.createElement("div");
+      btn.className = "tab-btn";
+      btn.textContent = cat.name;
+      btn.dataset.id = cat.id;
+      btn.onclick = async () => {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        await loadBfChallenges(cat.id);
+      };
+      tabsEl.appendChild(btn);
+    });
+
+    await loadBfChallenges(null);
+  } catch (e) {
+    console.error("Ошибка при загрузке категорий:", e);
   }
+}
+
 
 // JS фильтрацию по статусу:
 // === Фильтрация по статусу (Активные / Завершённые) ===
@@ -543,7 +553,24 @@ function setupUserChallengeSearch() {
 
 setupUserChallengeSearch();
 
-    
+
+// === Подсказка пользователю (через 5 секунд после загрузки испытаний) ===
+setTimeout(() => {
+  const tip = document.createElement("div");
+  tip.className = "bf-tip-popup";
+  tip.textContent = "💡 Нажмите дважды на карточку, чтобы начать выполнение испытания";
+  document.body.appendChild(tip);
+
+  tip.style.opacity = "0";
+  setTimeout(() => (tip.style.opacity = "1"), 100);
+
+  // исчезает через 7 секунд
+  setTimeout(() => {
+    tip.style.opacity = "0";
+    setTimeout(() => tip.remove(), 500);
+  }, 7000);
+}, 5000);
+      
 
 async function loadBfChallengesTable() {
   try {
@@ -762,4 +789,41 @@ window.editBfChallenge = async function(id) { // ← Добавить async
     document.getElementById("bf-current").value  = ch.current ?? 0;
     document.getElementById("bf-goal").value     = ch.goal ?? 0;
 };
+
+
+// === Двойной клик по карточке — начать выполнение ===
+document.addEventListener("dblclick", async (e) => {
+  const card = e.target.closest(".challenge-card-user");
+  if (!card) return;
+
+  const id = Number(card.dataset.id);
+  if (!id) return;
+
+  try {
+    // при старте ставим current = 1
+    const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ delta: 1, initData: tg?.initData || "" })
+    });
+
+    if (!res.ok) throw new Error("Ошибка начала испытания");
+
+    // Визуальный отклик
+    card.style.boxShadow = "0 0 15px rgba(0,255,100,0.4)";
+    card.style.transform = "scale(1.02)";
+    setTimeout(() => {
+      card.style.transition = "all 0.5s ease";
+      card.style.boxShadow = "";
+      card.style.transform = "";
+    }, 800);
+
+    // Обновляем список активных
+    setTimeout(() => renderChallengesByStatus("active"), 500);
+  } catch (err) {
+    console.error("Ошибка при запуске испытания:", err);
+  }
+});
+
+  
 }); 
