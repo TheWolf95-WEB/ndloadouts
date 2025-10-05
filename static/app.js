@@ -1,8 +1,3 @@
-if (window.location.hostname === 'localhost') {
-  window.Telegram = { WebApp: { initData: '', initDataUnsafe: { user: { id: 7494459560, first_name: 'Dev' } } } };
-}
-
-
 const tg = window.Telegram.WebApp;
 tg.expand();
 
