@@ -128,11 +128,18 @@
     <p class="screen-subtitle">Создай новое испытание Battlefield</p>
   </div>
 
-  <div class="form-section">
-    <label for="bf-category-input">Категория</label>
-    <input type="text" id="bf-category-input" class="form-input" placeholder="Введите категорию">
+<div class="form-section">
+  <label for="bf-category-select">Категория:</label>
+  <select id="bf-category-select" class="form-input">
+    <option value="">Выберите категорию...</option>
+  </select>
+
+  <div class="add-category-inline">
+    <input type="text" id="bf-new-category" class="form-input" placeholder="Новая категория">
     <button class="btn btn-secondary" id="bf-add-category-btn">➕ Добавить вкладку</button>
   </div>
+</div>
+
 
   <div class="form-section">
     <label for="bf-title-en">Название (EN)</label>
