@@ -1,9 +1,11 @@
-// === Battlefield JS ===
+// === Battlefield WebApp ===
 document.addEventListener('DOMContentLoaded', async () => {
   const tg = window.Telegram.WebApp;
   tg.expand();
 
-  // === DOM элементы Battlefield ===
+  /* -----------------------------
+      Роли и кнопки
+  ------------------------------ */
   const userBtns = [
     'bf-show-builds-btn',
     'bf-challenges-btn',
@@ -20,71 +22,73 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const globalHome = document.querySelector('#screen-battlefield-main .global-home-button');
 
-  // === Проверка прав пользователя ===
   try {
     const res = await fetch('/api/me', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ initData: tg.initData })
     });
-
     const data = await res.json();
 
-    // Прячем всё по умолчанию
+    // скрываем всё
     [...userBtns, ...adminBtns].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.classList.remove('is-visible');
     });
 
-    // Показываем кнопки по ролям
+    // показываем нужное
     if (data.is_admin) {
-      // 👑 админ видит всё
       [...userBtns, ...adminBtns].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('is-visible');
       });
-      console.log('✅ Battlefield: админ, показываем все кнопки');
+      console.log('✅ Battlefield: админ');
     } else {
-      // 👤 обычный пользователь — только базовые
       userBtns.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('is-visible');
       });
-      console.log('✅ Battlefield: пользователь, базовые кнопки');
+      console.log('✅ Battlefield: пользователь');
     }
 
-    // Главное меню показываем всем
     if (globalHome) globalHome.style.display = 'block';
 
   } catch (err) {
-    console.error('Ошибка проверки статуса Battlefield:', err);
+    console.error('Ошибка статуса Battlefield:', err);
   }
+
+  /* -----------------------------
+      Навигация Battlefield
+  ------------------------------ */
+  document.getElementById('bf-challenges-btn')?.addEventListener('click', () => {
+    showBfScreen('main');
+    loadBfCategories();
+  });
+
+  document.getElementById('bf-challenges-db-btn')?.addEventListener('click', () => {
+    showBfScreen('db');
+    loadBfChallengesTable();
+  });
+
+  document.getElementById('bf-add-challenge-db-btn')?.addEventListener('click', () => {
+    editingChallengeId = null;
+    showBfScreen('add');
+    loadBfCategories();
+  });
+
+  document.getElementById('bf-back-from-add')?.addEventListener('click', () => showBfScreen('db'));
+  document.getElementById('bf-back-to-bfmain')?.addEventListener('click', () => showScreen('screen-battlefield-main'));
+
+  document.getElementById('bf-add-category-btn')?.addEventListener('click', addBfCategory);
+  document.getElementById('bf-submit-challenge')?.addEventListener('click', addBfChallenge);
+  document.getElementById('bf-add-challenge-btn')?.addEventListener('click', () => {
+    editingChallengeId = null;
+    showBfScreen('add');
+    loadBfCategories();
+  });
+
+  await loadBfCategories(); // начальная подгрузка категорий
 });
-
-
-
-// ЛОГИКА ДОБАЛВЕНИЯ ИСПЫТАНИЙ
-
-// === Навигация Battlefield ===
-document.getElementById('bf-challenges-btn')?.addEventListener('click', () => {
-  showBfScreen('main');
-  loadBfCategories();
-});
-
-document.getElementById('bf-challenges-db-btn')?.addEventListener('click', () => {
-  showBfScreen('db');
-  loadBfChallengesTable();
-});
-
-document.getElementById('bf-add-challenge-db-btn')?.addEventListener('click', () => {
-  editingChallengeId = null;
-  showBfScreen('add');
-  loadBfCategories();
-});
-
-document.getElementById('bf-back-from-add')?.addEventListener('click', () => showBfScreen('db'));
-document.getElementById('bf-back-to-bfmain')?.addEventListener('click', () => showScreen('screen-battlefield-main'));
-
 
 
 /* ============================
@@ -96,13 +100,13 @@ let bfCategories = [];
 let bfChallenges = [];
 let editingChallengeId = null;
 
-// === Проверка роли ===
+/* === Проверка роли === */
 function isBfAdmin() {
   if (!window.userInfo || !window.ADMIN_IDS) return false;
   return window.ADMIN_IDS.includes(String(window.userInfo.id));
 }
 
-/* === Переходы между экранами === */
+/* === Экраны === */
 const bfScreens = {
   main: document.getElementById('screen-bf-challenges'),
   db: document.getElementById('screen-bf-challenges-db'),
@@ -111,16 +115,19 @@ const bfScreens = {
 
 function showBfScreen(screenId) {
   Object.values(bfScreens).forEach(el => el && (el.style.display = 'none'));
-  if (bfScreens[screenId]) bfScreens[screenId].style.display = 'block';
+  if (bfScreens[screenId]) {
+    bfScreens[screenId].style.display = 'block';
+    console.log(`🧭 Battlefield → экран: ${screenId}`);
+  }
 }
 
-/* === Загрузка категорий (вкладок) === */
+/* === Загрузка категорий === */
 async function loadBfCategories(selectedId = null) {
   try {
     const res = await fetch(`${BF_API_BASE}/categories`);
     bfCategories = await res.json();
 
-    // === Пользовательский экран ===
+    // пользовательский экран
     const tabsEl = document.getElementById('bf-tabs');
     if (tabsEl) {
       tabsEl.innerHTML = '';
@@ -137,13 +144,12 @@ async function loadBfCategories(selectedId = null) {
         tabsEl.appendChild(btn);
       });
 
-      // автозагрузка первой категории
       if (bfCategories.length > 0 && !selectedId) {
         document.querySelector('.tab-btn')?.click();
       }
     }
 
-    // === Для формы добавления ===
+    // для формы добавления
     const sel = document.getElementById('bf-category-select');
     if (sel) {
       sel.innerHTML = bfCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
@@ -204,7 +210,7 @@ async function loadBfChallenges(categoryId = null) {
   }
 }
 
-/* === Загрузка таблицы испытаний (для админов) === */
+/* === Таблица испытаний (для админов) === */
 async function loadBfChallengesTable() {
   try {
     const res = await fetch(`${BF_API_BASE}/challenges`);
@@ -241,7 +247,7 @@ async function loadBfChallengesTable() {
       </table>
     `;
   } catch (e) {
-    console.error('Ошибка загрузки таблицы испытаний:', e);
+    console.error('Ошибка таблицы испытаний:', e);
   }
 }
 
@@ -301,15 +307,3 @@ function editBfChallenge(id) {
 
   loadBfCategories(ch.category_id);
 }
-
-/* === Навигация === */
-document.getElementById('bf-add-category-btn')?.addEventListener('click', addBfCategory);
-document.getElementById('bf-submit-challenge')?.addEventListener('click', addBfChallenge);
-document.getElementById('bf-add-challenge-btn')?.addEventListener('click', () => {
-  editingChallengeId = null;
-  showBfScreen('add');
-  loadBfCategories();
-});
-document.getElementById('bf-back-from-add')?.addEventListener('click', () => showBfScreen('db'));
-document.getElementById('bf-back-to-bfmain')?.addEventListener('click', () => showScreen('screen-battlefield-main'));
-
