@@ -1233,7 +1233,8 @@ select:disabled {
 /* === Экран добавления испытания === */
 
 .add-category-inline {
-  display: flex;
+  display: flex !important;
+  flex-direction: column;
   gap: 8px;
   margin-top: 10px;
 }
