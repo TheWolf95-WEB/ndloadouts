@@ -88,10 +88,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ===== Helpers =====
   function showBfScreen(screenId) {
-    document.querySelectorAll(".screen").forEach(el => { el.classList.remove("active"); el.style.display = "none"; });
+    document.querySelectorAll(".screen").forEach(el => { 
+      el.classList.remove("active"); 
+      el.style.display = "none"; 
+    });
     document.getElementById("screen-battlefield-main").style.display = "none";
+  
     const target = bfScreens[screenId];
-    if (target) { target.style.display = "block"; target.classList.add("active"); }
+    if (target) { 
+      target.style.display = "block"; 
+      target.classList.add("active"); 
+    }
+  
+    // 👇 вот это добавляем
+    toggleBfBackButton(screenId);
   }
 
   function showBfMain() {
@@ -99,6 +109,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     const mainEl = document.getElementById("screen-battlefield-main");
     if (mainEl) { mainEl.style.display = "block"; mainEl.classList.add("active"); }
   }
+
+  // === Управление кнопкой "Назад" Battlefield ===
+  function toggleBfBackButton(screenId) {
+    // Скрываем все кнопки "Назад"
+    document.querySelectorAll("#bf-back-from-challenges, #bf-back-to-bfmain, #bf-back-from-add")
+      .forEach(btn => btn.style.display = "none");
+  
+    // Показываем кнопку только в нужных экранах
+    if (["main", "db", "add"].includes(screenId)) {
+      const backBtn = {
+        main: document.getElementById("bf-back-from-challenges"),
+        db: document.getElementById("bf-back-to-bfmain"),
+        add: document.getElementById("bf-back-from-add")
+      }[screenId];
+      if (backBtn) backBtn.style.display = "block";
+    }
+  }
+
 
   function prepAddForm(ch = null) {
     // Включаем инпуты на всякий случай и чистим значения
