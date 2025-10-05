@@ -262,26 +262,68 @@ async function loadBfChallenges(categoryId = null) {
 }
 
 function setupUserChallengeSearch() {
-  const searchInput = document.getElementById('bf-search-user');
+  const searchInput = document.getElementById("bf-search-user");
   if (!searchInput) return;
 
-  const filterChallenges = () => {
-    const searchTerm = searchInput.value.toLowerCase();
-    document.querySelectorAll('.challenge-card-user').forEach(card => {
-      const titleEn = card.querySelector('.challenge-title-en')?.textContent.toLowerCase() || "";
-      const titleRu = card.querySelector('.challenge-title-ru')?.textContent.toLowerCase() || "";
-      const category = card.querySelector('.challenge-category')?.textContent.toLowerCase() || "";
+  let searchTimeout = null;
 
-      const matchesSearch = 
-        titleEn.includes(searchTerm) ||
-        titleRu.includes(searchTerm) ||
-        category.includes(searchTerm);
+  searchInput.addEventListener("input", async () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(async () => {
+      const term = searchInput.value.trim().toLowerCase();
+      const listEl = document.getElementById("bf-challenges-list");
+      if (!listEl) return;
 
-      card.style.display = matchesSearch ? "block" : "none";
-    });
-  };
+      // Если поле пустое — вернуть текущую категорию
+      if (!term) {
+        const activeTab = document.querySelector("#bf-tabs .tab-btn.active");
+        const categoryId = activeTab?.dataset?.id || null;
+        await loadBfChallenges(categoryId);
+        return;
+      }
 
-  searchInput.addEventListener("input", filterChallenges);
+      // Загружаем все испытания
+      try {
+        const res = await fetch(`${BF_API_BASE}/challenges`);
+        const all = await res.json();
+
+        const filtered = all.filter(ch => {
+          const en = (ch.title_en || "").toLowerCase();
+          const ru = (ch.title_ru || "").toLowerCase();
+          const cat = (ch.category_name || "").toLowerCase();
+          return en.includes(term) || ru.includes(term) || cat.includes(term);
+        });
+
+        // Вывод
+        listEl.innerHTML = "";
+        if (!filtered.length) {
+          listEl.innerHTML = `<p style="text-align:center;color:#8ea2b6;">Ничего не найдено</p>`;
+          return;
+        }
+
+        listEl.innerHTML = filtered.map(ch => {
+          const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
+          return `
+            <div class="challenge-card-user">
+              ${ch.category_name ? `<div class="challenge-category">${ch.category_name}</div>` : ""}
+              <div class="challenge-title-en">${ch.title_en}</div>
+              <div class="challenge-title-ru">${ch.title_ru}</div>
+              <div class="progress-text">
+                <span>Прогресс</span>
+                <span>${ch.current} / ${ch.goal}</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:${percent}%;"></div>
+              </div>
+            </div>
+          `;
+        }).join("");
+      } catch (e) {
+        console.error("Ошибка при поиске испытаний:", e);
+        listEl.innerHTML = `<p style="text-align:center;color:#8ea2b6;">Ошибка при поиске</p>`;
+      }
+    }, 300); // задержка 300мс для плавного поиска
+  });
 }
 
 
