@@ -1,6 +1,7 @@
 <div id="screen-home" class="screen active">
   <div class="subtext" style="font-size:1.2rem;">
-    Добро пожаловать! <br><br>  Здесь вы найдёте лучшие сборки, полезные материалы и актуальные новости по любимым играм.
+    Добро пожаловать! <br><br>
+    Здесь вы найдёте лучшие сборки, полезные материалы и актуальные новости по любимым играм.
   </div>
 
   <h2 class="home-title">Выберите нужную вкладку ниже, чтобы начать 👇</h2>
@@ -8,37 +9,36 @@
   <!-- 🎮 Игры -->
   <div class="button-grid three-column" style="margin-bottom:16px;">
     <div class="card-btn is-visible" onclick="showScreen('screen-warzone-main')">
-        <img src="/static/images/logo-calda.png" alt="Warzone" class="game-thumb">
+      <img src="/static/images/logo-calda.png" alt="Warzone" class="game-thumb">
     </div>
-    <div class="card-btn is-visible" onclick="alert('Battlefield в разработке')">
-        <img src="/static/images/logo-battle.png" alt="Battlefield" class="game-thumb">
+    <div class="card-btn is-visible" onclick="showScreen('screen-battlefield-main')">
+      <img src="/static/images/logo-battle.png" alt="Battlefield" class="game-thumb">
     </div>
     <div class="card-btn is-visible" onclick="alert('Fortnite в разработке')">
-        <img src="/static/images/logo-fort.png" alt="Fortnite" class="game-thumb">
+      <img src="/static/images/logo-fort.png" alt="Fortnite" class="game-thumb">
     </div>
   </div>
 
-<!-- 🛒 Магазин и Новости -->
-<div class="button-grid two-column" style="margin-bottom:16px;">
-  <div class="card-btn is-visible" onclick="alert('Магазин в разработке')">
-    <i class="fas fa-store"></i>
-    <span>Магазин</span>
-  </div>
+  <!-- 🛒 Магазин и Новости -->
+  <div class="button-grid two-column" style="margin-bottom:16px;">
+    <div class="card-btn is-visible" onclick="alert('Магазин в разработке')">
+      <i class="fas fa-store"></i>
+      <span>Магазин</span>
+    </div>
     <div class="card-btn is-visible" onclick="alert('Новости в разработке')">
       <i class="fas fa-newspaper"></i>
       <span>Новости</span>
     </div>
-</div>
-
-<!-- 🛠 Админка (только для админов) -->
-<div id="admin-panel-entry" class="button-grid two-column" style="margin-bottom:16px; display: none;">
-  <div class="card-btn is-visible" onclick="showScreen('screen-news')">
-    <i class="fas fa-tools"></i>
-    <span>База новостей</span>
   </div>
-  <div></div> <!-- для выравнивания -->
-</div>
 
+  <!-- 🛠 Админка (только для админов) -->
+  <div id="admin-panel-entry" class="button-grid two-column" style="margin-bottom:16px; display: none;">
+    <div class="card-btn is-visible" onclick="showScreen('screen-news')">
+      <i class="fas fa-tools"></i>
+      <span>База новостей</span>
+    </div>
+    <div></div> <!-- для выравнивания -->
+  </div>
 
   <!-- ❓ Помощь -->
   <div class="button-grid" style="margin-bottom:16px;">
