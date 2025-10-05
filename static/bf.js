@@ -110,9 +110,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function showBfMain() {
     Object.values(bfScreens).forEach(el => (el.style.display = "none"));
-    document.getElementById("screen-battlefield-main").style.display = "block";
+    const mainEl = document.getElementById("screen-battlefield-main");
+    if (mainEl) {
+      mainEl.style.display = "block";
+      mainEl.classList.add("active");
+    }
     console.log("🏠 Возврат в главное меню Battlefield");
   }
+
 
   /* === Категории === */
   async function loadBfCategories(selectedId = null) {
@@ -145,13 +150,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           document.querySelector(".tab-btn")?.classList.add("active");
           await loadBfChallenges(first.id);
         }
-      }
-
-      // --- категории для формы ---
-      const sel = document.getElementById("bf-category-select");
-      if (sel) {
-        sel.innerHTML = bfCategories.map(c => `<option value="${c.id}">${c.name}</option>`).join("");
-        if (selectedId) sel.value = selectedId;
       }
     } catch (e) {
       console.error("Ошибка при загрузке категорий:", e);
@@ -273,7 +271,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* === Добавление / Редактирование испытаний === */
   async function addBfChallenge() {
     const data = {
-      category_id: document.getElementById("bf-category-select")?.value,
+      category_name: document.getElementById("bf-category-input")?.value.trim(),
       title_en: document.getElementById("bf-title-en")?.value.trim(),
       title_ru: document.getElementById("bf-title-ru")?.value.trim(),
       current: document.getElementById("bf-current")?.value || 0,
