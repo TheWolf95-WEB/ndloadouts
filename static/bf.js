@@ -80,6 +80,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     await loadBfCategories();
   });
 
+  // === Страховка для кнопок "Назад" ===
+document.addEventListener("click", e => {
+  if (e.target.id === "bf-back-from-add" || e.target.id === "bf-back-to-bfmain" || e.target.id === "bf-back-from-challenges") {
+    showBfMain();
+  }
+});
+
+
   // Назад
   document.getElementById("bf-back-from-add")?.addEventListener("click", showBfMain);
   document.getElementById("bf-back-to-bfmain")?.addEventListener("click", showBfMain);
@@ -95,28 +103,38 @@ document.addEventListener("DOMContentLoaded", async () => {
      ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
      ========================== */
 
-  function showBfScreen(screenId) {
-    document.querySelectorAll(".screen").forEach(el => {
-      el.classList.remove("active");
-      el.style.display = "none";
-    });
-    const target = bfScreens[screenId];
-    if (target) {
-      target.style.display = "block";
-      target.classList.add("active");
-      console.log(`🧭 Открыт экран Battlefield: ${screenId}`);
-    }
-  }
+function showBfScreen(screenId) {
+  // Скрываем все battlefield-экраны
+  document.querySelectorAll(".screen").forEach(el => {
+    el.classList.remove("active");
+    el.style.display = "none";
+  });
 
-  function showBfMain() {
-    Object.values(bfScreens).forEach(el => (el.style.display = "none"));
-    const mainEl = document.getElementById("screen-battlefield-main");
-    if (mainEl) {
-      mainEl.style.display = "block";
-      mainEl.classList.add("active");
-    }
-    console.log("🏠 Возврат в главное меню Battlefield");
+  // Скрываем главный экран Battlefield
+  document.getElementById("screen-battlefield-main").style.display = "none";
+
+  // Показываем нужный экран
+  const target = bfScreens[screenId];
+  if (target) {
+    target.style.display = "block";
+    target.classList.add("active");
+    console.log(`🧭 Открыт экран Battlefield: ${screenId}`);
   }
+}
+
+function showBfMain() {
+  // Скрываем внутренние экраны
+  Object.values(bfScreens).forEach(el => (el.style.display = "none"));
+  
+  // Показываем главный экран Battlefield
+  const mainEl = document.getElementById("screen-battlefield-main");
+  if (mainEl) {
+    mainEl.style.display = "block";
+    mainEl.classList.add("active");
+  }
+  console.log("🏠 Возврат в главное меню Battlefield");
+}
+
 
 
   /* === Категории === */
@@ -271,11 +289,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   /* === Добавление / Редактирование испытаний === */
   async function addBfChallenge() {
     const data = {
+      category_id: 0, // если бек не требует ID — можно оставить 0
       category_name: document.getElementById("bf-category-input")?.value.trim(),
       title_en: document.getElementById("bf-title-en")?.value.trim(),
       title_ru: document.getElementById("bf-title-ru")?.value.trim(),
-      current: document.getElementById("bf-current")?.value || 0,
-      goal: document.getElementById("bf-goal")?.value || 0
+      current: Number(document.getElementById("bf-current")?.value) || 0,
+      goal: Number(document.getElementById("bf-goal")?.value) || 0
     };
 
     if (!data.title_en || !data.title_ru) return alert("Введите название EN и RU");
