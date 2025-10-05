@@ -275,11 +275,11 @@ async function loadBfChallengesTable() {
 
     if (!bfChallenges.length) {
       gridEl.innerHTML = `
-        <div class="empty-state" style="grid-column: 1 / -1;">
+        <div class="empty-state">
           <div class="icon">🎯</div>
           <h3>Пока нет испытаний</h3>
           <p>Добавьте первое испытание, чтобы начать</p>
-          <button class="btn btn-primary" onclick="document.getElementById('bf-add-challenge-db-btn').click()">
+          <button class="btn btn-primary" onclick="document.getElementById('bf-add-challenge-db-btn').click()" style="max-width: 200px; margin: 0 auto;">
             ➕ Добавить испытание
           </button>
         </div>
@@ -298,8 +298,8 @@ async function loadBfChallengesTable() {
           </div>
           
           <div class="challenge-titles">
-            <div class="challenge-title-en">${ch.title_en || 'Без названия'}</div>
-            <div class="challenge-title-ru">${ch.title_ru || 'Без названия'}</div>
+            <div class="challenge-title-en">${escapeHtml(ch.title_en || 'Без названия')}</div>
+            <div class="challenge-title-ru">${escapeHtml(ch.title_ru || 'Без названия')}</div>
           </div>
           
           <div class="challenge-progress-admin">
@@ -332,17 +332,27 @@ async function loadBfChallengesTable() {
     const gridEl = document.getElementById("bf-challenges-grid");
     if (gridEl) {
       gridEl.innerHTML = `
-        <div class="empty-state" style="grid-column: 1 / -1;">
+        <div class="empty-state">
           <div class="icon">❌</div>
           <h3>Ошибка загрузки</h3>
           <p>Не удалось загрузить испытания</p>
-          <button class="btn btn-secondary" onclick="loadBfChallengesTable()">
+          <button class="btn btn-back" onclick="loadBfChallengesTable()" style="max-width: 150px; margin: 0 auto;">
             🔄 Повторить
           </button>
         </div>
       `;
     }
   }
+}
+
+// Функция для экранирования HTML
+function escapeHtml(unsafe) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 // Функция для поиска и фильтрации
@@ -369,7 +379,6 @@ function setupSearchAndFilter() {
   searchInput.addEventListener('input', filterChallenges);
   filterSelect.addEventListener('change', filterChallenges);
 }
-
 
   // ===== CRUD испытаний =====
 async function addBfChallenge() {
