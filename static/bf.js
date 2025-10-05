@@ -49,12 +49,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     editingChallengeId = null;
     showBfScreen("add");
     prepAddForm(); // включаем инпуты/сбрасываем форму
+    populateCategorySelect();
   });
   document.getElementById("bf-add-challenge-db-btn")?.addEventListener("click", () => {
     editingChallengeId = null;
     showBfScreen("add");
     prepAddForm();
+    populateCategorySelect();
   });
+
+// === Загрузка категорий в выпадающий список ===
+async function populateCategorySelect(selectedId = null) {
+  try {
+    const res = await fetch(`${BF_API_BASE}/categories`);
+    bfCategories = await res.json();
+
+    const select = document.getElementById("bf-category-select");
+    if (!select) return;
+
+    select.innerHTML = `<option value="">Выберите категорию...</option>`;
+    bfCategories.forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat.id;
+      opt.textContent = cat.name;
+      if (selectedId && Number(selectedId) === cat.id) opt.selected = true;
+      select.appendChild(opt);
+    });
+  } catch (e) {
+    console.error("Ошибка при загрузке категорий:", e);
+  }
+}
+
+  
 
   // Кнопки "Назад" + страховка делегированием
   const hookBack = () => showBfMain();
@@ -66,19 +92,37 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Добавление категории вручную (кнопка под полем "Категория")
-  document.getElementById("bf-add-category-btn")?.addEventListener("click", async () => {
-    const name = document.getElementById("bf-category-input")?.value?.trim();
-    if (!name) return alert("Введите название категории");
-    try {
-      const createdId = await ensureCategory(name); // создаст, если нет
-      if (createdId) {
-        alert("✅ Вкладка добавлена");
-        await loadBfCategories();
-      }
-    } catch (err) {
-      alert("❌ Ошибка при добавлении вкладки\n" + (err?.message || ""));
+document.getElementById("bf-add-category-btn")?.addEventListener("click", async () => {
+  const input = document.getElementById("bf-new-category");
+  const name = input?.value?.trim();
+  if (!name) return alert("Введите название новой категории");
+
+  try {
+    const res = await fetch(`${BF_API_BASE}/categories`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, initData: tg?.initData || "" })
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Ошибка: ${res.status}\n${text}`);
     }
-  });
+
+    input.value = "";
+    alert("✅ Категория добавлена!");
+
+    await populateCategorySelect(); // обновим выпадающий список
+    const select = document.getElementById("bf-category-select");
+    const newOption = [...select.options].find(o => o.textContent === name);
+    if (newOption) newOption.selected = true;
+
+  } catch (e) {
+    console.error("Ошибка при добавлении категории:", e);
+    alert("❌ Не удалось добавить категорию");
+  }
+});
+
 
   // Сохранение испытания
   document.getElementById("bf-submit-challenge")?.addEventListener("click", addBfChallenge);
@@ -130,7 +174,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function prepAddForm(ch = null) {
     // Включаем инпуты на всякий случай и чистим значения
-    ["bf-category-input","bf-title-en","bf-title-ru","bf-current","bf-goal"].forEach(id => {
+    ["bf-title-en","bf-title-ru","bf-current","bf-goal"].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
       el.disabled = false;
@@ -448,7 +492,13 @@ function setupSearchAndFilter() {
 
   // ===== CRUD испытаний =====
 async function addBfChallenge() {
-  const categoryName = document.getElementById("bf-category-input")?.value?.trim() || "";
+  const categorySelect = document.getElementById("bf-category-select");
+  const categoryId = categorySelect?.value || null;
+  const categoryName =
+    bfCategories.find(c => c.id == categoryId)?.name ||
+    document.getElementById("bf-new-category")?.value?.trim() ||
+    "";
+
   const title_en = document.getElementById("bf-title-en")?.value?.trim() || "";
   const title_ru = document.getElementById("bf-title-ru")?.value?.trim() || "";
   const current  = Number(document.getElementById("bf-current")?.value) || 0;
@@ -529,7 +579,7 @@ window.deleteBfChallenge = async function (id) {
     editingChallengeId = id;
     showBfScreen("add");
     prepAddForm(ch);
-    document.getElementById("bf-category-input").value = ch.category_name || "";
+    await populateCategorySelect(ch.category_id);
     document.getElementById("bf-title-en").value = ch.title_en || "";
     document.getElementById("bf-title-ru").value = ch.title_ru || "";
     document.getElementById("bf-current").value  = ch.current ?? 0;
