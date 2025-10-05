@@ -1231,6 +1231,29 @@ select:disabled {
 
 
 /* === Экран добавления испытания === */
+
+.add-category-inline {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.add-category-inline input {
+  flex: 1;
+}
+
+#bf-category-select {
+  width: 100%;
+  background: var(--bf-card);
+  border: 1px solid var(--bf-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--bf-text);
+  font-size: 14px;
+}
+
+
+
 #screen-bf-add-challenge {
   background: var(--bf-bg);
   color: var(--bf-text);
