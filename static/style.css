@@ -832,6 +832,10 @@ select:disabled {
   margin-bottom: 14px !important; /* единый ритм между строками */
 }
 
+#screen-battlefield-main .form-section{
+  gap:0;
+}
+
 #screen-battlefield-main .global-home-button {
   margin-top: 14px !important; /* ровно тот же шаг */
 }
