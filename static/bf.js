@@ -243,12 +243,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         <table class="data-table">
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Категория</th>
-              <th>EN</th>
-              <th>RU</th>
-              <th>Прогресс</th>
-              <th>Действия</th>
+              <td data-label="ID">${ch.id}</td>
+              <td data-label="Категория">${ch.category_name || "-"}</td>
+              <td data-label="EN">${ch.title_en}</td>
+              <td data-label="RU">${ch.title_ru}</td>
+              <td data-label="Прогресс">${ch.current}/${ch.goal}</td>
+              <td data-label="Действия">
             </tr>
           </thead>
           <tbody>
