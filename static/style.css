@@ -841,6 +841,41 @@ select:disabled {
 }
 
 
+/* === Battlefield Tabs === */
+#bf-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-start;
+  margin-bottom: 18px;
+}
+
+#bf-tabs .tab-btn {
+  background: rgba(255,255,255,0.05);
+  color: var(--bf-text);
+  border: 1px solid var(--bf-border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#bf-tabs .tab-btn:hover {
+  border-color: var(--bf-accent);
+  color: var(--bf-accent);
+}
+
+#bf-tabs .tab-btn.active {
+  background: linear-gradient(90deg, var(--bf-accent), var(--bf-accent-dim));
+  color: #fff;
+  border: none;
+  box-shadow: 0 0 8px rgba(0,200,255,0.25);
+}
+
+
+
 /* === Пользовательский экран испытаний (единый стиль с базой) === */
 #screen-bf-challenges {
   background: var(--bf-bg);
