@@ -814,6 +814,73 @@ async def analytics_page(request: Request):
     return templates.TemplateResponse("analytics.html", {"request": request})
 
 
+# BATTLEFIELD
+
+# =========================
+# BATTLEFIELD CHALLENGES API
+# =========================
+from fastapi import HTTPException, Depends, Request
+from database_bf import (
+    init_bf_db, get_all_categories, add_category, delete_category,
+    get_all_challenges, add_challenge, update_challenge, delete_challenge
+)
+
+init_bf_db()  # на всякий случай
+
+def is_admin(request: Request):
+    user_id = request.query_params.get("user_id")
+    from dotenv import load_dotenv
+    import os
+    load_dotenv("/opt/ndloadouts/.env")
+    ADMIN_IDS = os.getenv("ADMIN_IDS", "").split(",")
+    if str(user_id) not in ADMIN_IDS:
+        raise HTTPException(status_code=403, detail="Access denied")
+    return True
+
+
+# === Категории (вкладки) ===
+@app.get("/api/bf/categories")
+def bf_get_categories():
+    return get_all_categories()
+
+@app.post("/api/bf/categories")
+def bf_add_category(data: dict, request: Request, authorized: bool = Depends(is_admin)):
+    name = data.get("name")
+    if not name:
+        raise HTTPException(status_code=400, detail="Name is required")
+    return add_category(name)
+
+@app.delete("/api/bf/categories/{category_id}")
+def bf_delete_category(category_id: int, request: Request, authorized: bool = Depends(is_admin)):
+    delete_category(category_id)
+    return {"status": "deleted"}
+
+
+# === Испытания ===
+@app.get("/api/bf/challenges")
+def bf_get_challenges(category_id: int | None = None):
+    return get_all_challenges(category_id)
+
+@app.post("/api/bf/challenges")
+def bf_add_challenge(data: dict, request: Request, authorized: bool = Depends(is_admin)):
+    if not all(k in data for k in ("title_en", "title_ru", "category_id")):
+        raise HTTPException(status_code=400, detail="Missing required fields")
+    add_challenge(data)
+    return {"status": "added"}
+
+@app.put("/api/bf/challenges/{challenge_id}")
+def bf_update_challenge(challenge_id: int, data: dict, request: Request, authorized: bool = Depends(is_admin)):
+    update_challenge(challenge_id, data)
+    return {"status": "updated"}
+
+@app.delete("/api/bf/challenges/{challenge_id}")
+def bf_delete_challenge(challenge_id: int, request: Request, authorized: bool = Depends(is_admin)):
+    delete_challenge(challenge_id)
+    return {"status": "deleted"}
+
+
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)
