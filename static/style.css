@@ -920,38 +920,32 @@ select:disabled {
   margin-top: 10px;
 }
 
+.progress-fill {
+  transition: width 0.3s ease;
+}
+
 .btn-mini {
-  background: transparent;
-  border: 1px solid var(--bf-border);
+  background: none;
+  border: 1px solid rgba(255,255,255,0.1);
   border-radius: 8px;
-  color: var(--bf-text);
-  padding: 6px 10px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.2s ease;
+  width: 36px;
+  height: 36px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease, background 0.2s ease;
 }
 
 .btn-mini i {
   pointer-events: none;
 }
 
-.btn-mini:hover {
-  color: var(--bf-accent);
-  border-color: var(--bf-accent);
-  box-shadow: 0 0 6px rgba(0,200,255,0.2);
-}
-
 .btn-mini:active {
-  transform: scale(0.92);
-  box-shadow: 0 0 2px rgba(0,200,255,0.2);
+  transform: scale(0.9);
+  background: rgba(255,255,255,0.05);
 }
 
-.btn-mini[data-action="plus"] i {
-  color: #00d8ff;
-}
-.btn-mini[data-action="minus"] i {
-  color: #ff4c60;
-}
 
 
 
