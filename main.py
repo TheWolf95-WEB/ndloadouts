@@ -815,21 +815,22 @@ async def analytics_page(request: Request):
     return templates.TemplateResponse("analytics.html", {"request": request})
 
 
-# BATTLEFIELD
-
 # =========================
-# BATTLEFIELD CHALLENGES API
+# 🪖 BATTLEFIELD CHALLENGES API (персональный прогресс)
 # =========================
-from fastapi import HTTPException, Request
+from fastapi import HTTPException, Request, Body
+import sqlite3, os
 from database_bf import (
-    init_bf_db, get_all_categories, add_category, delete_category,
-    get_all_challenges, add_challenge, update_challenge, delete_challenge
+    init_bf_db, get_bf_conn,
+    get_all_categories, add_category, delete_category,
+    add_challenge, update_challenge, delete_challenge
 )
+from datetime import datetime
 
-# Инициализация базы Battlefield
+# --- Инициализация базы данных ---
 init_bf_db()
 
-# --- Универсальная проверка прав Battlefield ---
+# --- Проверка прав администратора ---
 def ensure_bf_admin(request: Request, data: dict | None = None):
     """
     Проверяет права администратора через initData (как в ND Loadouts)
@@ -847,7 +848,7 @@ def ensure_bf_admin(request: Request, data: dict | None = None):
     return user_id
 
 
-# === Категории (вкладки) ===
+# === Категории ===
 @app.get("/api/bf/categories")
 def bf_get_categories():
     return get_all_categories()
@@ -856,10 +857,21 @@ def bf_get_categories():
 @app.post("/api/bf/categories")
 def bf_add_category(data: dict, request: Request):
     ensure_bf_admin(request, data)
-    name = data.get("name")
+    name = data.get("name", "").strip()
     if not name:
         raise HTTPException(status_code=400, detail="Name is required")
     return add_category(name)
+
+
+@app.put("/api/bf/categories/{category_id}")
+def bf_update_category(category_id: int, data: dict, request: Request):
+    ensure_bf_admin(request, data)
+    name = data.get("name", "").strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Name required")
+    with get_bf_conn() as conn:
+        conn.execute("UPDATE challenge_categories SET name = ? WHERE id = ?", (name, category_id))
+    return {"status": "updated"}
 
 
 @app.delete("/api/bf/categories/{category_id}")
@@ -871,8 +883,24 @@ def bf_delete_category(category_id: int, request: Request, data: dict | None = N
 
 # === Испытания ===
 @app.get("/api/bf/challenges")
-def bf_get_challenges(category_id: int | None = None):
-    return get_all_challenges(category_id)
+def get_bf_challenges(initData: str = Body(None)):
+    """
+    Получает список испытаний с прогрессом для конкретного пользователя
+    """
+    user_id, _, _ = extract_user_roles(initData or "")
+    with get_bf_conn(row_mode=True) as conn:
+        rows = conn.execute("""
+            SELECT 
+                c.id, c.category_id, c.title_en, c.title_ru, c.goal,
+                COALESCE(uc.current, 0) as current,
+                cat.name as category_name
+            FROM challenges c
+            LEFT JOIN challenge_categories cat ON cat.id = c.category_id
+            LEFT JOIN user_challenges uc 
+                ON uc.challenge_id = c.id AND uc.user_id = ?
+            ORDER BY c.id DESC
+        """, (user_id,)).fetchall()
+    return [dict(r) for r in rows]
 
 
 @app.post("/api/bf/challenges")
@@ -898,80 +926,57 @@ def bf_delete_challenge(challenge_id: int, request: Request, data: dict | None =
     return {"status": "deleted"}
 
 
-# === Battlefield: обновление прогресса ===
+# === Battlefield: персональный прогресс ===
 @app.patch("/api/bf/challenges/{challenge_id}/progress")
-async def bf_update_progress(challenge_id: int, data: dict = Body(...)):
+def bf_update_progress(challenge_id: int, data: dict = Body(...)):
     """
-    Обновление прогресса испытания (+1 / -1)
+    Обновление прогресса испытания для конкретного пользователя (+1 / -1)
     """
-    try:
-        delta = int(data.get("delta", 0))
-        init_data = data.get("initData", "")
-
-        # Проверка (пользователь может быть любым)
-        user_id, is_admin, _ = extract_user_roles(init_data or "")
-
-        db_path = "/opt/ndloadouts_storage/bf_challenges.db"
-        if not os.path.exists(db_path):
-            raise HTTPException(status_code=500, detail=f"База данных не найдена: {db_path}")
-
-        conn = sqlite3.connect(db_path)
-        cur = conn.cursor()
-
-        # Проверяем, существует ли испытание
-        cur.execute("SELECT id, current, goal FROM challenges WHERE id = ?", (challenge_id,))
-        row = cur.fetchone()
-        if not row:
-            conn.close()
-            raise HTTPException(status_code=404, detail="Испытание не найдено")
-
-        current = row[1] or 0
-        goal = row[2] or 0
-        new_value = max(0, min(goal, current + delta))
-
-        # Обновляем значение
-        cur.execute("UPDATE challenges SET current = ? WHERE id = ?", (new_value, challenge_id))
-        conn.commit()
-        conn.close()
-
-        print(f"✅ Battlefield progress updated: id={challenge_id}, {current} → {new_value}/{goal}")
-        return {"id": challenge_id, "current": new_value, "goal": goal}
-
-    except Exception as e:
-        print(f"[❌ Battlefield Progress Error] {e}")
-        raise HTTPException(status_code=500, detail=f"Ошибка при обновлении прогресса: {e}")
-
-
-@app.put("/api/bf/categories/{category_id}")
-def bf_update_category(category_id: int, data: dict, request: Request):
-    ensure_bf_admin(request, data)
-    name = data.get("name", "").strip()
-    if not name:
-        raise HTTPException(status_code=400, detail="Name required")
-    with get_bf_conn() as conn:
-        conn.execute("UPDATE challenge_categories SET name = ? WHERE id = ?", (name, category_id))
-    return {"status": "updated"}
-
-
-@app.patch("/api/bf/challenges/{challenge_id}/progress")
-def bf_update_progress(challenge_id: int, data: dict, request: Request):
     delta = int(data.get("delta", 0))
-    user_id, is_admin, _ = extract_user_roles(data.get("initData", ""))
+    init_data = data.get("initData", "")
+    user_id, _, _ = extract_user_roles(init_data or "")
 
-    # Получаем текущее значение
-    with get_bf_conn(row_mode=True) as conn:
-        row = conn.execute("SELECT * FROM challenges WHERE id = ?", (challenge_id,)).fetchone()
-        if not row:
+    if not user_id:
+        raise HTTPException(status_code=400, detail="User ID missing")
+
+    with get_bf_conn() as conn:
+        # Проверяем, существует ли испытание
+        challenge = conn.execute(
+            "SELECT goal FROM challenges WHERE id = ?", (challenge_id,)
+        ).fetchone()
+        if not challenge:
             raise HTTPException(status_code=404, detail="Challenge not found")
 
-        current = int(row["current"])
-        goal = int(row["goal"])
+        goal = int(challenge[0])
 
-        # Обновляем current
-        new_current = max(0, current + delta)
-        conn.execute("UPDATE challenges SET current = ? WHERE id = ?", (new_current, challenge_id))
+        # Создаём запись прогресса, если нет
+        conn.execute("""
+            INSERT OR IGNORE INTO user_challenges (user_id, challenge_id, current)
+            VALUES (?, ?, 0)
+        """, (user_id, challenge_id))
 
-    return {"id": challenge_id, "current": new_current, "goal": goal}
+        # Обновляем прогресс с ограничениями (0...goal)
+        conn.execute("""
+            UPDATE user_challenges
+            SET current = MAX(0, MIN(?, current + ?))
+            WHERE user_id = ? AND challenge_id = ?
+        """, (goal, delta, user_id, challenge_id))
+
+        # Получаем обновлённое значение
+        row = conn.execute("""
+            SELECT current FROM user_challenges 
+            WHERE user_id = ? AND challenge_id = ?
+        """, (user_id, challenge_id)).fetchone()
+
+        # Если завершено — фиксируем время завершения
+        if row and row[0] >= goal:
+            conn.execute("""
+                UPDATE user_challenges 
+                SET completed_at = ? 
+                WHERE user_id = ? AND challenge_id = ?
+            """, (datetime.utcnow().isoformat(), user_id, challenge_id))
+
+    return {"id": challenge_id, "current": row[0], "goal": goal}
 
 
 
