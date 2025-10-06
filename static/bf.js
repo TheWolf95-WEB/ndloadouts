@@ -861,10 +861,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         
         // Обновляем счетчики
         updateStatusCountersAuto();
+        
+        // Показываем уведомление, что испытание начато
+        const activeBtn = document.querySelector('.status-btn[data-status="active"]');
+        if (activeBtn) {
+          activeBtn.classList.add("pulse");
+          setTimeout(() => activeBtn.classList.remove("pulse"), 1200);
+        }
       }, 800);
 
     } catch (err) {
       console.error("Ошибка при запуске испытания:", err);
+      alert("❌ Не удалось начать испытание");
     }
   });
 
