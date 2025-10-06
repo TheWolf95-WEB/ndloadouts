@@ -236,17 +236,20 @@ body {
 } 
 
 
-
-/* === 🎮 Игровые карточки: адаптивная высота === */
+/* === 🎮 Игровые карточки: статичный стиль без свечения === */
 #screen-home .button-grid.three-column .card-btn {
-  aspect-ratio: 1 / 1; /* делает карточку квадратной */
-  min-height: auto; /* сбрасываем фиксированную высоту */
+  aspect-ratio: 1 / 1;
+  min-height: auto;
   padding: 0;
   overflow: hidden;
   position: relative;
+  border: none;
+  box-shadow: none;
+  background: none;
+  transition: none;
 }
 
-/* картинка занимает всю карточку */
+/* Картинка полностью заполняет карточку */
 #screen-home .card-btn .game-thumb {
   position: absolute;
   inset: 0;
@@ -254,39 +257,39 @@ body {
   height: 100%;
   object-fit: cover;
   border-radius: var(--nd-radius-md, 10px);
-  transition: transform 0.3s ease, filter 0.3s ease;
+  transform: none;
+  filter: none;
+  transition: none;
 }
 
-/* hover эффекты */
-#screen-home .card-btn:hover .game-thumb {
-  transform: scale(1.05);
-  filter: brightness(1.1);
-}
-
-/* добавляем плавное затемнение */
+/* Без свечения и затемнения */
 #screen-home .card-btn::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: var(--nd-radius-md, 10px);
-  background: rgba(0, 0, 0, 0.25);
-  transition: background 0.3s ease;
+  content: none;
 }
 
-#screen-home .card-btn:hover::after {
-  background: rgba(0, 0, 0, 0.15);
+/* Ховеры полностью убраны */
+#screen-home .card-btn:hover,
+#screen-home .card-btn:hover .game-thumb,
+#screen-home .card-btn:active {
+  transform: none;
+  filter: none;
+  box-shadow: none;
 }
 
-/* 📱 адаптив: если экран узкий, делаем 2 карточки в ряд */
+/* 📱 адаптив: 2 карточки в ряд */
 @media (max-width: 600px) {
   #screen-home .button-grid.three-column {
     grid-template-columns: repeat(3, 1fr);
   }
+}
 
-  #screen-home .button-grid.three-column .card-btn {
-    aspect-ratio: 1 / 1; /* остаются квадратными */
+/* 📱 ещё уже — 1 карточка в ряд */
+@media (max-width: 400px) {
+  #screen-home .button-grid.three-column {
+    grid-template-columns: 1fr;
   }
 }
+
 
 
 
