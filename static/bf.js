@@ -253,8 +253,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       allBtn.onclick = async () => {
         document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
         allBtn.classList.add("active");
+      
+        // ✅ Сброс подсветки статусов сразу, до загрузки
+        document.querySelectorAll(".status-btn").forEach(b => b.classList.remove("active"));
+      
         await loadBfChallenges(null);
       };
+
       tabsEl.appendChild(allBtn);
 
       bfCategories.forEach(cat => {
@@ -265,6 +270,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         btn.onclick = async () => {
           document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
           btn.classList.add("active");
+        
+          // 🔧 сбросим статусные кнопки
+          document.querySelectorAll(".status-btn").forEach(b => b.classList.remove("active"));
+        
           await loadBfChallenges(cat.id);
         };
         tabsEl.appendChild(btn);
