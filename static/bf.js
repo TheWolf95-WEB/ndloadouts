@@ -903,6 +903,7 @@ document.addEventListener("dblclick", async (e) => {
   if (current >= goal) return;
 
   try {
+    // Обновляем прогресс (только +1)
     const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -910,7 +911,7 @@ document.addEventListener("dblclick", async (e) => {
     });
     if (!res.ok) throw new Error("Ошибка начала испытания");
 
-    // 🔆 анимация старта
+    // ⚡ Анимация старта
     card.style.transition = "all 0.4s ease";
     card.style.boxShadow = "0 0 20px rgba(0,255,120,0.6)";
     card.style.transform = "scale(1.03)";
@@ -919,19 +920,31 @@ document.addEventListener("dblclick", async (e) => {
       card.style.transform = "";
     }, 800);
 
-    // 🔁 после 1 секунды переносим в активные
+    // Убираем карточку из “Общего” после запуска
     setTimeout(async () => {
-      // удаляем из общего списка
       card.remove();
-      // перерисовываем активные
-      await renderChallengesByStatus("active");
       await updateStatusCountersAuto();
-    }, 900);
+
+      // Добавляем карточку в активные (виртуально, без загрузки с сервера)
+      const activeBtn = document.querySelector('.status-btn[data-status="active"]');
+      if (activeBtn) {
+        activeBtn.classList.add("pulse");
+        setTimeout(() => activeBtn.classList.remove("pulse"), 1200);
+      }
+
+      const listEl = document.getElementById("bf-challenges-list");
+      const cardClone = card.cloneNode(true);
+      const overlay = cardClone.querySelector(".completed-overlay");
+      if (overlay) overlay.remove();
+      listEl.appendChild(cardClone);
+
+    }, 700);
 
   } catch (err) {
     console.error("Ошибка при запуске испытания:", err);
   }
 });
+
 
 
 await updateStatusCountersAuto();
