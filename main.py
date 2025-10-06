@@ -882,8 +882,9 @@ def bf_delete_category(category_id: int, request: Request, data: dict | None = N
 
 
 # === Испытания ===
-@app.get("/api/bf/challenges")
-def get_bf_challenges(initData: str = Body(None)):
+@app.post("/api/bf/challenges")
+def get_bf_challenges(data: dict = Body(...)):
+    initData = data.get("initData", "")
     """
     Получает список испытаний с прогрессом для конкретного пользователя
     """
