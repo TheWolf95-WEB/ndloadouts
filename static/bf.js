@@ -799,11 +799,11 @@ document.querySelectorAll(".status-btn").forEach(btn => {
           // ✅ Загружаем завершённые испытания
           await renderChallengesByStatus("completed");
         }, 400);
-      }
-
+      
       } else {
         await updateInitialStatusCounts();
       }
+
     } catch (err) {
       console.error("Ошибка PATCH:", err);
       alert("❌ Ошибка обновления прогресса");
