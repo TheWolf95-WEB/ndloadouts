@@ -987,41 +987,6 @@ select:disabled {
   grid-template-columns: repeat(2, 1fr);
 }
 
-/* --- Карточки-кнопки --- */
-.card-btn {
-  background: var(--bf-card);
-  border: 1px solid var(--bf-border);
-  border-radius: 14px;
-  color: var(--bf-text);
-  padding: 20px 8px;
-  font-weight: 600;
-  font-size: 15px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.4);
-}
-
-.card-btn i {
-  font-size: 22px;
-  color: var(--bf-accent);
-  transition: transform 0.3s ease, color 0.3s ease;
-}
-
-.card-btn:hover {
-  border-color: var(--bf-accent);
-  box-shadow: 0 0 14px rgba(0,200,255,0.25);
-  transform: translateY(-4px);
-}
-
-.card-btn:hover i {
-  color: var(--bf-accent-dim);
-  transform: scale(1.1);
-}
 
 /* --- Кнопка главного меню --- */
 .global-home-button {
