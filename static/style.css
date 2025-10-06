@@ -140,118 +140,63 @@ body {
 }
 
 
-/* === 🧩 NDHQ Buttons & Grids (Обновлено) === */
-
-.button-grid {
-  display: grid;
-  gap: var(--nd-gap, 16px);
-  margin-bottom: var(--nd-gap, 16px);
-  padding: 0;
-}
-
-.button-grid.two-column {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-.button-grid.three-column {
-  grid-template-columns: repeat(3, 1fr);
-}
-
-/* --- На главном экране: единые отступы между рядами --- */
-#screen-home .button-grid {
-  margin-bottom: 18px;
-}
-
-#screen-home .button-grid:last-child {
-  margin-bottom: 0;
-}
-
-/* === Карточки (универсальные) === */
-.card-btn {
-  display: none !important;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: var(--nd-card);
-  border: 1px solid var(--nd-border);
-  border-radius: var(--nd-radius-lg, 14px);
-  color: var(--nd-text);
-  padding: 20px 10px;
-  min-height: 110px;
-  text-align: center;
-  gap: 10px;
-  box-shadow: var(--nd-shadow-sm, 0 2px 10px rgba(0,0,0,0.4));
-  transition: all var(--nd-trans-fast, 0.2s ease);
-  cursor: pointer;
-}
-
-.card-btn.is-visible {
-  display: flex !important;
-}
-
-.card-btn.full-width {
-  grid-column: 1 / -1;
-}
-
-/* === Иконки и текст === */
-.card-btn i {
-  font-size: 26px;
-  color: var(--nd-accent);
-  transition: color 0.2s ease, transform 0.2s ease;
-}
-
-.card-btn span {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--nd-text);
-}
-
-/* === Ховеры и клики === */
-.card-btn:hover {
-  border-color: var(--nd-accent);
-  box-shadow: 0 0 10px rgba(0,200,255,0.25);
-  transform: translateY(-3px);
-}
-
-.card-btn:hover i {
-  color: var(--nd-accent-dim);
-  transform: scale(1.1);
-}
-
-.card-btn:active {
-  transform: scale(0.95);
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
-}
-
-/* === 🖼 Игровые баннеры на главной === */
-#screen-home .button-grid.three-column {
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0; /* убираем промежутки */
-  margin: 0;
-  padding: 0;
-}
-
-#screen-home .card-btn {
-  border-radius: 0;
-  border: none;
-  background: none;
-  box-shadow: none;
-  padding: 0;
-  min-height: unset;
-}
-
+/* === Игровые карточки в главном меню === */
 #screen-home .game-thumb {
   width: 100%;
-  height: 130px;
+  height: 100%;
   object-fit: cover;
-  display: block;
-  border-radius: 0;
+  border-radius: var(--nd-radius-md, 10px);
   transition: transform 0.3s ease, filter 0.3s ease;
 }
 
+/* карточка — чтобы картинка занимала весь блок */
+#screen-home .card-btn {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+}
+
+#screen-home .card-btn .game-thumb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+/* создаём поверх полупрозрачный слой (эффект затемнения при ховере) */
+#screen-home .card-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  transition: background 0.3s ease;
+  z-index: 1;
+}
+
+#screen-home .card-btn:hover::after {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* при ховере слегка увеличиваем */
 #screen-home .card-btn:hover .game-thumb {
   transform: scale(1.05);
   filter: brightness(1.1);
+}
+
+/* выравнивание содержимого (иконки и текст) поверх картинки */
+#screen-home .card-btn i,
+#screen-home .card-btn span {
+  position: relative;
+  z-index: 2;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+/* высота карточек */
+#screen-home .card-btn {
+  min-height: 120px;
 }
 
 
