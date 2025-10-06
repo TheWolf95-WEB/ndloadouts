@@ -236,55 +236,88 @@ body {
 } 
 
 
-/* === 🎮 Игровые карточки: статичный стиль без свечения === */
+/* === 🎮 Игровые карточки NDHQ (в стиле общих кнопок) === */
+#screen-home .button-grid.three-column {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--nd-gap, 16px);
+  margin-bottom: var(--nd-gap, 16px);
+}
+
+/* Карточка игры */
 #screen-home .button-grid.three-column .card-btn {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 1 / 1; /* квадрат */
   min-height: auto;
   padding: 0;
   overflow: hidden;
   position: relative;
-  border: none;
-  box-shadow: none;
-  background: none;
-  transition: none;
+  background: var(--nd-card);
+  border: 1px solid var(--nd-border);
+  border-radius: var(--nd-radius-lg, 14px);
+  box-shadow: var(--nd-shadow-sm, 0 2px 10px rgba(0,0,0,0.4));
+  cursor: pointer;
+  transition: 
+    transform 0.25s ease, 
+    border-color 0.25s ease, 
+    box-shadow 0.25s ease;
 }
 
-/* Картинка полностью заполняет карточку */
-#screen-home .card-btn .game-thumb {
+/* Изображение внутри карточки */
+#screen-home .button-grid.three-column .card-btn .game-thumb {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: var(--nd-radius-md, 10px);
-  transform: none;
-  filter: none;
-  transition: none;
+  border-radius: var(--nd-radius-lg, 14px);
+  transition: transform 0.3s ease, filter 0.3s ease;
 }
 
-/* Без свечения и затемнения */
-#screen-home .card-btn::after {
-  content: none;
+/* Подложка (лёгкое затемнение для глубины) */
+#screen-home .button-grid.three-column .card-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--nd-radius-lg, 14px);
+  background: rgba(0, 0, 0, 0.15);
+  opacity: 0.8;
+  transition: opacity 0.3s ease, background 0.3s ease;
 }
 
-/* Ховеры полностью убраны */
-#screen-home .card-btn:hover,
-#screen-home .card-btn:hover .game-thumb,
-#screen-home .card-btn:active {
-  transform: none;
-  filter: none;
-  box-shadow: none;
+/* Ховер — стиль как у обычных кнопок */
+#screen-home .button-grid.three-column .card-btn:hover {
+  border-color: var(--nd-accent);
+  box-shadow: 0 0 12px rgba(0,200,255,0.25);
+  transform: translateY(-3px);
 }
 
-/* 📱 адаптив: 2 карточки в ряд */
+/* При наведении — лёгкое увеличение картинки */
+#screen-home .button-grid.three-column .card-btn:hover .game-thumb {
+  transform: scale(1.05);
+  filter: brightness(1.08);
+}
+
+/* При ховере убираем тёмную подложку */
+#screen-home .button-grid.three-column .card-btn:hover::after {
+  background: rgba(0, 0, 0, 0.05);
+  opacity: 0.6;
+}
+
+/* Эффект нажатия */
+#screen-home .button-grid.three-column .card-btn:active {
+  transform: scale(0.96);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Адаптив: 2 в ряд (планшет) */
 @media (max-width: 600px) {
   #screen-home .button-grid.three-column {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-/* 📱 ещё уже — 1 карточка в ряд */
-@media (max-width: 400px) {
+/* Адаптив: 1 в ряд (мобильные телефоны) */
+@media (max-width: 350px) {
   #screen-home .button-grid.three-column {
     grid-template-columns: 1fr;
   }
