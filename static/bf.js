@@ -469,7 +469,9 @@ async function loadBfChallenges(categoryId = null) {
     bfChallenges = await res.json();
 
     // ❌ исключаем завершённые испытания
-    bfChallenges = bfChallenges.filter(ch => ch.goal > 0 && ch.current < ch.goal);
+    // ✅ отфильтровываем только те, что ещё не начаты (current = 0)
+    bfChallenges = bfChallenges.filter(ch => ch.current === 0);
+
 
     const listEl = document.getElementById("bf-challenges-list");
     if (!listEl) return;
@@ -870,37 +872,85 @@ window.editBfChallenge = async function(id) { // ← Добавить async
 };
 
 
-// === Двойной клик по карточке — начать выполнение ===
+// === Двойной тап по карточке: перенос в "Активные" ===
 document.addEventListener("dblclick", async (e) => {
   const card = e.target.closest(".challenge-card-user");
   if (!card) return;
-
   const id = Number(card.dataset.id);
   if (!id) return;
 
   try {
-    // при старте ставим current = 1
+    // Если уже активное или завершённое — игнор
+    if (card.classList.contains("active") || card.classList.contains("completed")) return;
+
+    // Помечаем как активное (current = 1)
     const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ delta: 1, initData: tg?.initData || "" })
     });
-
-    if (!res.ok) throw new Error("Ошибка начала испытания");
+    if (!res.ok) throw new Error("Ошибка активации испытания");
 
     // Визуальный отклик
-    card.style.boxShadow = "0 0 15px rgba(0,255,100,0.4)";
-    card.style.transform = "scale(1.02)";
-    setTimeout(() => {
-      card.style.transition = "all 0.5s ease";
-      card.style.boxShadow = "";
-      card.style.transform = "";
-    }, 800);
+    card.classList.add("active");
+    card.style.transition = "all 0.4s ease";
+    card.style.boxShadow = "0 0 12px rgba(0,255,120,0.6)";
+    setTimeout(() => (card.style.boxShadow = ""), 1000);
 
-    // Обновляем список активных
-    setTimeout(() => renderChallengesByStatus("active"), 500);
+    // Перерисовать список активных (и убрать из "Общих")
+    setTimeout(async () => {
+      await renderChallengesByStatus("active");
+    }, 400);
   } catch (err) {
     console.error("Ошибка при запуске испытания:", err);
+  }
+});
+
+// === Обновление прогресса (+ автоматический перенос в завершённые) ===
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".btn-mini");
+  if (!btn) return;
+
+  const id = Number(btn.dataset.id);
+  const action = btn.dataset.action;
+  const delta = action === "plus" ? 1 : -1;
+
+  const card = document.querySelector(`.challenge-card-user[data-id="${id}"]`);
+  if (!card) return;
+
+  try {
+    const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ delta, initData: tg?.initData || "" })
+    });
+    if (!res.ok) throw new Error("Ошибка обновления прогресса");
+
+    const updated = await res.json();
+    const percent = updated.goal > 0 ? Math.min((updated.current / updated.goal) * 100, 100) : 0;
+
+    card.querySelector(".progress-fill").style.width = `${percent}%`;
+    card.querySelector(".progress-text span:last-child").textContent = `${updated.current} / ${updated.goal}`;
+
+    // Проверяем завершение
+    if (updated.current >= updated.goal) {
+      card.classList.add("completed");
+      const overlay = document.createElement("div");
+      overlay.className = "completed-overlay";
+      overlay.textContent = "ЗАВЕРШЕНО!";
+      card.appendChild(overlay);
+
+      // Добавим размытие и уберем кнопки управления
+      card.querySelector(".progress-controls")?.remove();
+      card.style.filter = "blur(2px)";
+      card.style.transition = "filter 0.5s ease";
+
+      setTimeout(async () => {
+        await renderChallengesByStatus("completed");
+      }, 600);
+    }
+  } catch (e) {
+    console.error("Ошибка при обновлении прогресса:", e);
   }
 });
 
