@@ -1,4 +1,4 @@
-
+почему именон на компе дергает экран при пехредое по кнопкам а на телкфоне нет 
 
 
 
@@ -200,23 +200,23 @@ document.getElementById("bf-add-category-btn")?.addEventListener("click", async 
   // Стартовая загрузка вкладок для пользовательского экрана
   await loadBfCategories();
 
+  // ===== Helpers =====
   function showBfScreen(screenId) {
     document.querySelectorAll(".screen").forEach(el => { 
-      el.classList.remove("active");
-      el.style.opacity = "0";
-      el.style.pointerEvents = "none";
+      el.classList.remove("active"); 
+      el.style.display = "none"; 
     });
+    document.getElementById("screen-battlefield-main").style.display = "none";
   
     const target = bfScreens[screenId];
     if (target) { 
-      target.classList.add("active");
-      target.style.opacity = "1";
-      target.style.pointerEvents = "auto";
+      target.style.display = "block"; 
+      target.classList.add("active"); 
     }
   
+    // 👇 вот это добавляем
     toggleBfBackButton(screenId);
   }
-
 
   function showBfMain() {
     Object.values(bfScreens).forEach(el => (el.style.display = "none"));
