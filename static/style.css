@@ -1,3 +1,84 @@
+
+/* === 🧱 NDHQ DESIGN SYSTEM (Global) === */
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap');
+
+:root {
+  /* 🎨 Core palette */
+  --nd-bg: #0f111a;           /* app background */
+  --nd-surface: #171d25;      /* surfaces / panels */
+  --nd-card: #141b23;         /* cards */
+  --nd-card-2: #1b202b;       /* alt card for depth */
+  --nd-border: #2a2e3b;       /* borders / separators */
+
+  --nd-text: #d7e3f4;         /* primary text */
+  --nd-text-muted: #8ea2b6;   /* secondary text */
+  --nd-accent: #00c8ff;       /* primary accent (blue-cyan) */
+  --nd-accent-dim: #0092cc;   /* darker accent */
+
+  /* Reserved (not used now, for future themes) */
+  --nd-success: #17a51c;
+  --nd-warning: #ffb703;
+  --nd-error: #ff5c5c;
+
+  /* Elevation & FX */
+  --nd-shadow-sm: 0 2px 6px rgba(0,0,0,0.3);
+  --nd-shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --nd-shadow-lg: 0 6px 20px rgba(0,0,0,0.5);
+  --nd-blur-bg: blur(8px);
+
+  /* Radii / Spacing */
+  --nd-radius-sm: 6px;
+  --nd-radius-md: 10px;
+  --nd-radius-lg: 14px;
+  --nd-gap: 12px;
+  --nd-padding: 20px;
+
+  /* Typography */
+  --nd-font: 'Rubik', 'Segoe UI', sans-serif;
+  --nd-font-size: 16px;
+}
+
+/* === Base reset alignment === */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--nd-bg);
+  color: var(--nd-text);
+  font-family: var(--nd-font);
+  font-size: var(--nd-font-size);
+  margin: 0;
+}
+
+/* Scrollbars (WebKit) */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, var(--nd-accent-dim), var(--nd-accent));
+  border-radius: 6px;
+}
+
+/* Utility */
+.text-muted { color: var(--nd-text-muted) !important; }
+.card { background: var(--nd-card); border: 1px solid var(--nd-border); border-radius: var(--nd-radius-lg); box-shadow: var(--nd-shadow-sm); }
+.btn {
+  background: var(--nd-card-2);
+  color: var(--nd-text);
+  border: 1px solid var(--nd-border);
+  border-radius: var(--nd-radius-md);
+  padding: 10px 14px;
+  font-weight: 600;
+  transition: .2s ease;
+}
+.btn:hover { border-color: var(--nd-accent); box-shadow: 0 0 10px rgba(0,200,255,.25); }
+.input, .form-input, select {
+  background: var(--nd-surface);
+  color: var(--nd-text);
+  border: 1px solid var(--nd-border);
+  border-radius: var(--nd-radius-md);
+}
+
+
+
+/* === Refactored from original with NDHQ variables === */
 @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600&display=swap');
 
 * {
@@ -5,8 +86,8 @@
 }
 
 body {
-  background-color: #0f111a;
-  font-family: 'Rubik', 'Segoe UI', sans-serif;
+  background-color: var(--nd-bg);
+  font-family: var(--nd-font);
   color: #ffffff;
   margin: 0;
   padding: 0;
@@ -88,7 +169,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #1f2937;
+  background: var(--nd-card-2);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
   padding: 20px 10px;
   border-radius: 12px;
@@ -245,7 +326,7 @@ body {
   justify-content: space-between;
   gap: 12px;
   padding: 10px 14px;
-  background: #1f2836;
+  background: var(--nd-card-2);
   border-radius: 10px;
   margin: 8px 0;
 }
@@ -293,7 +374,7 @@ body {
 
 .filter-btn {
   padding: 10px 15px;
-  background: #1f2937;
+  background: var(--nd-card-2);
   color: #fff;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
   border:none;
@@ -311,17 +392,12 @@ body {
 
 
 
-h1 {
-  font-size: 1.8rem;
-  color: #ffffff;
-  margin-bottom: 10px;
-  text-align: center;
-}
+h1 { color: var(--nd-text); }
 
 
 .subtext {
   font-size: 1rem;
-  color: #aaa;
+  color: var(--nd-text-muted);
   margin-bottom: 16px;
   font-style: italic;
   line-height: 1.4;
@@ -330,8 +406,8 @@ h1 {
 
 .user-info-block {
   display: none;
-  background: #1f2937;
-  color: #ddd;
+  background: var(--nd-card-2);
+  color: var(--nd-text);
   padding: 12px 16px;
   border-radius: 10px;
   margin-bottom: 20px;
@@ -347,7 +423,7 @@ h1 {
 }
 
 .form-block {
-  background-color: #1c1f2a;
+  background-color: var(--nd-card-2);
   border-radius: 10px;
   padding: 15px;
   margin-bottom: 20px;
@@ -357,15 +433,15 @@ label {
   display: block;
   margin-bottom: 6px;
   font-size: 0.95rem;
-  color: #ccc;
+  color: var(--nd-text-muted);
 }
 
 .form-input,
 select {
   width: 100%;
   padding: 11px 14px;
-  background-color: #0f111a;
-  border: 1px solid #2a2e3b;
+  background-color: var(--nd-bg);
+  border: 1px solid var(--nd-border);
   color: #fff;
   border-radius: 6px;
   font-size: 0.95rem;
@@ -377,7 +453,7 @@ select:disabled {
 }
 
 .tab-block {
-  background-color: #1c1f2a;
+  background-color: var(--nd-card-2);
   border-radius: 10px;
   padding: 15px;
   margin-bottom: 20px;
@@ -396,7 +472,7 @@ select:disabled {
 }
 
 .btn {
-  background: #1f2937;
+  background: var(--nd-card-2);
   width: 100%;
   color: #fff;
   padding: 12px 18px;
@@ -457,12 +533,12 @@ select:disabled {
 
 .tab-panel {
   padding: 12px;
-  background: #141821;
+  background: var(--nd-card);
   border-radius: 8px;
 }
 
 .mod-block {
-  background: #22242d;
+  background: var(--nd-card-2);
   padding: 8px 10px;
   border-radius: 6px;
   margin: 5px 0;
@@ -496,7 +572,7 @@ select:disabled {
 
 .form-input {
   appearance: none;
-  background-color: #171D25;
+  background-color: var(--nd-surface);
   color: #fff;
   padding: 8px 12px;
   border-radius: 8px;
@@ -537,8 +613,8 @@ select:disabled {
   padding: 20px;
   border-radius: 8px;
   flex-direction:column;
-  background: #171D25;
-  color: #ccc;
+  background: var(--nd-surface);
+  color: var(--nd-text-muted);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
@@ -630,7 +706,7 @@ select:disabled {
 
 .loadout{
     transition: 0.3s ease;
-    background: #171D25;
+    background: var(--nd-surface);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
 
@@ -692,7 +768,7 @@ select:disabled {
 
 .loadout__module {
   width: calc(50% - 10px);
-  background: #1B2838;
+  background: var(--nd-card-2);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
   padding: 12px 16px;
   border-radius: 6px;
@@ -731,7 +807,7 @@ select:disabled {
 /* стили для красивой таблицы */
 
 .build-card {
-  background-color: #1e1f26;
+  background-color: var(--nd-card-2);
   border-radius: 8px;
   padding: 12px;
   margin-bottom: 10px;
@@ -762,9 +838,9 @@ select:disabled {
     display: flex;
     flex-direction: column;
   gap:10px;
-  background: #1f2937;
+  background: var(--nd-card-2);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-  color: #aaa;
+  color: var(--nd-text-muted);
   text-align: center;
   font-size: 1rem;
   padding-top:20px;
@@ -817,7 +893,7 @@ select:disabled {
   padding-bottom: 10px;
   border-bottom: 1px solid #2a2a2a;
   font-size: 14px;
-  color: #ccc;
+  color: var(--nd-text-muted);
   line-height: 1.5;
 }
 
@@ -853,15 +929,7 @@ select:disabled {
   text-align: center;
 }
 
-#screen-battlefield-main h1 {
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--bf-accent);
-  letter-spacing: 1px;
-  margin: 14px 0 22px;
-  text-transform: uppercase;
-  text-shadow: 0 0 8px rgba(0,200,255,0.3);
-}
+#screen-battlefield-main h1 { color: var(--nd-text); }
 
 #screen-battlefield-main .subtext {
   color: var(--bf-subtext);
@@ -1084,12 +1152,12 @@ select:disabled {
 }
 
 .status-btn.active {
-  background: #0099ff;
+  background: var(--nd-accent);
   color: #fff;
 }
 .status-btn:not(.active) {
   background: #1a1f25;
-  color: #8ea2b6;
+  color: var(--nd-text-muted);
 }
 
 /* --- Завершённые испытания --- */
@@ -1216,7 +1284,7 @@ select:disabled {
 }
 .category-actions .btn-mini:hover {
   background: rgba(0,157,255,0.2);
-  border-color: #009dff;
+  border-color: var(--nd-accent);
 }
 
 
@@ -1347,13 +1415,13 @@ select:disabled {
 
 /* === Общие цвета Battlefield UI === */
 :root {
-  --bf-bg: #0d1116;
-  --bf-card: #141b23;
-  --bf-border: #1f2a37;
-  --bf-accent: #00c8ff;
-  --bf-accent-dim: #0092cc;
-  --bf-text: #d7e3f4;
-  --bf-subtext: #8ea2b6;
+  --bf-bg: var(--nd-bg);
+  --bf-card: var(--nd-card);
+  --bf-border: var(--nd-border);
+  --bf-accent: var(--nd-accent);
+  --bf-accent-dim: var(--nd-accent-dim);
+  --bf-text: var(--nd-text);
+  --bf-subtext: var(--nd-text-muted);
 }
 
 /* === Заголовок экрана === */
