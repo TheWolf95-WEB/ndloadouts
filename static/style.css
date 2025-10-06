@@ -953,36 +953,58 @@ select:disabled {
 
 
 /* === Карточка испытания === */
+/* =============================
+   ✅ Исправленное завершение карточки
+   ============================= */
 .challenge-card-user {
   position: relative;
-  background: #111823;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
-  transition: all 0.3s ease;
+  overflow: hidden;
 }
 
 .challenge-card-user.completed {
-  filter: blur(1.5px) brightness(0.7);
-  pointer-events: none;
   position: relative;
 }
 
-.challenge-card-user .completed-overlay {
+.challenge-card-user.completed::before {
+  /* размываем только фон и контент */
+  content: "";
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(0,0,0,0.6);
-  color: #00ff8c;
-  font-weight: 700;
-  font-size: 1.2em;
-  padding: 10px 16px;
-  border-radius: 12px;
+  inset: 0;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.45);
   z-index: 2;
-  text-align: center;
-  box-shadow: 0 0 12px rgba(0,255,140,0.4);
 }
+
+/* текст "ЗАВЕРШЕНО!" — поверх, четкий */
+.completed-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3;
+  font-size: 20px;
+  font-weight: 800;
+  color: #00ff9a;
+  text-shadow: 0 0 10px rgba(0, 255, 160, 0.7);
+  background: transparent;
+  pointer-events: none;
+}
+
+/* мелкие адаптивные правки для мобильных */
+@media (max-width: 600px) {
+  .completed-overlay {
+    font-size: 16px;
+    text-shadow: 0 0 6px rgba(0, 255, 160, 0.8);
+  }
+
+  .challenge-card-user.completed::before {
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+  }
+}
+
 
 /* Прогресс и кнопки */
 .progress-controls {
