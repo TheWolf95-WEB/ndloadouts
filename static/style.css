@@ -149,7 +149,7 @@ body {
 .button-grid {
   display: grid;
   gap: 14px;                     /* универсальный промежуток между кнопками */
-  margin-bottom: 16px;
+  margin: 0;
 }
 .button-grid.two-column {
   grid-template-columns: repeat(2, 1fr);
@@ -253,7 +253,7 @@ body {
 #screen-home .button-grid,
 #screen-warzone-main .button-grid,
 #screen-battlefield-main .button-grid {
-  margin-bottom: 16px;
+  margin: 0;
 }
 
 #screen-home .button-grid:last-child,
