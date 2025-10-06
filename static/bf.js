@@ -277,32 +277,36 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // --- Challenges load (category) ---
-  async function loadBfChallenges(categoryId = null) {
-    try {
-      const res = await fetch(`${BF_API_BASE}/challenges/list`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: tg?.initData || "" })
-      });
-      bfChallenges = await res.json();
-      // 🔧 защита — фильтруем по категории, если API возвращает всё подряд
-      if (categoryId) bfChallenges = bfChallenges.filter(ch => ch.category_id == categoryId);
+async function loadBfChallenges(categoryId = null) {
+  try {
+    const res = await fetch(`${BF_API_BASE}/challenges/list`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ initData: tg?.initData || "" })
+    });
+    bfChallenges = await res.json();
 
+    // 🔧 показываем только не начатые (current === 0)
+    bfChallenges = bfChallenges.filter(ch => ch.current === 0);
 
-      const listEl = document.getElementById("bf-challenges-list");
-      if (!listEl) return;
-      if (!bfChallenges.length) {
-        listEl.innerHTML = `<p style="text-align:center;color:#8ea2b6;">Нет испытаний</p>`;
-        await updateInitialStatusCounts();
-        return;
-      }
+    // фильтр по категории
+    if (categoryId) bfChallenges = bfChallenges.filter(ch => ch.category_id == categoryId);
 
-      listEl.innerHTML = bfChallenges.map(createChallengeCard).join("");
+    const listEl = document.getElementById("bf-challenges-list");
+    if (!listEl) return;
+    if (!bfChallenges.length) {
+      listEl.innerHTML = `<p style="text-align:center;color:#8ea2b6;">Нет доступных испытаний</p>`;
       await updateInitialStatusCounts();
-    } catch (e) {
-      console.error("Ошибка при загрузке испытаний:", e);
+      return;
     }
+
+    listEl.innerHTML = bfChallenges.map(createChallengeCard).join("");
+    await updateInitialStatusCounts();
+  } catch (e) {
+    console.error("Ошибка при загрузке испытаний:", e);
   }
+}
+
 
   function createChallengeCard(ch) {
     const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
@@ -330,18 +334,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // --- Status tabs (Active/Completed) ---
-  document.querySelectorAll(".status-btn").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const alreadyActive = btn.classList.contains("active");
-      document.querySelectorAll(".status-btn").forEach(b => b.classList.remove("active"));
+document.querySelectorAll(".status-btn").forEach(btn => {
+  btn.addEventListener("click", async () => {
+    // снять активность со всех
+    document.querySelectorAll(".status-btn").forEach(b => b.classList.remove("active"));
 
-      if (alreadyActive) {
-        document.querySelectorAll(".status-btn").forEach(b => b.classList.remove("active"));
-        const activeTab = document.querySelector("#bf-tabs .tab-btn.active");
-        const categoryId = activeTab?.dataset?.id || null;
-        await loadBfChallenges(categoryId);
-        return;
-      }
+    // установить только выбранную
+    btn.classList.add("active");
+
+    const status = btn.dataset.status;
+
+    if (status === "active" || status === "completed") {
+      await renderChallengesByStatus(status);
+    } else {
+      // если кликнули на уже активную, просто сбрасываем фильтр
+      document.querySelectorAll(".status-btn").forEach(b => b.classList.remove("active"));
+      const activeTab = document.querySelector("#bf-tabs .tab-btn.active");
+      const categoryId = activeTab?.dataset?.id || null;
+      await loadBfChallenges(categoryId);
+    }
+  });
+});
 
 
       btn.classList.add("active");
