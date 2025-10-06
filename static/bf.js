@@ -670,10 +670,15 @@ document.getElementById("bf-challenges-list")?.addEventListener("dblclick", asyn
     setTimeout(async () => {
       card.remove();
       await updateInitialStatusCounts();
-      document.querySelectorAll(".status-btn").forEach(b => b.classList.remove("active"));
-      document.querySelector('[data-status="active"]').classList.add("active");
-      await renderChallengesByStatus("active");
+    
+      // Небольшая задержка, чтобы сервер успел обновить current
+      setTimeout(async () => {
+        document.querySelectorAll(".status-btn").forEach(b => b.classList.remove("active"));
+        document.querySelector('[data-status="active"]').classList.add("active");
+        await renderChallengesByStatus("active");
+      }, 300);
     }, 400);
+
   } catch (err) {
     console.error("Ошибка при запуске испытания:", err);
   } finally {
@@ -682,57 +687,76 @@ document.getElementById("bf-challenges-list")?.addEventListener("dblclick", asyn
 });
 
 
-  // --- Progress +/- (single handler, no duplication) ---
-  document.addEventListener("click", async (e) => {
-    const btn = e.target.closest(".btn-mini");
-    if (!btn) return;
+// --- Progress +/- (single handler, no duplication) ---
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".btn-mini");
+  if (!btn) return;
 
-    // блокируем кнопку на время запроса
-    if (btn.disabled) return;
-    btn.disabled = true;
+  // блокируем кнопку на время запроса
+  if (btn.disabled) return;
+  btn.disabled = true;
 
-    const id = Number(btn.dataset.id);
-    const delta = btn.dataset.action === "plus" ? 1 : -1;
-    const card = document.querySelector(`.challenge-card-user[data-id="${id}"]`);
-    if (!id || !card) return;
+  const id = Number(btn.dataset.id);
+  const delta = btn.dataset.action === "plus" ? 1 : -1;
+  const card = document.querySelector(`.challenge-card-user[data-id="${id}"]`);
+  if (!id || !card) return;
 
-    try {
-      const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
-        method: "PATCH",
-        headers: { "Content-Type":"application/json" },
-        body: JSON.stringify({ delta, initData: tg?.initData || "" })
-      });
-      if (!res.ok) throw new Error("Ошибка обновления прогресса");
+  try {
+    // получаем текущие значения до обновления
+    const progressText = card.querySelector(".progress-text span:last-child").textContent;
+    const [currentRaw, goalRaw] = progressText.split("/").map(s => parseInt(s.trim(), 10) || 0);
+    let current = currentRaw, goal = goalRaw;
 
-      const updated = await res.json();
-      const percent = updated.goal > 0 ? Math.min((updated.current / updated.goal) * 100, 100) : 0;
-
-      card.querySelector(".progress-fill").style.width = `${percent}%`;
-      card.querySelector(".progress-text span:last-child").textContent = `${updated.current} / ${updated.goal}`;
-
-      if (updated.current >= updated.goal) {
-        card.classList.add("completed");
-        const overlay = document.createElement("div");
-        overlay.className = "completed-overlay";
-        overlay.textContent = "ЗАВЕРШЕНО!";
-        card.appendChild(overlay);
-        card.querySelector(".progress-controls")?.remove();
-        card.style.filter = "blur(2px)";
-        card.style.transition = "filter 0.5s ease";
-      
-        setTimeout(async () => {
-          await renderChallengesByStatus("completed"); // 👈 теперь попадает в завершённые
-          await updateInitialStatusCounts();
-        }, 600);
-      } else {
-        const activeStatus = document.querySelector(".status-btn.active")?.dataset?.status;
-        if (activeStatus === "active") await renderChallengesByStatus("active");
-      }
-
-    } catch (e2) {
-      console.error("Ошибка при обновлении прогресса:", e2);
+    // если уже достигнут максимум, не продолжаем
+    if (current >= goal && delta > 0) {
+      btn.disabled = false;
+      return;
     }
-  });
+
+    // PATCH-запрос
+    const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ delta, initData: tg?.initData || "" })
+    });
+    if (!res.ok) throw new Error("Ошибка обновления прогресса");
+
+    const updated = await res.json();
+    const percent = updated.goal > 0 ? Math.min((updated.current / updated.goal) * 100, 100) : 0;
+
+    // обновляем UI
+    card.querySelector(".progress-fill").style.width = `${percent}%`;
+    card.querySelector(".progress-text span:last-child").textContent = `${updated.current} / ${updated.goal}`;
+
+    // если достигнута цель
+    if (updated.current >= updated.goal) {
+      card.classList.add("completed");
+      const overlay = document.createElement("div");
+      overlay.className = "completed-overlay";
+      overlay.textContent = "ЗАВЕРШЕНО!";
+      card.appendChild(overlay);
+      card.querySelector(".progress-controls")?.remove();
+      card.style.filter = "blur(2px)";
+      card.style.transition = "filter 0.5s ease";
+
+      setTimeout(async () => {
+        await renderChallengesByStatus("completed");
+        await updateInitialStatusCounts();
+      }, 600);
+    } else {
+      // просто обновляем статус, если активен
+      const activeStatus = document.querySelector(".status-btn.active")?.dataset?.status;
+      if (activeStatus === "active") await renderChallengesByStatus("active");
+      await updateInitialStatusCounts();
+    }
+
+  } catch (e2) {
+    console.error("Ошибка при обновлении прогресса:", e2);
+  } finally {
+    btn.disabled = false;
+  }
+});
+
 
   // --- Start ---
   await loadBfCategories();
