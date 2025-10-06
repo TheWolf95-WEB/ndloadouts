@@ -935,7 +935,7 @@ select:disabled {
   color: #00ffc3;
   text-shadow: 0 0 10px #00ffe1, 0 0 20px rgba(0, 255, 255, 0.5);
   background: rgba(0, 0, 0, 0.45); /* ✅ затемнение только фона */
-  backdrop-filter: blur(2px); /* ✅ мягкий фон */
+  backdrop-filter: blur(1px); /* ✅ мягкий фон */
   pointer-events: none;
   opacity: 0;
   transform: scale(0.9);
