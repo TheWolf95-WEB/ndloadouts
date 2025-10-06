@@ -366,6 +366,9 @@ document.querySelectorAll(".status-btn").forEach(btn => {
 });
 
   async function renderChallengesByStatus(status) {
+  // Сброс активных категорий
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+
     const listEl = document.getElementById("bf-challenges-list");
     if (!listEl) return;
 
