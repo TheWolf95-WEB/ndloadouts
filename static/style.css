@@ -1483,6 +1483,23 @@ select:disabled {
   --bf-subtext: var(--nd-text-muted);
 }
 
+/* === 🎯 WARZONE (зелёная тема) === */
+:root.warzone-theme {
+  --nd-accent: #17a51c;        /* ярко-зелёный основной */
+  --nd-accent-dim: #0e7413;    /* тёмно-зелёный */
+  --nd-accent-glow: rgba(23, 165, 28, 0.3);
+}
+
+
+body.warzone-theme .btn:hover,
+body.warzone-theme .card-btn:hover {
+  border-color: var(--nd-accent);
+  box-shadow: 0 0 10px var(--nd-accent-glow);
+  background: rgba(23,165,28,0.1);
+}
+
+
+
 /* === Заголовок экрана === */
 .screen-header {
   text-align: center;
