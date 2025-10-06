@@ -1,6 +1,3 @@
-почему именон на компе дергает экран при пехредое по кнопкам а на телкфоне нет 
-
-
 
 // === Battlefield WebApp (stable) ===
 document.addEventListener("DOMContentLoaded", async () => {
