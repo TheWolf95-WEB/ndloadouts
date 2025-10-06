@@ -583,8 +583,6 @@ async function updateProgress(id, delta) {
   }
 }
 
- 
-}
 
 // === Поиск испытаний (для пользователя) ===
 function setupUserChallengeSearch() {
