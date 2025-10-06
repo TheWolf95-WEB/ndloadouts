@@ -479,16 +479,20 @@ document.querySelectorAll(".status-btn").forEach(btn => {
   setupUserChallengeSearch();
 
   // --- Tip popup (only for top-level tabs) ---
+  // --- Tip popup (показывается только на экране испытаний и верхних вкладках) ---
   setTimeout(() => {
+    const activeScreen = document.querySelector("#screen-bf-challenges.active");
+    if (!activeScreen) return; // ❌ если не экран испытаний — не показываем
+  
     const activeTopTab = document.querySelector("#bf-tabs .tab-btn.active");
     const activeStatus = document.querySelector(".status-btn.active");
   
-    // 💡 Показываем подсказку только если выбрана верхняя вкладка (а не статус)
+    // 💡 показываем только если выбрана верхняя вкладка и нет статуса
     if (activeTopTab && !activeStatus) {
       const tip = document.createElement("div");
       tip.className = "bf-tip-popup";
       tip.textContent = "💡 Нажмите дважды на карточку, чтобы начать выполнение испытания";
-      document.body.appendChild(tip);
+      activeScreen.appendChild(tip); // привязка к экрану, а не к body
   
       tip.style.opacity = "0";
       setTimeout(() => (tip.style.opacity = "1"), 100);
