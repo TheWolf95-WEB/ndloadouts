@@ -606,7 +606,7 @@ body {
 
 
 
-h1 { color: var(--nd-text); }
+h1 { color: var(--nd-text); text-align:center;  }
 
 
 .subtext {
