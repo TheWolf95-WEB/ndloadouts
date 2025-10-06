@@ -1,0 +1,768 @@
+/* BATTLEFIELD */
+
+
+/* === Battlefield Tabs === */
+/* === Battlefield Tabs Scrollbar === */
+#bf-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 10px 0 10px 0; /* ✅ добавил отступы сверху/снизу */
+  scrollbar-width: thin;
+  scroll-behavior: smooth;
+  margin-bottom: 14px;
+}
+
+/* Firefox scrollbar */
+#bf-tabs {
+  scrollbar-color: rgba(0, 180, 255, 0.5) transparent;
+}
+
+/* Chrome / Edge / Safari */
+#bf-tabs::-webkit-scrollbar {
+  height: 6px;
+  margin-top: 4px;
+}
+
+#bf-tabs::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
+}
+
+#bf-tabs::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, rgba(0,180,255,0.5), rgba(0,220,255,0.7));
+  border-radius: 6px;
+  box-shadow: 0 0 6px rgba(0,180,255,0.4);
+  transition: background 0.3s ease;
+}
+
+#bf-tabs::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, rgba(0,220,255,0.8), rgba(0,255,255,0.9));
+}
+
+/* Элементы вкладок */
+.tab-btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+
+
+/* === Battlefield Tabs — чуть крупнее и с мягкими краями === */
+#bf-tabs .tab-btn {
+  background: rgba(255,255,255,0.06);
+  color: var(--bf-text);
+  border: 1px solid var(--bf-border);
+  border-radius: 10px;
+  padding: 12px 20px; /* было 10px 16px — увеличено */
+  font-size: 14px;
+  letter-spacing: 0.4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#bf-tabs .tab-btn:hover {
+  border-color: var(--bf-accent);
+  color: var(--bf-accent);
+}
+
+#bf-tabs .tab-btn.active {
+  background: linear-gradient(90deg, var(--bf-accent), var(--bf-accent-dim));
+  color: #fff;
+  border: none;
+  box-shadow: 0 0 12px rgba(0,200,255,0.3);
+}
+
+/* === Исправление черных углов и размытия завершенных карточек === */
+.challenge-card-user.completed {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden; /* ✅ убирает черные углы */
+  filter: none; /* ✅ убираем глобальное размытие */
+}
+
+/* Надпись "ЗАВЕРШЕНО!" */
+.challenge-card-user.completed .completed-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 14px; /* ✅ совпадает с карточкой */
+  font-size: 22px;
+  font-weight: 800;
+  color: #00ffc3;
+  text-shadow: 0 0 10px #00ffe1, 0 0 20px rgba(0, 255, 255, 0.5);
+  background: rgba(0, 0, 0, 0.45); /* ✅ затемнение только фона */
+  backdrop-filter: blur(1px); /* ✅ мягкий фон */
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.9);
+  animation: fadeInCompleted 0.35s ease forwards;
+  z-index: 3;
+}
+
+@keyframes fadeInCompleted {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+
+/* Кол-во испытаний в кнопках */
+.status-btn .count {
+  font-weight: 500;
+  color: #a7c8ff;
+  margin-left: 6px;
+}
+
+
+/* === Кнопки статусов === */
+.status-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.status-btn {
+  flex: 1;
+  padding: 10px 0;
+  border: none;
+  border-radius: 10px;
+  background: #1c2433;
+  color: #a0b3c8;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.status-btn.active {
+  background: var(--nd-accent);
+  color: #fff;
+}
+.status-btn:not(.active) {
+  background: #1a1f25;
+  color: var(--nd-text-muted);
+}
+
+/* --- Завершённые испытания --- */
+.challenge-card-user.completed {
+  position: relative;
+  opacity: 1;
+  filter: none;
+}
+
+/* Чистая надпись поверх карточки */
+.completed-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.55); /* затемнение фона под текстом */
+  font-size: 22px;
+  font-weight: 800;
+  color: #00ffc3;
+  text-shadow: 0 0 10px #00ffe1, 0 0 20px rgba(0, 255, 255, 0.5);
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+  transform: scale(0.9);
+  animation: fadeInCompleted 0.35s ease forwards;
+}
+
+/* Плавное появление текста */
+@keyframes fadeInCompleted {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Мобильная адаптация */
+@media (max-width: 600px) {
+  .completed-overlay {
+    font-size: 18px;
+    background: rgba(0, 0, 0, 0.65);
+    text-shadow: 0 0 8px #00ffe1;
+  }
+}
+
+
+
+
+/* Прогресс и кнопки */
+.progress-controls {
+  display: flex;
+  justify-content: right;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.btn-mini {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease, background 0.2s ease;
+}
+
+.btn-mini i {
+  pointer-events: none;
+}
+
+.btn-mini:active {
+  transform: scale(0.9);
+  background: rgba(255,255,255,0.08);
+}
+
+.bf-tip-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 157, 255, 0.25);
+  border: 1px solid #00aaff;
+  color: #fff;
+  padding: 14px 22px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 20px rgba(0,157,255,0.4);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+}
+.bf-tip-popup.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+
+
+.category-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.category-actions .btn-mini {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.category-actions .btn-mini:hover {
+  background: rgba(0,157,255,0.2);
+  border-color: var(--nd-accent);
+}
+
+
+.no-active-message {
+  text-align: center;
+  color: #9fb6cc;
+  font-size: 15px;
+  line-height: 1.5;
+  padding: 30px 10px;
+  background: rgba(255,255,255,0.02);
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+
+
+/* === Пользовательский экран испытаний (единый стиль с базой) === */
+#screen-bf-challenges {
+  background: var(--bf-bg);
+  color: var(--bf-text);
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+/* Сетка карточек */
+#bf-challenges-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+/* Карточка испытания — общий стиль с базой, но без кнопок */
+.challenge-card-user {
+  background: var(--bf-card);
+  border: 1px solid var(--bf-border);
+  border-radius: 12px;
+  padding: 18px;
+  color: var(--bf-text);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.challenge-card-user:hover {
+  transform: translateY(-3px);
+  border-color: var(--bf-accent-dim);
+  box-shadow: 0 4px 14px rgba(0,200,255,0.15);
+}
+
+/* Верх карточки */
+.challenge-card-user .challenge-category {
+  background: rgba(0,200,255,0.1);
+  color: var(--bf-accent);
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  text-transform: uppercase;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+/* Названия */
+.challenge-card-user .challenge-title-en {
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--bf-accent);
+  margin-bottom: 4px;
+}
+
+.challenge-card-user .challenge-title-ru {
+  font-size: 14px;
+  color: var(--bf-subtext);
+  margin-bottom: 12px;
+}
+
+/* Прогресс */
+.challenge-card-user .progress-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--bf-subtext);
+  margin-bottom: 5px;
+}
+
+.challenge-card-user .progress-bar {
+  height: 7px;
+  background: #1c2532;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.challenge-card-user .progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--bf-accent), var(--bf-accent-dim));
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* === Поиск === */
+#screen-bf-challenges .search-box {
+  display: flex;
+  margin-bottom: 16px;
+}
+
+#screen-bf-challenges .search-input {
+  background: var(--bf-card);
+  border: 1px solid var(--bf-border);
+  color: var(--bf-text);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  flex: 1;
+}
+
+#screen-bf-challenges .search-input:focus {
+  border-color: var(--bf-accent);
+  outline: none;
+}
+
+/* Мобильная адаптация */
+@media (max-width: 480px) {
+  #bf-challenges-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
+/* === Общие цвета Battlefield UI === */
+:root {
+  --bf-bg: var(--nd-bg);
+  --bf-card: var(--nd-card);
+  --bf-border: var(--nd-border);
+  --bf-accent: var(--nd-accent);
+  --bf-accent-dim: var(--nd-accent-dim);
+  --bf-text: var(--nd-text);
+  --bf-subtext: var(--nd-text-muted);
+}
+
+/* === 🎯 WARZONE (зелёная тема) === */
+:root.warzone-theme {
+  --nd-accent: #17a51c;        /* ярко-зелёный основной */
+  --nd-accent-dim: #0e7413;    /* тёмно-зелёный */
+  --nd-accent-glow: rgba(23, 165, 28, 0.3);
+}
+
+
+body.warzone-theme .btn:hover,
+body.warzone-theme .card-btn:hover {
+  border-color: var(--nd-accent);
+  box-shadow: 0 0 10px var(--nd-accent-glow);
+  background: rgba(23,165,28,0.1);
+}
+
+
+
+/* === Заголовок экрана === */
+.screen-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.screen-header h2 {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--bf-accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.screen-subtitle {
+  color: var(--bf-subtext);
+  font-size: 14px;
+  margin-top: -5px;
+}
+
+/* === Статистика === */
+.stats-bar {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: linear-gradient(135deg, #12202f, #0d141d);
+  border: 1px solid var(--bf-border);
+  border-radius: 10px;
+  color: var(--bf-text);
+}
+
+.stat-item {
+  text-align: center;
+  flex: 1;
+}
+
+.stat-value {
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--bf-accent);
+  margin-bottom: 5px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--bf-subtext);
+}
+
+/* === Поиск и фильтр === */
+.search-box {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.search-input,
+.filter-select {
+  background: var(--bf-card);
+  border: 1px solid var(--bf-border);
+  color: var(--bf-text);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 14px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.search-input:focus,
+.filter-select:focus {
+  border-color: var(--bf-accent);
+  outline: none;
+}
+
+/* === Сетка карточек испытаний === */
+.challenges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.challenge-card-admin {
+  background: var(--bf-card);
+  border: 1px solid var(--bf-border);
+  border-radius: 12px;
+  padding: 18px;
+  color: var(--bf-text);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.challenge-card-admin:hover {
+  transform: translateY(-3px);
+  border-color: var(--bf-accent-dim);
+  box-shadow: 0 4px 14px rgba(0,200,255,0.15);
+}
+
+/* === Верх карточки === */
+.challenge-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.challenge-id {
+  background: rgba(255,255,255,0.05);
+  color: var(--bf-subtext);
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.challenge-category {
+  background: rgba(0,200,255,0.1);
+  color: var(--bf-accent);
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+/* === Названия === */
+.challenge-titles {
+  margin-bottom: 14px;
+}
+
+.challenge-title-en {
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--bf-accent);
+  margin-bottom: 4px;
+}
+
+.challenge-title-ru {
+  font-size: 14px;
+  color: var(--bf-subtext);
+}
+
+/* === Прогресс === */
+.challenge-progress-admin {
+  margin-bottom: 14px;
+}
+
+.progress-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--bf-subtext);
+  margin-bottom: 5px;
+}
+
+.progress-bar {
+  height: 7px;
+  background: #1c2532;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--bf-accent), var(--bf-accent-dim));
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+/* === Кнопки действий === */
+.challenge-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.btn-small {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #fff;
+  transition: all 0.2s ease;
+}
+
+.btn-edit {
+  background: rgba(0,200,255,0.2);
+}
+
+.btn-edit:hover {
+  background: rgba(0,200,255,0.4);
+}
+
+.btn-delete {
+  background: rgba(255,60,80,0.2);
+}
+
+.btn-delete:hover {
+  background: rgba(255,60,80,0.4);
+}
+
+/* === Пустое состояние === */
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--bf-subtext);
+}
+
+.empty-state .icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+  color: var(--bf-accent);
+  opacity: 0.7;
+}
+
+/* === Общий фон страницы === */
+#screen-bf-challenges-db {
+  background: var(--bf-bg);
+  min-height: 100vh;
+  color: var(--bf-text);
+}
+
+/* === Мобильная адаптация === */
+@media (max-width: 480px) {
+  .challenges-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
+/* === Экран добавления испытания === */
+
+.add-category-inline {
+  display: flex !important;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.add-category-inline input {
+  flex: 1;
+}
+
+#bf-category-select {
+  width: 100%;
+  background: var(--bf-card);
+  border: 1px solid var(--bf-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--bf-text);
+  font-size: 14px;
+}
+
+
+
+#screen-bf-add-challenge {
+  background: var(--bf-bg);
+  color: var(--bf-text);
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+#screen-bf-add-challenge .form-section {
+  margin-bottom: 18px;
+}
+
+#screen-bf-add-challenge label {
+  display: block;
+  font-size: 13px;
+  color: var(--bf-subtext);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-input {
+  width: 100%;
+  background: var(--bf-card);
+  border: 1px solid var(--bf-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--bf-text);
+  font-size: 14px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.form-input:focus {
+  border-color: var(--bf-accent);
+  outline: none;
+}
+
+.btn-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, var(--bf-accent), var(--bf-accent-dim));
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-back {
+  background: rgba(255,255,255,0.08);
+  color: var(--bf-text);
+  border: 1px solid var(--bf-border);
+}
+
+.btn-secondary {
+  background: rgba(0,200,255,0.15);
+  color: var(--bf-accent);
+  border: 1px solid var(--bf-accent-dim);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.btn-secondary:hover {
+  background: rgba(0,200,255,0.3);
+}
+
+.form-col {
+  flex: 1;
+}
