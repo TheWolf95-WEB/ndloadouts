@@ -583,14 +583,7 @@ async function updateProgress(id, delta) {
   }
 }
 
-
-  // После успешного обновления:
-const activeStatus = document.querySelector(".status-btn.active")?.dataset?.status;
-if (activeStatus === "completed" || activeStatus === "active") {
-  await renderChallengesByStatus(activeStatus);
-}
-
-  
+ 
 }
 
 // === Поиск испытаний (для пользователя) ===
