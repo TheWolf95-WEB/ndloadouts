@@ -280,7 +280,7 @@ body {
 /* 📱 адаптив: если экран узкий, делаем 2 карточки в ряд */
 @media (max-width: 600px) {
   #screen-home .button-grid.three-column {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 
   #screen-home .button-grid.three-column .card-btn {
