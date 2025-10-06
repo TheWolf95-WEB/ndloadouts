@@ -310,9 +310,11 @@ async function updateStatusCountersAuto() {
     const res = await fetch(`${BF_API_BASE}/challenges`);
     const all = await res.json();
 
-    const active = all.filter(ch => ch.goal > 0 && ch.current < ch.goal);
-    const completed = all.filter(ch => ch.goal > 0 && ch.current >= ch.goal);
-    updateStatusCounters(active.length, completed.length);
+  // ✅ активные — только те, где начат прогресс (>0 и <goal)
+  const active = all.filter(ch => ch.goal > 0 && ch.current > 0 && ch.current < ch.goal);
+  // ✅ завершённые — где достигнут goal
+  const completed = all.filter(ch => ch.goal > 0 && ch.current >= ch.goal);
+  updateStatusCounters(active.length, completed.length);
   } catch (e) {
     console.warn("Ошибка при обновлении счётчиков:", e);
   }
