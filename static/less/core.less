@@ -217,3 +217,116 @@ body {
   transform: translateY(0);
   pointer-events: auto;
 }
+
+
+
+
+
+
+/* === 🧩 NDHQ Buttons & Grids === */
+
+/* === 🧩 NDHQ — Единый стиль кнопок и отступов === */
+
+/* Сетка */
+.button-grid {
+  display: grid;
+  gap: 14px;                     /* универсальный промежуток между кнопками */
+  margin: 0;
+}
+.button-grid.two-column {
+  grid-template-columns: repeat(2, 1fr);
+}
+.button-grid.three-column {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/* Универсальная кнопка */
+.btn,
+.card-btn,
+.global-home-button .btn,
+.status-btn,
+.modules-type-btn,
+.filter-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  background: var(--nd-card-2);
+  color: var(--nd-text);
+  border: 1px solid var(--nd-border);
+  border-radius: var(--nd-radius-lg);
+
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+
+  min-height: 62px;
+  padding: 0 14px;
+
+  box-shadow: var(--nd-shadow-sm);
+  transition: all 0.25s ease;
+  cursor: pointer;
+}
+
+/* Иконки и текст в кнопках */
+.btn i,
+.card-btn i {
+  font-size: 22px;
+  color: var(--nd-accent);
+  margin-bottom: 6px;
+  transition: 0.25s;
+}
+.btn span,
+.card-btn span {
+  font-size: 0.95rem;
+  color: var(--nd-text);
+}
+
+/* Ховер — один стиль */
+.btn:hover,
+.card-btn:hover,
+.status-btn:hover,
+.modules-type-btn:hover,
+.filter-btn:hover,
+.global-home-button .btn:hover {
+  border-color: var(--nd-accent);
+  background: rgba(0, 200, 255, 0.08);
+  box-shadow: 0 0 10px rgba(0, 200, 255, 0.25);
+  transform: translateY(-2px);
+}
+
+/* Активное нажатие */
+.btn:active,
+.card-btn:active,
+.status-btn:active,
+.modules-type-btn:active,
+.filter-btn:active,
+.global-home-button .btn:active {
+  transform: scale(0.96);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* Размеры для узких экранов */
+@media (max-width: 480px) {
+  .btn,
+  .card-btn,
+  .status-btn,
+  .modules-type-btn,
+  .filter-btn {
+    min-height: 58px;
+    font-size: 14px;
+  }
+
+  .button-grid {
+    gap: 12px;
+  }
+}
+
+/* Полноширинные кнопки (главное меню, добавить и т.п.) */
+.btn.full-width,
+.card-btn.full-width,
+.global-home-button .btn {
+  grid-column: 1 / -1;
+  width: 100%;
+}
