@@ -900,7 +900,6 @@ document.addEventListener("dblclick", async (e) => {
 
   const progressText = card.querySelector(".progress-text span:last-child");
   const [current, goal] = progressText.textContent.split("/").map(n => parseInt(n.trim()));
-
   if (current >= goal) return;
 
   try {
@@ -911,32 +910,29 @@ document.addEventListener("dblclick", async (e) => {
     });
     if (!res.ok) throw new Error("Ошибка начала испытания");
 
-    // 🔆 визуальная анимация
-    card.style.boxShadow = "0 0 20px rgba(0,255,120,0.5)";
+    // 🔆 анимация старта
+    card.style.transition = "all 0.4s ease";
+    card.style.boxShadow = "0 0 20px rgba(0,255,120,0.6)";
     card.style.transform = "scale(1.03)";
     setTimeout(() => {
-      card.style.transition = "all 0.5s ease";
-      card.style.boxShadow = "";document.getElementById("bf-challenges-btn")
+      card.style.boxShadow = "";
       card.style.transform = "";
-    }, 700);
+    }, 800);
 
-  // 🔁 корректное обновление после старта испытания
-  setTimeout(async () => {
-    // только обновляем счётчик, не перерисовываем весь список
-    await updateStatusCountersAuto();
-  
-    // визуально подсвечиваем кнопку "Активные", но не переключаем экран
-    const activeBtn = document.querySelector('.status-btn[data-status="active"]');
-    if (activeBtn) {
-      activeBtn.classList.add("pulse");
-      setTimeout(() => activeBtn.classList.remove("pulse"), 1200);
-    }
-  }, 700);
+    // 🔁 после 1 секунды переносим в активные
+    setTimeout(async () => {
+      // удаляем из общего списка
+      card.remove();
+      // перерисовываем активные
+      await renderChallengesByStatus("active");
+      await updateStatusCountersAuto();
+    }, 900);
 
   } catch (err) {
     console.error("Ошибка при запуске испытания:", err);
   }
 });
+
 
 await updateStatusCountersAuto();
 
