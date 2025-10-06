@@ -176,7 +176,6 @@ body {
   border: 1px solid var(--nd-border);
   border-radius: var(--nd-radius-lg, 14px);
   color: var(--nd-text);
-  padding: 20px 10px;
   min-height: 110px;
   text-align: center;
   gap: 10px;
@@ -226,7 +225,6 @@ body {
 /* === Изображения игр === */
 .game-thumb {
   width: 100%;
-  max-width: 80px;
   height: auto;
   object-fit: cover;
   border-radius: var(--nd-radius-md, 10px);
