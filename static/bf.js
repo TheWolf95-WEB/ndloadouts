@@ -377,47 +377,50 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateProgress(id, delta);
   });
 
-  async function updateProgress(id, delta) {
-    const card = document.querySelector(`.challenge-card-user[data-id="${id}"]`);
-    try {
-      const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ delta, initData: tg?.initData || "" })
-      });
-      if (!res.ok) throw new Error(await res.text());
-      const updated = await res.json();
+// === Управление прогрессом (+/-) и автоматическое перемещение ===
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".btn-mini");
+  if (!btn) return;
+  const id = Number(btn.dataset.id);
+  const action = btn.dataset.action;
+  if (!id || !action) return;
+  const delta = action === "plus" ? 1 : -1;
+  updateProgress(id, delta);
+});
 
-      // Локально обновим полоску (если карточка в DOM)
-      if (card) {
-        const progressText = card.querySelector(".progress-text span:last-child");
-        const fill = card.querySelector(".progress-fill");
-        const percent = updated.goal > 0 ? Math.min((updated.current / updated.goal) * 100, 100) : 0;
-        if (fill) fill.style.width = `${percent}%`;
-        if (progressText) progressText.textContent = `${updated.current} / ${updated.goal}`;
-      }
+async function updateProgress(id, delta) {
+  try {
+    const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ delta, initData: tg?.initData || "" })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const updated = await res.json();
 
-      const status = getActiveStatus();      // "active" | "completed" | null (если мы в “Общем”)
-      const categoryId = getActiveCategoryId(); // id или null
+    // обновляем счётчики
+    await updateStatusCountersAuto();
 
-      // Перерисовываем правильный список, НЕ переключая вкладки
-      if (status === "active") {
-        // Если стало 0 — уйдёт из активных; если достигли цели — тоже уйдёт.
-        await renderChallengesByStatus("active");
-      } else if (status === "completed") {
-        // В завершённых +/- нет, но на всякий обновим.
-        await renderChallengesByStatus("completed");
-      } else {
-        // Мы в “Общее” — если пользователь кликал по +/- из “Общего”, их там нет.
-        // Но если запускали двойным кликом — нужно убрать карточку и перерисовать список “Общее”.
-        await loadBfChallenges(categoryId);
-      }
+    // перемещение карточки между статусами
+    const listEl = document.getElementById("bf-challenges-list");
+    if (!listEl) return;
 
-      await updateStatusCountersAuto();
-    } catch (e) {
-      console.error("Ошибка при обновлении прогресса:", e);
+    if (updated.current <= 0) {
+      // вернули в "Общее"
+      showToast("📦 Испытание сброшено");
+      await loadBfChallenges(); // перерисуем общий список
+    } else if (updated.current >= updated.goal) {
+      // достигнута цель
+      showToast("✅ Испытание завершено!");
+      await renderChallengesByStatus("completed");
+    } else {
+      // в процессе — активное
+      await renderChallengesByStatus("active");
     }
+  } catch (e) {
+    console.error("Ошибка updateProgress:", e);
   }
+}
 
   // ================= Поиск (пользователь) =================
   function setupUserChallengeSearch() {
@@ -594,46 +597,101 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById("bf-goal").value     = ch.goal ?? 0;
   };
 
-  // Двойной клик по карточке — начать выполнение (+1)
-  document.addEventListener("dblclick", async (e) => {
-    const card = e.target.closest(".challenge-card-user");
-    if (!card || card.classList.contains("completed")) return;
-    const id = Number(card.dataset.id);
-    if (!id) return;
+// === Управление прогрессом (+/-) и автоматическое перемещение ===
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".btn-mini");
+  if (!btn) return;
+  const id = Number(btn.dataset.id);
+  const action = btn.dataset.action;
+  if (!id || !action) return;
+  const delta = action === "plus" ? 1 : -1;
+  updateProgress(id, delta);
+});
 
-    const progressText = card.querySelector(".progress-text span:last-child");
-    if (!progressText) return;
-    const [current, goal] = progressText.textContent.split("/").map(n => parseInt(n.trim()));
-    if (!(goal > 0) || current >= goal) return;
+async function updateProgress(id, delta) {
+  try {
+    const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ delta, initData: tg?.initData || "" })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const updated = await res.json();
 
-    try {
-      const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ delta: 1, initData: tg?.initData || "" })
-      });
-      if (!res.ok) throw new Error("Ошибка начала испытания");
+    // обновляем счётчики
+    await updateStatusCountersAuto();
 
-      // Эффект старта
-      card.style.transition = "all 0.4s ease";
-      card.style.boxShadow = "0 0 20px rgba(0,255,120,0.6)";
-      card.style.transform = "scale(1.03)";
-      setTimeout(() => {
-        card.style.boxShadow = "";
-        card.style.transform = "";
-      }, 800);
+    // перемещение карточки между статусами
+    const listEl = document.getElementById("bf-challenges-list");
+    if (!listEl) return;
 
-      // Убираем карточку из “Общего”
-      setTimeout(async () => {
-        const categoryId = getActiveCategoryId();
-        card.remove();
-        await updateStatusCountersAuto();
-        await loadBfChallenges(categoryId);
-      }, 700);
-    } catch (err) {
-      console.error("Ошибка при запуске испытания:", err);
+    if (updated.current <= 0) {
+      // вернули в "Общее"
+      showToast("📦 Испытание сброшено");
+      await loadBfChallenges(); // перерисуем общий список
+    } else if (updated.current >= updated.goal) {
+      // достигнута цель
+      showToast("✅ Испытание завершено!");
+      await renderChallengesByStatus("completed");
+    } else {
+      // в процессе — активное
+      await renderChallengesByStatus("active");
     }
-  });
+  } catch (e) {
+    console.error("Ошибка updateProgress:", e);
+  }
+}
+
+// === Двойной клик — начало испытания ===
+document.addEventListener("dblclick", async (e) => {
+  const card = e.target.closest(".challenge-card-user");
+  if (!card || card.classList.contains("completed")) return;
+
+  const id = Number(card.dataset.id);
+  if (!id) return;
+
+  try {
+    const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ delta: 1, initData: tg?.initData || "" })
+    });
+    if (!res.ok) throw new Error(await res.text());
+
+    // эффект старта
+    card.style.transition = "all 0.4s ease";
+    card.style.boxShadow = "0 0 20px rgba(0,255,120,0.6)";
+    card.style.transform = "scale(1.03)";
+    setTimeout(() => {
+      card.style.boxShadow = "";
+      card.style.transform = "";
+    }, 800);
+
+    // удаляем из "Общего"
+    setTimeout(async () => {
+      card.remove();
+      showToast("🚀 Испытание начато!");
+      await updateStatusCountersAuto();
+      await renderChallengesByStatus("active");
+    }, 600);
+  } catch (err) {
+    console.error("Ошибка при запуске испытания:", err);
+  }
+});
+
+// === Простая функция уведомления ===
+function showToast(text) {
+  const toast = document.createElement("div");
+  toast.className = "bf-toast";
+  toast.textContent = text;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.classList.add("show"), 50);
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 300);
+  }, 2500);
+}
+
 
   // ================= Админская таблица =================
   async function loadBfChallengesTable() {
