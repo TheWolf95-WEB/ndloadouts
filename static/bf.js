@@ -500,7 +500,9 @@ async function loadBfChallenges(categoryId = null) {
     bfChallenges = await res.json();
 
     // ❌ исключаем завершённые испытания
-    bfChallenges = bfChallenges.filter(ch => ch.goal > 0 && ch.current < ch.goal);
+    // ✅ показываем только не начатые (current === 0 и goal > 0)
+    bfChallenges = bfChallenges.filter(ch => ch.goal > 0 && ch.current === 0);
+
 
     const listEl = document.getElementById("bf-challenges-list");
     if (!listEl) return;
