@@ -951,47 +951,33 @@ select:disabled {
   color: #8ea2b6;
 }
 
-
-/* === Карточка испытания === */
-/* =============================
-   ✅ Исправленное завершение карточки
-   ============================= */
-/* =============================
-   Финальная версия эффекта завершения
-   ============================= */
-.challenge-card-user {
+/* --- Завершённые испытания --- */
+.challenge-card-user.completed {
   position: relative;
-  overflow: hidden;
+  opacity: 1;
+  filter: none;
 }
 
-/* Размытие только содержимого карточки, но не надписи */
-.challenge-card-user.completed > *:not(.completed-overlay) {
-  filter: blur(3px);
-  opacity: 0.6;
-  transition: filter 0.3s ease, opacity 0.3s ease;
-}
-
-/* Сам текст "ЗАВЕРШЕНО!" */
+/* Чистая надпись поверх карточки */
 .completed-overlay {
   position: absolute;
   inset: 0;
   display: flex;
   justify-content: center;
   align-items: center;
+  background: rgba(0, 0, 0, 0.55); /* затемнение фона под текстом */
   font-size: 22px;
   font-weight: 800;
-  color: #00ffb7;
-  text-shadow: 0 0 10px #00ffc8, 0 0 20px rgba(0, 255, 255, 0.4);
-  background: rgba(0, 0, 0, 0.4);
+  color: #00ffc3;
+  text-shadow: 0 0 10px #00ffe1, 0 0 20px rgba(0, 255, 255, 0.5);
   pointer-events: none;
-  z-index: 5;
-  filter: none !important;
+  z-index: 3;
   opacity: 0;
   transform: scale(0.9);
-  animation: fadeInCompleted 0.4s ease forwards;
+  animation: fadeInCompleted 0.35s ease forwards;
 }
 
-/* Анимация появления */
+/* Плавное появление текста */
 @keyframes fadeInCompleted {
   to {
     opacity: 1;
@@ -999,16 +985,15 @@ select:disabled {
   }
 }
 
-/* Адаптив под мобилки */
+/* Мобильная адаптация */
 @media (max-width: 600px) {
   .completed-overlay {
     font-size: 18px;
-    text-shadow: 0 0 8px #00ffc8, 0 0 14px rgba(0, 255, 255, 0.5);
-  }
-  .challenge-card-user.completed > *:not(.completed-overlay) {
-    filter: blur(2px);
+    background: rgba(0, 0, 0, 0.65);
+    text-shadow: 0 0 8px #00ffe1;
   }
 }
+
 
 
 
