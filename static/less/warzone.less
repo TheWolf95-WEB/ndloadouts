@@ -20,9 +20,9 @@
 
   --wz-text: #e6ffe8;
   --wz-text-muted: #85b88a;
-  --wz-accent: #17a51c;
-  --wz-accent-dark: #0d5d11;
-  --wz-accent-glow: rgba(23, 165, 28, 0.4);
+   --wz-accent: #3aff6b;         /* неоново-салатовый */
+   --wz-accent-dark: #16391f;    /* глубокий болотный */
+   --wz-accent-glow: rgba(58, 255, 107, 0.4);
 
   background: var(--wz-bg);
   color: var(--wz-text);
@@ -75,16 +75,17 @@
     transition: all 0.25s ease;
     cursor: pointer;
   }
+   
+   .btn:hover,
+   .card-btn:hover,
+   .filter-btn:hover,
+   .modules-type-btn:hover {
+     border-color: var(--wz-accent);
+     background: linear-gradient(90deg, #16391f, #1b4a24);
+     box-shadow: 0 0 12px var(--wz-accent-glow);
+     transform: translateY(-2px);
+   }
 
-  .btn:hover,
-  .card-btn:hover,
-  .filter-btn:hover,
-  .modules-type-btn:hover {
-    border-color: var(--wz-accent);
-    background: var(--wz-accent-dark);
-    box-shadow: 0 0 15px var(--wz-accent-glow);
-    transform: translateY(-2px);
-  }
 
   .btn:active,
   .card-btn:active {
