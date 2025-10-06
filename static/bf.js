@@ -392,7 +392,7 @@ document.querySelectorAll(".status-btn").forEach(btn => {
       listEl.innerHTML = `
         <div class="no-active-message">
           💡 У вас нет активных заданий.<br>
-          Дважды щёлкните по карточке во вкладке <b>«Все»</b>, чтобы начать выполнение.
+          Дважды щёлкните по карточке во вкладке <b>«Общее»</b>, чтобы начать выполнение.
         </div>
       `;
       return;
@@ -786,11 +786,21 @@ document.querySelectorAll(".status-btn").forEach(btn => {
         overlay.textContent = "ЗАВЕРШЕНО!";
         card.appendChild(overlay);
         card.querySelector(".progress-controls")?.remove();
-
+      
         setTimeout(async () => {
-          await renderChallengesByStatus("completed");  // FIX: Переход в completed
+          // ✅ Обновляем счётчики
           await updateInitialStatusCounts();
+      
+          // ✅ Переключаем визуально на "Завершённые"
+          document.querySelectorAll(".status-btn").forEach(b => b.classList.remove("active"));
+          const completedBtn = document.querySelector('[data-status="completed"]');
+          if (completedBtn) completedBtn.classList.add("active");
+      
+          // ✅ Загружаем завершённые испытания
+          await renderChallengesByStatus("completed");
         }, 400);
+      }
+
       } else {
         await updateInitialStatusCounts();
       }
