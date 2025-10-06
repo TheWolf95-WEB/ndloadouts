@@ -214,9 +214,9 @@ document.getElementById("bf-add-category-btn")?.addEventListener("click", async 
   }
 
   
-    // 👇 вот это добавляем
-    toggleBfBackButton(screenId);
-  }
+  //   // 👇 вот это добавляем
+  //   toggleBfBackButton(screenId);
+  // }
 
   function showBfMain() {
     Object.values(bfScreens).forEach(el => (el.style.display = "none"));
