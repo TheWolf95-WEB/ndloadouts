@@ -56,6 +56,21 @@ def init_bf_db():
         """)
 
 
+        # === Прогресс пользователей ===
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS user_challenges (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                challenge_id INTEGER NOT NULL,
+                current INTEGER DEFAULT 0,
+                completed_at TEXT,
+                UNIQUE(user_id, challenge_id),
+                FOREIGN KEY (challenge_id) REFERENCES challenges(id) ON DELETE CASCADE
+            )
+        """)
+
+
+
 # ========================
 # CRUD категории (вкладки)
 # ========================
