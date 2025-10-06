@@ -882,12 +882,14 @@ def bf_delete_category(category_id: int, request: Request, data: dict | None = N
 
 
 # === Испытания ===
-@app.post("/api/bf/challenges")
-def get_bf_challenges(data: dict = Body(...)):
-    initData = data.get("initData", "")
+# === Испытания ===
+
+@app.post("/api/bf/challenges/list")
+def bf_get_challenges(data: dict = Body(...)):
     """
     Получает список испытаний с прогрессом для конкретного пользователя
     """
+    initData = data.get("initData", "")
     user_id, _, _ = extract_user_roles(initData or "")
     with get_bf_conn(row_mode=True) as conn:
         rows = conn.execute("""
@@ -906,11 +908,15 @@ def get_bf_challenges(data: dict = Body(...)):
 
 @app.post("/api/bf/challenges")
 def bf_add_challenge(data: dict, request: Request):
+    """
+    Добавление нового испытания (только для админов)
+    """
     ensure_bf_admin(request, data)
     if not all(k in data for k in ("title_en", "title_ru", "category_id")):
         raise HTTPException(status_code=400, detail="Missing required fields")
     add_challenge(data)
     return {"status": "added"}
+
 
 
 @app.put("/api/bf/challenges/{challenge_id}")
