@@ -1046,75 +1046,6 @@ select:disabled {
   border-radius: 4px;
 }
 
-/* версия приложение стили */
-
-.footer-note {
-  margin-top:50px;
-    display: flex;
-    flex-direction: column;
-  gap:10px;
-  background: var(--nd-card-2);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-  color: var(--nd-text-muted);
-  text-align: center;
-  font-size: 1rem;
-  padding-top:20px;
-  padding-bottom:30px;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  z-index: 999;
-  opacity: 1;
-}
-
-
-.version-clickable {
-  transition: color 0.2s ease, transform 0.1s ease;
-}
-
-.version-clickable:hover {
-  color: #22c55e; /* ярко-зелёный оттенок */
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.version-clickable:active {
-  transform: scale(0.95); /* эффект нажатия */
-}
-
-.version-hint {
-  position: fixed;
-  bottom: 90px; /* чуть выше футера */
-  left: 0;
-  width: 100%;
-  text-align: center;
-  font-size: 0.9rem;
-  color: #6ee7b7;
-  opacity: 0.8;
-  z-index: 998;
-  animation: fadeIn 0.6s ease, fadeOut 0.6s ease 6s forwards;
-}
-
-@keyframes fadeOut {
-  from { opacity: 0.8; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(5px); }
-}
-
-
-
-.version-entry {
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #2a2a2a;
-  font-size: 14px;
-  color: var(--nd-text-muted);
-  line-height: 1.5;
-}
-
-.version-entry br{
-  display:none;
-}
 
 /* BATTLEFIELD */
 
@@ -1140,8 +1071,6 @@ select:disabled {
   background: rgba(0,200,255,0.25);
   box-shadow: 0 0 12px rgba(0,200,255,0.25);
 }
-
-
 
 /* === Battlefield Tabs === */
 /* === Battlefield Tabs Scrollbar === */
