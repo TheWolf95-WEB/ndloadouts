@@ -377,18 +377,35 @@ async function renderChallengesByStatus(status) {
   const active = all.filter(ch => ch.goal > 0 && ch.current < ch.goal);
   const completed = all.filter(ch => ch.goal > 0 && ch.current >= ch.goal);
 
-  // ✅ обновляем счетчики во вкладках
+  // ✅ обновляем счетчики
   updateStatusCounters(active.length, completed.length);
 
   let filtered = [];
   if (status === "completed") filtered = completed;
   else if (status === "active") filtered = active;
 
-  if (!filtered.length) {
-    listEl.innerHTML = `<p style="text-align:center;color:#8ea2b6;">Нет испытаний</p>`;
+  // === если активных нет ===
+  if (status === "active" && active.length === 0) {
+    listEl.innerHTML = `
+      <div class="no-active-message">
+        💡 У вас нет активных заданий.<br>
+        Дважды щёлкните по карточке во вкладке <b>«Все»</b>, чтобы начать выполнение.
+      </div>
+    `;
     return;
   }
 
+  // === если завершённых нет ===
+  if (status === "completed" && completed.length === 0) {
+    listEl.innerHTML = `
+      <div class="no-active-message">
+        💤 У вас пока нет завершённых заданий.
+      </div>
+    `;
+    return;
+  }
+
+  // === стандартный рендер карточек ===
   listEl.innerHTML = filtered.map(ch => {
     const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
     const isDone = ch.current >= ch.goal;
@@ -418,6 +435,7 @@ async function renderChallengesByStatus(status) {
     `;
   }).join('');
 }
+
 
 // === обновляем счетчики ===
 function updateStatusCounters(activeCount, completedCount) {
