@@ -1,32 +1,16 @@
-// /static/js/bf-challenges.js — full rewritten version (user + admin)
-// Совместим с твоими main.py и database_bf.py. Сохраняет описанную механику:
-// - "Общее" -> двойной тап активирует (current = 1) и переносит в "Активные"
-// - "+" / "–" обновляют прогресс с подтверждением при завершении
-// - "Активные" и "Завершённые" фильтруют корректно, счётчики обновляются
-// - Сохраняются выбранные вкладка и статус (localStorage)
-// - Работает админ-часть: список, поиск/фильтр, добавление/редактирование/удаление испытаний и CRUD категорий
-// Важно: для персонального прогресса GET /api/bf/challenges принимает initData В ТЕЛЕ ТЕЛА (Body) — оставлено как в твоём backend.
-
 document.addEventListener("DOMContentLoaded", async () => {
   const BF_API_BASE = "/api/bf";
   const tg = window.Telegram?.WebApp;
   if (tg) tg.expand();
 
-  // --- STATE ---
+  // --- State ---
   let bfCategories = [];
   let bfChallenges = [];
   let editingChallengeId = null;
-
-  // debounce-защиты
   let isActivating = false;
-  let isUpdatingProgress = false;
-  let activeTapId = null;
+  let isUpdatingProgress = false;  // FIX: Добавил для debounce +/-
 
-  // Сохранённые фильтры
-  let currentTab = localStorage.getItem("bf_current_tab") || "all";        // "all" | category_id
-  let currentStatus = localStorage.getItem("bf_current_status") || "all";  // "all" | "active" | "completed"
-
-  // --- SCREENS ---
+  // --- Screens ---
   const bfScreens = {
     main: document.getElementById("screen-bf-challenges"),
     db: document.getElementById("screen-bf-challenges-db"),
@@ -36,7 +20,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const userBtns  = ["bf-show-builds-btn","bf-challenges-btn","bf-search-btn"];
   const adminBtns = ["bf-weapons-db-btn","bf-challenges-db-btn","bf-modules-dict-btn","bf-add-build-btn","bf-add-challenge-btn"];
 
-  // --- ROLES (не критично для UI) ---
+  // --- Role (not fatal for UI) ---
   try {
     const res = await fetch("/api/me", {
       method: "POST",
@@ -54,29 +38,21 @@ document.addEventListener("DOMContentLoaded", async () => {
       userBtns.forEach(id => document.getElementById(id)?.classList.add("is-visible"));
     }
 
-    // показать глобальную кнопку "домой"
     document.querySelector("#screen-battlefield-main .global-home-button")
       ?.style?.setProperty("display", "block");
   } catch (e) {
     console.warn("⚠️ /api/me недоступен (OK для локального теста)", e);
   }
 
-  // --- NAVIGATION ---
+  // --- Navigation ---
   document.getElementById("bf-challenges-btn")?.addEventListener("click", async () => {
     showBfScreen("main");
     await loadBfCategories();
-    // восстановим статусную вкладку
-    setActiveStatusButton(currentStatus);
-    if (currentStatus !== "all") {
-      await renderChallengesByStatus(currentStatus);
-    }
   });
-
   document.getElementById("bf-challenges-db-btn")?.addEventListener("click", async () => {
     showBfScreen("db");
     await loadBfChallengesTable();
   });
-
   document.getElementById("bf-add-challenge-btn")?.addEventListener("click", () => {
     editingChallengeId = null;
     showBfScreen("add");
@@ -90,13 +66,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     populateCategorySelect();
   });
 
-  // BACK
+  // Back buttons
   const hookBack = () => showBfMain();
   document.getElementById("bf-back-from-add")?.addEventListener("click", hookBack);
   document.getElementById("bf-back-to-bfmain")?.addEventListener("click", hookBack);
   document.getElementById("bf-back-from-challenges")?.addEventListener("click", hookBack);
 
-  // --- CATEGORY CRUD UI ---
+  // --- Category CRUD ---
   document.getElementById("bf-add-category-btn")?.addEventListener("click", async () => {
     const input = document.getElementById("bf-new-category");
     const name = input?.value?.trim();
@@ -112,10 +88,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       alert("✅ Категория добавлена!");
       input.value = "";
       await populateCategorySelect();
-      await loadBfCategories();
-      // Выберем новую категорию в селекте формы
       const select = document.getElementById("bf-category-select");
-      const newOption = [...(select?.options || [])].find(o => o.textContent === name);
+      const newOption = [...select.options].find(o => o.textContent === name);
       if (newOption) newOption.selected = true;
     } catch (e) {
       console.error("Ошибка при добавлении категории:", e);
@@ -141,7 +115,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!res.ok) throw new Error(await res.text());
       alert("✅ Категория обновлена!");
       await populateCategorySelect(id);
-      await loadBfCategories();
     } catch (e) {
       console.error("Ошибка при обновлении категории:", e);
       alert("❌ Не удалось обновить категорию");
@@ -166,18 +139,13 @@ document.addEventListener("DOMContentLoaded", async () => {
       alert("🗑 Категория удалена!");
       await populateCategorySelect();
       await loadBfCategories(); // обновим вкладки
-      // если удалили текущую вкладку — переключим на "Общее"
-      if (String(currentTab) === String(id)) {
-        currentTab = "all";
-        localStorage.setItem("bf_current_tab", "all");
-      }
     } catch (e) {
       console.error("Ошибка при удалении категории:", e);
       alert("❌ Не удалось удалить категорию");
     }
   });
 
-  // --- UI HELPERS ---
+  // --- Helper UI ---
   function showBfScreen(screenId) {
     document.querySelectorAll(".screen").forEach(el => {
       el.classList.remove("active");
@@ -262,7 +230,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!res.ok) throw new Error(await res.text());
       const created = await res.json();
       await populateCategorySelect();
-      await loadBfCategories();
       return created?.id ?? created?.category_id ?? null;
     } catch (e) {
       console.error("ensureCategory error:", e);
@@ -270,7 +237,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // --- LOAD TABS ---
+  // --- Tabs load ---
   async function loadBfCategories() {
     try {
       const res = await fetch(`${BF_API_BASE}/categories`);
@@ -280,75 +247,50 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!tabsEl) return;
       tabsEl.innerHTML = "";
 
-      // восстановим currentTab
-      currentTab = localStorage.getItem("bf_current_tab") || "all";
-
       const allBtn = document.createElement("div");
-      allBtn.className = "tab-btn" + (currentTab === "all" ? " active" : "");
+      allBtn.className = "tab-btn active";
       allBtn.textContent = "Общее";
       allBtn.onclick = async () => {
-        currentTab = "all";
-        localStorage.setItem("bf_current_tab", "all");
         document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
         allBtn.classList.add("active");
         await loadBfChallenges(null);
-        // восстановим статус
-        if (currentStatus !== "all") {
-          await renderChallengesByStatus(currentStatus);
-        }
       };
       tabsEl.appendChild(allBtn);
 
       bfCategories.forEach(cat => {
         const btn = document.createElement("div");
-        btn.className = "tab-btn" + (String(cat.id) === String(currentTab) ? " active" : "");
+        btn.className = "tab-btn";
         btn.textContent = cat.name;
         btn.dataset.id = cat.id;
         btn.onclick = async () => {
-          currentTab = String(cat.id);
-          localStorage.setItem("bf_current_tab", currentTab);
           document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
           btn.classList.add("active");
           await loadBfChallenges(cat.id);
-          // статус фильтра
-          if (currentStatus !== "all") {
-            await renderChallengesByStatus(currentStatus);
-          }
         };
         tabsEl.appendChild(btn);
       });
 
-      const activeCat = currentTab === "all" ? null : currentTab;
-      await loadBfChallenges(activeCat);
-      // статус фильтра
-      if (currentStatus !== "all") {
-        await renderChallengesByStatus(currentStatus);
-      }
+      await loadBfChallenges(null);
     } catch (e) {
       console.error("Ошибка при загрузке категорий:", e);
     }
   }
 
-  // --- LOAD CHALLENGES (by category) ---
+  // --- Challenges load (category) ---
   async function loadBfChallenges(categoryId = null) {
     try {
-      // ВНИМАНИЕ: твой бекенд ждёт initData в Body даже у GET. Оставляю как было.
-      const url = categoryId
-        ? `${BF_API_BASE}/challenges?category_id=${categoryId}`
-        : `${BF_API_BASE}/challenges`;
-      const res = await fetch(url, {
-        method: "GET",
+      const res = await fetch(`${BF_API_BASE}/challenges/list`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: tg?.initData || "" }) // <- как в твоём main.py
+        body: JSON.stringify({ initData: tg?.initData || "" })
       });
       bfChallenges = await res.json();
-
-      // подстрахуемся: если API не фильтрует по category_id
+      // 🔧 защита — фильтруем по категории, если API возвращает всё подряд
       if (categoryId) bfChallenges = bfChallenges.filter(ch => ch.category_id == categoryId);
+
 
       const listEl = document.getElementById("bf-challenges-list");
       if (!listEl) return;
-
       if (!bfChallenges.length) {
         listEl.innerHTML = `<p style="text-align:center;color:#8ea2b6;">Нет испытаний</p>`;
         await updateInitialStatusCounts();
@@ -365,9 +307,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   function createChallengeCard(ch) {
     const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
     const isDone = ch.current >= ch.goal;
-    const isActive = ch.current > 0 && ch.current < ch.goal;
     return `
-      <div class="challenge-card-user ${isDone ? "completed" : isActive ? "active" : ""}" data-id="${ch.id}">
+      <div class="challenge-card-user ${isDone ? "completed" : ""}" data-id="${ch.id}">
         ${ch.category_name ? `<div class="challenge-category">${ch.category_name}</div>` : ""}
         <div class="challenge-title-en">${ch.title_en}</div>
         <div class="challenge-title-ru">${ch.title_ru}</div>
@@ -388,86 +329,66 @@ document.addEventListener("DOMContentLoaded", async () => {
     `;
   }
 
-  // --- STATUS TABS ---
+  // --- Status tabs (Active/Completed) ---
   document.querySelectorAll(".status-btn").forEach(btn => {
     btn.addEventListener("click", async () => {
       const alreadyActive = btn.classList.contains("active");
       document.querySelectorAll(".status-btn").forEach(b => b.classList.remove("active"));
 
       if (alreadyActive) {
-        // поведение "сбросить фильтр" — вернуться к текущей категории
-        currentStatus = "all";
-        localStorage.setItem("bf_current_status", "all");
+        document.querySelectorAll(".status-btn").forEach(b => b.classList.remove("active"));
         const activeTab = document.querySelector("#bf-tabs .tab-btn.active");
         const categoryId = activeTab?.dataset?.id || null;
         await loadBfChallenges(categoryId);
         return;
       }
 
+
       btn.classList.add("active");
       const status = btn.dataset.status;
-      currentStatus = status;
-      localStorage.setItem("bf_current_status", status);
       await renderChallengesByStatus(status);
     });
   });
-
-  function setActiveStatusButton(status) {
-    document.querySelectorAll(".status-btn").forEach(b => b.classList.remove("active"));
-    if (status === "all") return;
-    const btn = document.querySelector(`.status-btn[data-status="${status}"]`);
-    btn?.classList.add("active");
-  }
 
   async function renderChallengesByStatus(status) {
     const listEl = document.getElementById("bf-challenges-list");
     if (!listEl) return;
 
-    try {
-      const res = await fetch(`${BF_API_BASE}/challenges`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ initData: tg?.initData || "" })
-      });
-      const all = await res.json();
+    const res = await fetch(`${BF_API_BASE}/challenges/list`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ initData: tg?.initData || "" })
+    });
+    const all = await res.json();
+    const active = all.filter(ch => ch.goal > 0 && ch.current > 0 && ch.current < ch.goal);
+    const completed = all.filter(ch => ch.goal > 0 && ch.current >= ch.goal);
 
-      // если выбран таб категории — ограничим массив
-      const activeTab = document.querySelector("#bf-tabs .tab-btn.active");
-      const catId = activeTab?.dataset?.id || null;
-      const base = catId ? all.filter(ch => ch.category_id == catId) : all;
+    // counters
+    updateStatusCounters(active.length, completed.length);
 
-      const active = base.filter(ch => ch.goal > 0 && ch.current > 0 && ch.current < ch.goal);
-      const completed = base.filter(ch => ch.goal > 0 && ch.current >= ch.goal);
-      updateStatusCounters(active.length, completed.length);
+    let filtered = [];
+    if (status === "completed") filtered = completed;
+    else if (status === "active") filtered = active;
 
-      let filtered = [];
-      if (status === "completed") filtered = completed;
-      else if (status === "active") filtered = active;
-      else filtered = base;
-
-      if (status === "active" && active.length === 0) {
-        listEl.innerHTML = `
-          <div class="no-active-message">
-            💡 У вас нет активных заданий.<br>
-            Дважды нажмите на карточку во вкладке <b>«Общее»</b>, чтобы начать выполнение.
-          </div>
-        `;
-        return;
-      }
-      if (status === "completed" && completed.length === 0) {
-        listEl.innerHTML = `
-          <div class="no-active-message">
-            💤 У вас пока нет завершённых заданий.
-          </div>
-        `;
-        return;
-      }
-
-      listEl.innerHTML = filtered.map(createChallengeCard).join("");
-    } catch (e) {
-      console.error("Ошибка при фильтрации по статусу:", e);
-      listEl.innerHTML = `<p style="text-align:center;color:#8ea2b6;">Ошибка загрузки</p>`;
+    if (status === "active" && active.length === 0) {
+      listEl.innerHTML = `
+        <div class="no-active-message">
+          💡 У вас нет активных заданий.<br>
+          Дважды щёлкните по карточке во вкладке <b>«Все»</b>, чтобы начать выполнение.
+        </div>
+      `;
+      return;
     }
+    if (status === "completed" && completed.length === 0) {
+      listEl.innerHTML = `
+        <div class="no-active-message">
+          💤 У вас пока нет завершённых заданий.
+        </div>
+      `;
+      return;
+    }
+
+    listEl.innerHTML = filtered.map(createChallengeCard).join("");
   }
 
   function updateStatusCounters(activeCount, completedCount) {
@@ -481,26 +402,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function updateInitialStatusCounts() {
     try {
-      const res = await fetch(`${BF_API_BASE}/challenges`, {
-        method: "GET",
+      const res = await fetch(`${BF_API_BASE}/challenges/list`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ initData: tg?.initData || "" })
       });
       const all = await res.json();
-
-      const activeTab = document.querySelector("#bf-tabs .tab-btn.active");
-      const catId = activeTab?.dataset?.id || null;
-      const base = catId ? all.filter(ch => ch.category_id == catId) : all;
-
-      const active = base.filter(ch => ch.goal > 0 && ch.current > 0 && ch.current < ch.goal);
-      const completed = base.filter(ch => ch.goal > 0 && ch.current >= ch.goal);
+      const active = all.filter(ch => ch.goal > 0 && ch.current > 0 && ch.current < ch.goal);
+      const completed = all.filter(ch => ch.goal > 0 && ch.current >= ch.goal);
       updateStatusCounters(active.length, completed.length);
     } catch (e) {
-      console.error("Ошибка при подсчёте статусов:", e);
+      console.error("Ошибка при подсчёте статуса:", e);
     }
   }
 
-  // --- SEARCH (user) ---
+  // --- Search (user) ---
   function setupUserChallengeSearch() {
     const searchInput = document.getElementById("bf-search-user");
     if (!searchInput) return;
@@ -516,24 +432,17 @@ document.addEventListener("DOMContentLoaded", async () => {
           const activeTab = document.querySelector("#bf-tabs .tab-btn.active");
           const categoryId = activeTab?.dataset?.id || null;
           await loadBfChallenges(categoryId);
-          if (currentStatus !== "all") await renderChallengesByStatus(currentStatus);
           return;
         }
 
         try {
-          const res = await fetch(`${BF_API_BASE}/challenges`, {
-            method: "GET",
+          const res = await fetch(`${BF_API_BASE}/challenges/list`, {
+            method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ initData: tg?.initData || "" })
           });
           const all = await res.json();
-
-          // Учитываем выбранную категорию
-          const activeTab = document.querySelector("#bf-tabs .tab-btn.active");
-          const catId = activeTab?.dataset?.id || null;
-          const base = catId ? all.filter(ch => ch.category_id == catId) : all;
-
-          const filtered = base.filter(ch => {
+          const filtered = all.filter(ch => {
             const en = (ch.title_en || "").toLowerCase();
             const ru = (ch.title_ru || "").toLowerCase();
             const cat = (ch.category_name || "").toLowerCase();
@@ -551,31 +460,32 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   setupUserChallengeSearch();
 
-  // --- TIP (1 раз после открытия) ---
+  // --- Tip popup (once after open) ---
   setTimeout(() => {
     const tip = document.createElement("div");
     tip.className = "bf-tip-popup";
-    tip.textContent = "💡 Дважды нажмите на карточку, чтобы начать выполнение испытания";
+    tip.textContent = "💡 Нажмите дважды на карточку, чтобы начать выполнение испытания";
     document.body.appendChild(tip);
+
     tip.style.opacity = "0";
     setTimeout(() => (tip.style.opacity = "1"), 100);
+
     setTimeout(() => {
       tip.style.opacity = "0";
       setTimeout(() => tip.remove(), 500);
     }, 7000);
   }, 5000);
 
-  // --- ADMIN GRID ---
+  // --- Admin grid ---
   async function loadBfChallengesTable() {
     try {
-      const res = await fetch(`${BF_API_BASE}/challenges`, {
-        method: "GET",
+      const res = await fetch(`${BF_API_BASE}/challenges/list`, {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ initData: tg?.initData || "" })
       });
       bfChallenges = await res.json();
 
-      // counters
       document.getElementById("bf-total-challenges").textContent = bfChallenges.length;
 
       const categories = [...new Set(bfChallenges.map(ch => ch.category_name).filter(Boolean))];
@@ -658,7 +568,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     filterSelect?.addEventListener('change', filterChallenges);
   }
 
-  // --- CRUD Challenges (Admin) ---
+  // --- CRUD Challenges ---
   async function addBfChallenge() {
     const categorySelect = document.getElementById("bf-category-select");
     const categoryId = categorySelect?.value || null;
@@ -669,7 +579,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const title_en = document.getElementById("bf-title-en")?.value?.trim() || "";
     const title_ru = document.getElementById("bf-title-ru")?.value?.trim() || "";
-    const current  = 0; // при создании всегда 0
+    const current  = 0;
     const goal     = Number(document.getElementById("bf-goal")?.value) || 0;
 
     if (!categoryName) return alert("Введите категорию");
@@ -707,17 +617,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       prepAddForm();
       await populateCategorySelect();
-      // если мы на админ-экране — обновим таблицу
+      // обновим админ-таблицу если мы в ней
       if (bfScreens.db?.classList.contains("active")) await loadBfChallengesTable();
-      // если мы на пользовательском — обновим список/счётчики
-      if (bfScreens.main?.classList.contains("active")) {
-        const catId = (currentTab === "all") ? null : currentTab;
-        await loadBfChallenges(catId);
-        if (currentStatus !== "all") await renderChallengesByStatus(currentStatus);
-        await updateInitialStatusCounts();
-      }
-      // вернёмся из формы в админ-таблицу, если пришли оттуда
-      showBfScreen("db");
+      await updateInitialStatusCounts();
     } catch (err) {
       console.error("Ошибка при сохранении испытания:", err);
       alert("❌ Не удалось сохранить испытание");
@@ -740,13 +642,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
       alert("✅ Испытание удалено");
       await loadBfChallengesTable();
-      // также обновим пользователю
-      const catId = (currentTab === "all") ? null : currentTab;
-      if (bfScreens.main?.classList.contains("active")) {
-        await loadBfChallenges(catId);
-        if (currentStatus !== "all") await renderChallengesByStatus(currentStatus);
-        await updateInitialStatusCounts();
-      }
+      await updateInitialStatusCounts();
     } catch (e) {
       console.error("Ошибка при удалении испытания:", e);
       alert("❌ Не удалось удалить испытание");
@@ -755,90 +651,68 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   window.editBfChallenge = async function(id) {
     const ch = bfChallenges.find(c => c.id === id);
-    // Если не нашли в кэше — попробуем подгрузить
-    if (!ch) {
-      try {
-        const res = await fetch(`${BF_API_BASE}/challenges`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ initData: tg?.initData || "" })
-        });
-        const all = await res.json();
-        const found = all.find(c => c.id === id);
-        if (!found) return;
-        bfChallenges = all;
-        return window.editBfChallenge(id);
-      } catch {
-        return;
-      }
-    }
+    if (!ch) return;
     editingChallengeId = id;
     showBfScreen("add");
     prepAddForm(ch);
     await populateCategorySelect(ch.category_id);
     document.getElementById("bf-title-en").value = ch.title_en || "";
     document.getElementById("bf-title-ru").value = ch.title_ru || "";
-    document.getElementById("bf-current").value  = ch.current ?? 0; // только отображение для админа
+    document.getElementById("bf-current").value  = ch.current ?? 0;
     document.getElementById("bf-goal").value     = ch.goal ?? 0;
   };
 
-  // --- Double tap (активация) ---
+  // --- Double tap activate (fixed) ---
   document.getElementById("bf-challenges-list")?.addEventListener("dblclick", async (e) => {
+    if (isActivating) return;
     const card = e.target.closest(".challenge-card-user");
-    if (!card || isActivating) return;
+    if (!card) return;
     const id = Number(card.dataset.id);
     if (!id || card.classList.contains("completed") || card.classList.contains("active")) return;
-    if (activeTapId && activeTapId === id) return; // защита от мультиклика
-    activeTapId = id;
 
-    // Если цель = 1 — предупредим, что активируя — сразу завершишь
-    const text = card.querySelector(".progress-text span:last-child").textContent;
-    const goal = parseInt(text.split("/")[1].trim()) || 0;
-    if (goal === 1 && !confirm("Это сразу завершит испытание. Начать?")) {
-      activeTapId = null; 
-      return;
-    }
+    // FIX: Если goal=1, confirm чтобы не завершить сразу
+    const goal = parseInt(card.querySelector(".progress-text span:last-child").textContent.split("/")[1].trim()) || 0;
+    if (goal === 1 && !confirm("Это сразу завершит испытание (цель=1). Начать?")) return;
 
     isActivating = true;
     try {
-      // Активируем с +1 (current: 0 -> 1)
+      // FIX: Активируем с +1 (current>0 -> active)
       const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ delta: 1, initData: tg?.initData || "" })
       });
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) throw new Error("Ошибка активации испытания");
       const updated = await res.json();
 
-      // Обновим UI текущей карточки
+      // FIX: Синхронизируем UI
       const percent = updated.goal ? Math.min(updated.current / updated.goal * 100, 100) : 0;
       card.querySelector(".progress-fill").style.width = `${percent}%`;
       card.querySelector(".progress-text span:last-child").textContent = `${updated.current} / ${updated.goal}`;
 
-      // Визуально подчеркнём активацию и перенесём в "Активные"
       card.classList.add("active");
-      card.style.transition = "all 0.3s ease";
-      card.style.boxShadow = "0 0 12px rgba(0,255,120,0.5)";
+      card.style.transition = "all 0.4s ease";
+      card.style.boxShadow = "0 0 12px rgba(0,255,120,0.6)";
 
       setTimeout(async () => {
-        // Переключим статус-фильтр на "Активные" и перерендерим список
-        setActiveStatusButton("active");
-        currentStatus = "active";
-        localStorage.setItem("bf_current_status", "active");
-        await renderChallengesByStatus("active");
+        card.remove();
         await updateInitialStatusCounts();
-      }, 250);
+
+        // FIX: Автоматически рендерим "активные" (карточка переходит туда)
+        document.querySelectorAll(".status-btn").forEach(b => b.classList.remove("active"));
+        document.querySelector('[data-status="active"]').classList.add("active");
+        await renderChallengesByStatus("active");
+      }, 300);
 
     } catch (err) {
       console.error("Ошибка при запуске испытания:", err);
       alert("❌ Ошибка активации");
     } finally {
       isActivating = false;
-      activeTapId = null;
     }
   });
 
-  // --- Progress +/- ---
+  // --- Progress +/- (fixed, with debounce) ---
   document.addEventListener("click", async (e) => {
     const btn = e.target.closest(".btn-mini");
     if (!btn || isUpdatingProgress) return;
@@ -849,7 +723,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const delta = btn.dataset.action === "plus" ? 1 : -1;
     const card = document.querySelector(`.challenge-card-user[data-id="${id}"]`);
     if (!card) {
-      btn.disabled = false;
       isUpdatingProgress = false;
       return;
     }
@@ -858,7 +731,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const [currRaw, goalRaw] = text.split("/").map(t => parseInt(t.trim()) || 0);
     let curr = currRaw, goal = goalRaw;
 
-    // Предупреждение при завершении
+    // FIX: Confirm если + завершит
     if (curr + delta >= goal && delta > 0) {
       if (!confirm("Это завершит испытание. Продолжить?")) {
         btn.disabled = false;
@@ -866,7 +739,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
     }
-    // Не уходим ниже 0
+
+    // Не ниже 0
     if (curr + delta < 0 && delta < 0) {
       btn.disabled = false;
       isUpdatingProgress = false;
@@ -884,36 +758,22 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const percent = updated.goal ? Math.min(updated.current / updated.goal * 100, 100) : 0;
       card.querySelector(".progress-fill").style.width = `${percent}%`;
-      card.querySelector(".progress-text span:last-child").textContent = `${updated.current} / ${updated.goal}`;
+      card.querySelector(".progress-text span:last-child").textContent =
+        `${updated.current} / ${updated.goal}`;
 
       if (updated.current >= updated.goal) {
-        // Завершили — пометим и перенесём во вкладку "Завершённые"
         card.classList.add("completed");
+        const overlay = document.createElement("div");
+        overlay.className = "completed-overlay";
+        overlay.textContent = "ЗАВЕРШЕНО!";
+        card.appendChild(overlay);
         card.querySelector(".progress-controls")?.remove();
-        if (!card.querySelector(".completed-overlay")) {
-          const overlay = document.createElement("div");
-          overlay.className = "completed-overlay";
-          overlay.textContent = "ЗАВЕРШЕНО!";
-          card.appendChild(overlay);
-        }
+
         setTimeout(async () => {
-          setActiveStatusButton("completed");
-          currentStatus = "completed";
-          localStorage.setItem("bf_current_status", "completed");
-          await renderChallengesByStatus("completed");
+          await renderChallengesByStatus("completed");  // FIX: Переход в completed
           await updateInitialStatusCounts();
-        }, 250);
+        }, 400);
       } else {
-        // Если были в "Общее" — оставим; если в "Активных" — просто обновим список
-        if (currentStatus === "active") {
-          await renderChallengesByStatus("active");
-        } else if (currentStatus === "completed") {
-          // если откатили из completed (теоретически) — вернём в active/all
-          await renderChallengesByStatus("active");
-          setActiveStatusButton("active");
-          currentStatus = "active";
-          localStorage.setItem("bf_current_status", "active");
-        }
         await updateInitialStatusCounts();
       }
     } catch (err) {
@@ -925,12 +785,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // --- START ---
-  await loadBfCategories();
 
-  // восстановим статус после загрузки
-  setActiveStatusButton(currentStatus);
-  if (currentStatus !== "all") {
-    await renderChallengesByStatus(currentStatus);
-  }
+  // --- Start ---
+  await loadBfCategories();
 });
