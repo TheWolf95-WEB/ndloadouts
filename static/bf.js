@@ -688,6 +688,7 @@ document.getElementById("bf-challenges-list")?.addEventListener("dblclick", asyn
 
 
 // --- Progress +/- (single handler, no duplication) ---
+// --- Progress +/- (fixed) ---
 document.addEventListener("click", async (e) => {
   const btn = e.target.closest(".btn-mini");
   if (!btn) return;
@@ -702,17 +703,6 @@ document.addEventListener("click", async (e) => {
   if (!id || !card) return;
 
   try {
-    // получаем текущие значения до обновления
-    const progressText = card.querySelector(".progress-text span:last-child").textContent;
-    const [currentRaw, goalRaw] = progressText.split("/").map(s => parseInt(s.trim(), 10) || 0);
-    let current = currentRaw, goal = goalRaw;
-
-    // если уже достигнут максимум, не продолжаем
-    if (current >= goal && delta > 0) {
-      btn.disabled = false;
-      return;
-    }
-
     // PATCH-запрос
     const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
       method: "PATCH",
@@ -728,7 +718,7 @@ document.addEventListener("click", async (e) => {
     card.querySelector(".progress-fill").style.width = `${percent}%`;
     card.querySelector(".progress-text span:last-child").textContent = `${updated.current} / ${updated.goal}`;
 
-    // если достигнута цель
+    // ТОЛЬКО если достигнута цель - помечаем как завершенное
     if (updated.current >= updated.goal) {
       card.classList.add("completed");
       const overlay = document.createElement("div");
@@ -736,17 +726,20 @@ document.addEventListener("click", async (e) => {
       overlay.textContent = "ЗАВЕРШЕНО!";
       card.appendChild(overlay);
       card.querySelector(".progress-controls")?.remove();
-      card.style.filter = "blur(2px)";
-      card.style.transition = "filter 0.5s ease";
-
+      
+      // Убираем анимацию blur, которая мешает
+      card.style.filter = "none";
+      
       setTimeout(async () => {
-        await renderChallengesByStatus("completed");
         await updateInitialStatusCounts();
-      }, 600);
+        // Обновляем активные задания, если мы на этой вкладке
+        const activeStatusBtn = document.querySelector('.status-btn.active[data-status="active"]');
+        if (activeStatusBtn) {
+          await renderChallengesByStatus("active");
+        }
+      }, 300);
     } else {
-      // просто обновляем статус, если активен
-      const activeStatus = document.querySelector(".status-btn.active")?.dataset?.status;
-      if (activeStatus === "active") await renderChallengesByStatus("active");
+      // Просто обновляем счетчики для активных заданий
       await updateInitialStatusCounts();
     }
 
@@ -755,6 +748,47 @@ document.addEventListener("click", async (e) => {
   } finally {
     btn.disabled = false;
   }
+});
+
+// --- Double tap activate (fixed) ---
+document.getElementById("bf-challenges-list")?.addEventListener("dblclick", async (e) => {
+  if (isActivating) return;
+  const card = e.target.closest(".challenge-card-user");
+  if (!card) return;
+  const id = Number(card.dataset.id);
+  if (!id || card.classList.contains("completed") || card.classList.contains("active")) return;
+
+  isActivating = true;
+  try {
+    // Активируем без прибавки прогресса
+    const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ delta: 0, initData: tg?.initData || "" })
+    });
+    if (!res.ok) throw new Error("Ошибка активации испытания");
+
+    card.classList.add("active");
+    card.style.transition = "all 0.4s ease";
+    card.style.boxShadow = "0 0 12px rgba(0,255,120,0.6)";
+
+    setTimeout(async () => {
+      // Переключаемся на вкладку активных
+      document.querySelectorAll(".status-btn").forEach(b => b.classList.remove("active"));
+      const activeBtn = document.querySelector('[data-status="active"]');
+      if (activeBtn) {
+        activeBtn.classList.add("active");
+        await renderChallengesByStatus("active");
+      }
+      await updateInitialStatusCounts();
+    }, 400);
+
+  } catch (err) {
+    console.error("Ошибка при запуске испытания:", err);
+  } finally {
+    isActivating = false;
+  }
+});
 });
 
 
