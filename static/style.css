@@ -947,10 +947,14 @@ select:disabled {
 }
 
 .status-btn.active {
-  background: #009dff;
+  background: #0099ff;
   color: #fff;
-  box-shadow: 0 0 10px rgba(0,157,255,0.4);
 }
+.status-btn:not(.active) {
+  background: #1a1f25;
+  color: #8ea2b6;
+}
+
 
 /* === Карточка испытания === */
 .challenge-card-user {
