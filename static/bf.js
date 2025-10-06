@@ -44,7 +44,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("bf-challenges-btn")?.addEventListener("click", async () => {
     showBfScreen("main");
     await loadBfCategories();
+    await updateStatusCountersAuto(); // ✅ добавили сюда
   });
+
+  // 🔁 при первой загрузке страницы (если пользователь уже на испытаниях)
+  if (document.getElementById("screen-bf-challenges").classList.contains("active")) {
+    await updateStatusCountersAuto();
+  }
+
+
   document.getElementById("bf-challenges-db-btn")?.addEventListener("click", async () => {
     showBfScreen("db");
     await loadBfChallengesTable();
@@ -323,13 +331,11 @@ async function loadBfCategories() {
 
     const tabsEl = document.getElementById("bf-tabs");
     if (!tabsEl) return;
-
     tabsEl.innerHTML = "";
 
-    // Добавляем вкладку "Все"
     const allBtn = document.createElement("div");
     allBtn.className = "tab-btn active";
-    allBtn.textContent = "Общее ";
+    allBtn.textContent = "Общее";
     allBtn.onclick = async () => {
       document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
       allBtn.classList.add("active");
@@ -338,7 +344,6 @@ async function loadBfCategories() {
     };
     tabsEl.appendChild(allBtn);
 
-    // Добавляем остальные категории
     bfCategories.forEach(cat => {
       const btn = document.createElement("div");
       btn.className = "tab-btn";
@@ -348,25 +353,18 @@ async function loadBfCategories() {
         document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
         btn.classList.add("active");
         await loadBfChallenges(cat.id);
+        await updateStatusCountersAuto();
       };
       tabsEl.appendChild(btn);
     });
 
-    async function updateStatusCountersAuto() {
-      const res = await fetch(`${BF_API_BASE}/challenges`);
-      const all = await res.json();
-    
-      const active = all.filter(ch => ch.goal > 0 && ch.current < ch.goal);
-      const completed = all.filter(ch => ch.goal > 0 && ch.current >= ch.goal);
-      updateStatusCounters(active.length, completed.length);
-}
-
-
     await loadBfChallenges(null);
+    await updateStatusCountersAuto(); // ✅ пересчёт после первой загрузки
   } catch (e) {
     console.error("Ошибка при загрузке категорий:", e);
   }
 }
+
 
 
 // === Фильтрация по статусу (Активные / Завершённые) ===
@@ -936,7 +934,7 @@ document.addEventListener("dblclick", async (e) => {
     card.style.transform = "scale(1.03)";
     setTimeout(() => {
       card.style.transition = "all 0.5s ease";
-      card.style.boxShadow = "";
+      card.style.boxShadow = "";document.getElementById("bf-challenges-btn")
       card.style.transform = "";
     }, 700);
 
@@ -951,7 +949,7 @@ document.addEventListener("dblclick", async (e) => {
   }
 });
 
-
+await updateStatusCountersAuto();
 
   
 }); 
