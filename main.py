@@ -375,38 +375,6 @@ async def remove_admin(data: dict = Body(...)):
 
     return JSONResponse({"status": "ok", "message": f"Пользователь {target_id} удалён из админов."})
 
-@app.get("/api/version-history")
-async def get_version_history():
-    try:
-        return {"content": get_latest_version()}
-    except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=500)
-
-@app.post("/api/version-history")
-async def update_version_history(request: Request):
-    data = await request.json()
-    user_id, is_admin, _ = extract_user_roles(data.get("initData", ""))
-    if not is_admin:
-        return JSONResponse({"error": "Недостаточно прав"}, status_code=403)
-
-    content = data.get("content", "").strip()
-    if not content:
-        return JSONResponse({"error": "Контент пуст"}, status_code=400)
-
-    try:
-        add_version_entry(content)
-        return {"message": "Сохранено!"}
-    except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=500)
-
-@app.get("/api/version-history/all")
-async def all_versions():
-    try:
-        versions = get_all_versions()
-        return {"versions": versions}
-    except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=500)
-
 
 ### РАССЫЛКА
 
