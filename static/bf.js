@@ -356,13 +356,6 @@ document.querySelectorAll(".status-btn").forEach(btn => {
   });
 });
 
-
-      btn.classList.add("active");
-      const status = btn.dataset.status;
-      await renderChallengesByStatus(status);
-    });
-  });
-
   async function renderChallengesByStatus(status) {
     const listEl = document.getElementById("bf-challenges-list");
     if (!listEl) return;
