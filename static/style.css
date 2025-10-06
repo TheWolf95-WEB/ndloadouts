@@ -866,14 +866,16 @@ select:disabled {
 }
 
 
+/* === Battlefield Tabs — чуть крупнее и с мягкими краями === */
 #bf-tabs .tab-btn {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.06);
   color: var(--bf-text);
   border: 1px solid var(--bf-border);
-  border-radius: 8px;
-  padding: 10px 16px;
-  font-size: 13px;
-  letter-spacing: 0.3px;
+  border-radius: 10px;
+  padding: 12px 20px; /* было 10px 16px — увеличено */
+  font-size: 14px;
+  letter-spacing: 0.4px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -887,33 +889,57 @@ select:disabled {
   background: linear-gradient(90deg, var(--bf-accent), var(--bf-accent-dim));
   color: #fff;
   border: none;
-  box-shadow: 0 0 8px rgba(0,200,255,0.25);
+  box-shadow: 0 0 12px rgba(0,200,255,0.3);
 }
 
+/* === Исправление черных углов и размытия завершенных карточек === */
 .challenge-card-user.completed {
   position: relative;
-  filter: blur(2px);
+  border-radius: 14px;
+  overflow: hidden; /* ✅ убирает черные углы */
+  filter: none; /* ✅ убираем глобальное размытие */
 }
 
+/* Надпись "ЗАВЕРШЕНО!" */
 .challenge-card-user.completed .completed-overlay {
   position: absolute;
   inset: 0;
   display: flex;
   justify-content: center;
   align-items: center;
+  border-radius: 14px; /* ✅ совпадает с карточкой */
   font-size: 22px;
-  font-weight: 700;
-  color: #00ff90;
-  text-shadow: 0 0 8px #00ff90;
-  background: rgba(0, 0, 0, 0.4);
-  filter: none; /* текст не мылится */
+  font-weight: 800;
+  color: #00ffc3;
+  text-shadow: 0 0 10px #00ffe1, 0 0 20px rgba(0, 255, 255, 0.5);
+  background: rgba(0, 0, 0, 0.45); /* ✅ затемнение только фона */
+  backdrop-filter: blur(4px); /* ✅ мягкий фон */
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.9);
+  animation: fadeInCompleted 0.35s ease forwards;
+  z-index: 3;
 }
 
-
-@keyframes overlayShow {
-  from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+@keyframes fadeInCompleted {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
+
+/* === Мобильная адаптация === */
+@media (max-width: 600px) {
+  #bf-tabs .tab-btn {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+  .completed-overlay {
+    font-size: 18px;
+    backdrop-filter: blur(6px);
+  }
+}
+
 
 /* Кол-во испытаний в кнопках */
 .status-btn .count {
