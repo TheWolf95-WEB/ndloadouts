@@ -842,28 +842,50 @@ select:disabled {
 
 
 /* === Battlefield Tabs === */
-/* === Горизонтальный скролл вкладок === */
+/* === Battlefield Tabs Scrollbar === */
 #bf-tabs {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding-bottom: 6px;
+  padding: 10px 0 10px 0; /* ✅ добавил отступы сверху/снизу */
   scrollbar-width: thin;
   scroll-behavior: smooth;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
+/* Firefox scrollbar */
+#bf-tabs {
+  scrollbar-color: rgba(0, 180, 255, 0.5) transparent;
+}
+
+/* Chrome / Edge / Safari */
 #bf-tabs::-webkit-scrollbar {
   height: 6px;
+  margin-top: 4px;
 }
+
+#bf-tabs::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
+}
+
 #bf-tabs::-webkit-scrollbar-thumb {
-  background: var(--bf-border);
-  border-radius: 4px;
+  background: linear-gradient(90deg, rgba(0,180,255,0.5), rgba(0,220,255,0.7));
+  border-radius: 6px;
+  box-shadow: 0 0 6px rgba(0,180,255,0.4);
+  transition: background 0.3s ease;
 }
+
+#bf-tabs::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, rgba(0,220,255,0.8), rgba(0,255,255,0.9));
+}
+
+/* Элементы вкладок */
 .tab-btn {
   flex: 0 0 auto;
   white-space: nowrap;
 }
+
 
 
 /* === Battlefield Tabs — чуть крупнее и с мягкими краями === */
