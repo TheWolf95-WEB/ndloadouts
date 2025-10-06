@@ -259,7 +259,7 @@ body {
 #screen-home .button-grid:last-child,
 #screen-warzone-main .button-grid:last-child,
 #screen-battlefield-main .button-grid:last-child {
-  margin-bottom: 0;
+  margin-top: 12px;
 }
 
 
