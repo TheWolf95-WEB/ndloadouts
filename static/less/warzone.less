@@ -373,23 +373,27 @@
     transform: translateY(1px);
   }
 
-  /* === СБОРКИ === */
- /* === СБОРКИ (адаптированные под мобильные) === */
+/* === СБОРКИ === */
 .loadout {
   transition: all 0.3s ease;
   background: linear-gradient(145deg, #1b2324, #101617);
   border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3),
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 
               inset 0 -1px 4px rgba(255, 255, 255, 0.05);
   margin-bottom: 16px;
   overflow: hidden;
 }
 
+.loadout:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4),
+              inset 0 -1px 4px rgba(255, 255, 255, 0.1);
+}
+
 .loadout__header {
   display: flex;
-  flex-direction: column;
   padding: 16px;
-  gap: 8px;
+  border-radius: 8px;
+  flex-direction: column;
   background: transparent;
   color: var(--wz-text-muted);
 }
@@ -397,25 +401,54 @@
 .loadout__header--top {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 10px;
+  gap: 12px;
+  align-items: flex-start;
+  width: 100%;
   flex-wrap: wrap;
 }
 
-.loadout__title {
-  font-size: 1.2rem;
-  flex: 1;
+.loadout__toggle-icon {
+  background: transparent;
+  border: none;
   color: var(--wz-text);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  flex-shrink: 0;
+  padding: 4px;
+}
+
+.loadout__toggle-icon:hover {
+  color: var(--wz-accent);
+}
+
+.loadout__toggle-icon i {
+  transition: transform 0.3s ease;
+}
+
+.loadout.is-open .loadout__toggle-icon i {
+  transform: rotate(180deg);
+}
+
+.loadout__title {
+  flex: 1;
+  font-size: 1.3rem;
+  color: var(--wz-text);
+  margin: 0;
   text-transform: capitalize;
-  word-break: break-word;
+  line-height: 1.3;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .loadout__meta {
   display: flex;
   align-items: center;
+  margin-top: 12px;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 4px;
+  width: 100%;
 }
 
 .loadout__content {
@@ -425,7 +458,7 @@
 }
 
 .loadout.is-open .loadout__content {
-  max-height: 1200px;
+  max-height: 5000px;
 }
 
 .loadout__inner {
@@ -433,27 +466,48 @@
   background: linear-gradient(145deg, #1e2728, #131b1c);
 }
 
-/* вкладки */
+.loadout__thumb {
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  margin: 0 auto 16px;
+  display: block;
+}
+
 .loadout__tab-buttons {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
   gap: 8px;
-  margin-bottom: 10px;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.loadout__tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .loadout__tab {
-  flex: 1 1 calc(50% - 8px);
+  flex: 1 1 calc(50% - 4px);
+  min-width: 140px;
   color: var(--wz-text);
-  padding: 10px;
-  border-radius: 8px;
+  padding: 10px 12px;
+  border-radius: 6px;
   font-size: 13px;
+  display: inline-block;
   background: linear-gradient(145deg, #1b2324, #101617);
   border: none;
   transition: all 0.3s ease;
   cursor: pointer;
   text-align: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .loadout__tab:hover {
@@ -461,100 +515,253 @@
   color: #fff;
 }
 
-/* модули */
+.loadout__tab:active {
+  transform: scale(0.95);
+}
+
+.loadout__tab-content {
+  display: none;
+}
+
+.loadout__tab-content.is-active {
+  display: block;
+}
+
 .loadout__modules {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
 }
 
 .loadout__module {
+  width: 100%;
+  background: linear-gradient(145deg, #1b2324, #101617);
+  padding: 12px;
+  border-radius: 6px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(145deg, #1b2324, #101617);
+  color: var(--wz-text);
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3), 
+              inset 0 -1px 4px rgba(255, 255, 255, 0.05);
   border-left: 4px solid var(--wz-accent);
-  padding: 10px 12px;
-  border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  gap: 8px;
+}
+
+.loadout__module:hover {
+  background: linear-gradient(145deg, #223234, #141c1d);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
 
 .loadout__module-slot {
   font-size: 0.85rem;
   color: var(--wz-text-muted);
-  margin-right: 6px;
+  white-space: nowrap;
+  font-weight: 500;
   flex-shrink: 0;
+  min-width: 80px;
 }
 
 .loadout__module-name {
   font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: var(--wz-text);
+  font-weight: 500;
   text-align: right;
   flex: 1;
-  word-break: break-word;
+  min-width: 0;
 }
 
-/* тип оружия и топы */
+/* === ТОПЫ === */
 .loadout__tops {
   display: flex;
-  flex-wrap: wrap;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
 .loadout__top {
   padding: 5px 10px;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  color: #fff;
+  border-radius: 4px;
+  font-size: 0.75rem;
   font-weight: 600;
+  color: #fff;
   text-transform: uppercase;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+}
+
+.loadout__top--gold {
+  background: linear-gradient(135deg, #ffd700, #ffa500);
+}
+
+.loadout__top--orange {
+  background: linear-gradient(135deg, #ff8c00, #ff4500);
+}
+
+.loadout__top--silver {
+  background: linear-gradient(135deg, #c0c0c0, #808080);
 }
 
 .loadout__type {
-  padding: 6px 12px;
+  padding: 5px 10px;
   background: linear-gradient(145deg, #2d9c44, #1e6b32);
-  border-radius: 6px;
+  border-radius: 4px;
   color: #fff;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 500;
-  align-self: flex-start;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
 }
 
-/* адаптив */
-@media (max-width: 480px) {
+.loadout__date {
+  font-size: 0.8rem;
+  color: var(--wz-text-muted);
+  white-space: nowrap;
+}
+
+.loadout__module-count {
+  font-size: 0.8rem;
+  color: var(--wz-text-muted);
+  white-space: nowrap;
+}
+
+/* === АДАПТИВ ДЛЯ МОБИЛЬНЫХ === */
+@media (max-width: 768px) {
+  .loadout__header {
+    padding: 12px;
+  }
+  
+  .loadout__header--top {
+    gap: 8px;
+    align-items: center;
+  }
+  
+  .loadout__title {
+    font-size: 1.1rem;
+    line-height: 1.2;
+  }
+  
+  .loadout__meta {
+    margin-top: 8px;
+    gap: 6px;
+  }
+  
+  .loadout__inner {
+    padding: 12px;
+  }
+  
   .loadout__tab {
     flex: 1 1 100%;
+    min-width: auto;
+    padding: 8px 10px;
+    font-size: 12px;
   }
+  
+  .loadout__module {
+    padding: 10px;
+    gap: 6px;
+  }
+  
+  .loadout__module-slot {
+    font-size: 0.8rem;
+    min-width: 70px;
+  }
+  
+  .loadout__module-name {
+    font-size: 0.85rem;
+  }
+  
+  .loadout__tops {
+    gap: 4px;
+  }
+  
+  .loadout__top {
+    padding: 4px 8px;
+    font-size: 0.7rem;
+  }
+  
+  .loadout__type {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+  
+  .loadout__date,
+  .loadout__module-count {
+    font-size: 0.75rem;
+  }
+}
 
+@media (max-width: 480px) {
+  .loadout__header {
+    padding: 10px;
+  }
+  
+  .loadout__title {
+    font-size: 1rem;
+  }
+  
+  .loadout__toggle-icon {
+    font-size: 1rem;
+  }
+  
   .loadout__module {
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
-    padding: 12px;
+    padding: 8px;
   }
-
-  .loadout__module-slot,
+  
+  .loadout__module-slot {
+    min-width: auto;
+    font-size: 0.75rem;
+  }
+  
   .loadout__module-name {
     text-align: left;
-    font-size: 0.9rem;
-    word-break: break-word;
+    font-size: 0.8rem;
+    width: 100%;
   }
-
-  .loadout__header {
-    padding: 14px;
-  }
-
-  .loadout__title {
-    font-size: 1.1rem;
-  }
-
-  .loadout__tab-buttons {
+  
+  .loadout__meta {
     flex-direction: column;
-    gap: 8px;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .loadout__tops {
+    width: 100%;
+    justify-content: flex-start;
   }
 }
 
+/* Для очень маленьких экранов */
+@media (max-width: 360px) {
+  .loadout__header--top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .loadout__toggle-icon {
+    align-self: flex-end;
+    margin-top: -30px;
+  }
+  
+  .loadout__title {
+    width: 100%;
+  }
+  
+  .loadout__tab {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+}
   /* === СПИСКИ И ТАБЛИЦЫ === */
   #builds-list {
     display: flex;
