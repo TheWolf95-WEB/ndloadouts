@@ -669,7 +669,10 @@ setupUserChallengeSearch();
 
 
 // === Подсказка пользователю (через 5 секунд после загрузки испытаний) ===
-if (!localStorage.getItem("bf_tip_shown")) {
+// === Подсказка пользователю (до 3 раз) ===
+const tipShownCount = parseInt(localStorage.getItem("bf_tip_shown_count") || "0", 10);
+
+if (tipShownCount < 3) {
   setTimeout(() => {
     const tip = document.createElement("div");
     tip.className = "bf-tip-popup";
@@ -683,9 +686,10 @@ if (!localStorage.getItem("bf_tip_shown")) {
       setTimeout(() => tip.remove(), 500);
     }, 7000);
 
-    localStorage.setItem("bf_tip_shown", "1");
+    localStorage.setItem("bf_tip_shown_count", String(tipShownCount + 1));
   }, 5000);
 }
+
 
       
 
