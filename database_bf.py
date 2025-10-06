@@ -155,6 +155,72 @@ def delete_challenge(challenge_id: int):
 
 
 # ========================
+# Прогресс пользователя
+# ========================
+
+def get_user_challenges(user_id: int):
+    """Возвращает список всех испытаний пользователя с текущим прогрессом"""
+    with get_bf_conn(row_mode=True) as conn:
+        rows = conn.execute("""
+            SELECT 
+                c.id, c.category_id, c.title_en, c.title_ru, c.goal,
+                COALESCE(uc.current, 0) as current,
+                cat.name as category_name,
+                uc.completed_at
+            FROM challenges c
+            LEFT JOIN challenge_categories cat ON cat.id = c.category_id
+            LEFT JOIN user_challenges uc ON uc.challenge_id = c.id AND uc.user_id = ?
+            ORDER BY c.id DESC
+        """, (user_id,)).fetchall()
+    return [dict(r) for r in rows]
+
+
+def update_user_progress(user_id: int, challenge_id: int, delta: int):
+    """Изменяет прогресс конкретного пользователя"""
+    with get_bf_conn(row_mode=True) as conn:
+        # Проверяем, есть ли запись
+        row = conn.execute("""
+            SELECT uc.id, uc.current, c.goal
+            FROM challenges c
+            LEFT JOIN user_challenges uc ON uc.challenge_id = c.id AND uc.user_id = ?
+            WHERE c.id = ?
+        """, (user_id, challenge_id)).fetchone()
+
+        if not row:
+            # создаём запись
+            conn.execute("""
+                INSERT INTO user_challenges (user_id, challenge_id, current)
+                VALUES (?, ?, ?)
+            """, (user_id, challenge_id, max(0, delta)))
+            return {"current": max(0, delta), "goal": get_challenge_goal(challenge_id)}
+
+        current = int(row["current"] or 0)
+        goal = int(row["goal"] or 0)
+        new_value = max(0, min(goal, current + delta))
+
+        # обновляем прогресс
+        conn.execute("""
+            UPDATE user_challenges
+            SET current = ?, completed_at = CASE WHEN ? >= ? THEN CURRENT_TIMESTAMP ELSE NULL END
+            WHERE user_id = ? AND challenge_id = ?
+        """, (new_value, new_value, goal, user_id, challenge_id))
+
+    return {"current": new_value, "goal": goal}
+
+
+def get_challenge_goal(challenge_id: int) -> int:
+    with get_bf_conn(row_mode=True) as conn:
+        row = conn.execute("SELECT goal FROM challenges WHERE id = ?", (challenge_id,)).fetchone()
+        return int(row["goal"]) if row else 0
+
+
+
+
+
+
+
+
+# ========================
 # Инициализация вручную
 # ========================
 
