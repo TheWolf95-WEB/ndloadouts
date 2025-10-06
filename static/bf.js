@@ -202,17 +202,18 @@ document.getElementById("bf-add-category-btn")?.addEventListener("click", async 
 
   // ===== Helpers =====
   function showBfScreen(screenId) {
-    document.querySelectorAll(".screen").forEach(el => { 
-      el.classList.remove("active"); 
-      el.style.display = "none"; 
-    });
-    document.getElementById("screen-battlefield-main").style.display = "none";
+  document.querySelectorAll(".screen").forEach(el => { 
+    el.classList.remove("active");
+    el.style.opacity = "0";
+    el.style.pointerEvents = "none";
+  });
   
-    const target = bfScreens[screenId];
-    if (target) { 
-      target.style.display = "block"; 
-      target.classList.add("active"); 
-    }
+  const target = bfScreens[screenId];
+  if (target) { 
+    target.classList.add("active");
+    target.style.opacity = "1";
+    target.style.pointerEvents = "auto";
+  }
   
     // 👇 вот это добавляем
     toggleBfBackButton(screenId);
