@@ -313,7 +313,7 @@ async function loadBfCategories() {
     // Добавляем вкладку "Все"
     const allBtn = document.createElement("div");
     allBtn.className = "tab-btn active";
-    allBtn.textContent = "Все";
+    allBtn.textContent = "Общее";
     allBtn.onclick = async () => {
       document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
       allBtn.classList.add("active");
@@ -446,10 +446,11 @@ async function loadBfChallenges(categoryId = null) {
     const url = categoryId
       ? `${BF_API_BASE}/challenges?category_id=${categoryId}`
       : `${BF_API_BASE}/challenges`;
+
     const res = await fetch(url);
     bfChallenges = await res.json();
 
-    // 🧩 фильтруем завершённые
+    // ❌ исключаем завершённые испытания
     bfChallenges = bfChallenges.filter(ch => ch.goal > 0 && ch.current < ch.goal);
 
     const listEl = document.getElementById("bf-challenges-list");
@@ -457,41 +458,40 @@ async function loadBfChallenges(categoryId = null) {
     listEl.innerHTML = "";
 
     if (!bfChallenges.length) {
-      listEl.innerHTML = `<p style="text-align:center;color:#8ea2b6;">Пока нет активных испытаний</p>`;
+      listEl.innerHTML = `<p style="text-align:center;color:#8ea2b6;">Нет активных испытаний</p>`;
       return;
     }
 
-  listEl.innerHTML = bfChallenges.map(ch => {
-    const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
-    const isCompleted = ch.goal > 0 && ch.current >= ch.goal;
-    return `
-      <div class="challenge-card-user ${isCompleted ? "completed" : ""}" data-id="${ch.id}">
-        ${ch.category_name ? `<div class="challenge-category">${ch.category_name}</div>` : ""}
-        <div class="challenge-title-en">${ch.title_en}</div>
-        <div class="challenge-title-ru">${ch.title_ru}</div>
-        <div class="progress-text">
-          <span>Прогресс</span>
-          <span>${ch.current} / ${ch.goal}</span>
+    listEl.innerHTML = bfChallenges.map(ch => {
+      const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
+      return `
+        <div class="challenge-card-user" data-id="${ch.id}">
+          ${ch.category_name ? `<div class="challenge-category">${ch.category_name}</div>` : ""}
+          <div class="challenge-title-en">${ch.title_en}</div>
+          <div class="challenge-title-ru">${ch.title_ru}</div>
+          <div class="progress-text">
+            <span>Прогресс</span>
+            <span>${ch.current} / ${ch.goal}</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width:${percent}%;"></div>
+          </div>
+          <div class="progress-controls">
+            <button class="btn-mini" data-action="minus" data-id="${ch.id}">
+              <i class="fas fa-minus"></i>
+            </button>
+            <button class="btn-mini" data-action="plus" data-id="${ch.id}">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
         </div>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width:${percent}%;"></div>
-        </div>
-        <div class="progress-controls">
-          <button class="btn-mini" data-action="minus" data-id="${ch.id}">
-            <i class="fas fa-minus"></i>
-          </button>
-          <button class="btn-mini" data-action="plus" data-id="${ch.id}">
-            <i class="fas fa-plus"></i>
-          </button>
-        </div>
-        ${isCompleted ? `<div class="completed-overlay">ЗАВЕРШЕНО!</div>` : ""}
-      </div>
-    `;
-  }).join("");
+      `;
+    }).join("");
   } catch (e) {
     console.error("Ошибка при загрузке испытаний:", e);
   }
 }
+
 
 
 // === Обновление прогресса ===
