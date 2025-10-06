@@ -509,9 +509,11 @@ async function loadBfChallenges(categoryId = null) {
     listEl.innerHTML = "";
 
     if (!bfChallenges.length) {
-      listEl.innerHTML = `<p style="text-align:center;color:#8ea2b6;">Нет активных испытаний</p>`;
+      listEl.innerHTML = `<p style="text-align:center;color:#8ea2b6;">Пока нет доступных испытаний</p>`;
+      await updateStatusCountersAuto(); // пересчёт даже если пусто
       return;
     }
+
 
     listEl.innerHTML = bfChallenges.map(ch => {
       const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
