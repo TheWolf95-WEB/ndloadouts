@@ -478,21 +478,28 @@ document.querySelectorAll(".status-btn").forEach(btn => {
   }
   setupUserChallengeSearch();
 
-  // --- Tip popup (once after open) ---
+  // --- Tip popup (only for top-level tabs) ---
   setTimeout(() => {
-    const tip = document.createElement("div");
-    tip.className = "bf-tip-popup";
-    tip.textContent = "💡 Нажмите дважды на карточку, чтобы начать выполнение испытания";
-    document.body.appendChild(tip);
-
-    tip.style.opacity = "0";
-    setTimeout(() => (tip.style.opacity = "1"), 100);
-
-    setTimeout(() => {
+    const activeTopTab = document.querySelector("#bf-tabs .tab-btn.active");
+    const activeStatus = document.querySelector(".status-btn.active");
+  
+    // 💡 Показываем подсказку только если выбрана верхняя вкладка (а не статус)
+    if (activeTopTab && !activeStatus) {
+      const tip = document.createElement("div");
+      tip.className = "bf-tip-popup";
+      tip.textContent = "💡 Нажмите дважды на карточку, чтобы начать выполнение испытания";
+      document.body.appendChild(tip);
+  
       tip.style.opacity = "0";
-      setTimeout(() => tip.remove(), 500);
-    }, 7000);
+      setTimeout(() => (tip.style.opacity = "1"), 100);
+  
+      setTimeout(() => {
+        tip.style.opacity = "0";
+        setTimeout(() => tip.remove(), 500);
+      }, 7000);
+    }
   }, 5000);
+
 
   // --- Admin grid ---
   async function loadBfChallengesTable() {
