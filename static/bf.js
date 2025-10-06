@@ -1,4 +1,3 @@
-// === Battlefield WebApp (full, fixed, no dupes) ===
 document.addEventListener("DOMContentLoaded", async () => {
   const BF_API_BASE = "/api/bf";
   const tg = window.Telegram?.WebApp;
@@ -655,94 +654,111 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     isActivating = true;
     try {
-      // Активируем без прибавки прогресса
+      // FIX: Активируем с прибавкой +1 (чтобы current > 0 и вызов стал активным)
       const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ delta: 0, initData: tg?.initData || "" })
+        body: JSON.stringify({ delta: 1, initData: tg?.initData || "" })  // FIX: delta: 1 вместо 0
       });
       if (!res.ok) throw new Error("Ошибка активации испытания");
+      const updated = await res.json();  // FIX: Получаем обновлённые данные для синхронизации UI
+
+      // FIX: Обновляем UI карточки сразу (прогресс, процент)
+      const percent = updated.goal ? Math.min(updated.current / updated.goal * 100, 100) : 0;
+      card.querySelector(".progress-fill").style.width = `${percent}%`;
+      card.querySelector(".progress-text span:last-child").textContent = `${updated.current} / ${updated.goal}`;
 
       card.classList.add("active");
       card.style.transition = "all 0.4s ease";
       card.style.boxShadow = "0 0 12px rgba(0,255,120,0.6)";
 
       setTimeout(async () => {
-        // Переключаемся на вкладку активных
-        document.querySelectorAll(".status-btn").forEach(b => b.classList.remove("active"));
-        const activeBtn = document.querySelector('[data-status="active"]');
-        if (activeBtn) {
-          activeBtn.classList.add("active");
-          await renderChallengesByStatus("active");
-        }
+        card.remove();
         await updateInitialStatusCounts();
-      }, 400);
+      
+        // FIX: Дождёмся обновления и сразу рендерим активные (с новой карточкой)
+        document.querySelectorAll(".status-btn").forEach(b => b.classList.remove("active"));
+        document.querySelector('[data-status="active"]').classList.add("active");
+        await renderChallengesByStatus("active");  // FIX: Прямо рендерим активные, чтобы карточка появилась там
+      }, 300);
 
     } catch (err) {
       console.error("Ошибка при запуске испытания:", err);
+      alert("❌ Ошибка активации");  // FIX: Добавил алерт для пользователя
     } finally {
       isActivating = false;
     }
   });
 
-  // --- Progress +/- (fixed) ---
+  // --- Progress +/- (fixed step, no instant completion) ---
   document.addEventListener("click", async (e) => {
     const btn = e.target.closest(".btn-mini");
     if (!btn) return;
-
-    // блокируем кнопку на время запроса
     if (btn.disabled) return;
     btn.disabled = true;
 
     const id = Number(btn.dataset.id);
     const delta = btn.dataset.action === "plus" ? 1 : -1;
     const card = document.querySelector(`.challenge-card-user[data-id="${id}"]`);
-    if (!id || !card) return;
+    if (!card) return;
+
+    const text = card.querySelector(".progress-text span:last-child").textContent;
+    const [currRaw, goalRaw] = text.split("/").map(t => parseInt(t.trim()) || 0);
+    let curr = currRaw, goal = goalRaw;
+
+    // FIX: Если + доведёт до goal или больше, спрашиваем подтверждение (чтобы избежать "мгновенного завершения")
+    if (curr + delta >= goal && delta > 0) {
+      if (!confirm("Это завершит вызов. Продолжить?")) {
+        btn.disabled = false;
+        return;
+      }
+    }
+
+    // Не позволяем current < 0 для -
+    if (curr + delta < 0 && delta < 0) {
+      btn.disabled = false;
+      return;
+    }
 
     try {
-      // PATCH-запрос
       const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ delta, initData: tg?.initData || "" })
       });
-      if (!res.ok) throw new Error("Ошибка обновления прогресса");
-
+      if (!res.ok) throw new Error(await res.text());
       const updated = await res.json();
-      const percent = updated.goal > 0 ? Math.min((updated.current / updated.goal) * 100, 100) : 0;
 
-      // обновляем UI
+      const percent = updated.goal ? Math.min(updated.current / updated.goal * 100, 100) : 0;
       card.querySelector(".progress-fill").style.width = `${percent}%`;
-      card.querySelector(".progress-text span:last-child").textContent = `${updated.current} / ${updated.goal}`;
+      card.querySelector(".progress-text span:last-child").textContent =
+        `${updated.current} / ${updated.goal}`;
 
-      // ТОЛЬКО если достигнута цель - помечаем как завершенное
-      if (updated.current >= updated.goal) {
+      // показываем завершение только если реально достигли цели после клика
+      if (updated.current >= updated.goal) {  // FIX: Изменил на >= для безопасности
         card.classList.add("completed");
         const overlay = document.createElement("div");
         overlay.className = "completed-overlay";
         overlay.textContent = "ЗАВЕРШЕНО!";
         card.appendChild(overlay);
         card.querySelector(".progress-controls")?.remove();
-        
+
         setTimeout(async () => {
+          await renderChallengesByStatus("completed");
           await updateInitialStatusCounts();
-          // Обновляем активные задания, если мы на этой вкладке
-          const activeStatusBtn = document.querySelector('.status-btn.active[data-status="active"]');
-          if (activeStatusBtn) {
-            await renderChallengesByStatus("active");
-          }
-        }, 300);
+        }, 400);
       } else {
-        // Просто обновляем счетчики
+        // просто обновляем счётчик без переходов
         await updateInitialStatusCounts();
       }
-
-    } catch (e2) {
-      console.error("Ошибка при обновлении прогресса:", e2);
+    } catch (err) {
+      console.error("Ошибка PATCH:", err);
+      alert("❌ Ошибка обновления прогресса");  // FIX: Добавил алерт
     } finally {
       btn.disabled = false;
     }
   });
+
 
   // --- Start ---
   await loadBfCategories();
