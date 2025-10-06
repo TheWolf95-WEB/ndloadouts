@@ -156,6 +156,17 @@ function showScreen(id) {
     time: new Date().toISOString()
   });
 
+    // 🎨 Смена темы по экрану
+  const body = document.body;
+  body.classList.remove('warzone-theme', 'bf-theme'); // сброс старой темы
+
+  if (id === 'screen-warzone-main') {
+    body.classList.add('warzone-theme');   // зелёная тема для Warzone
+  } else if (id === 'screen-battlefield-main') {
+    body.classList.add('bf-theme');        // синяя тема для Battlefield
+  }
+
+
   const protectedScreens = {
     'screen-form': 'is_admin',
     'screen-edit-builds': 'is_admin',
