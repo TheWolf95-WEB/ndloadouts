@@ -956,54 +956,60 @@ select:disabled {
 /* =============================
    ✅ Исправленное завершение карточки
    ============================= */
+/* =============================
+   Финальная версия эффекта завершения
+   ============================= */
 .challenge-card-user {
   position: relative;
   overflow: hidden;
 }
 
-.challenge-card-user.completed {
-  position: relative;
+/* Размытие только содержимого карточки, но не надписи */
+.challenge-card-user.completed > *:not(.completed-overlay) {
+  filter: blur(3px);
+  opacity: 0.6;
+  transition: filter 0.3s ease, opacity 0.3s ease;
 }
 
-.challenge-card-user.completed::before {
-  /* размываем только фон и контент */
-  content: "";
-  position: absolute;
-  inset: 0;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  background: rgba(0, 0, 0, 0.45);
-  z-index: 2;
-}
-
-/* текст "ЗАВЕРШЕНО!" — поверх, четкий */
+/* Сам текст "ЗАВЕРШЕНО!" */
 .completed-overlay {
   position: absolute;
   inset: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 3;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 800;
-  color: #00ff9a;
-  text-shadow: 0 0 10px rgba(0, 255, 160, 0.7);
-  background: transparent;
+  color: #00ffb7;
+  text-shadow: 0 0 10px #00ffc8, 0 0 20px rgba(0, 255, 255, 0.4);
+  background: rgba(0, 0, 0, 0.4);
   pointer-events: none;
+  z-index: 5;
+  filter: none !important;
+  opacity: 0;
+  transform: scale(0.9);
+  animation: fadeInCompleted 0.4s ease forwards;
 }
 
-/* мелкие адаптивные правки для мобильных */
+/* Анимация появления */
+@keyframes fadeInCompleted {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Адаптив под мобилки */
 @media (max-width: 600px) {
   .completed-overlay {
-    font-size: 16px;
-    text-shadow: 0 0 6px rgba(0, 255, 160, 0.8);
+    font-size: 18px;
+    text-shadow: 0 0 8px #00ffc8, 0 0 14px rgba(0, 255, 255, 0.5);
   }
-
-  .challenge-card-user.completed::before {
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
+  .challenge-card-user.completed > *:not(.completed-overlay) {
+    filter: blur(2px);
   }
 }
+
 
 
 /* Прогресс и кнопки */
