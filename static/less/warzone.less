@@ -12,17 +12,18 @@
 #screen-assign-admin {
 
   /* 🎨 Локальные переменные Warzone */
-  --wz-bg: #0b0f0d;
-  --wz-surface: #111a13;
-  --wz-card: #152116;
-  --wz-card-2: #1c2e1d;
-  --wz-border: #29482e;
+   --wz-bg: #080c08;             /* глубокий чёрно-зелёный фон */
+   --wz-surface: #0e1410;        /* чуть светлее фон блоков */
+   --wz-card: #121c12;           /* карточки */
+   --wz-card-2: #182618;         /* кнопки/элементы */
+   --wz-border: #2e4a2e;         /* границы */
+   
+   --wz-text: #ffffff;           /* чисто белый текст */
+   --wz-text-muted: #a8e6a3;     /* мягкий мятный */
+   --wz-accent: #a6ff00;         /* неоново-лаймовый */
+   --wz-accent-dark: #446600;    /* насыщенный тёмно-зелёный */
+   --wz-accent-glow: rgba(166, 255, 0, 0.45); /* свечение */
 
-  --wz-text: #e6ffe8;
-  --wz-text-muted: #85b88a;
-   --wz-accent: #3aff6b;         /* неоново-салатовый */
-   --wz-accent-dark: #16391f;    /* глубокий болотный */
-   --wz-accent-glow: rgba(58, 255, 107, 0.4);
 
   background: var(--wz-bg);
   color: var(--wz-text);
@@ -32,11 +33,11 @@
     box-sizing: border-box;
   }
 
-  h1, h2, h3 {
-    color: var(--wz-accent);
-    text-shadow: 0 0 10px var(--wz-accent-glow);
-    text-align: center;
-  }
+  h1, h2, h3, label, .form-input, .loadout__title, .loadout__module-name {
+     color: #ffffff;
+     text-shadow: none;
+   }
+
 
   .subtext {
     font-size: 1rem;
@@ -81,8 +82,9 @@
    .filter-btn:hover,
    .modules-type-btn:hover {
      border-color: var(--wz-accent);
-     background: linear-gradient(90deg, #16391f, #1b4a24);
-     box-shadow: 0 0 12px var(--wz-accent-glow);
+     background: linear-gradient(to right, #b0ff4e, #8dfd00);
+     color: #000;
+     box-shadow: 0 0 18px var(--wz-accent-glow);
      transform: translateY(-2px);
    }
 
