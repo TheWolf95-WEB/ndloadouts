@@ -1,5 +1,5 @@
 /* =======================================================
-   NDHQ WARZONE THEME — нейтрально-зелёная кибер-палитра
+   NDHQ BATTLEFIELD THEME — тёмная зелёная палитра с градиентами
    ======================================================= */
 
 #screen-warzone-main,
@@ -10,19 +10,23 @@
 #screen-edit-builds,
 #screen-assign-admin {
 
-  /* 🎨 Цветовая база */
-  --wz-bg: #0b0f0c;               /* базовый фон — тёмно-зеленоватый */
-  --wz-surface: #121914;          /* общий слой */
-  --wz-card: #18231b;             /* карточки */
-  --wz-card-2: #1e2b21;           /* вторичные карточки / кнопки */
-  --wz-border: #2c3c2f;           /* рамки */
-  --wz-glass: linear-gradient(145deg, #1b2324, #101617); /* лёгкий объём */
+  /* 🎨 Локальные переменные в стиле примера */
+   --wz-bg: #0a0f0a;             /* глубокий тёмно-зелёный фон */
+   --wz-surface: #101617;        /* тёмная поверхность */
+   --wz-card: #1b2324;           /* карточки как в примере */
+   --wz-card-2: #1e2728;         /* вторичные карточки */
+   --wz-border: #2a3a3a;         /* границы */
+   
+   --wz-text: #ffffff;           /* белый текст */
+   --wz-text-muted: #a8b8b8;     /* приглушённый серо-зелёный */
+   --wz-accent: #2d9c44;         /* основной акцент - зелёный */
+   --wz-accent-dark: #1e6b32;    /* тёмный зелёный */
+   --wz-accent-light: #3cb054;   /* светлый зелёный */
+   --wz-accent-glow: rgba(45, 156, 68, 0.25); /* мягкое свечение */
 
-  --wz-text: #ffffff;             /* чисто белый текст */
-  --wz-text-muted: #b5ccb8;       /* мягкий серо-мятный */
-  --wz-accent: #8dfd00;           /* неоново-лаймовый акцент */
-  --wz-accent-dark: #3d4f2f;      /* мягкий контрастный зелёный */
-  --wz-accent-glow: rgba(141, 253, 0, 0.25); /* лёгкое свечение */
+
+  background: var(--wz-bg);
+  color: var(--wz-text);
 
   /* === Общие стили === */
   * {
@@ -56,19 +60,20 @@
     justify-content: center;
     text-align: center;
 
-    background: var(--wz-card-2);
+    background: linear-gradient(145deg, #1b2324, #101617);
     color: var(--wz-text);
-    border: 1px solid var(--wz-border);
+    border: none;
     border-radius: 8px;
 
     font-weight: 600;
     font-size: 15px;
     letter-spacing: 0.3px;
 
-    min-height: 60px;
+    min-height: 73px;
     padding: 0 14px;
 
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 
+                inset 0 -1px 4px rgba(255, 255, 255, 0.05);
     transition: all 0.25s ease;
     cursor: pointer;
   }
@@ -77,10 +82,10 @@
    .card-btn:hover,
    .filter-btn:hover,
    .modules-type-btn:hover {
-     border-color: var(--wz-accent);
-     background: var(--wz-accent);
+     background: linear-gradient(145deg, #2d9c44, #1e6b32);
      color: #fff;
-     box-shadow: 0 4px 16px var(--wz-accent-glow);
+     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4),
+                 inset 0 -1px 4px rgba(255, 255, 255, 0.1);
      transform: translateY(-2px);
    }
 
@@ -88,7 +93,7 @@
   .btn:active,
   .card-btn:active {
     transform: scale(0.96);
-    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.3);
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
   }
 
   .btn i,
@@ -112,7 +117,7 @@
   .card-btn {
     flex-direction: column;
     gap: 8px;
-    background: var(--wz-card);
+    background: linear-gradient(145deg, #1b2324, #101617);
   }
 
   .card-btn:hover i {
@@ -129,26 +134,28 @@
   }
 
   .filter-btn {
-    padding: 10px 15px;
-    background: var(--wz-card-2);
+    padding: 12px 18px;
+    background: linear-gradient(145deg, #1b2324, #101617);
     color: var(--wz-text-muted);
-    border: 1px solid var(--wz-border);
+    border: none;
     border-radius: 8px;
     cursor: pointer;
     font-size: 12px;
     letter-spacing: 1px;
     transition: all 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 
+                inset 0 -1px 4px rgba(255, 255, 255, 0.05);
   }
 
   .filter-btn.active {
-    border-color: var(--wz-accent);
-    background: var(--wz-accent);
+    background: linear-gradient(145deg, #2d9c44, #1e6b32);
     color: #fff;
-    box-shadow: 0 0 12px var(--wz-accent-glow);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4),
+                inset 0 -1px 4px rgba(255, 255, 255, 0.1);
   }
 
   .filter-btn:hover:not(.active) {
-    border-color: var(--wz-accent-light);
+    background: linear-gradient(145deg, #223234, #141c1d);
     color: var(--wz-accent-light);
   }
 
@@ -172,19 +179,22 @@
   select {
     width: 100%;
     padding: 11px 14px;
-    background-color: var(--wz-surface);
-    border: 1px solid var(--wz-border);
+    background: linear-gradient(145deg, #1b2324, #101617);
+    border: none;
     color: #fff;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 0.95rem;
     height: 44px;
     transition: 0.2s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 
+                inset 0 -1px 4px rgba(255, 255, 255, 0.05);
   }
 
   .form-input:focus,
   select:focus {
-    border-color: var(--wz-accent);
-    box-shadow: 0 0 8px var(--wz-accent-glow);
+    background: linear-gradient(145deg, #223234, #141c1d);
+    box-shadow: 0 0 0 2px var(--wz-accent-glow),
+                inset 0 -1px 4px rgba(255, 255, 255, 0.1);
     outline: none;
   }
 
@@ -193,13 +203,11 @@
   }
 
   .btn.delete-tab {
-    background-color: #5d2a2a;
-    border-color: #7a3737;
+    background: linear-gradient(145deg, #5d2a2a, #3a1a1a);
   }
 
   .btn.delete-tab:hover {
-    background-color: #7a3737;
-    border-color: #ff6b6b;
+    background: linear-gradient(145deg, #7a3737, #4a2222);
   }
 
   /* === Табуляторы и вкладки === */
@@ -211,35 +219,36 @@
   }
 
   .tab-btn {
-    background-color: var(--wz-card-2);
+    background: linear-gradient(145deg, #1b2324, #101617);
     color: var(--wz-text-muted);
-    border: 1px solid var(--wz-border);
-    padding: 8px 14px;
-    border-radius: 6px;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
     cursor: pointer;
     font-size: 0.95rem;
     transition: all 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   }
 
   .tab-btn:hover {
-    background-color: var(--wz-card);
-    border-color: var(--wz-accent-light);
+    background: linear-gradient(145deg, #223234, #141c1d);
     color: var(--wz-accent-light);
   }
 
   .tab-block {
-    background-color: var(--wz-card-2);
+    background: linear-gradient(145deg, #1b2324, #101617);
     border-radius: 8px;
-    padding: 15px;
+    padding: 20px;
     margin-bottom: 20px;
-    border: 1px solid var(--wz-border);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 
+                inset 0 -1px 4px rgba(255, 255, 255, 0.05);
   }
 
   .tab-panel {
-    padding: 12px;
-    background: var(--wz-card);
-    border-radius: 6px;
-    border: 1px solid var(--wz-border);
+    padding: 16px;
+    background: linear-gradient(145deg, #1e2728, #131b1c);
+    border-radius: 8px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
   }
 
   .tab-actions {
@@ -249,13 +258,11 @@
   }
 
   .tab-actions .delete-tab {
-    background-color: #5d2a2a;
-    border-color: #7a3737;
+    background: linear-gradient(145deg, #5d2a2a, #3a1a1a);
   }
 
   .tab-actions .delete-tab:hover {
-    background-color: #7a3737;
-    border-color: #ff6b6b;
+    background: linear-gradient(145deg, #7a3737, #4a2222);
   }
 
   /* === Справочник модулей === */
@@ -267,13 +274,13 @@
   }
 
   .modules-type-btn {
-    background-color: var(--wz-card-2);
+    background: linear-gradient(145deg, #1b2324, #101617);
     color: var(--wz-text);
     font-weight: 600;
     font-size: 16px;
     padding: 14px 16px;
-    height: 52px;
-    border: 1px solid var(--wz-border);
+    height: 73px;
+    border: none;
     border-radius: 8px;
     cursor: pointer;
     text-align: center;
@@ -282,11 +289,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 
+                inset 0 -1px 4px rgba(255, 255, 255, 0.05);
   }
 
   .modules-type-btn:hover {
-    background-color: var(--wz-accent);
-    border-color: var(--wz-accent);
+    background: linear-gradient(145deg, #2d9c44, #1e6b32);
   }
 
   #modules-toolbar {
@@ -306,16 +314,17 @@
     align-self: flex-start;
     height: 42px;
     padding: 0 18px;
-    background: var(--wz-accent-dark);
+    background: linear-gradient(145deg, #2d9c44, #1e6b32);
     color: #fff;
     border-radius: 8px;
     font-weight: 600;
-    transition: background 0.2s;
+    transition: all 0.2s;
     border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   }
 
   #modules-toolbar .btn:hover {
-    background: var(--wz-accent);
+    background: linear-gradient(145deg, #3cb054, #2d9c44);
   }
 
   .module-row {
@@ -323,17 +332,18 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 10px 14px;
-    background: var(--wz-card-2);
+    padding: 12px 16px;
+    background: linear-gradient(145deg, #1b2324, #101617);
     border-radius: 8px;
-    border: 1px solid var(--wz-border);
     margin: 8px 0;
     transition: all 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 
+                inset 0 -1px 4px rgba(255, 255, 255, 0.05);
   }
 
   .module-row:hover {
-    border-color: var(--wz-accent-light);
-    box-shadow: 0 2px 8px var(--wz-accent-glow);
+    background: linear-gradient(145deg, #223234, #141c1d);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
   }
 
   .module-row .mod-title {
@@ -352,17 +362,17 @@
   .module-row .btn.btn-sm {
     width: 40px;
     height: 40px;
-    background: #5d2a2a;
+    background: linear-gradient(145deg, #5d2a2a, #3a1a1a);
     color: #ff8a8a;
-    border: 1px solid #7a3737;
+    border: none;
     border-radius: 6px;
     font-weight: 600;
     transition: all 0.15s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 
   .module-row .btn.btn-sm:hover {
-    background: #7a3737;
-    border-color: #ff6b6b;
+    background: linear-gradient(145deg, #7a3737, #4a2222);
   }
 
   .module-row .btn.btn-sm:active {
@@ -372,16 +382,17 @@
   /* === СБОРКИ === */
   .loadout {
     transition: all 0.3s ease;
-    background: var(--wz-surface);
-    border: 1px solid var(--wz-border);
+    background: linear-gradient(145deg, #1b2324, #101617);
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 
+                inset 0 -1px 4px rgba(255, 255, 255, 0.05);
     margin-bottom: 16px;
+    overflow: hidden;
   }
 
   .loadout:hover {
-    border-color: var(--wz-accent-light);
-    box-shadow: 0 4px 16px var(--wz-accent-glow);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4),
+                inset 0 -1px 4px rgba(255, 255, 255, 0.1);
   }
 
   .loadout__header {
@@ -389,7 +400,7 @@
     padding: 20px;
     border-radius: 8px;
     flex-direction: column;
-    background: var(--wz-card-2);
+    background: transparent;
     color: var(--wz-text-muted);
   }
 
@@ -450,13 +461,14 @@
 
   .loadout__inner {
     padding: 20px;
+    background: linear-gradient(145deg, #1e2728, #131b1c);
   }
 
   .loadout__thumb {
     width: 200px;
     height: auto;
     border-radius: 6px;
-    border: 1px solid var(--wz-border);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   }
 
   .loadout__tab-buttons {
@@ -475,20 +487,20 @@
   .loadout__tab {
     flex: 1 1 calc(50% - 10px);
     color: var(--wz-text);
-    padding: 8px 16px;
-    border-radius: 6px;
+    padding: 12px 16px;
+    border-radius: 8px;
     font-size: 14px;
     display: inline-block;
-    background: transparent;
-    border: 1px solid var(--wz-border);
+    background: linear-gradient(145deg, #1b2324, #101617);
+    border: none;
     transition: all 0.3s ease;
     cursor: pointer;
     text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   }
 
   .loadout__tab:hover {
-    background: var(--wz-accent-dark);
-    border-color: var(--wz-accent);
+    background: linear-gradient(145deg, #2d9c44, #1e6b32);
     color: #fff;
   }
 
@@ -513,23 +525,24 @@
 
   .loadout__module {
     width: calc(50% - 6px);
-    background: var(--wz-card-2);
-    padding: 12px 16px;
-    border-radius: 6px;
+    background: linear-gradient(145deg, #1b2324, #101617);
+    padding: 14px 16px;
+    border-radius: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: var(--wz-text);
     box-sizing: border-box;
-    border-left: 4px solid var(--wz-accent);
     transition: all 0.2s ease;
-    border: 1px solid var(--wz-border);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 
+                inset 0 -1px 4px rgba(255, 255, 255, 0.05);
+    border-left: 4px solid var(--wz-accent);
   }
 
   .loadout__module:hover {
-    border-color: var(--wz-accent-light);
+    background: linear-gradient(145deg, #223234, #141c1d);
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px var(--wz-accent-glow);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
   }
 
   .loadout__module-slot {
@@ -556,12 +569,13 @@
   }
 
   .loadout__top {
-    padding: 5px 10px;
-    border-radius: 4px;
+    padding: 6px 12px;
+    border-radius: 6px;
     font-size: 0.8rem;
     font-weight: 600;
     color: #fff;
     text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 
   .loadout__top--gold {
@@ -578,12 +592,12 @@
 
   .loadout__type {
     padding: 6px 12px;
-    background: var(--wz-accent-dark);
-    border-radius: 4px;
+    background: linear-gradient(145deg, #2d9c44, #1e6b32);
+    border-radius: 6px;
     color: #fff;
     font-size: 0.9rem;
     font-weight: 500;
-    border: 1px solid var(--wz-accent);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 
   /* === СПИСКИ И ТАБЛИЦЫ === */
@@ -594,10 +608,9 @@
   }
 
   .build-card {
-    background-color: var(--wz-card-2);
-    border: 1px solid var(--wz-border);
+    background: linear-gradient(145deg, #1b2324, #101617);
     border-radius: 8px;
-    padding: 16px;
+    padding: 20px;
     margin-bottom: 8px;
     color: var(--wz-text);
     font-size: 14px;
@@ -605,44 +618,47 @@
     flex-direction: column;
     gap: 8px;
     transition: all 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 
+                inset 0 -1px 4px rgba(255, 255, 255, 0.05);
   }
 
   .build-card:hover {
-    border-color: var(--wz-accent-light);
-    box-shadow: 0 2px 8px var(--wz-accent-glow);
+    background: linear-gradient(145deg, #223234, #141c1d);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
   }
 
   .build-actions {
     display: flex;
     gap: 8px;
-    margin-top: 8px;
+    margin-top: 12px;
   }
 
   .btn.btn-sm {
-    padding: 6px 12px;
+    padding: 8px 16px;
     font-size: 14px;
-    border-radius: 4px;
+    border-radius: 6px;
     min-height: auto;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 
   /* === АДМИН-СПИСОК === */
   #admin-list li {
     margin-bottom: 10px;
-    padding: 10px;
-    background: var(--wz-card-2);
-    border-radius: 6px;
-    border: 1px solid var(--wz-border);
+    padding: 12px 16px;
+    background: linear-gradient(145deg, #1b2324, #101617);
+    border-radius: 8px;
     color: var(--wz-text);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   }
 
   #assign-admin-status {
     color: var(--wz-accent);
     font-weight: 600;
     margin-top: 8px;
-    padding: 10px;
-    background: var(--wz-card);
-    border-radius: 6px;
-    border: 1px solid var(--wz-border);
+    padding: 12px 16px;
+    background: linear-gradient(145deg, #1b2324, #101617);
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   }
 
   /* === ГЛАВНАЯ КНОПКА === */
@@ -651,21 +667,30 @@
   }
 
   .global-home-button .btn {
-    background: var(--wz-accent-dark);
-    border: 1px solid var(--wz-accent);
+    background: linear-gradient(145deg, #2d9c44, #1e6b32);
     color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   }
 
   .global-home-button .btn:hover {
-    background: var(--wz-accent);
-    box-shadow: 0 4px 16px var(--wz-accent-glow);
+    background: linear-gradient(145deg, #3cb054, #2d9c44);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
   }
 
   /* === АДАПТИВ === */
   @media (max-width: 480px) {
     .loadout__module {
       width: 100%;
-    }    
+    }
+
+    .button-grid.two-column {
+      grid-template-columns: 1fr;
+    }
+
+    .button-grid.three-column {
+      grid-template-columns: 1fr;
+    }
+    
     .loadout__tab {
       flex: 1 1 100%;
     }
