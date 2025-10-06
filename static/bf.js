@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   let bfChallenges = [];
   let editingChallengeId = null;
   let isActivating = false;
+  let isUpdatingProgress = false;  // FIX: Добавил для debounce +/-
 
   // --- Screens ---
   const bfScreens = {
@@ -281,7 +282,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const url = categoryId
         ? `${BF_API_BASE}/challenges?category_id=${categoryId}`
         : `${BF_API_BASE}/challenges`;
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ initData: tg?.initData || "" })  // FIX: Добавил initData для auth
+      });
       bfChallenges = await res.json();
       // 🔧 защита — фильтруем по категории, если API возвращает всё подряд
       if (categoryId) bfChallenges = bfChallenges.filter(ch => ch.category_id == categoryId);
@@ -352,7 +357,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     const listEl = document.getElementById("bf-challenges-list");
     if (!listEl) return;
 
-    const res = await fetch(`${BF_API_BASE}/challenges`);
+    const res = await fetch(`${BF_API_BASE}/challenges`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ initData: tg?.initData || "" })  // FIX: initData
+    });
     const all = await res.json();
     const active = all.filter(ch => ch.goal > 0 && ch.current > 0 && ch.current < ch.goal);
     const completed = all.filter(ch => ch.goal > 0 && ch.current >= ch.goal);
@@ -396,7 +405,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function updateInitialStatusCounts() {
     try {
-      const res = await fetch(`${BF_API_BASE}/challenges`);
+      const res = await fetch(`${BF_API_BASE}/challenges`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ initData: tg?.initData || "" })  // FIX: initData
+      });
       const all = await res.json();
       const active = all.filter(ch => ch.goal > 0 && ch.current > 0 && ch.current < ch.goal);
       const completed = all.filter(ch => ch.goal > 0 && ch.current >= ch.goal);
@@ -426,7 +439,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         try {
-          const res = await fetch(`${BF_API_BASE}/challenges`);
+          const res = await fetch(`${BF_API_BASE}/challenges`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ initData: tg?.initData || "" })  // FIX: initData
+          });
           const all = await res.json();
           const filtered = all.filter(ch => {
             const en = (ch.title_en || "").toLowerCase();
@@ -465,7 +482,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   // --- Admin grid ---
   async function loadBfChallengesTable() {
     try {
-      const res = await fetch(`${BF_API_BASE}/challenges`);
+      const res = await fetch(`${BF_API_BASE}/challenges`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ initData: tg?.initData || "" })  // FIX: initData
+      });
       bfChallenges = await res.json();
 
       document.getElementById("bf-total-challenges").textContent = bfChallenges.length;
@@ -652,18 +673,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     const id = Number(card.dataset.id);
     if (!id || card.classList.contains("completed") || card.classList.contains("active")) return;
 
+    // FIX: Если goal=1, confirm чтобы не завершить сразу
+    const goal = parseInt(card.querySelector(".progress-text span:last-child").textContent.split("/")[1].trim()) || 0;
+    if (goal === 1 && !confirm("Это сразу завершит испытание (цель=1). Начать?")) return;
+
     isActivating = true;
     try {
-      // FIX: Активируем с прибавкой +1 (чтобы current > 0 и вызов стал активным)
+      // FIX: Активируем с +1 (current>0 -> active)
       const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ delta: 1, initData: tg?.initData || "" })  // FIX: delta: 1 вместо 0
+        body: JSON.stringify({ delta: 1, initData: tg?.initData || "" })
       });
       if (!res.ok) throw new Error("Ошибка активации испытания");
-      const updated = await res.json();  // FIX: Получаем обновлённые данные для синхронизации UI
+      const updated = await res.json();
 
-      // FIX: Обновляем UI карточки сразу (прогресс, процент)
+      // FIX: Синхронизируем UI
       const percent = updated.goal ? Math.min(updated.current / updated.goal * 100, 100) : 0;
       card.querySelector(".progress-fill").style.width = `${percent}%`;
       card.querySelector(".progress-text span:last-child").textContent = `${updated.current} / ${updated.goal}`;
@@ -675,48 +700,53 @@ document.addEventListener("DOMContentLoaded", async () => {
       setTimeout(async () => {
         card.remove();
         await updateInitialStatusCounts();
-      
-        // FIX: Дождёмся обновления и сразу рендерим активные (с новой карточкой)
+
+        // FIX: Автоматически рендерим "активные" (карточка переходит туда)
         document.querySelectorAll(".status-btn").forEach(b => b.classList.remove("active"));
         document.querySelector('[data-status="active"]').classList.add("active");
-        await renderChallengesByStatus("active");  // FIX: Прямо рендерим активные, чтобы карточка появилась там
+        await renderChallengesByStatus("active");
       }, 300);
 
     } catch (err) {
       console.error("Ошибка при запуске испытания:", err);
-      alert("❌ Ошибка активации");  // FIX: Добавил алерт для пользователя
+      alert("❌ Ошибка активации");
     } finally {
       isActivating = false;
     }
   });
 
-  // --- Progress +/- (fixed step, no instant completion) ---
+  // --- Progress +/- (fixed, with debounce) ---
   document.addEventListener("click", async (e) => {
     const btn = e.target.closest(".btn-mini");
-    if (!btn) return;
-    if (btn.disabled) return;
+    if (!btn || isUpdatingProgress) return;
     btn.disabled = true;
+    isUpdatingProgress = true;
 
     const id = Number(btn.dataset.id);
     const delta = btn.dataset.action === "plus" ? 1 : -1;
     const card = document.querySelector(`.challenge-card-user[data-id="${id}"]`);
-    if (!card) return;
+    if (!card) {
+      isUpdatingProgress = false;
+      return;
+    }
 
     const text = card.querySelector(".progress-text span:last-child").textContent;
     const [currRaw, goalRaw] = text.split("/").map(t => parseInt(t.trim()) || 0);
     let curr = currRaw, goal = goalRaw;
 
-    // FIX: Если + доведёт до goal или больше, спрашиваем подтверждение (чтобы избежать "мгновенного завершения")
+    // FIX: Confirm если + завершит
     if (curr + delta >= goal && delta > 0) {
-      if (!confirm("Это завершит вызов. Продолжить?")) {
+      if (!confirm("Это завершит испытание. Продолжить?")) {
         btn.disabled = false;
+        isUpdatingProgress = false;
         return;
       }
     }
 
-    // Не позволяем current < 0 для -
+    // Не ниже 0
     if (curr + delta < 0 && delta < 0) {
       btn.disabled = false;
+      isUpdatingProgress = false;
       return;
     }
 
@@ -734,8 +764,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       card.querySelector(".progress-text span:last-child").textContent =
         `${updated.current} / ${updated.goal}`;
 
-      // показываем завершение только если реально достигли цели после клика
-      if (updated.current >= updated.goal) {  // FIX: Изменил на >= для безопасности
+      if (updated.current >= updated.goal) {
         card.classList.add("completed");
         const overlay = document.createElement("div");
         overlay.className = "completed-overlay";
@@ -744,18 +773,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         card.querySelector(".progress-controls")?.remove();
 
         setTimeout(async () => {
-          await renderChallengesByStatus("completed");
+          await renderChallengesByStatus("completed");  // FIX: Переход в completed
           await updateInitialStatusCounts();
         }, 400);
       } else {
-        // просто обновляем счётчик без переходов
         await updateInitialStatusCounts();
       }
     } catch (err) {
       console.error("Ошибка PATCH:", err);
-      alert("❌ Ошибка обновления прогресса");  // FIX: Добавил алерт
+      alert("❌ Ошибка обновления прогресса");
     } finally {
       btn.disabled = false;
+      isUpdatingProgress = false;
     }
   });
 
