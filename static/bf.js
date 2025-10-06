@@ -945,12 +945,19 @@ document.addEventListener("dblclick", async (e) => {
       card.style.transform = "";
     }, 700);
 
-    // 🔁 обновляем вкладку "Активные"
-    setTimeout(async () => {
-      document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
-      document.querySelector('.status-btn[data-status="active"]')?.classList.add("active");
-      await renderChallengesByStatus("active");
-    }, 500);
+  // 🔁 корректное обновление после старта испытания
+  setTimeout(async () => {
+    // только обновляем счётчик, не перерисовываем весь список
+    await updateStatusCountersAuto();
+  
+    // визуально подсвечиваем кнопку "Активные", но не переключаем экран
+    const activeBtn = document.querySelector('.status-btn[data-status="active"]');
+    if (activeBtn) {
+      activeBtn.classList.add("pulse");
+      setTimeout(() => activeBtn.classList.remove("pulse"), 1200);
+    }
+  }, 700);
+
   } catch (err) {
     console.error("Ошибка при запуске испытания:", err);
   }
