@@ -310,11 +310,10 @@ async function updateStatusCountersAuto() {
     const res = await fetch(`${BF_API_BASE}/challenges`);
     const all = await res.json();
 
-  // ✅ активные — только те, где начат прогресс (>0 и <goal)
-  const active = all.filter(ch => ch.goal > 0 && ch.current > 0 && ch.current < ch.goal);
-  // ✅ завершённые — где достигнут goal
-  const completed = all.filter(ch => ch.goal > 0 && ch.current >= ch.goal);
-  updateStatusCounters(active.length, completed.length);
+    const active = all.filter(ch => ch.goal > 0 && ch.current > 0 && ch.current < ch.goal);
+    const completed = all.filter(ch => ch.goal > 0 && ch.current >= ch.goal);
+
+    updateStatusCounters(active.length, completed.length);
   } catch (e) {
     console.warn("Ошибка при обновлении счётчиков:", e);
   }
@@ -408,38 +407,28 @@ async function renderChallengesByStatus(status) {
   const res = await fetch(`${BF_API_BASE}/challenges`);
   const all = await res.json();
 
-  const active = all.filter(ch => ch.goal > 0 && ch.current < ch.goal);
+  const active = all.filter(ch => ch.goal > 0 && ch.current > 0 && ch.current < ch.goal);
   const completed = all.filter(ch => ch.goal > 0 && ch.current >= ch.goal);
 
-  // ✅ обновляем счетчики
   updateStatusCounters(active.length, completed.length);
 
   let filtered = [];
   if (status === "completed") filtered = completed;
-  else if (status === "active") filtered = active;
+  if (status === "active")    filtered = active;
 
-  // === если активных нет ===
   if (status === "active" && active.length === 0) {
     listEl.innerHTML = `
       <div class="no-active-message">
         💡 У вас нет активных заданий.<br>
         Дважды щёлкните по карточке во вкладке <b>«Общее»</b>, чтобы начать выполнение.
-      </div>
-    `;
+      </div>`;
     return;
   }
-
-  // === если завершённых нет ===
   if (status === "completed" && completed.length === 0) {
-    listEl.innerHTML = `
-      <div class="no-active-message">
-        💤 У вас пока нет завершённых заданий.
-      </div>
-    `;
+    listEl.innerHTML = `<div class="no-active-message">💤 У вас пока нет завершённых заданий.</div>`;
     return;
   }
 
-  // === стандартный рендер карточек ===
   listEl.innerHTML = filtered.map(ch => {
     const percent = ch.goal > 0 ? Math.min((ch.current / ch.goal) * 100, 100) : 0;
     const isDone = ch.current >= ch.goal;
@@ -448,27 +437,17 @@ async function renderChallengesByStatus(status) {
         ${ch.category_name ? `<div class="challenge-category">${ch.category_name}</div>` : ""}
         <div class="challenge-title-en">${ch.title_en}</div>
         <div class="challenge-title-ru">${ch.title_ru}</div>
-        <div class="progress-text">
-          <span>Прогресс</span>
-          <span>${ch.current} / ${ch.goal}</span>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width:${percent}%;"></div>
-        </div>
+        <div class="progress-text"><span>Прогресс</span><span>${ch.current} / ${ch.goal}</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${percent}%"></div></div>
         ${!isDone ? `
           <div class="progress-controls">
-            <button class="btn-mini" data-action="minus" data-id="${ch.id}">
-              <i class="fas fa-minus"></i>
-            </button>
-            <button class="btn-mini" data-action="plus" data-id="${ch.id}">
-              <i class="fas fa-plus"></i>
-            </button>
-          </div>` 
-        : `<div class="completed-overlay">ЗАВЕРШЕНО!</div>`}
-      </div>
-    `;
+            <button class="btn-mini" data-action="minus" data-id="${ch.id}"><i class="fas fa-minus"></i></button>
+            <button class="btn-mini" data-action="plus"  data-id="${ch.id}"><i class="fas fa-plus"></i></button>
+          </div>` : `<div class="completed-overlay">ЗАВЕРШЕНО!</div>`}
+      </div>`;
   }).join('');
 }
+
 
 // === обновляем счетчики ===
 function updateStatusCounters(activeCount, completedCount) {
@@ -551,54 +530,59 @@ async function loadBfChallenges(categoryId = null) {
 
 
 // === Обновление прогресса ===
-// === Обновление прогресса (боевой режим) ===
 async function updateProgress(id, delta) {
   const card = document.querySelector(`.challenge-card-user[data-id="${id}"]`);
   if (!card) return;
 
   try {
-    // PATCH-запрос на сервер
     const res = await fetch(`${BF_API_BASE}/challenges/${id}/progress`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ delta, initData: tg?.initData || "" })
     });
-
     if (!res.ok) throw new Error("Ошибка обновления прогресса");
     const updated = await res.json();
 
-    // Обновляем визуально
+    // обновляем DOM цифры/полосу
     const progressText = card.querySelector(".progress-text span:last-child");
     const fill = card.querySelector(".progress-fill");
-
     const percent = updated.goal > 0 ? Math.min((updated.current / updated.goal) * 100, 100) : 0;
-    fill.style.width = `${percent}%`;
-    progressText.textContent = `${updated.current} / ${updated.goal}`;
+    if (fill) fill.style.width = `${percent}%`;
+    if (progressText) progressText.textContent = `${updated.current} / ${updated.goal}`;
 
-    // Проверяем, завершено ли испытание
+    // если завершили — эффект + перенос в «Завершённые»
     if (updated.current >= updated.goal) {
       card.classList.add("completed");
       if (!card.querySelector(".completed-overlay")) {
-        const overlay = document.createElement("div");
-        overlay.className = "completed-overlay";
-        overlay.textContent = "ЗАВЕРШЕНО!";
-        card.appendChild(overlay);
+        const ov = document.createElement("div");
+        ov.className = "completed-overlay";
+        ov.textContent = "ЗАВЕРШЕНО!";
+        card.appendChild(ov);
       }
-
-      // Анимация исчезновения и перенос во вкладку "Завершённые"
       setTimeout(async () => {
-        card.style.transition = "all 0.6s ease";
-        card.style.transform = "scale(0.95)";
-        card.style.opacity = "0";
-        setTimeout(async () => {
-          card.remove();
-          await renderChallengesByStatus("completed");
-        }, 600);
-      }, 1000);
+        card.remove();
+        await renderChallengesByStatus("completed");
+        await updateStatusCountersAuto();
+      }, 700);
+      return;
     }
+
+    // если мы были в «Общем», после первого инкремента карточка должна пропасть оттуда
+    const activeStatus = document.querySelector(".status-btn.active")?.dataset?.status;
+    if (!activeStatus) {
+      // Находим выбранную вкладку категорий и перерисовываем «Общее»
+      const categoryId = document.querySelector("#bf-tabs .tab-btn.active")?.dataset?.id || null;
+      await loadBfChallenges(categoryId);
+    } else if (activeStatus === "active") {
+      await renderChallengesByStatus("active");
+    }
+
+    await updateStatusCountersAuto();
   } catch (e) {
     console.error("Ошибка при обновлении прогресса:", e);
   }
+}
+
 
   // После успешного обновления:
 const activeStatus = document.querySelector(".status-btn.active")?.dataset?.status;
