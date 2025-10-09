@@ -137,19 +137,20 @@
     <!-- 📋 Экран со сборками -->
     <div id="screen-builds" class="screen">
         
-        <div id="weapon-type-filters" class="filter-buttons">
-          <button class="filter-btn active" data-type="all">Все</button>
-          <button class="filter-btn" data-type="assault">Штурмовые</button>
-          <button class="filter-btn" data-type="pp">ПП</button>
-          <button class="filter-btn" data-type="pulemet">Пулемёты</button>
-          <button class="filter-btn" data-type="snayperki">Снайперки</button>
-          <button class="filter-btn" data-type="pehotnay">Пехотные</button>
-          <button class="filter-btn" data-type="drobovik">Дробовики</button>
-        </div>
-
-            
-          <div class="form-section" style="width: 100%;">
-            <label for="category-filter">Категория:</label>
+        <div class="filters-row">
+          <div class="form-section" style="width: 50%;">
+            <select id="weapon-filter" class="form-input">
+              <option value="all">Выберите тип оружия</option>
+              <option value="assault">Штурмовые</option>
+              <option value="pp">Пистолеты-пулемёты</option>
+              <option value="pulemet">Пулемёты</option>
+              <option value="snayperki">Снайперские</option>
+              <option value="pehotnay">Пехотные</option>
+              <option value="drobovik">Дробовики</option>
+            </select>
+          </div>
+        
+          <div class="form-section" style="width: 50%;">
             <select id="category-filter" class="form-input">
               <option value="all">Все сборки</option>
               <option value="popular">Популярное</option>
@@ -158,6 +159,8 @@
               <option value="meta">Мета</option>
             </select>
           </div>
+        </div>
+
         
     
     
