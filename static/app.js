@@ -39,35 +39,44 @@ if (user && userInfoEl) {
 
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // фиксируем старт сессии
-  Analytics.trackEvent('session_start', { 
-  platform: tg.platform, 
-  time: new Date().toISOString()
-});
-  
-  await loadWeaponTypes(); // Загрузка типов
+  try {
+    Analytics.trackEvent('session_start', { 
+      platform: tg.platform, 
+      time: new Date().toISOString()
+    });
 
-      // ✅ Показываем кнопки пользователя
-  document.getElementById('show-builds-btn')?.classList.add('is-visible');
-  document.getElementById('help-btn')?.classList.add('is-visible');
-  
-  const dateInput = document.getElementById('build-date');
-  if (dateInput) {
-    const today = new Date().toISOString().split('T')[0];
-    dateInput.value = today;
-  }
+    // загружаем типы оружия
+    await loadWeaponTypes();
 
+    // показываем пользовательские кнопки
+    document.getElementById('show-builds-btn')?.classList.add('is-visible');
+    document.getElementById('help-btn')?.classList.add('is-visible');
 
-  // 👉 Добавить ожидание checkAdminStatus
-  await checkAdminStatus();
+    // проставляем сегодняшнюю дату
+    const dateInput = document.getElementById('build-date');
+    if (dateInput) {
+      dateInput.value = new Date().toISOString().split('T')[0];
+    }
 
-  // ✅ Показываем экран только после загрузки userInfo
-  if (window.userInfo) {
+    // проверяем статус админа
+    await checkAdminStatus();
+
+    // если сервер не ответил, создаём базовый объект
+    if (!window.userInfo) {
+      window.userInfo = { is_admin: false, is_super_admin: false };
+      console.warn('⚠️ checkAdminStatus не вернул userInfo — создаём пустой объект');
+    }
+
+    // гарантированно открываем домашний экран
     showScreen('screen-home');
-  } else {
-    console.error("❌ userInfo не загружен — showScreen не будет вызван");
+    
+  } catch (err) {
+    console.error('Ошибка при инициализации приложения:', err);
+    alert('⚠️ Ошибка запуска приложения. Проверь подключение к серверу.');
+    showScreen('screen-home'); // всё равно открываем домашний экран
   }
 });
+
 
 // 👉 Обработка смены категории в фильтре
 document.getElementById('category-filter')?.addEventListener('change', async (e) => {
