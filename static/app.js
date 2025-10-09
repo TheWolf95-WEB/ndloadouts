@@ -1021,6 +1021,7 @@ function formatRuDate(input) {
 
 
 // JS — функция для загрузки и отрисовки таблицы
+// JS — функция для загрузки и отрисовки таблицы
 async function loadBuildsTable() {
   try {
     const res = await fetch('/api/builds');
@@ -1032,27 +1033,52 @@ async function loadBuildsTable() {
       return;
     }
 
-    // Рендер карточек
+    // Рендер компактных карточек
     let html = '';
     builds.forEach((build, index) => {
+      const weaponTypeRu = weaponTypeLabels[build.weapon_type] || build.weapon_type;
+      const tabsCount = Array.isArray(build.tabs) ? build.tabs.length : 0;
+      const categories = Array.isArray(build.categories) ? build.categories : [];
+      
+      // Бейджи категорий
+      const categoryBadges = categories.map(cat => {
+        const label = {
+          'popular': '🔥',
+          'new': '🆕', 
+          'topmeta': '🏆',
+          'meta': '🎯',
+          'all': '📦'
+        }[cat] || '📌';
+        return `<span class="compact-badge">${label}</span>`;
+      }).join('');
+
       html += `
-        <div class="build-card">
-          <div><strong>#${index + 1}</strong></div>
-          <div><strong>Название:</strong> ${build.title}</div>
-          <div><strong>Тип:</strong> ${weaponTypeLabels[build.weapon_type] || build.weapon_type}</div>
-          <div><strong>Вкладки:</strong> ${Array.isArray(build.tabs) ? build.tabs.length : 0}</div>
-          <div class="build-actions">
-            <button class="btn btn-sm edit-btn" data-id="${build.id}">✏</button>
-            <button class="btn btn-sm delete-btn" data-id="${build.id}">🗑</button>
+        <div class="compact-build-card" data-id="${build.id}">
+          <div class="compact-card-header">
+            <div class="compact-card-main">
+              <span class="compact-index">#${index + 1}</span>
+              <h3 class="compact-title">${build.title}</h3>
+              ${categoryBadges}
+            </div>
+            <div class="compact-card-meta">
+              <span class="compact-type">${weaponTypeRu}</span>
+              <span class="compact-tabs">${tabsCount} вклад.</span>
+            </div>
+          </div>
+          <div class="compact-card-actions">
+            <button class="btn btn-sm btn-edit" data-id="${build.id}">✏️</button>
+            <button class="btn btn-sm btn-delete" data-id="${build.id}">🗑️</button>
           </div>
         </div>
       `;
     });
+    
     tableWrapper.innerHTML = html;
 
     // --- Удаление ---
-    tableWrapper.querySelectorAll('.delete-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
+    tableWrapper.querySelectorAll('.btn-delete').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
         const id = btn.dataset.id;
         if (!confirm('Удалить сборку?')) return;
 
@@ -1072,8 +1098,9 @@ async function loadBuildsTable() {
     });
 
     // --- Редактирование ---
-    tableWrapper.querySelectorAll('.edit-btn').forEach(btn => {
-      btn.addEventListener('click', async () => {
+    tableWrapper.querySelectorAll('.btn-edit').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.stopPropagation();
         const id = btn.dataset.id;
         currentEditId = id;
 
@@ -1097,11 +1124,10 @@ async function loadBuildsTable() {
 
         // Модули по типу
         tabsContainer.innerHTML = '';
-        await loadModules(build.weapon_type); // важно: подгрузить справочник модулей для типа
+        await loadModules(build.weapon_type);
 
         // Восстановление вкладок и модулей
         (build.tabs || []).forEach(tab => {
-          // Вкладка
           const tabDiv = document.createElement('div');
           tabDiv.className = 'tab-block';
           tabDiv.innerHTML = `
@@ -1117,31 +1143,24 @@ async function loadBuildsTable() {
           tabDiv.querySelector('.add-mod').addEventListener('click', () => addModuleRow(tabDiv, build.weapon_type));
           tabDiv.querySelector('.delete-tab').addEventListener('click', () => tabDiv.remove());
 
-          // Модули во вкладке — со строгим восстановлением категории
           (tab.items || []).forEach(modKey => {
             if (!modKey) return;
 
-            // создаём строку
             addModuleRow(tabDiv, build.weapon_type);
-
             const rows = tabDiv.querySelectorAll('.mod-row');
             const row = rows[rows.length - 1];
             const catSelect = row.querySelector('.category-select');
             const modSelect = row.querySelector('.module-select');
 
-            // определяем правильную категорию для этого модуля
             let cat = getCategoryByModule(modKey, build.weapon_type);
             if (!cat) {
-              // если модуль не найден ни в одной категории — пусть остаётся первая доступная
               const first = catSelect.options[0]?.value || '';
               cat = first;
             }
 
-            // ставим категорию → это заполнит список модулей (через обработчик change)
             catSelect.value = cat;
             catSelect.dispatchEvent(new Event('change'));
 
-            // теперь ставим значение модуля; если отсутствует в списке — добавим как “неизвестный”
             if (![...modSelect.options].some(o => o.value === modKey)) {
               const opt = document.createElement('option');
               opt.value = modKey;
@@ -1152,6 +1171,17 @@ async function loadBuildsTable() {
             modSelect.dispatchEvent(new Event('change'));
           });
         });
+      });
+    });
+
+    // Клик по карточке для быстрого редактирования
+    tableWrapper.querySelectorAll('.compact-build-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (!e.target.closest('.compact-card-actions')) {
+          const id = card.dataset.id;
+          const btn = card.querySelector('.btn-edit');
+          btn.click();
+        }
       });
     });
 
