@@ -1,4 +1,4 @@
-const tg = window.Telegram.WebApp;
+смотри у меня даже в браузере появилаьс кнопки админки но нету в веб апп для супер админа  const tg = window.Telegram.WebApp;
 tg.expand();
 
 const user = tg.initDataUnsafe?.user;
@@ -39,44 +39,35 @@ if (user && userInfoEl) {
 
 
 document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    Analytics.trackEvent('session_start', { 
-      platform: tg.platform, 
-      time: new Date().toISOString()
-    });
+    // фиксируем старт сессии
+  Analytics.trackEvent('session_start', { 
+  platform: tg.platform, 
+  time: new Date().toISOString()
+});
+  
+  await loadWeaponTypes(); // Загрузка типов
 
-    // загружаем типы оружия
-    await loadWeaponTypes();
+      // ✅ Показываем кнопки пользователя
+  document.getElementById('show-builds-btn')?.classList.add('is-visible');
+  document.getElementById('help-btn')?.classList.add('is-visible');
+  
+  const dateInput = document.getElementById('build-date');
+  if (dateInput) {
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.value = today;
+  }
 
-    // показываем пользовательские кнопки
-    document.getElementById('show-builds-btn')?.classList.add('is-visible');
-    document.getElementById('help-btn')?.classList.add('is-visible');
 
-    // проставляем сегодняшнюю дату
-    const dateInput = document.getElementById('build-date');
-    if (dateInput) {
-      dateInput.value = new Date().toISOString().split('T')[0];
-    }
+  // 👉 Добавить ожидание checkAdminStatus
+  await checkAdminStatus();
 
-    // проверяем статус админа
-    await checkAdminStatus();
-
-    // если сервер не ответил, создаём базовый объект
-    if (!window.userInfo) {
-      window.userInfo = { is_admin: false, is_super_admin: false };
-      console.warn('⚠️ checkAdminStatus не вернул userInfo — создаём пустой объект');
-    }
-
-    // гарантированно открываем домашний экран
+  // ✅ Показываем экран только после загрузки userInfo
+  if (window.userInfo) {
     showScreen('screen-home');
-    
-  } catch (err) {
-    console.error('Ошибка при инициализации приложения:', err);
-    alert('⚠️ Ошибка запуска приложения. Проверь подключение к серверу.');
-    showScreen('screen-home'); // всё равно открываем домашний экран
+  } else {
+    console.error("❌ userInfo не загружен — showScreen не будет вызван");
   }
 });
-
 
 // 👉 Обработка смены категории в фильтре
 document.getElementById('category-filter')?.addEventListener('change', async (e) => {
@@ -142,13 +133,10 @@ async function checkAdminStatus() {
     // === Если супер-админ ===
     if (data.is_super_admin) {
       assignBtn?.classList.add('is-visible');
-      assignBtn?.style.display = 'flex'; // 👈 гарантированно покажет
-      console.log("👑 Супер-админ — кнопка админки показана");
+      addBtn?.classList.add('full-width');
     } else {
-      assignBtn?.classList.remove('is-visible');
-      assignBtn?.style.display = 'none';
+      addBtn?.classList.remove('full-width');
     }
-
 
   } catch (e) {
     console.error("Ошибка при проверке прав администратора:", e);
@@ -1381,4 +1369,4 @@ document.addEventListener('touchend', (e) => {
   if (deltaX > 70 && deltaY < 50) {
     goBack();
   }
-});
+}); 
