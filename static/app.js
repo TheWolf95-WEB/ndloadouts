@@ -268,7 +268,7 @@ document.getElementById('back-to-main')?.addEventListener('click', () => {
   time: new Date().toISOString()
 });
 });
-document.getElementById('back-from-builds')?.addEventListener('click', () => showScreen('screen-home'));
+document.getElementById('back-from-builds')?.addEventListener('click', () => showScreen('screen-warzone-main'));
 
 document.getElementById('help-btn')?.addEventListener('click', () => {
   tg.openLink('https://t.me/ndzone_admin');
@@ -1209,7 +1209,7 @@ document.getElementById('assign-admin-btn')?.addEventListener('click', () => {
 
 // Назад с экрана назначения
 document.getElementById('back-from-assign')?.addEventListener('click', () => {
-  showScreen('screen-warzone-main');
+  showScreen('screen-home');
 });
 
 // Обработка формы назначения админа
