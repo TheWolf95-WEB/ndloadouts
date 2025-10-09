@@ -809,14 +809,16 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   }
 
-  /* === АДМИН-СПИСОК === */
-/* === ЭКРАН: Назначить администратора === */
+/* === АДМИН-СПИСОК | ЭКРАН: Назначить администратора === */
 #screen-assign-admin {
   background: linear-gradient(145deg, #181d24, #111519);
   border-radius: 14px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
   color: #fff;
   animation: fadeIn 0.3s ease;
+  padding: 24px 24px 32px;
+  max-width: 520px;
+  margin: 0 auto;
 }
 
 /* Заголовок */
@@ -844,6 +846,26 @@
   background: #12171d;
 }
 
+/* Кнопка "Назначить" */
+#submit-admin-id {
+  margin-top: 16px;
+  width: 100%;
+  background: #1f6feb;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  padding: 10px 14px;
+  font-weight: 500;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+#submit-admin-id:hover {
+  background: #388bfd;
+}
+#submit-admin-id:active {
+  transform: scale(0.97);
+}
 
 /* Статус */
 #assign-admin-status {
@@ -858,49 +880,48 @@
   border: none;
   height: 1px;
   background: #232a32;
-  margin: 24px 0;
+  margin: 28px 0 20px;
 }
 
 /* Заголовки блоков */
 #admin-list strong {
+  display: block;
+  margin: 14px 0 8px;
   color: #9cc9ff;
   font-size: 15px;
 }
 
-/* Список */
+/* Список админов */
+#admin-list {
+  list-style: none;
+  padding: 0 12px;
+  margin: 0;
+}
+
+/* Элемент списка */
 #admin-list li {
+  list-style: none;
   background: #0d1116;
   border: 1px solid #1e242b;
   border-radius: 8px;
-  padding: 10px 12px;
+  padding: 10px 14px;
   margin-bottom: 10px;
   color: #fff;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: background 0.2s ease, border-color 0.2s ease;
 }
+#admin-list li:hover {
+  background: #12171d;
+  border-color: #2a323b;
+}
+
 #admin-list li span {
   flex: 1;
   font-size: 14px;
+  word-break: break-word;
 }
-
-   #submit-admin-id {
-      margin-top: 14px;
-   }
-
-#admin-list {
-  list-style: none;
-  padding-left: 0;
-  margin-left: 0;
-}
-
-#admin-list li {
-  list-style-type: none;
-  margin-left: 0;
-  padding-left: 0;
-}
-
-   
 
 /* Кнопка "Удалить" */
 #admin-list li button {
@@ -918,11 +939,21 @@
   color: #fff;
 }
 
+/* 👑 Акцент для владельца */
+#admin-list li.owner {
+  border: 1px solid #3fb950;
+  background: rgba(63, 185, 80, 0.08);
+}
+#admin-list li.owner span {
+  color: #3fb950;
+}
+
 /* Анимация появления */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
 
 
   /* === ГЛАВНАЯ КНОПКА === */
