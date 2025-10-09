@@ -757,111 +757,99 @@ cachedBuilds = sorted;
   buildsList.innerHTML = '';
   const topColors = ['#FFD700', '#B0B0B0', '#FF8C00'];
 
-  sorted.forEach((build, buildIndex) => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'loadout js-loadout';
+sorted.forEach((build, buildIndex) => {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'loadout js-loadout';
 
-const tops = [build.top1, build.top2, build.top3]
-        .filter(Boolean)
-        .map((mod) => {
-          // если ты сам написал #1, #2 и т.п. — оставляем как есть
-          const displayText = mod.trim();
-          // используем те же цвета, что и раньше, просто по порядку
-          const bg = topColors.find((_, idx) => idx < 3) || '#666';
-          return `<span class="loadout__top" style="background:${bg}">${displayText}</span>`;
-        })
-        .join('');
+  // 👉 это пропало у тебя — нужно снова объявить
+  const weaponTypeRu = weaponTypeLabels[build.weapon_type] || build.weapon_type;
 
+  // Цвет топа определяется ТОЛЬКО если ты сам написал #1 / #2 / #3
+  const pickTopBg = (text) => {
+    const m = String(text).trim().match(/^#?(\d+)/);
+    const n = m ? parseInt(m[1], 10) : 0;
+    if (n === 1) return '#FFD700'; // золото
+    if (n === 2) return '#B0B0B0'; // серебро
+    if (n === 3) return '#FF8C00'; // бронза
+    return '#2f3336';             // базовый серый, если без номера
+  };
 
+  const tops = [build.top1, build.top2, build.top3]
+    .filter(Boolean)
+    .map((mod) => {
+      const text = mod.trim();          // ничего не дописываем автоматически
+      const bg = pickTopBg(text);       // цвет по твоему номеру
+      return `<span class="loadout__top" style="background:${bg}">${text}</span>`;
+    })
+    .join('');
 
-          // === Категории (бейджи, русский + приоритет + отдельный бейдж справа)
-      const cats = Array.isArray(build.categories) ? build.categories : [];
-
-      // === Перевод категорий с английского на русский ===
-      const translatedCats = cats.map(cat => {
-        switch (cat.toLowerCase()) {
-          case 'all': return 'Все';
-          case 'new': return 'Новинки';
-          case 'popular': return 'Популярное';
-          case 'meta': return 'Мета';
-          case 'topmeta': return 'Топ мета';
-          default: return cat;
-        }
-      });
-
-      
-      // 🔸 сортировка и приоритет категорий
-      const badgePriority = ["Новинки", "Популярное", "Топ мета", "Мета"];
-      const badgeColors = {
-        "Новинка": "#2f3336",
-        "Популярное": "#2f3336",
-        "Топ мета": "#2f3336",
-        "Мета": "#2f3336"
-      };
-      
-      // 🔸 перевод категории на русский и единую форму (без "Новинки")
-      const normalizeName = (name) => {
-        if (name === "Новинки") return "Новинка";
-        return name;
-      };
-      
-      let categoryBadges = translatedCats
-        .map(cat => {
-          const name = normalizeName(cat);
-          return `<span class="badge badge-category" data-cat="${name}">${name}</span>`;
-        })
-        .join("");
-
-      
-    const tabBtns = build.tabs.map((tab, i) =>
-      `<button class="loadout__tab ${i === 0 ? 'is-active' : ''}" data-tab="tab-${buildIndex}-${i}">${tab.label}</button>`
-    ).join('');
-
-    const tabContents = build.tabs.map((tab, i) => `
-      <div class="loadout__tab-content ${i === 0 ? 'is-active' : ''}" data-tab-content="tab-${buildIndex}-${i}">
-        <div class="loadout__modules">
-          ${tab.items.map(itemKey => {
-            const wrap = modulesByType[build.weapon_type];
-            const norm = s => String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
-            const mod  = wrap?.byKey?.[itemKey] || wrap?.byKey?.[norm(itemKey)] || null;
-            const slot = mod?.category || '—';
-            const ru   = mod?.ru || itemKey;
-            return `
-              <div class="loadout__module">
-                <span class="loadout__module-slot">${slot}</span>
-                <span class="loadout__module-name">${ru}</span>
-              </div>
-            `;
-          }).join('')}
-        </div>
-      </div>
-    `).join('');
-
-    wrapper.innerHTML = `
-      <div class="loadout__header js-loadout-toggle">
-        <div class="loadout__header--top">
-          <button class="loadout__toggle-icon" type="button"><i class="fa-solid fa-chevron-down"></i></button>
-          <h3 class="loadout__title">${build.title}</h3>
-          <span class="loadout__date">${build.date || ''}</span>
-        </div>
-        <div class="loadout__meta">
-          <div class="loadout__tops">${tops}</div>
-          <div class="loadout__categories">${categoryBadges}</div>
-          <div class="loadout__type">${weaponTypeRu}</div>
-        </div>
-      </div>
-      <div class="loadout__content" style="max-height: 0; overflow: hidden;">
-        <div class="loadout__inner">
-          <div class="loadout__tabs">
-            <div class="loadout__tab-buttons">${tabBtns}</div>
-            <div class="loadout__tab-contents">${tabContents}</div>
-          </div>
-        </div>
-      </div>
-    `;
-    
-    buildsList.appendChild(wrapper);
+  // Категории (для бейджей снизу)
+  const cats = Array.isArray(build.categories) ? build.categories : [];
+  const translatedCats = cats.map(cat => {
+    switch (String(cat).toLowerCase()) {
+      case 'all': return 'Все';
+      case 'new': return 'Новинка';       // для UI — в единственном числе
+      case 'popular': return 'Популярное';
+      case 'meta': return 'Мета';
+      case 'topmeta': return 'Топ мета';
+      default: return cat;
+    }
   });
+
+  const categoryBadges = translatedCats
+    .map(name => `<span class="badge badge-category" data-cat="${name}">${name}</span>`)
+    .join('');
+
+  const tabBtns = build.tabs.map((tab, i) =>
+    `<button class="loadout__tab ${i === 0 ? 'is-active' : ''}" data-tab="tab-${buildIndex}-${i}">${tab.label}</button>`
+  ).join('');
+
+  const tabContents = build.tabs.map((tab, i) => `
+    <div class="loadout__tab-content ${i === 0 ? 'is-active' : ''}" data-tab-content="tab-${buildIndex}-${i}">
+      <div class="loadout__modules">
+        ${tab.items.map(itemKey => {
+          const wrap = modulesByType[build.weapon_type];
+          const norm = s => String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
+          const mod  = wrap?.byKey?.[itemKey] || wrap?.byKey?.[norm(itemKey)] || null;
+          const slot = mod?.category || '—';
+          const ru   = mod?.ru || itemKey;
+          return `
+            <div class="loadout__module">
+              <span class="loadout__module-slot">${slot}</span>
+              <span class="loadout__module-name">${ru}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  wrapper.innerHTML = `
+    <div class="loadout__header js-loadout-toggle">
+      <div class="loadout__header--top">
+        <button class="loadout__toggle-icon" type="button"><i class="fa-solid fa-chevron-down"></i></button>
+        <h3 class="loadout__title">${build.title}</h3>
+        <span class="loadout__date">${build.date || ''}</span>
+      </div>
+      <div class="loadout__meta">
+        <div class="loadout__tops">${tops}</div>
+        <div class="loadout__categories">${categoryBadges}</div>
+        <div class="loadout__type">${weaponTypeRu}</div>
+      </div>
+    </div>
+    <div class="loadout__content" style="max-height: 0; overflow: hidden;">
+      <div class="loadout__inner">
+        <div class="loadout__tabs">
+          <div class="loadout__tab-buttons">${tabBtns}</div>
+          <div class="loadout__tab-contents">${tabContents}</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  buildsList.appendChild(wrapper);
+});
+
 
   // сброс раскрытия
   document.querySelectorAll('.js-loadout').forEach(el => {
