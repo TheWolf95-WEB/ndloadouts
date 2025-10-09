@@ -713,38 +713,39 @@
 }
 
 /* === Категории под названием сборки === */
+/* === Стили бейджей категорий === */
 .badge-category {
   display: inline-block;
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 0.85rem;
   font-weight: 600;
-  text-transform: none;
   margin-right: 6px;
   margin-top: 4px;
   color: #fff;
+  text-transform: none;
   opacity: 0.95;
 }
 
-/* === Цвета по категориям === */
+/* === Цвета категорий === */
 .badge-category[data-cat="Новинка"] {
-  background: linear-gradient(145deg, #2b4a72, #20364e);
-}
-
-.badge-category[data-cat="Топ мета"] {
-  background: linear-gradient(145deg, #c6791a, #9a5c0f);
-}
-
-.badge-category[data-cat="Мета"] {
-  background: linear-gradient(145deg, #2d9c44, #1e6b32);
+  background: linear-gradient(145deg, #2c4e73, #1d3249); /* синеватый */
 }
 
 .badge-category[data-cat="Популярное"] {
-  background: linear-gradient(145deg, #396a49, #2e4f38);
+  background: linear-gradient(145deg, #8c1d1d, #601212); /* красноватый */
+}
+
+.badge-category[data-cat="Топ мета"] {
+  background: linear-gradient(145deg, #d8891b, #9e5c0f); /* оранжево-золотой */
+}
+
+.badge-category[data-cat="Мета"] {
+  background: linear-gradient(145deg, #2e8b47, #1d5f30); /* зелёный */
 }
 
 .badge-category[data-cat="Все"] {
-  background: #2f3336;
+  background: #2f3336; /* серый нейтральный */
   color: #ccc;
 }
 
