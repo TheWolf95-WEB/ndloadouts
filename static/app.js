@@ -349,7 +349,7 @@ document.getElementById('add-tab').addEventListener('click', () => {
   const tabDiv = document.createElement('div');
   tabDiv.className = 'tab-block';
   tabDiv.innerHTML = `
-    <input type="text" class="том tab-label" placeholder="Название вкладки" style="margin-bottom: 10px;">
+    <input type="text" class="tab-label" placeholder="Название вкладки" style="margin-bottom: 10px;">
     <div class="mod-selects"></div>
     <div class="tab-actions">
       <button type="button" class="btn add-mod">+ модуль</button>
@@ -816,28 +816,6 @@ cachedBuilds = sorted;
         </div>
       </div>
     `;
-
-    const cats = Array.isArray(build.categories) ? build.categories : [];
-    const headerTop = wrapper.querySelector('.loadout__header--top');
-    
-    // показываем только один бэйдж с приоритетом: Новинки > Популярное
-    let badgeText = null;
-    let badgeClass = null;
-    
-    if (cats.includes('Новинки')) {
-      badgeText = 'Новинка';
-      badgeClass = 'badge-new';
-    } else if (cats.includes('Популярное')) {
-      badgeText = 'Популярное';
-      badgeClass = 'badge-popular';
-    }
-    
-    if (badgeText && headerTop) {
-      const badge = document.createElement('span');
-      badge.className = `badge ${badgeClass}`;
-      badge.textContent = badgeText;
-      headerTop.appendChild(badge);
-    }
 
     buildsList.appendChild(wrapper);
   });
