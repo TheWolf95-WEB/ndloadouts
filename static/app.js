@@ -820,7 +820,7 @@ cachedBuilds = sorted;
       const pickTopBg = (text) => {
         const m = String(text).trim().match(/^#?(\d+)/);
         const n = m ? parseInt(m[1], 10) : 0;
-        if (n === 1) return '#e6c44d';
+        if (n === 1) return '#b8a326';
         if (n === 2) return '#B0B0B0';
         if (n === 3) return '#FF8C00';
         return '#2f3336';
