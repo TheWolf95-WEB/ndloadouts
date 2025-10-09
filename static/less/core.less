@@ -60,7 +60,6 @@ body {
   padding: 16px;
   width: 100%;
   min-height: 100vh;
-  overflow-x: hidden;
   position: relative;
 }
 
@@ -86,6 +85,7 @@ body {
   pointer-events: all;
   z-index: 1;
 }
+
 
 /* 🔹 Анимации для свайпа */
 .screen.slide-out-right {
@@ -377,14 +377,6 @@ body {
 
 
 /* анимация перехода */
-
-.screen {
-  opacity: 0;
-  transform: translateY(10px); /* чуть меньше — плавнее */
-  pointer-events: none;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  display: none;
-}
 
 
 .card-btn{
