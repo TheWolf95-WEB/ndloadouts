@@ -810,24 +810,126 @@
   }
 
   /* === АДМИН-СПИСОК === */
-  #admin-list li {
-    margin-bottom: 10px;
-    padding: 12px 16px;
-    background: linear-gradient(145deg, #1b2324, #101617);
-    border-radius: 8px;
-    color: var(--wz-text);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  }
+/* === ЭКРАН: Назначить администратора === */
+#screen-assign-admin {
+  max-width: 520px;
+  margin: 0 auto;
+  background: linear-gradient(145deg, #181d24, #111519);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  padding: 24px 28px 32px;
+  color: #fff;
+  animation: fadeIn 0.3s ease;
+}
 
-  #assign-admin-status {
-    color: var(--wz-accent);
-    font-weight: 600;
-    margin-top: 8px;
-    padding: 12px 16px;
-    background: linear-gradient(145deg, #1b2324, #101617);
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-  }
+/* Заголовок */
+#screen-assign-admin h3 {
+  font-size: 1.4rem;
+  margin-bottom: 20px;
+  color: #fff;
+  text-align: center;
+}
+
+/* Поле ввода */
+#new-admin-id {
+  width: 100%;
+  background: #0d1116;
+  border: 1px solid #232a32;
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+  transition: border 0.2s ease, background 0.2s ease;
+}
+#new-admin-id:focus {
+  border-color: #3fb950;
+  background: #12171d;
+}
+
+/* Кнопка "Назначить" */
+#submit-admin-id {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1f6feb;
+  color: #fff;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-top: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+#submit-admin-id:hover {
+  background: #388bfd;
+}
+#submit-admin-id:active {
+  transform: scale(0.97);
+}
+
+/* Статус */
+#assign-admin-status {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #8b949e;
+  text-align: center;
+}
+
+/* Разделитель */
+#screen-assign-admin hr {
+  border: none;
+  height: 1px;
+  background: #232a32;
+  margin: 24px 0;
+}
+
+/* Заголовки блоков */
+#admin-list strong {
+  color: #9cc9ff;
+  font-size: 15px;
+}
+
+/* Список */
+#admin-list li {
+  background: #0d1116;
+  border: 1px solid #1e242b;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#admin-list li span {
+  flex: 1;
+  font-size: 14px;
+}
+
+/* Кнопка "Удалить" */
+#admin-list li button {
+  background: #2f1a1a;
+  border: 1px solid #803333;
+  color: #ff6b6b;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+#admin-list li button:hover {
+  background: #a33636;
+  color: #fff;
+}
+
+/* Анимация появления */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 
   /* === ГЛАВНАЯ КНОПКА === */
   #screen-warzone-main.active .global-home-button {
