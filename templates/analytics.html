@@ -1174,12 +1174,6 @@
 
 <script>
     let currentData = null;
-    let todayStats = {
-        activeUsers: new Set(),
-        newUsers: new Set(),
-        startOfDay: new Date().setHours(0, 0, 0, 0)
-    };
-
     let broadcastUsers = [];
     let selectedUserIds = new Set();
     let currentSelectionMode = 'all';
@@ -1361,8 +1355,8 @@
             const data = await response.json();
             currentData = data;
             
-            updateTodayStats(data.users, data.recent_activity);
-            updateStats(data.stats, data.users);
+            // Передаем activities в updateStats
+            updateStats(data.stats, data.users, data.recent_activity);
             updateUsers(data.users);
             updateActivity(data.recent_activity);
             updatePopularActions(data.popular_actions);
@@ -1390,37 +1384,43 @@
         }
     }
 
-    function updateTodayStats(users, activities) {
-        const today = new Date().setHours(0, 0, 0, 0);
-        
-        if (today !== todayStats.startOfDay) {
-            todayStats.activeUsers.clear();
-            todayStats.newUsers.clear();
-            todayStats.startOfDay = today;
+    // Функция для расчета реального времени использования бота
+    function calculateRealUsageTime(user) {
+        if (user.session_data && user.session_data.total_minutes) {
+            const totalMinutes = user.session_data.total_minutes;
+            
+            if (totalMinutes < 1) return '<1м';
+            if (totalMinutes < 60) return `${totalMinutes}м`;
+            
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            
+            if (hours < 24) {
+                return minutes > 0 ? `${hours}ч ${minutes}м` : `${hours}ч`;
+            }
+            
+            const days = Math.floor(hours / 24);
+            const remainingHours = hours % 24;
+            
+            if (remainingHours > 0) {
+                return `${days}д ${remainingHours}ч`;
+            }
+            
+            return `${days}д`;
         }
-        
-        users.forEach(user => {
-            if (isToday(user.last_seen)) {
-                todayStats.activeUsers.add(user.id);
-            }
-            if (isToday(user.first_seen)) {
-                todayStats.newUsers.add(user.id);
-            }
-        });
-        
-        activities.forEach(activity => {
-            if (isToday(activity.time)) {
-                todayStats.activeUsers.add(activity.user_id);
-            }
-        });
+        return '0м';
     }
 
-    function updateStats(stats, users) {
+    // Обновляем функцию updateStats для правильного отображения статистики за сегодня
+    function updateStats(stats, users, activities) {
         document.getElementById('total-users').textContent = stats.total_users;
         document.getElementById('online-users').textContent = stats.online_users;
-        document.getElementById('total-actions').textContent = todayStats.activeUsers.size;
+        
+        // Используем данные с сервера для статистики за сегодня
+        document.getElementById('total-actions').textContent = stats.today_actions || stats.total_actions_today || 0;
         document.getElementById('total-actions').parentNode.querySelector('.stat-label').textContent = '📊 Активность сегодня';
-        document.getElementById('total-errors').textContent = todayStats.newUsers.size;
+        
+        document.getElementById('total-errors').textContent = stats.today_new_users || stats.new_users_today || 0;
         document.getElementById('total-errors').parentNode.querySelector('.stat-label').textContent = '🆕 Новые сегодня';
     }
 
@@ -1459,7 +1459,7 @@
                                 ${user.status === 'online' ? '🟢 Онлайн' : '⚪ Оффлайн'}
                             </span>
                             <span>${user.platform === 'android' || user.platform === 'ios' ? '📱 Телефон' : '💻 ПК'}</span>
-                            <span>${calculateAverageTime(user)} в боте</span>
+                            <span>${calculateRealUsageTime(user)} использования</span>
                             ${user.username ? `<a href="https://t.me/${user.username}" target="_blank" style="color: var(--accent-secondary); text-decoration: none;">@${user.username}</a>` : ''}
                         </div>
                     </div>
@@ -1576,8 +1576,8 @@
                         <div class="user-card-stat-label">Действий</div>
                     </div>
                     <div class="user-card-stat">
-                        <div class="user-card-stat-value">${calculateAverageTime(user)}</div>
-                        <div class="user-card-stat-label">В боте</div>
+                        <div class="user-card-stat-value">${calculateRealUsageTime(user)}</div>
+                        <div class="user-card-stat-label">Использования</div>
                     </div>
                 </div>
                 <div style="text-align: center; margin-top: 10px;">
@@ -1603,42 +1603,6 @@
 
     function isNewToday(user) {
         return isToday(user.first_seen);
-    }
-
-    function calculateAverageTime(user) {
-        if (!user.first_seen) return '0м';
-        
-        try {
-            const firstSeenStr = user.first_seen;
-            let firstSeen;
-            
-            if (firstSeenStr.includes('.')) {
-                const [datePart, timePart] = firstSeenStr.split(' ');
-                const [day, month, year] = datePart.split('.');
-                firstSeen = new Date(`${year}-${month}-${day}T${timePart}`);
-            } else {
-                firstSeen = new Date(firstSeenStr);
-            }
-            
-            if (isNaN(firstSeen.getTime())) {
-                return '0м';
-            }
-            
-            const now = new Date();
-            const totalMinutes = Math.round((now - firstSeen) / (1000 * 60));
-            
-            if (totalMinutes < 1) return '<1м';
-            if (totalMinutes < 60) return `${totalMinutes}м`;
-            
-            const hours = Math.round(totalMinutes / 60);
-            if (hours < 24) return `${hours}ч`;
-            
-            const days = Math.round(hours / 24);
-            return `${days}д`;
-            
-        } catch (error) {
-            return '0м';
-        }
     }
 
     function isRecentActivity(lastSeen) {
