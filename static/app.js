@@ -752,23 +752,43 @@ cachedBuilds = sorted;
         : '')
       .join('');
 
-    // === Категории (бейджи)
-    let categoryBadges = '';
-    const cats = Array.isArray(build.categories) ? build.categories : [];
-    const badgeColors = {
-      'Новинки': '#3cb054',
-      'Популярное': '#2d9c44',
-      'Топ мета': '#e67e22',
-      'Мета': '#3498db'
-    };
-    
-    if (cats.length > 0) {
-      categoryBadges = cats.map(cat => {
-        const color = badgeColors[cat] || '#555';
-        return `<span class="badge badge-category" style="background:${color};">${cat}</span>`;
-      }).join('');
-    }
+          // === Категории (бейджи, русский + приоритет + отдельный бейдж справа)
+      const cats = Array.isArray(build.categories) ? build.categories : [];
+      
+      // 🔸 сортировка и приоритет категорий
+      const badgePriority = ["Новинки", "Популярное", "Топ мета", "Мета"];
+      const badgeColors = {
+        "Новинка": "#2f3336",
+        "Популярное": "#2f3336",
+        "Топ мета": "#2f3336",
+        "Мета": "#2f3336"
+      };
+      
+      // 🔸 перевод категории на русский и единую форму (без "Новинки")
+      const normalizeName = (name) => {
+        if (name === "Новинки") return "Новинка";
+        return name;
+      };
+      
+      // 🔸 для вывода внизу (несколько категорий)
+      let categoryBadges = cats
+        .map(cat => {
+          const name = normalizeName(cat);
+          const color = badgeColors[name] || "#2f3336";
+          return `<span class="badge badge-category" style="background:${color};">${name}</span>`;
+        })
+        .join("");
+      
+      // 🔸 для бейджа справа в заголовке
+      let badgeText = null;
+      for (const name of badgePriority) {
+        if (cats.includes(name)) {
+          badgeText = normalizeName(name);
+          break;
+        }
+      }
 
+ 
 
     const tabBtns = build.tabs.map((tab, i) =>
       `<button class="loadout__tab ${i === 0 ? 'is-active' : ''}" data-tab="tab-${buildIndex}-${i}">${tab.label}</button>`
@@ -816,6 +836,16 @@ cachedBuilds = sorted;
         </div>
       </div>
     `;
+
+          // === Добавляем бейдж справа в шапку ===
+      const headerTop = wrapper.querySelector('.loadout__header--top');
+      if (badgeText && headerTop) {
+        const badge = document.createElement('span');
+        badge.className = 'badge-category-main';
+        badge.textContent = badgeText;
+        headerTop.appendChild(badge);
+      }
+
 
     buildsList.appendChild(wrapper);
   });
