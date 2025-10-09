@@ -154,10 +154,6 @@ body {
   transition: 0.25s;
 }
 
-.card-btn { display: none; }
-.card-btn.is-visible { display: flex; }
-
-
 .btn span,
 .card-btn span {
   font-size: 0.95rem;
@@ -225,7 +221,6 @@ body {
 
 /* === Карточки === */
 .card-btn {
-  display: none !important;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -406,9 +401,19 @@ body {
   display: none;
 }
 
-.screen.active {
-  display: block; /* останется, но будет изначально */
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
+
+/* === FIX: видимость карточек === */
+.card-btn {
+  display: none;
 }
+
+.card-btn.is-visible {
+  display: flex !important;
+}
+
+.card-btn.full-width {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+
