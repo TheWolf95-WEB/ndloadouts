@@ -1021,62 +1021,78 @@ function formatRuDate(input) {
 
 
 // JS — функция для загрузки и отрисовки таблицы
-// JS — функция для загрузки и отрисовки таблицы
 async function loadBuildsTable() {
   try {
     const res = await fetch('/api/builds');
     const builds = await res.json();
-    const tableWrapper = document.getElementById('edit-builds-table');
+    const gridWrapper = document.getElementById('edit-builds-grid');
 
     if (!Array.isArray(builds) || builds.length === 0) {
-      tableWrapper.innerHTML = "<p>Сборок пока нет.</p>";
+      gridWrapper.innerHTML = "<p>Сборок пока нет.</p>";
+      document.getElementById('builds-count').textContent = "Всего: 0 сборок";
       return;
     }
 
-    // Рендер компактных карточек
-    let html = '';
-    builds.forEach((build, index) => {
-      const weaponTypeRu = weaponTypeLabels[build.weapon_type] || build.weapon_type;
-      const tabsCount = Array.isArray(build.tabs) ? build.tabs.length : 0;
-      const categories = Array.isArray(build.categories) ? build.categories : [];
+    // Сохраняем builds для фильтрации
+    window.allBuilds = builds;
+
+    // Обновляем статистику
+    document.getElementById('builds-count').textContent = `Всего: ${builds.length} сборок`;
+
+    // Рендер сетки
+    renderBuildsGrid(builds);
+
+    // --- ФИЛЬТРАЦИЯ ---
+    const weaponFilter = document.getElementById('edit-weapon-filter');
+    const categoryFilter = document.getElementById('edit-category-filter');
+    const searchInput = document.getElementById('edit-search');
+
+    function applyFilters() {
+      const weaponValue = weaponFilter.value;
+      const categoryValue = categoryFilter.value;
+      const searchValue = searchInput.value.toLowerCase().trim();
+
+      const filtered = builds.filter(build => {
+        // Фильтр по типу оружия
+        if (weaponValue !== 'all' && build.weapon_type !== weaponValue) {
+          return false;
+        }
+
+        // Фильтр по категории
+        if (categoryValue !== 'all') {
+          const categories = Array.isArray(build.categories) ? build.categories : [];
+          if (!categories.includes(categoryValue)) {
+            return false;
+          }
+        }
+
+        // Поиск по названию
+        if (searchValue && !build.title.toLowerCase().includes(searchValue)) {
+          return false;
+        }
+
+        return true;
+      });
+
+      renderBuildsGrid(filtered);
       
-      // Бейджи категорий
-      const categoryBadges = categories.map(cat => {
-        const label = {
-          'popular': '🔥',
-          'new': '🆕', 
-          'topmeta': '🏆',
-          'meta': '🎯',
-          'all': '📦'
-        }[cat] || '📌';
-        return `<span class="compact-badge">${label}</span>`;
-      }).join('');
+      // Обновляем статистику
+      const filteredCount = document.getElementById('filtered-count');
+      if (filtered.length !== builds.length) {
+        filteredCount.textContent = `Показано: ${filtered.length}`;
+        filteredCount.style.display = 'inline';
+      } else {
+        filteredCount.style.display = 'none';
+      }
+    }
 
-      html += `
-        <div class="compact-build-card" data-id="${build.id}">
-          <div class="compact-card-header">
-            <div class="compact-card-main">
-              <span class="compact-index">#${index + 1}</span>
-              <h3 class="compact-title">${build.title}</h3>
-              ${categoryBadges}
-            </div>
-            <div class="compact-card-meta">
-              <span class="compact-type">${weaponTypeRu}</span>
-              <span class="compact-tabs">${tabsCount} вклад.</span>
-            </div>
-          </div>
-          <div class="compact-card-actions">
-            <button class="btn btn-sm btn-edit" data-id="${build.id}">✏️</button>
-            <button class="btn btn-sm btn-delete" data-id="${build.id}">🗑️</button>
-          </div>
-        </div>
-      `;
-    });
-    
-    tableWrapper.innerHTML = html;
+    // Слушатели событий для фильтров
+    weaponFilter.addEventListener('change', applyFilters);
+    categoryFilter.addEventListener('change', applyFilters);
+    searchInput.addEventListener('input', applyFilters);
 
-    // --- Удаление ---
-    tableWrapper.querySelectorAll('.btn-delete').forEach(btn => {
+    // --- УДАЛЕНИЕ ---
+    function setupDeleteHandler(btn) {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const id = btn.dataset.id;
@@ -1090,29 +1106,28 @@ async function loadBuildsTable() {
         const data = await delRes.json().catch(() => ({}));
 
         if (delRes.ok && data.status === "ok") {
-          await loadBuildsTable();
+          await loadBuildsTable(); // Перезагружаем всю таблицу
         } else {
           alert("Не удалось удалить сборку. " + (data.detail || ""));
         }
       });
-    });
+    }
 
-    // --- Редактирование ---
-    tableWrapper.querySelectorAll('.btn-edit').forEach(btn => {
+    // --- РЕДАКТИРОВАНИЕ ---
+    function setupEditHandler(btn, build) {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const id = btn.dataset.id;
         currentEditId = id;
-
-        const build = builds.find(b => String(b.id) === String(id));
-        if (!build) return alert("Сборка не найдена");
 
         showScreen('screen-form');
         document.getElementById('submit-build').textContent = "💾 Сохранить";
 
         // Категории
         const checkboxes = document.querySelectorAll('.build-category');
-        checkboxes.forEach(cb => { cb.checked = (build.categories || []).includes(cb.value); });
+        checkboxes.forEach(cb => { 
+          cb.checked = (build.categories || []).includes(cb.value); 
+        });
 
         // Поля
         document.getElementById('title').value = build.title || '';
@@ -1172,21 +1187,80 @@ async function loadBuildsTable() {
           });
         });
       });
-    });
+    }
 
-    // Клик по карточке для быстрого редактирования
-    tableWrapper.querySelectorAll('.compact-build-card').forEach(card => {
-      card.addEventListener('click', (e) => {
-        if (!e.target.closest('.compact-card-actions')) {
-          const id = card.dataset.id;
-          const btn = card.querySelector('.btn-edit');
-          btn.click();
-        }
+    // Функция рендера сетки
+    function renderBuildsGrid(buildsToRender) {
+      let html = '';
+      buildsToRender.forEach((build, index) => {
+        const weaponTypeRu = weaponTypeLabels[build.weapon_type] || build.weapon_type;
+        const tabsCount = Array.isArray(build.tabs) ? build.tabs.length : 0;
+        const categories = Array.isArray(build.categories) ? build.categories : [];
+        
+        // Бейджи категорий с эмодзи
+        const categoryBadges = categories.map(cat => {
+          const emojiMap = {
+            'popular': '🔥',
+            'new': '🆕', 
+            'topmeta': '🏆',
+            'meta': '🎯',
+            'all': '📦'
+          };
+          const emoji = emojiMap[cat] || '📌';
+          return `<span class="compact-badge" title="${cat}">${emoji}</span>`;
+        }).join('');
+
+        html += `
+          <div class="compact-build-card" data-id="${build.id}">
+            <div class="compact-card-header">
+              <div class="compact-card-main">
+                <span class="compact-index">#${index + 1}</span>
+                <h3 class="compact-title" title="${build.title}">${build.title}</h3>
+              </div>
+              <div class="compact-badges">
+                ${categoryBadges}
+              </div>
+            </div>
+            <div class="compact-card-meta">
+              <span class="compact-type">${weaponTypeRu}</span>
+              <span class="compact-tabs">${tabsCount} вклад.</span>
+            </div>
+            <div class="compact-card-actions">
+              <button class="btn btn-sm btn-edit" data-id="${build.id}">✏️</button>
+              <button class="btn btn-sm btn-delete" data-id="${build.id}">🗑️</button>
+            </div>
+          </div>
+        `;
       });
-    });
+      
+      gridWrapper.innerHTML = html || '<p>Сборки не найдены</p>';
+
+      // Назначаем обработчики для новых элементов
+      gridWrapper.querySelectorAll('.btn-delete').forEach(btn => {
+        const build = buildsToRender.find(b => String(b.id) === btn.dataset.id);
+        if (build) setupDeleteHandler(btn);
+      });
+
+      gridWrapper.querySelectorAll('.btn-edit').forEach(btn => {
+        const build = buildsToRender.find(b => String(b.id) === btn.dataset.id);
+        if (build) setupEditHandler(btn, build);
+      });
+
+      // Клик по карточке для быстрого редактирования
+      gridWrapper.querySelectorAll('.compact-build-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+          if (!e.target.closest('.compact-card-actions')) {
+            const id = card.dataset.id;
+            const btn = card.querySelector('.btn-edit');
+            if (btn) btn.click();
+          }
+        });
+      });
+    }
 
   } catch (e) {
     console.error('Ошибка загрузки сборок:', e);
+    gridWrapper.innerHTML = '<p>Ошибка загрузки сборок</p>';
   }
 }
 
