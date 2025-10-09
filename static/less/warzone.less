@@ -712,15 +712,40 @@
   opacity: 0.95;
 }
 
-/* === Общий стиль для бейджей категорий (внизу карточки) === */
+/* === Категории под названием сборки === */
 .badge-category {
-  background: #2f3336;
-  color: #d8d8d8;
-  border-radius: 5px;
-  padding: 3px 8px;
-  font-size: 0.8rem;
-  margin-right: 6px;
   display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: none;
+  margin-right: 6px;
+  margin-top: 4px;
+  color: #fff;
+  opacity: 0.95;
+}
+
+/* === Цвета по категориям === */
+.badge-category[data-cat="Новинка"] {
+  background: linear-gradient(145deg, #2b4a72, #20364e);
+}
+
+.badge-category[data-cat="Топ мета"] {
+  background: linear-gradient(145deg, #c6791a, #9a5c0f);
+}
+
+.badge-category[data-cat="Мета"] {
+  background: linear-gradient(145deg, #2d9c44, #1e6b32);
+}
+
+.badge-category[data-cat="Популярное"] {
+  background: linear-gradient(145deg, #396a49, #2e4f38);
+}
+
+.badge-category[data-cat="Все"] {
+  background: #2f3336;
+  color: #ccc;
 }
 
 
