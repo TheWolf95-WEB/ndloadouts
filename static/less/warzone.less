@@ -48,7 +48,6 @@
 
   /* === Кнопки и карточки === */
 
-  .card-btn,
   .status-btn {
     display: flex;
     align-items: center;
@@ -80,6 +79,10 @@
                  inset 0 -1px 4px rgba(255, 255, 255, 0.1);
      transform: translateY(-2px);
    }
+
+   .card-btn { display: none; }
+.card-btn.is-visible { display: flex; }
+
 
 
   .btn:active,
