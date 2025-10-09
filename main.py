@@ -287,7 +287,7 @@ async def get_me(data: dict = Body(...)):
         username = user_json.get("username", "")
         save_user(user_id, first_name, username)
 
-        env_vars = dotenv_values(".env")
+        env_vars = dotenv_values("/opt/ndloadouts/.env")
         admin_ids = set(map(str.strip, env_vars.get("ADMIN_IDS", "").split(",")))
         admin_dop = set(map(str.strip, env_vars.get("ADMIN_DOP", "").split(",")))
 
