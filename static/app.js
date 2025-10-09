@@ -754,6 +754,19 @@ cachedBuilds = sorted;
 
           // === Категории (бейджи, русский + приоритет + отдельный бейдж справа)
       const cats = Array.isArray(build.categories) ? build.categories : [];
+
+      // === Перевод категорий с английского на русский ===
+      const translatedCats = cats.map(cat => {
+        switch (cat.toLowerCase()) {
+          case 'all': return 'Все';
+          case 'new': return 'Новинки';
+          case 'popular': return 'Популярное';
+          case 'meta': return 'Мета';
+          case 'topmeta': return 'Топ мета';
+          default: return cat;
+        }
+      });
+
       
       // 🔸 сортировка и приоритет категорий
       const badgePriority = ["Новинки", "Популярное", "Топ мета", "Мета"];
@@ -770,8 +783,7 @@ cachedBuilds = sorted;
         return name;
       };
       
-      // 🔸 для вывода внизу (несколько категорий)
-      let categoryBadges = cats
+      let categoryBadges = translatedCats
         .map(cat => {
           const name = normalizeName(cat);
           const color = badgeColors[name] || "#2f3336";
@@ -782,11 +794,12 @@ cachedBuilds = sorted;
       // 🔸 для бейджа справа в заголовке
       let badgeText = null;
       for (const name of badgePriority) {
-        if (cats.includes(name)) {
+        if (translatedCats.includes(name)) {
           badgeText = normalizeName(name);
           break;
         }
       }
+      
 
  
 
