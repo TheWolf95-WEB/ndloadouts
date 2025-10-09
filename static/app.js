@@ -710,11 +710,16 @@ function rebuildModuleSelects() {
 
 
 
-// === Загрузка сборок ===
-// === Загрузка сборок ===
+// === Загрузка сборок для пользователей ===
 async function loadBuilds(category = 'all') {
   const res = await fetch(`/api/builds?category=${category}`);
   const builds = await res.json();
+
+  // Сохраняем builds для фильтрации
+  window.userBuilds = builds;
+
+  // Обновляем статистику
+  updateUserStats(builds.length, builds.length);
 
   // если пусто
   if (!Array.isArray(builds) || builds.length === 0) {
@@ -723,58 +728,141 @@ async function loadBuilds(category = 'all') {
     return;
   }
 
-  function getTime(b) {
-  let t = b.created_at ? Date.parse(b.created_at) : NaN;
-  if (Number.isNaN(t)) {
-    const dt = parseRuDate(b.date);
-    t = dt ? dt.getTime() : 0;
+  // Рендер сборок
+  renderUserBuilds(builds);
+
+  // --- ФИЛЬТРАЦИЯ ДЛЯ ПОЛЬЗОВАТЕЛЕЙ ---
+  const weaponFilter = document.getElementById('weapon-filter');
+  const categoryFilter = document.getElementById('category-filter');
+  const searchInput = document.getElementById('builds-search');
+
+  function applyUserFilters() {
+    const weaponValue = weaponFilter.value;
+    const categoryValue = categoryFilter.value;
+    const searchValue = searchInput.value.toLowerCase().trim();
+
+    const filtered = builds.filter(build => {
+      // Фильтр по типу оружия
+      if (weaponValue !== 'all' && build.weapon_type !== weaponValue) {
+        return false;
+      }
+
+      // Фильтр по категории (уже применен на сервере, но для поиска тоже)
+      if (categoryValue !== 'all') {
+        const categories = Array.isArray(build.categories) ? build.categories : [];
+        if (!categories.includes(categoryValue)) {
+          return false;
+        }
+      }
+
+      // Поиск по названию и модулям
+      if (searchValue) {
+        const titleMatch = build.title.toLowerCase().includes(searchValue);
+        
+        // Поиск по модулям в топах
+        const topModulesMatch = [build.top1, build.top2, build.top3]
+          .some(top => top && top.toLowerCase().includes(searchValue));
+        
+        // Поиск по модулям во вкладках
+        let tabsMatch = false;
+        if (Array.isArray(build.tabs)) {
+          tabsMatch = build.tabs.some(tab => {
+            return Array.isArray(tab.items) && tab.items.some(item => 
+              item && item.toLowerCase().includes(searchValue)
+            );
+          });
+        }
+
+        if (!titleMatch && !topModulesMatch && !tabsMatch) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    renderUserBuilds(filtered);
+    updateUserStats(builds.length, filtered.length);
   }
-  return t || 0;
-}
 
-function prioritySort(a, b) {
-  // Переводим категории на русский, если они английские
-  const normalizeCats = (cats = []) => cats.map(c => {
-    switch (c.toLowerCase()) {
-      case 'new': return 'Новинки';
-      case 'popular': return 'Популярное';
-      case 'meta': return 'Мета';
-      case 'topmeta': return 'Топ мета';
-      default: return c;
-    }
+  // Слушатели событий для фильтров
+  weaponFilter.addEventListener('change', applyUserFilters);
+  categoryFilter.addEventListener('change', applyUserFilters);
+  searchInput.addEventListener('input', applyUserFilters);
+
+  // Сброс поиска при смене категории через селект
+  categoryFilter.addEventListener('change', () => {
+    searchInput.value = '';
   });
-
-  const A = normalizeCats(a.categories || []);
-  const B = normalizeCats(b.categories || []);
-
-  const getPriority = (cats) => {
-    if (cats.includes("Новинки")) return 1;
-    if (cats.includes("Топ мета")) return 2;
-    if (cats.includes("Мета")) return 3;
-    return 4;
-  };
-
-  const pa = getPriority(A);
-  const pb = getPriority(B);
-
-  // 🔹 сначала по приоритету категорий
-  if (pa !== pb) return pa - pb;
-
-  // 🔹 потом по дате (новее — выше)
-  const ta = getTime(a);
-  const tb = getTime(b);
-  return tb - ta;
 }
 
+// Функция обновления статистики для пользователей
+function updateUserStats(total, filtered) {
+  const totalCount = document.getElementById('user-builds-count');
+  const filteredCount = document.getElementById('user-filtered-count');
+  
+  totalCount.textContent = `Всего сборок: ${total}`;
+  
+  if (filtered !== total) {
+    filteredCount.textContent = `Найдено: ${filtered}`;
+    filteredCount.style.display = 'inline';
+  } else {
+    filteredCount.style.display = 'none';
+  }
+}
 
+// Функция рендера сборок для пользователей
+function renderUserBuilds(buildsToRender) {
+  const buildsList = document.getElementById('builds-list');
+  
+  if (!Array.isArray(buildsToRender) || buildsToRender.length === 0) {
+    buildsList.innerHTML = '<p class="no-results">🔍 Сборки не найдены</p>';
+    cachedBuilds = [];
+    return;
+  }
 
-const sorted = [...builds].sort(prioritySort);
-cachedBuilds = sorted;
+  function getTime(b) {
+    let t = b.created_at ? Date.parse(b.created_at) : NaN;
+    if (Number.isNaN(t)) {
+      const dt = parseRuDate(b.date);
+      t = dt ? dt.getTime() : 0;
+    }
+    return t || 0;
+  }
 
+  function prioritySort(a, b) {
+    const normalizeCats = (cats = []) => cats.map(c => {
+      switch (c.toLowerCase()) {
+        case 'new': return 'Новинки';
+        case 'popular': return 'Популярное';
+        case 'meta': return 'Мета';
+        case 'topmeta': return 'Топ мета';
+        default: return c;
+      }
+    });
 
-  // загрузим справочники модулей только для типов, которые реально есть
-  const uniqueTypes = [...new Set(sorted.map(b => b.weapon_type))];
-  await Promise.all(uniqueTypes.map(loadModules));
+    const A = normalizeCats(a.categories || []);
+    const B = normalizeCats(b.categories || []);
+
+    const getPriority = (cats) => {
+      if (cats.includes("Новинки")) return 1;
+      if (cats.includes("Топ мета")) return 2;
+      if (cats.includes("Мета")) return 3;
+      return 4;
+    };
+
+    const pa = getPriority(A);
+    const pb = getPriority(B);
+
+    if (pa !== pb) return pa - pb;
+
+    const ta = getTime(a);
+    const tb = getTime(b);
+    return tb - ta;
+  }
+
+  const sorted = [...buildsToRender].sort(prioritySort);
+  cachedBuilds = sorted;
 
   // === Группировка по категориям ===
   const groups = {
@@ -814,9 +902,9 @@ cachedBuilds = sorted;
     buildsInGroup.forEach((build, buildIndex) => {
       const wrapper = document.createElement('div');
       wrapper.className = 'loadout js-loadout';
-  
+
       const weaponTypeRu = weaponTypeLabels[build.weapon_type] || build.weapon_type;
-  
+
       const pickTopBg = (text) => {
         const m = String(text).trim().match(/^#?(\d+)/);
         const n = m ? parseInt(m[1], 10) : 0;
@@ -825,7 +913,7 @@ cachedBuilds = sorted;
         if (n === 3) return '#FF8C00';
         return '#2f3336';
       };
-  
+
       const tops = [build.top1, build.top2, build.top3]
         .filter(Boolean)
         .map(mod => {
@@ -834,7 +922,7 @@ cachedBuilds = sorted;
           return `<span class="loadout__top" style="background:${bg}">${text}</span>`;
         })
         .join('');
-  
+
       const cats = Array.isArray(build.categories) ? build.categories : [];
       const translatedCats = cats.map(cat => {
         switch (String(cat).toLowerCase()) {
@@ -846,11 +934,11 @@ cachedBuilds = sorted;
           default: return cat;
         }
       });
-  
+
       const categoryBadges = translatedCats
         .map(name => `<span class="badge badge-category" data-cat="${name}">${name}</span>`)
         .join('');
-  
+
         // === вкладки ===
         const tabBtns = (build.tabs || []).map((tab, i) =>
           `<button class="loadout__tab ${i === 0 ? 'is-active' : ''}" data-tab="tab-${groupIndex}-${buildIndex}-${i}">
@@ -901,12 +989,9 @@ cachedBuilds = sorted;
           </div>
         `;
 
-  
       buildsList.appendChild(wrapper);
     });
   });
-
-
 
   // сброс раскрытия
   document.querySelectorAll('.js-loadout').forEach(el => {
@@ -915,59 +1000,50 @@ cachedBuilds = sorted;
     if (content) content.style.maxHeight = '0';
   });
 
+  // === Переключение вкладок ===
+  document.querySelectorAll('.loadout__tab').forEach(button => {
+    button.addEventListener('click', () => {
+      const parent = button.closest('.loadout');
+      const tab = button.dataset.tab;
 
-// === Переключение вкладок ===
-document.querySelectorAll('.loadout__tab').forEach(button => {
-  button.addEventListener('click', () => {
-    const parent = button.closest('.loadout');
-    const tab = button.dataset.tab;
+      Analytics.trackEvent('switch_tab', { 
+        tab: button.textContent.trim() || 'Без названия',
+        time: new Date().toISOString()
+      });
 
-    // фиксируем событие переключения вкладки
-    Analytics.trackEvent('switch_tab', { 
-      tab: button.textContent.trim() || 'Без названия',
-      time: new Date().toISOString()
+      parent.querySelectorAll('.loadout__tab').forEach(b => b.classList.remove('is-active'));
+      parent.querySelectorAll('.loadout__tab-content').forEach(c => c.classList.remove('is-active'));
+      button.classList.add('is-active');
+      parent.querySelector(`[data-tab-content="${tab}"]`)?.classList.add('is-active');
+
+      const content = parent.querySelector('.loadout__content');
+      content.style.maxHeight = content.scrollHeight + 'px';
     });
-
-
-    parent.querySelectorAll('.loadout__tab').forEach(b => b.classList.remove('is-active'));
-    parent.querySelectorAll('.loadout__tab-content').forEach(c => c.classList.remove('is-active'));
-    button.classList.add('is-active');
-    parent.querySelector(`[data-tab-content="${tab}"]`)?.classList.add('is-active');
-
-    // обновление высоты блока при смене вкладки
-    const content = parent.querySelector('.loadout__content');
-    content.style.maxHeight = content.scrollHeight + 'px';
   });
-});
 
-// === Просмотр сборки ===
-document.querySelectorAll('.js-loadout-toggle').forEach(header => {
-  header.addEventListener('click', () => {
-    const loadout = header.closest('.js-loadout');
-    const content = loadout.querySelector('.loadout__content');
-    loadout.classList.toggle('is-open');
-    content.style.maxHeight = loadout.classList.contains('is-open') ? content.scrollHeight + 'px' : '0';
+  // === Просмотр сборки ===
+  document.querySelectorAll('.js-loadout-toggle').forEach(header => {
+    header.addEventListener('click', () => {
+      const loadout = header.closest('.js-loadout');
+      const content = loadout.querySelector('.loadout__content');
+      loadout.classList.toggle('is-open');
+      content.style.maxHeight = loadout.classList.contains('is-open') ? content.scrollHeight + 'px' : '0';
 
-    // фиксируем просмотр сборки
-    const buildIndex = [...document.querySelectorAll('.js-loadout')].indexOf(loadout);
-    const build = cachedBuilds[buildIndex];
-    const weaponTypeRu = weaponTypeLabels[build.weapon_type] || build.weapon_type;
+      const buildIndex = [...document.querySelectorAll('.js-loadout')].indexOf(loadout);
+      const build = cachedBuilds[buildIndex];
+      const weaponTypeRu = weaponTypeLabels[build.weapon_type] || build.weapon_type;
 
-    const finalTitle = build.title && build.title.trim() !== ""
-      ? build.title
-      : (weaponTypeLabels[build.weapon_type] || build.weapon_type);
-    
-    Analytics.trackEvent('view_build', { 
-      title: finalTitle,
-      weapon_name: weaponTypeRu,
-      time: new Date().toISOString()
+      const finalTitle = build.title && build.title.trim() !== ""
+        ? build.title
+        : (weaponTypeLabels[build.weapon_type] || build.weapon_type);
+      
+      Analytics.trackEvent('view_build', { 
+        title: finalTitle,
+        weapon_name: weaponTypeRu,
+        time: new Date().toISOString()
+      });
     });
-
-
   });
-});
-
-
 }
 
 
