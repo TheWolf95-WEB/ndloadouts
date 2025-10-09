@@ -1174,6 +1174,12 @@
 
 <script>
     let currentData = null;
+    let todayStats = {
+        activeUsers: new Set(),
+        newUsers: new Set(),
+        startOfDay: new Date().setHours(0, 0, 0, 0)
+    };
+
     let broadcastUsers = [];
     let selectedUserIds = new Set();
     let currentSelectionMode = 'all';
@@ -1355,7 +1361,7 @@
             const data = await response.json();
             currentData = data;
             
-            // Передаем activities в updateStats
+            updateTodayStats(data.users, data.recent_activity);
             updateStats(data.stats, data.users, data.recent_activity);
             updateUsers(data.users);
             updateActivity(data.recent_activity);
@@ -1411,16 +1417,45 @@
         return '0м';
     }
 
-    // Обновляем функцию updateStats для правильного отображения статистики за сегодня
+    function updateTodayStats(users, activities) {
+        const today = new Date().setHours(0, 0, 0, 0);
+        
+        if (today !== todayStats.startOfDay) {
+            todayStats.activeUsers.clear();
+            todayStats.newUsers.clear();
+            todayStats.startOfDay = today;
+        }
+        
+        users.forEach(user => {
+            if (isToday(user.last_seen)) {
+                todayStats.activeUsers.add(user.id);
+            }
+            if (isToday(user.first_seen)) {
+                todayStats.newUsers.add(user.id);
+            }
+        });
+        
+        activities.forEach(activity => {
+            if (isToday(activity.time)) {
+                todayStats.activeUsers.add(activity.user_id);
+            }
+        });
+    }
+
+    // Обновляем функцию updateStats для правильного отображения статистики
     function updateStats(stats, users, activities) {
         document.getElementById('total-users').textContent = stats.total_users;
         document.getElementById('online-users').textContent = stats.online_users;
         
-        // Используем данные с сервера для статистики за сегодня
-        document.getElementById('total-actions').textContent = stats.today_actions || stats.total_actions_today || 0;
+        // Используем данные с сервера для статистики за сегодня, если они есть
+        // Иначе используем локальную статистику активных пользователей
+        const todayActions = stats.today_actions || stats.total_actions_today || todayStats.activeUsers.size;
+        const todayNewUsers = stats.today_new_users || stats.new_users_today || todayStats.newUsers.size;
+        
+        document.getElementById('total-actions').textContent = todayActions;
         document.getElementById('total-actions').parentNode.querySelector('.stat-label').textContent = '📊 Активность сегодня';
         
-        document.getElementById('total-errors').textContent = stats.today_new_users || stats.new_users_today || 0;
+        document.getElementById('total-errors').textContent = todayNewUsers;
         document.getElementById('total-errors').parentNode.querySelector('.stat-label').textContent = '🆕 Новые сегодня';
     }
 
