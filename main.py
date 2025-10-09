@@ -273,11 +273,13 @@ def get_weapon_types():
 
 @app.post("/api/me")
 async def get_me(data: dict = Body(...)):
+    import datetime
     init_data = data.get("initData", "")
     parsed = parse_qs(init_data)
     user_data = parsed.get("user", [None])[0]
 
     if not user_data:
+        print(f"[{datetime.datetime.now()}] [API /me] ❌ Нет user_data в initData")
         return JSONResponse({"error": "No user info"}, status_code=400)
 
     try:
@@ -285,6 +287,7 @@ async def get_me(data: dict = Body(...)):
         user_id = str(user_json.get("id"))
         first_name = user_json.get("first_name", "")
         username = user_json.get("username", "")
+
         save_user(user_id, first_name, username)
 
         env_vars = dotenv_values("/opt/ndloadouts/.env")
@@ -294,14 +297,24 @@ async def get_me(data: dict = Body(...)):
         is_super_admin = user_id in admin_ids
         is_admin = is_super_admin or user_id in admin_dop
 
+        # 🧩 Логируем
+        print(
+            f"[{datetime.datetime.now()}] [API /me] "
+            f"user_id={user_id} ({first_name}) | username=@{username or '-'} | "
+            f"is_admin={is_admin} | is_super_admin={is_super_admin}"
+        )
+
         return JSONResponse({
             "user_id": user_id,
             "first_name": first_name,
             "is_admin": is_admin,
             "is_super_admin": is_super_admin
         })
+
     except Exception as e:
+        print(f"[{datetime.datetime.now()}] [API /me] ⚠️ Ошибка: {e}")
         return JSONResponse({"error": "Invalid user data", "detail": str(e)}, status_code=400)
+
 
 @app.get("/api/admins")
 async def get_admins():
