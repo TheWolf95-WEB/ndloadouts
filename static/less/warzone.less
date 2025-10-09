@@ -1353,51 +1353,9 @@ select option:focus {
 }
 
 .filters-row .form-section {
-  margin-bottom: 0;
+  margin: 0;
 }
 
-/* АДАПТИВ ДЛЯ МОБИЛЬНЫХ */
-@media (max-width: 768px) {
-  .builds-grid {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-  
-  .filters-row {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .filters-row .form-section {
-    width: 100% !important;
-  }
-  
-  .compact-build-card {
-    padding: 14px;
-    min-height: 110px;
-  }
-  
-  .compact-title {
-    font-size: 0.9rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .compact-build-card {
-    padding: 12px;
-    min-height: 100px;
-  }
-  
-  .compact-card-main {
-    gap: 6px;
-  }
-  
-  .compact-card-actions .btn {
-    width: 28px;
-    height: 28px;
-    font-size: 0.75rem;
-  }
-}
 
 /* АНИМАЦИЯ ДЛЯ ФИЛЬТРАЦИИ */
 .builds-grid {
