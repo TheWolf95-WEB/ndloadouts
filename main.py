@@ -1,4 +1,3 @@
-что это значит не понял # main.py - исправленная версия
 from fastapi import FastAPI, Request, Body, BackgroundTasks
 from fastapi import Query
 from fastapi.responses import HTMLResponse, JSONResponse
