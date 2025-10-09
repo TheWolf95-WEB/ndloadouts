@@ -61,6 +61,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 👉 Добавить ожидание checkAdminStatus
   await checkAdminStatus();
 
+    // 👑 Если супер-админ — показать кнопку админки после полной загрузки DOM
+  if (window.userInfo?.is_super_admin) {
+    document.getElementById('assign-admin-btn')?.classList.add('is-visible');
+  }
+
   // ✅ Показываем экран только после загрузки userInfo
   if (window.userInfo) {
     showScreen('screen-home');
