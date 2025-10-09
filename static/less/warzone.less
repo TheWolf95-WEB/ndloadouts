@@ -737,6 +737,27 @@
    display:flex;
    gap:6px;
 }
+
+
+   .category-divider {
+  width: 100%;
+  height: 2px;
+  margin: 30px 0 25px 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg,
+    rgba(0, 255, 136, 0.15),
+    rgba(0, 255, 136, 0.8),
+    rgba(0, 255, 136, 0.15)
+  );
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.4);
+  opacity: 0.9;
+  animation: dividerPulse 3s ease-in-out infinite;
+}
+
+@keyframes dividerPulse {
+  0%, 100% { opacity: 0.8; box-shadow: 0 0 12px rgba(0,255,136,0.4); }
+  50% { opacity: 1; box-shadow: 0 0 20px rgba(0,255,136,0.7); }
+}
    
 
   /* === СПИСКИ И ТАБЛИЦЫ === */
