@@ -190,13 +190,50 @@
     </div>
 
 
-      <div id="screen-edit-builds" class="screen" style="display: none;">
-        <button class="btn back-btn" id="back-from-edit">⬅ Назад</button>
-        <h2>База сборок</h2>
-        <div id="edit-builds-table" class="table-wrapper">
-          <!-- Тут будет таблица -->
+    <div id="screen-edit-builds" class="screen" style="display: none;">
+      <button class="btn back-btn" id="back-from-edit">⬅ Назад</button>
+      <h2>База сборок</h2>
+      
+      <!-- 🔍 ФИЛЬТРЫ -->
+      <div class="filters-row">
+        <div class="form-section" style="width: 50%;">
+          <select id="edit-weapon-filter" class="form-input">
+            <option value="all">Все типы</option>
+            <option value="assault">Штурмовые</option>
+            <option value="pp">Пистолеты-пулемёты</option>
+            <option value="pulemet">Пулемёты</option>
+            <option value="snayperki">Снайперские</option>
+            <option value="pehotnay">Пехотные</option>
+            <option value="drobovik">Дробовики</option>
+          </select>
+        </div>
+        
+        <div class="form-section" style="width: 50%;">
+          <select id="edit-category-filter" class="form-input">
+            <option value="all">Все категории</option>
+            <option value="popular">Популярное</option>
+            <option value="new">Новинки</option>
+            <option value="topmeta">Топ мета</option>
+            <option value="meta">Мета</option>
+          </select>
         </div>
       </div>
+    
+      <div class="search-section">
+        <input type="text" id="edit-search" class="form-input" placeholder="🔍 Поиск по названию...">
+      </div>
+    
+      <!-- 📊 СТАТИСТИКА -->
+      <div class="stats-bar">
+        <span id="builds-count">Всего: 0 сборок</span>
+        <span id="filtered-count" style="display: none;"></span>
+      </div>
+    
+      <!-- 🎯 СЕТКА СБОРОК -->
+      <div id="edit-builds-grid" class="builds-grid">
+        <!-- Тут будет сетка сборок -->
+      </div>
+    </div>
 
       <div id="screen-assign-admin" class="screen" style="display: none;">
         <button class="btn back-btn" id="back-from-assign">⬅ Назад</button>
