@@ -149,19 +149,35 @@
   }
 
   /* === Формы === */
-  .form-section {
-    display: flex;
-    flex-direction: column;
-    margin:20px 0;
-  }
+  .form-section:nth-of-type(2) > div {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px 20px;
+  margin-top: 8px;
+}
 
-  label {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 0.95rem;
-    color: var(--wz-text-muted);
-    font-weight: 500;
-  }
+.form-section:nth-of-type(2) label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  color: var(--wz-text-muted);
+  cursor: pointer;
+}
+
+input.build-category {
+  accent-color: var(--wz-accent-light);
+  width: 16px;
+  height: 16px;
+}
+
+/* ТОП-модули — 2 в строку, ровные отступы */
+.form-section:has(#top1) {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px 20px;
+  margin-bottom: 18px;
+}
 
   .form-input,
   select {
