@@ -1183,6 +1183,166 @@ select option:focus {
 }
 
 
+   /* === КОМПАКТНЫЙ СТИЛЬ ДЛЯ БАЗЫ СБОРОК === */
+.compact-build-card {
+  background: linear-gradient(145deg, #1b2324, #101617);
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+  border: 1px solid #2a3a3a;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.compact-build-card:hover {
+  background: linear-gradient(145deg, #223234, #141c1d);
+  border-color: var(--wz-accent);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.compact-card-header {
+  flex: 1;
+  min-width: 0;
+}
+
+.compact-card-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.compact-index {
+  background: var(--wz-accent);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  min-width: 24px;
+  text-align: center;
+}
+
+.compact-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--wz-text);
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compact-badge {
+  font-size: 0.8rem;
+  padding: 2px 4px;
+}
+
+.compact-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: var(--wz-text-muted);
+}
+
+.compact-type {
+  background: rgba(45, 156, 68, 0.2);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(45, 156, 68, 0.3);
+}
+
+.compact-tabs {
+  background: rgba(128, 128, 128, 0.2);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(128, 128, 128, 0.3);
+}
+
+.compact-card-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.compact-card-actions .btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  border-radius: 6px;
+}
+
+.btn-edit {
+  background: linear-gradient(145deg, #2d5c9c, #1e3b6b);
+  border: 1px solid rgba(45, 92, 156, 0.3);
+}
+
+.btn-edit:hover {
+  background: linear-gradient(145deg, #3c6cb0, #2d5c9c);
+}
+
+.btn-delete {
+  background: linear-gradient(145deg, #9c2d2d, #6b1e1e);
+  border: 1px solid rgba(156, 45, 45, 0.3);
+}
+
+.btn-delete:hover {
+  background: linear-gradient(145deg, #b03c3c, #9c2d2d);
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 768px) {
+  .compact-build-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .compact-card-main {
+    gap: 8px;
+  }
+  
+  .compact-title {
+    font-size: 0.95rem;
+  }
+  
+  .compact-card-meta {
+    justify-content: space-between;
+  }
+  
+  .compact-card-actions {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 480px) {
+  .compact-build-card {
+    padding: 12px;
+  }
+  
+  .compact-card-main {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .compact-index {
+    align-self: flex-start;
+  }
+}
 
    
 }
