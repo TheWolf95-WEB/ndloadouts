@@ -698,27 +698,30 @@
 }
 
 
-/* === БЕЙДЖИ КАТЕГОРИЙ === */
-.loadout__categories {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 6px;
+/* === Основной бейдж справа (Новинка, Популярное, Топ мета, Мета) === */
+.badge-category-main {
+  background: #2f3336;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: none;
+  margin-left: auto;
+  align-self: center;
+  opacity: 0.95;
 }
 
+/* === Общий стиль для бейджей категорий (внизу карточки) === */
 .badge-category {
+  background: #2f3336;
+  color: #d8d8d8;
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 0.8rem;
+  margin-right: 6px;
   display: inline-block;
-  padding: 4px 10px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #fff;
-  border-radius: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  user-select: none;
 }
-   
 
 
   /* === СПИСКИ И ТАБЛИЦЫ === */
