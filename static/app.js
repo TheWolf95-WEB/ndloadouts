@@ -349,7 +349,7 @@ document.getElementById('add-tab').addEventListener('click', () => {
   const tabDiv = document.createElement('div');
   tabDiv.className = 'tab-block';
   tabDiv.innerHTML = `
-    <input type="text" class="form-input tab-label" placeholder="Название вкладки" style="margin-bottom: 10px;">
+    <input type="text" class="том tab-label" placeholder="Название вкладки" style="margin-bottom: 10px;">
     <div class="mod-selects"></div>
     <div class="tab-actions">
       <button type="button" class="btn add-mod">+ модуль</button>
@@ -713,17 +713,21 @@ function prioritySort(a, b) {
   const A = a.categories || [];
   const B = b.categories || [];
 
-  // 1) "Новинки" всегда выше остальных
-  if (A.includes("Новинки") && !B.includes("Новинки")) return -1;
-  if (!A.includes("Новинки") && B.includes("Новинки")) return 1;
+  // приоритеты категорий
+  const getPriority = (cats) => {
+    if (cats.includes("Новинки")) return 1;
+    if (cats.includes("Топ мета")) return 2;
+    if (cats.includes("Мета")) return 3;
+    return 4; // остальное
+  };
 
-  // 2) "Популярное" сразу после "Новинки"
-  if (A.includes("Популярное") && !B.includes("Популярное")) return -1;
-  if (!A.includes("Популярное") && B.includes("Популярное")) return 1;
+  const pa = getPriority(A);
+  const pb = getPriority(B);
 
-  // 3) далее по дате: новее выше
-  return getTime(b) - getTime(a);
+  if (pa !== pb) return pa - pb; // чем меньше — тем выше
+  return getTime(b) - getTime(a); // внутри группы сортировка по дате (новее выше)
 }
+
 
 const sorted = [...builds].sort(prioritySort);
 cachedBuilds = sorted;
@@ -747,6 +751,24 @@ cachedBuilds = sorted;
         ? `<span class="loadout__top" style="background:${topColors[i]}">#${i + 1} ${moduleNameMap[mod] || mod}</span>`
         : '')
       .join('');
+
+    // === Категории (бейджи)
+    let categoryBadges = '';
+    const cats = Array.isArray(build.categories) ? build.categories : [];
+    const badgeColors = {
+      'Новинки': '#3cb054',
+      'Популярное': '#2d9c44',
+      'Топ мета': '#e67e22',
+      'Мета': '#3498db'
+    };
+    
+    if (cats.length > 0) {
+      categoryBadges = cats.map(cat => {
+        const color = badgeColors[cat] || '#555';
+        return `<span class="badge badge-category" style="background:${color};">${cat}</span>`;
+      }).join('');
+    }
+
 
     const tabBtns = build.tabs.map((tab, i) =>
       `<button class="loadout__tab ${i === 0 ? 'is-active' : ''}" data-tab="tab-${buildIndex}-${i}">${tab.label}</button>`
@@ -781,6 +803,7 @@ cachedBuilds = sorted;
         </div>
         <div class="loadout__meta">
           <div class="loadout__tops">${tops}</div>
+          <div class="loadout__categories">${categoryBadges}</div>
           <div class="loadout__type">${weaponTypeRu}</div>
         </div>
       </div>
