@@ -761,16 +761,17 @@ cachedBuilds = sorted;
     const wrapper = document.createElement('div');
     wrapper.className = 'loadout js-loadout';
 
-      const tops = [build.top1, build.top2, build.top3]
+const tops = [build.top1, build.top2, build.top3]
         .filter(Boolean)
-        .map((mod, i) => {
-          // если в модуле уже есть # — не добавляем автоматически
-          const hasNumber = /^#?\d+/i.test(mod.trim());
-          const displayText = hasNumber ? mod.trim() : `#${i + 1} ${mod.trim()}`;
-          const bg = topColors[i] || '#666';
+        .map((mod) => {
+          // если ты сам написал #1, #2 и т.п. — оставляем как есть
+          const displayText = mod.trim();
+          // используем те же цвета, что и раньше, просто по порядку
+          const bg = topColors.find((_, idx) => idx < 3) || '#666';
           return `<span class="loadout__top" style="background:${bg}">${displayText}</span>`;
         })
         .join('');
+
 
 
           // === Категории (бейджи, русский + приоритет + отдельный бейдж справа)
