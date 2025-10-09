@@ -133,10 +133,13 @@ async function checkAdminStatus() {
     // === Если супер-админ ===
     if (data.is_super_admin) {
       assignBtn?.classList.add('is-visible');
-      addBtn?.classList.add('full-width');
+      assignBtn?.style.display = 'flex'; // 👈 гарантированно покажет
+      console.log("👑 Супер-админ — кнопка админки показана");
     } else {
-      addBtn?.classList.remove('full-width');
+      assignBtn?.classList.remove('is-visible');
+      assignBtn?.style.display = 'none';
     }
+
 
   } catch (e) {
     console.error("Ошибка при проверке прав администратора:", e);
