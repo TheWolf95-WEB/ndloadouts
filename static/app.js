@@ -1,4 +1,4 @@
-смотри у меня даже в браузере появилаьс кнопки админки но нету в веб апп для супер админа  const tg = window.Telegram.WebApp;
+const tg = window.Telegram.WebApp;
 tg.expand();
 
 const user = tg.initDataUnsafe?.user;
