@@ -80,6 +80,20 @@ document.getElementById('category-filter')?.addEventListener('change', async (e)
   });
 });
 
+document.getElementById('weapon-filter')?.addEventListener('change', (e) => {
+  const type = e.target.value;
+
+  document.querySelectorAll('.js-loadout').forEach((el, i) => {
+    const build = cachedBuilds[i];
+    const matches = (type === 'all' || build.weapon_type === type);
+    el.style.display = matches ? 'block' : 'none';
+  });
+
+  const anyVisible = [...document.querySelectorAll('.js-loadout')].some(el => el.style.display !== 'none');
+  document.getElementById('no-results-message').style.display = anyVisible ? 'none' : 'block';
+});
+
+
 
 async function checkAdminStatus() {
   try {
