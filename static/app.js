@@ -97,10 +97,14 @@ document.getElementById('weapon-filter')?.addEventListener('change', (e) => {
 
 async function checkAdminStatus() {
   try {
+    const initData = tg.initData && tg.initData.length > 0
+      ? tg.initData
+      : JSON.stringify(tg.initDataUnsafe || {});
+
     const res = await fetch('/api/me', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ initData: tg.initData })
+      body: JSON.stringify({ initData })
     });
 
     const data = await res.json();
