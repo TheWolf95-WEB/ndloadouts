@@ -148,46 +148,54 @@
 
 
 
-    <!-- 📋 Экран со сборками -->
-    <div id="screen-builds" class="screen">
-        
-        <div class="filters-row">
-          <div class="form-section" style="width: 50%;">
-            <select id="weapon-filter" class="form-input">
-              <option value="all">Тип оружия</option>
-              <option value="assault">Штурмовые</option>
-              <option value="pp">Пистолеты-пулемёты</option>
-              <option value="pulemet">Пулемёты</option>
-              <option value="snayperki">Снайперские</option>
-              <option value="pehotnay">Пехотные</option>
-              <option value="drobovik">Дробовики</option>
-            </select>
-          </div>
-        
-          <div class="form-section" style="width: 50%;">
-            <select id="category-filter" class="form-input">
-              <option value="all">Все сборки</option>
-              <option value="popular">Популярное</option>
-              <option value="new">Новинки</option>
-              <option value="topmeta">Топ мета</option>
-              <option value="meta">Мета</option>
-            </select>
-          </div>
-        </div>
-
-        
+<!-- 📋 Экран со сборками -->
+<div id="screen-builds" class="screen">
     
-    
-      <div class="form-section" style="display:flex;gap:20px;justify-content:space-between;height:50px;align-items:center;    flex-direction: row;">
-           <div> <h2 id="builds-title">📦 Все сборки</h2> </div>
-           <div> <button id="back-from-builds" class="btn btn-back">⬅ Назад</button> </div>
+    <div class="filters-row">
+      <div class="form-section" style="width: 50%;">
+        <select id="weapon-filter" class="form-input">
+          <option value="all">Все типы</option>
+          <option value="assault">Штурмовые</option>
+          <option value="pp">Пистолеты-пулемёты</option>
+          <option value="pulemet">Пулемёты</option>
+          <option value="snayperki">Снайперские</option>
+          <option value="pehotnay">Пехотные</option>
+          <option value="drobovik">Дробовики</option>
+        </select>
       </div>
     
-      <div id="builds-list">
-        <p>Загрузка сборок...</p>
+      <div class="form-section" style="width: 50%;">
+        <select id="category-filter" class="form-input">
+          <option value="all">Все категории</option>
+          <option value="popular">Популярное</option>
+          <option value="new">Новинки</option>
+          <option value="topmeta">Топ мета</option>
+          <option value="meta">Мета</option>
+        </select>
       </div>
-        <p id="no-results-message" style="display:none; text-align:center; margin-top:20px;">🔍 Ничего не найдено</p>
     </div>
+
+    <!-- 🔍 ПОИСК ДЛЯ ПОЛЬЗОВАТЕЛЕЙ -->
+    <div class="search-section">
+      <input type="text" id="builds-search" class="form-input" placeholder="🔍 Поиск по названию или модулям...">
+    </div>
+
+    <!-- 📊 СТАТИСТИКА -->
+    <div class="stats-bar">
+      <span id="user-builds-count">Всего сборок: 0</span>
+      <span id="user-filtered-count" style="display: none;"></span>
+    </div>
+    
+    <div class="form-section" style="display:flex;gap:20px;justify-content:space-between;height:50px;align-items:center;flex-direction: row;">
+         <div> <h2 id="builds-title">📦 Все сборки</h2> </div>
+         <div> <button id="back-from-builds" class="btn btn-back">⬅ Назад</button> </div>
+    </div>
+  
+    <div id="builds-list">
+      <p>Загрузка сборок...</p>
+    </div>
+      <p id="no-results-message" style="display:none; text-align:center; margin-top:20px;">🔍 Ничего не найдено</p>
+</div>
 
 
     <div id="screen-edit-builds" class="screen" style="display: none;">
