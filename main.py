@@ -501,6 +501,27 @@ def init_analytics_db():
             timestamp TEXT
         )
         """)
+
+        # НОВАЯ ТАБЛИЦА ДЛЯ СЕССИЙ
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS user_sessions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT,
+            session_start TEXT,
+            session_end TEXT,
+            duration_minutes INTEGER,
+            platform TEXT
+        )
+        """)
+        
+        # НОВАЯ ТАБЛИЦА ДЛЯ СУММАРНОГО ВРЕМЕНИ
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS user_total_time (
+            user_id TEXT PRIMARY KEY,
+            total_minutes INTEGER DEFAULT 0,
+            last_updated TEXT
+        )
+        """)
         
         cur.execute("""
         CREATE TABLE IF NOT EXISTS errors (
@@ -545,6 +566,8 @@ async def save_analytics(data: dict = Body(...)):
             return {"status": "ok"}
             
         details_json = json.dumps(details, ensure_ascii=False) if details else "{}"
+        platform = details.get("platform", "unknown")
+        now_iso = datetime.now().isoformat()
         
         conn = sqlite3.connect(ANALYTICS_DB)
         cur = conn.cursor()
@@ -555,11 +578,48 @@ async def save_analytics(data: dict = Body(...)):
             (str(user_id), action, details_json, timestamp)
         )
         
-        # Быстрое обновление профиля пользователя
-        platform = details.get("platform", "unknown")
-        now_iso = datetime.now().isoformat()
+        # ОБРАБОТКА СЕССИЙ
+        if action == "session_start":
+            # Начало сессии
+            cur.execute(
+                "INSERT INTO user_sessions (user_id, session_start, platform) VALUES (?, ?, ?)",
+                (str(user_id), timestamp, platform)
+            )
+            
+        elif action == "session_end":
+            # Конец сессии - вычисляем продолжительность
+            cur.execute(
+                "SELECT id, session_start FROM user_sessions WHERE user_id = ? AND session_end IS NULL ORDER BY session_start DESC LIMIT 1",
+                (str(user_id),)
+            )
+            session = cur.fetchone()
+            
+            if session:
+                session_id, session_start = session
+                try:
+                    start_dt = datetime.fromisoformat(session_start.replace('Z', '+00:00'))
+                    end_dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                    duration_minutes = int((end_dt - start_dt).total_seconds() / 60)
+                    
+                    # Обновляем сессию
+                    cur.execute(
+                        "UPDATE user_sessions SET session_end = ?, duration_minutes = ? WHERE id = ?",
+                        (timestamp, duration_minutes, session_id)
+                    )
+                    
+                    # Обновляем общее время пользователя
+                    cur.execute("""
+                        INSERT INTO user_total_time (user_id, total_minutes, last_updated)
+                        VALUES (?, ?, ?)
+                        ON CONFLICT(user_id) DO UPDATE SET
+                            total_minutes = total_minutes + excluded.total_minutes,
+                            last_updated = excluded.last_updated
+                    """, (str(user_id), duration_minutes, now_iso))
+                    
+                except Exception as e:
+                    print(f"Session duration calculation error: {e}")
         
-        # Получаем данные пользователя из Telegram
+        # Остальной код обновления профиля...
         user_info = {}
         try:
             if user_id and user_id != "anonymous":
