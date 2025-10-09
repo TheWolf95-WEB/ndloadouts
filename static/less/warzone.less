@@ -261,15 +261,19 @@
 
    .mod-row {
      display: flex;
+     align-items: center;
+     justify-content: space-between;
      gap: 10px;
      margin-bottom: 10px;
-     flex-wrap: wrap;
+     flex-wrap: nowrap; // ❗ запрещаем перенос
    }
    
    .mod-row select {
-     flex: 1 1 45%;
-     min-width: 100px;
+     width: 50%;
+     flex: 0 0 50%;
+     min-width: 0;
    }
+
 
   /* === Справочник модулей === */
   #modules-types-grid {
