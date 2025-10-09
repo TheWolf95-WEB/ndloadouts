@@ -710,23 +710,39 @@ async function loadBuilds(category = 'all') {
 }
 
 function prioritySort(a, b) {
-  const A = a.categories || [];
-  const B = b.categories || [];
+  // Переводим категории на русский, если они английские
+  const normalizeCats = (cats = []) => cats.map(c => {
+    switch (c.toLowerCase()) {
+      case 'new': return 'Новинки';
+      case 'popular': return 'Популярное';
+      case 'meta': return 'Мета';
+      case 'topmeta': return 'Топ мета';
+      default: return c;
+    }
+  });
 
-  // приоритеты категорий
+  const A = normalizeCats(a.categories || []);
+  const B = normalizeCats(b.categories || []);
+
   const getPriority = (cats) => {
     if (cats.includes("Новинки")) return 1;
     if (cats.includes("Топ мета")) return 2;
     if (cats.includes("Мета")) return 3;
-    return 4; // остальное
+    return 4;
   };
 
   const pa = getPriority(A);
   const pb = getPriority(B);
 
-  if (pa !== pb) return pa - pb; // чем меньше — тем выше
-  return getTime(b) - getTime(a); // внутри группы сортировка по дате (новее выше)
+  // 🔹 сначала по приоритету категорий
+  if (pa !== pb) return pa - pb;
+
+  // 🔹 потом по дате (новее — выше)
+  const ta = getTime(a);
+  const tb = getTime(b);
+  return tb - ta;
 }
+
 
 
 const sorted = [...builds].sort(prioritySort);
@@ -786,23 +802,11 @@ cachedBuilds = sorted;
       let categoryBadges = translatedCats
         .map(cat => {
           const name = normalizeName(cat);
-          const color = badgeColors[name] || "#2f3336";
-          return `<span class="badge badge-category" style="background:${color};">${name}</span>`;
+          return `<span class="badge badge-category" data-cat="${name}">${name}</span>`;
         })
         .join("");
-      
-      // 🔸 для бейджа справа в заголовке
-      let badgeText = null;
-      for (const name of badgePriority) {
-        if (translatedCats.includes(name)) {
-          badgeText = normalizeName(name);
-          break;
-        }
-      }
-      
 
- 
-
+      
     const tabBtns = build.tabs.map((tab, i) =>
       `<button class="loadout__tab ${i === 0 ? 'is-active' : ''}" data-tab="tab-${buildIndex}-${i}">${tab.label}</button>`
     ).join('');
@@ -849,17 +853,7 @@ cachedBuilds = sorted;
         </div>
       </div>
     `;
-
-          // === Добавляем бейдж справа в шапку ===
-      const headerTop = wrapper.querySelector('.loadout__header--top');
-      if (badgeText && headerTop) {
-        const badge = document.createElement('span');
-        badge.className = 'badge-category-main';
-        badge.textContent = badgeText;
-        headerTop.appendChild(badge);
-      }
-
-
+    
     buildsList.appendChild(wrapper);
   });
 
