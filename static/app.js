@@ -828,23 +828,56 @@ cachedBuilds = sorted;
         .map(name => `<span class="badge badge-category" data-cat="${name}">${name}</span>`)
         .join('');
   
-      wrapper.innerHTML = `
-        <div class="loadout__header js-loadout-toggle">
-          <div class="loadout__header--top">
-            <button class="loadout__toggle-icon" type="button"><i class="fa-solid fa-chevron-down"></i></button>
-            <h3 class="loadout__title">${build.title}</h3>
-            <span class="loadout__date">${build.date || ''}</span>
+        // === вкладки ===
+        const tabBtns = (build.tabs || []).map((tab, i) =>
+          `<button class="loadout__tab ${i === 0 ? 'is-active' : ''}" data-tab="tab-${groupIndex}-${buildIndex}-${i}">
+             ${tab.label}
+           </button>`
+        ).join('');
+        
+        const tabContents = (build.tabs || []).map((tab, i) => `
+          <div class="loadout__tab-content ${i === 0 ? 'is-active' : ''}" data-tab-content="tab-${groupIndex}-${buildIndex}-${i}">
+            <div class="loadout__modules">
+              ${(tab.items || []).map(itemKey => {
+                const wrap = modulesByType[build.weapon_type];
+                const norm = s => String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
+                const mod  = wrap?.byKey?.[itemKey] || wrap?.byKey?.[norm(itemKey)] || null;
+                const slot = mod?.category || '—';
+                const ru   = mod?.ru || itemKey;
+                return `
+                  <div class="loadout__module">
+                    <span class="loadout__module-slot">${slot}</span>
+                    <span class="loadout__module-name">${ru}</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
           </div>
-          <div class="loadout__meta">
-            <div class="loadout__tops">${tops}</div>
-            <div class="loadout__categories">${categoryBadges}</div>
-            <div class="loadout__type">${weaponTypeRu}</div>
+        `).join('');
+        
+        wrapper.innerHTML = `
+          <div class="loadout__header js-loadout-toggle">
+            <div class="loadout__header--top">
+              <button class="loadout__toggle-icon" type="button"><i class="fa-solid fa-chevron-down"></i></button>
+              <h3 class="loadout__title">${build.title}</h3>
+              <span class="loadout__date">${build.date || ''}</span>
+            </div>
+            <div class="loadout__meta">
+              <div class="loadout__tops">${tops}</div>
+              <div class="loadout__categories">${categoryBadges}</div>
+              <div class="loadout__type">${weaponTypeRu}</div>
+            </div>
           </div>
-        </div>
-        <div class="loadout__content" style="max-height: 0; overflow: hidden;">
-          <div class="loadout__inner"></div>
-        </div>
-      `;
+          <div class="loadout__content" style="max-height: 0; overflow: hidden;">
+            <div class="loadout__inner">
+              <div class="loadout__tabs">
+                <div class="loadout__tab-buttons">${tabBtns}</div>
+                <div class="loadout__tab-contents">${tabContents}</div>
+              </div>
+            </div>
+          </div>
+        `;
+
   
       buildsList.appendChild(wrapper);
     });
