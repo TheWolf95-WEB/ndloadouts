@@ -711,6 +711,7 @@ function rebuildModuleSelects() {
 
 
 // === Загрузка сборок для пользователей ===
+// === Загрузка сборок для пользователей ===
 async function loadBuilds(category = 'all') {
   const res = await fetch(`/api/builds?category=${category}`);
   const builds = await res.json();
@@ -728,6 +729,10 @@ async function loadBuilds(category = 'all') {
     return;
   }
 
+  // 🔥 ВАЖНО: Загружаем модули для всех типов оружия, которые есть в сборках
+  const uniqueTypes = [...new Set(builds.map(b => b.weapon_type))];
+  await Promise.all(uniqueTypes.map(loadModules));
+
   // Рендер сборок
   renderUserBuilds(builds);
 
@@ -735,6 +740,58 @@ async function loadBuilds(category = 'all') {
   const weaponFilter = document.getElementById('weapon-filter');
   const categoryFilter = document.getElementById('category-filter');
   const searchInput = document.getElementById('builds-search');
+
+  // Функция для улучшенного поиска по модулям
+  function searchInModules(build, searchValue, weaponType) {
+    // Поиск по топ-модулям (русские названия)
+    const topModules = [build.top1, build.top2, build.top3];
+    const topModulesMatch = topModules.some(top => {
+      if (!top) return false;
+      
+      // Пытаемся найти русский перевод топ-модуля
+      const mods = modulesByType[weaponType];
+      if (mods) {
+        const normTop = String(top).toLowerCase().trim().replace(/\s+/g, ' ');
+        const mod = mods.byKey?.[normTop];
+        if (mod && mod.ru.toLowerCase().includes(searchValue)) {
+          return true;
+        }
+      }
+      
+      // Ищем по самому тексту топ-модуля
+      return top.toLowerCase().includes(searchValue);
+    });
+
+    if (topModulesMatch) return true;
+
+    // Поиск по модулям во вкладках
+    if (Array.isArray(build.tabs)) {
+      for (const tab of build.tabs) {
+        if (Array.isArray(tab.items)) {
+          for (const itemKey of tab.items) {
+            if (!itemKey) continue;
+            
+            // Ищем русский перевод модуля
+            const mods = modulesByType[weaponType];
+            if (mods) {
+              const normKey = String(itemKey).toLowerCase().trim().replace(/\s+/g, ' ');
+              const mod = mods.byKey?.[normKey];
+              if (mod && mod.ru.toLowerCase().includes(searchValue)) {
+                return true;
+              }
+            }
+            
+            // Ищем по английскому ключу
+            if (itemKey.toLowerCase().includes(searchValue)) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    return false;
+  }
 
   function applyUserFilters() {
     const weaponValue = weaponFilter.value;
@@ -747,7 +804,7 @@ async function loadBuilds(category = 'all') {
         return false;
       }
 
-      // Фильтр по категории (уже применен на сервере, но для поиска тоже)
+      // Фильтр по категории
       if (categoryValue !== 'all') {
         const categories = Array.isArray(build.categories) ? build.categories : [];
         if (!categories.includes(categoryValue)) {
@@ -759,21 +816,10 @@ async function loadBuilds(category = 'all') {
       if (searchValue) {
         const titleMatch = build.title.toLowerCase().includes(searchValue);
         
-        // Поиск по модулям в топах
-        const topModulesMatch = [build.top1, build.top2, build.top3]
-          .some(top => top && top.toLowerCase().includes(searchValue));
-        
-        // Поиск по модулям во вкладках
-        let tabsMatch = false;
-        if (Array.isArray(build.tabs)) {
-          tabsMatch = build.tabs.some(tab => {
-            return Array.isArray(tab.items) && tab.items.some(item => 
-              item && item.toLowerCase().includes(searchValue)
-            );
-          });
-        }
+        // Улучшенный поиск по модулям
+        const modulesMatch = searchInModules(build, searchValue, build.weapon_type);
 
-        if (!titleMatch && !topModulesMatch && !tabsMatch) {
+        if (!titleMatch && !modulesMatch) {
           return false;
         }
       }
