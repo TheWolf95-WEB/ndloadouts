@@ -785,4 +785,79 @@
       flex: 1 1 100%;
     }
   }
+
+
+/* === ЕДИНЫЙ СТИЛЬ ДЛЯ ВСЕХ SELECT === */
+select {
+  width: 100%;
+  height: 44px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  color: #fff;
+  background: linear-gradient(145deg, #1b2324, #101617);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3), inset 0 -1px 4px rgba(255,255,255,0.05);
+  transition: all 0.2s ease;
+  appearance: none; /* убираем стандартную стрелку */
+  position: relative;
+  cursor: pointer;
+}
+
+/* ✳️ Стрелка (кастомная) */
+select::-ms-expand {
+  display: none;
+}
+
+select::after {
+  content: "▼";
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--wz-accent-light);
+  pointer-events: none;
+}
+
+/* Фокус */
+select:focus {
+  background: linear-gradient(145deg, #223234, #141c1d);
+  box-shadow: 0 0 0 2px var(--wz-accent-glow),
+              inset 0 -1px 4px rgba(255,255,255,0.1);
+  outline: none;
+}
+
+/* Заблокированные */
+select:disabled {
+  background: #181d1d;
+  color: #777;
+  cursor: not-allowed;
+}
+
+/* === Стили для опций === */
+select option {
+  background: #101617;
+  color: #fff;
+  padding: 10px;
+  border: none;
+}
+
+select option:hover,
+select option:checked,
+select option:focus {
+  background: #1e6b32;
+  color: #fff;
+}
+
+/* === Адаптив под мобилки === */
+@media (max-width: 480px) {
+  select {
+    height: 40px;
+    font-size: 0.9rem;
+  }
+}
+
+
+
+   
 }
