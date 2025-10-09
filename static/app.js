@@ -1200,11 +1200,11 @@ async function loadBuildsTable() {
         // Бейджи категорий с эмодзи
         const categoryBadges = categories.map(cat => {
           const emojiMap = {
-            'popular': '🔥',
-            'new': '🆕', 
-            'topmeta': '🏆',
-            'meta': '🎯',
-            'all': '📦'
+            'popular': 'Популярное',
+            'new': 'Новинки', 
+            'topmeta': 'Топ Мета',
+            'meta': 'Мета',
+            'all': 'Все'
           };
           const emoji = emojiMap[cat] || '📌';
           return `<span class="compact-badge" title="${cat}">${emoji}</span>`;
