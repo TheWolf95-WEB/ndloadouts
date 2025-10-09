@@ -547,6 +547,7 @@
               inset 0 -1px 4px rgba(255, 255, 255, 0.05);
   border-left: 4px solid var(--wz-accent);
   gap: 8px;
+   flex-direction:column;
 }
 
 .loadout__module:hover {
@@ -561,7 +562,6 @@
   white-space: nowrap;
   font-weight: 500;
   flex-shrink: 0;
-  min-width: 80px;
 }
 
 .loadout__module-name {
@@ -664,11 +664,6 @@
   .loadout__module {
     padding: 10px;
     gap: 6px;
-  }
-  
-  .loadout__module-slot {
-    font-size: 0.8rem;
-    min-width: 70px;
   }
   
   .loadout__module-name {
