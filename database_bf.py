@@ -271,11 +271,16 @@ def get_bf_modules_by_type(weapon_type):
 
 def add_bf_module(data):
     with get_connection() as conn:
+        name = data.get("en") or data.get("name") or "unknown"
+        ru = data.get("ru") or ""
+        full_name = f"{name} — {ru}" if ru else name
+
         conn.execute(
             "INSERT INTO bf_modules (weapon_type, category, name) VALUES (?, ?, ?)",
-            (data["weapon_type"], data["category"], data["name"])
+            (data.get("weapon_type"), data.get("category"), full_name)
         )
         conn.commit()
+
 
 def delete_bf_module(module_id):
     with get_connection() as conn:
