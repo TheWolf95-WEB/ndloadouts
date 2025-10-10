@@ -640,35 +640,36 @@ function bfRenderBuilds(builds) {
       <button class="btn bf-toggle">Показать модули</button>
     `;
 
-    const tabsHTML = (b.tabs || [])
-      .map((tab) => {
-        const modsCount = (tab.items || []).filter(Boolean).length;
+   const tabsHTML = tabs
+     .map((tab) => {
+       const modsCount = (tab.items || []).filter(Boolean).length;
+   
+       const modsList = (tab.items || [])
+         .filter(Boolean)
+         .map((m) => {
+           const modInfo = bfModulesByType[b.weapon_type]?.byKey?.[m.toLowerCase()];
+           const category = modInfo?.category || "—";
+           return `
+             <div class="bf-mod-card">
+               <div class="bf-mod-category">${category}</div>
+               <div class="bf-mod-name">${m}</div>
+             </div>
+           `;
+         })
+         .join("");
+   
+       return `
+         <div class="bf-tab">
+           <button class="bf-tab-header">
+             <span>${tab.label || "Без названия"} (${modsCount} модулей)</span>
+             <span class="arrow">▼</span>
+           </button>
+           <div class="bf-tab-body">${modsList}</div>
+         </div>
+       `;
+     })
+     .join("");
 
-        const modsList = (tab.items || [])
-          .filter(Boolean)
-          .map((m) => {
-            const modInfo = bfModulesByType[b.weapon_type]?.byKey?.[m.toLowerCase()];
-            const category = modInfo?.category || "—";
-            return `
-              <div class="bf-mod-card">
-                <div class="bf-mod-category">${category}</div>
-                <div class="bf-mod-name">${m}</div>
-              </div>
-            `;
-          })
-          .join("");
-
-        return `
-          <div class="bf-tab">
-            <button class="bf-tab-header">
-              <span>${tab.label || "Без названия"} (${modsCount} модулей)</span>
-              <span class="arrow">▼</span>
-            </button>
-            <div class="bf-tab-body">${modsList}</div>
-          </div>
-        `;
-      })
-      .join("");
 
     const content = document.createElement("div");
     content.className = "bf-build-content";
