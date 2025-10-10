@@ -368,10 +368,12 @@ function bfAddModuleRow(tabDiv, type) {
 
     // Добавляем только те, которых ещё нет
     list.forEach((m) => {
-      const opt = document.createElement("option");
-      opt.value = m.en;
-      opt.textContent = m.en;
-      if (!used.includes(m.en)) moduleSelect.appendChild(opt);
+      if (!used.includes(m.en)) {
+        const opt = document.createElement("option");
+        opt.value = m.en;
+        opt.textContent = m.en;
+        moduleSelect.appendChild(opt);
+      }
     });
 
     if (!moduleSelect.options.length) {
@@ -386,28 +388,39 @@ function bfAddModuleRow(tabDiv, type) {
   // === Обновляем все селекты во вкладке при выборе любого модуля ===
   function updateAllSelects() {
     const allRows = tabDiv.querySelectorAll(".mod-row");
+    
+    // Собираем ВСЕ выбранные модули во вкладке
+    const allUsed = Array.from(tabDiv.querySelectorAll(".module-select"))
+      .map((s) => s.value)
+      .filter(Boolean);
+
     allRows.forEach((r) => {
       const catSel = r.querySelector(".category-select");
       const modSel = r.querySelector(".module-select");
       const list = modsWrap.byCategory[catSel.value] || [];
 
-      const used = Array.from(tabDiv.querySelectorAll(".module-select"))
-        .map((s) => s.value)
-        .filter(Boolean);
-
       const currentValue = modSel.value;
       modSel.innerHTML = "";
 
+      // Добавляем доступные модули (не выбранные в других селектах)
       list.forEach((m) => {
         const opt = document.createElement("option");
         opt.value = m.en;
         opt.textContent = m.en;
-        if (m.en === currentValue || !used.includes(m.en)) modSel.appendChild(opt);
+        
+        // Модуль доступен если: он текущий выбранный ИЛИ не выбран в других селектах
+        const isAvailable = m.en === currentValue || !allUsed.includes(m.en);
+        if (isAvailable) {
+          modSel.appendChild(opt);
+        }
       });
 
-      // Сохраняем прежний выбор, если он остался допустимым
+      // Восстанавливаем предыдущее значение, если оно доступно
       if (Array.from(modSel.options).some((o) => o.value === currentValue)) {
         modSel.value = currentValue;
+      } else if (modSel.options.length > 0) {
+        // Если предыдущее значение недоступно, выбираем первый доступный
+        modSel.selectedIndex = 0;
       }
     });
   }
