@@ -743,13 +743,14 @@ function bfRenderBuilds(builds) {
 
       const weaponTypeRu = bfWeaponTypeLabels[build.weapon_type] || build.weapon_type;
 
+      // 🔥 Цвета топ-модулей как в Warzone
       const pickTopBg = (text) => {
         const m = String(text).trim().match(/^#?(\d+)/);
         const n = m ? parseInt(m[1], 10) : 0;
-        if (n === 1) return '#b8a326';
-        if (n === 2) return '#B0B0B0';
-        if (n === 3) return '#FF8C00';
-        return '#2f3336';
+        if (n === 1) return '#b8a326'; // золотой
+        if (n === 2) return '#B0B0B0'; // серебряный
+        if (n === 3) return '#FF8C00'; // бронзовый
+        return '#2f3336'; // серый по умолчанию
       };
 
       const tops = [build.top1, build.top2, build.top3]
@@ -762,20 +763,41 @@ function bfRenderBuilds(builds) {
         .join('');
 
       const cats = Array.isArray(build.categories) ? build.categories : [];
-      const translatedCats = cats.map(cat => {
-        switch (String(cat).toLowerCase()) {
-          case 'all': return 'Все';
-          case 'new': return 'Новинка';
-          case 'popular': return 'Популярное';
-          case 'meta': return 'Мета';
-          case 'topmeta': return 'Топ мета';
-          default: return cat;
+      
+      // 🔥 Цвета категорий как в Warzone
+      const categoryBadges = cats.map(cat => {
+        const categoryName = String(cat).toLowerCase();
+        let color = '#3a7bd5'; // синий по умолчанию
+        
+        switch (categoryName) {
+          case 'new':
+          case 'новинки':
+            color = '#FF6B6B'; // красный для новинок
+            break;
+          case 'topmeta':
+          case 'топ мета':
+            color = '#4ECDC4'; // бирюзовый для топ меты
+            break;
+          case 'meta':
+          case 'мета':
+            color = '#45B7D1'; // голубой для меты
+            break;
+          case 'popular':
+          case 'популярное':
+            color = '#96CEB4'; // зеленый для популярного
+            break;
         }
-      });
-
-      const categoryBadges = translatedCats
-        .map(name => `<span class="bf-badge" data-cat="${name}">${name}</span>`)
-        .join('');
+        
+        const displayName = {
+          'all': 'Все',
+          'new': 'Новинка',
+          'popular': 'Популярное',
+          'meta': 'Мета',
+          'topmeta': 'Топ мета'
+        }[categoryName] || cat;
+        
+        return `<span class="bf-badge" style="background:${color}">${displayName}</span>`;
+      }).join('');
 
       // Безопасный парсинг вкладок
       let tabs = [];
@@ -784,6 +806,21 @@ function bfRenderBuilds(builds) {
       } catch {
         tabs = [];
       }
+
+      // 🔥 Форматирование даты в DD.MM.YYYY
+      const formatDate = (dateStr) => {
+        if (!dateStr) return '';
+        // Если дата уже в формате DD.MM.YYYY
+        if (dateStr.includes('.')) return dateStr;
+        
+        // Если дата в формате YYYY-MM-DD
+        if (dateStr.includes('-')) {
+          const [year, month, day] = dateStr.split('-');
+          return `${day}.${month}.${year}`;
+        }
+        
+        return dateStr;
+      };
 
       // Вкладки
       const tabBtns = tabs.map((tab, i) =>
@@ -817,7 +854,7 @@ function bfRenderBuilds(builds) {
           <div class="bf-loadout__header-top">
             <button class="bf-toggle-icon" type="button"><i class="fa-solid fa-chevron-down"></i></button>
             <h3 class="bf-loadout__title">${build.title}</h3>
-            <span class="bf-loadout__date">${build.date || ''}</span>
+            <span class="bf-loadout__date">${formatDate(build.date)}</span>
           </div>
           <div class="bf-loadout__meta">
             <div class="bf-tops">${tops}</div>
