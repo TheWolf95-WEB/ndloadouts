@@ -619,6 +619,14 @@ function bfRenderBuilds(builds) {
     const item = document.createElement("div");
     item.className = "bf-build-item";
 
+       // ✅ безопасно парсим tabs
+     let tabs = [];
+     try {
+       tabs = typeof b.tabs === "string" ? JSON.parse(b.tabs) : (b.tabs || []);
+     } catch {
+       tabs = [];
+     }
+
     const topBlock = `
       <div class="bf-build-header">
         <h3>${b.title}</h3>
