@@ -1075,6 +1075,9 @@ function bfFilterBuilds() {
 /* ===============================
    🧱 БАЗА СБОРОК (АДМИН)
    =============================== */
+/* ===============================
+   🧱 БАЗА СБОРОК (АДМИН)
+   =============================== */
 async function bfLoadBuildsTable() {
   try {
     const res = await fetch("/api/bf/builds");
@@ -1085,32 +1088,76 @@ async function bfLoadBuildsTable() {
     grid.innerHTML = "";
     countEl.textContent = `Всего: ${builds.length} сборок`;
 
+    if (!builds.length) {
+      grid.innerHTML = `<p class="no-results">🔍 Сборок пока нет</p>`;
+      return;
+    }
+
     builds.forEach((b) => {
       const card = document.createElement("div");
       card.className = "bf-build-card";
 
       const weaponLabel = bfWeaponTypeLabels[b.weapon_type] || b.weapon_type;
+      const cats = Array.isArray(b.categories) ? b.categories : [];
 
-      const cats = Array.isArray(b.categories)
-        ? b.categories.map(c => `<span class="bf-cat">${c}</span>`).join(" ")
-        : "";
+      // 🎨 Метки категорий как в Warzone
+      const categoryBadges = cats.map(cat => {
+        const categoryName = String(cat).toLowerCase();
+        let bg = '#2a2f36', text = '#fff', label = '';
 
+        switch (categoryName) {
+          case 'new': case 'новинки':
+            bg = 'linear-gradient(135deg, #ff4e50, #f9d423)';
+            label = 'Новинка'; break;
+          case 'topmeta': case 'топ мета':
+            bg = 'linear-gradient(135deg, #ffb347, #ffcc33)';
+            text = '#222'; label = 'Топ Мета'; break;
+          case 'meta': case 'мета':
+            bg = 'linear-gradient(135deg, #56ab2f, #a8e063)';
+            label = 'Мета'; break;
+          case 'popular': case 'популярное':
+            bg = 'linear-gradient(135deg, #36d1dc, #5b86e5)';
+            label = 'Популярное'; break;
+          default:
+            label = cat;
+        }
+
+        return `
+          <span class="bf-badge" style="
+            background:${bg};
+            color:${text};
+            border-radius:6px;
+            padding:3px 8px;
+            font-size:0.75rem;
+            font-weight:500;
+            text-shadow:0 1px 1px rgba(0,0,0,0.4);
+          ">${label}</span>
+        `;
+      }).join('');
+
+      // 🔸 Карточка
       card.innerHTML = `
-        <h4>${b.title}</h4>
-        <p>${weaponLabel}</p>
-        <div class="bf-cats">${cats}</div>
-        <div class="bf-build-actions">
-          <button class="btn btn-edit">Изменить</button>
-          <button class="btn btn-delete">Удалить</button>
+        <div class="bf-card-top">
+          <h3 class="bf-title">${b.title}</h3>
+          <div class="bf-type">${weaponLabel}</div>
+        </div>
+
+        <div class="bf-categories">${categoryBadges}</div>
+
+        <div class="bf-tops">
+          ${[b.top1, b.top2, b.top3].filter(Boolean).map((t, i) => `
+            <span class="bf-top bf-top${i + 1}">${t}</span>
+          `).join('')}
+        </div>
+
+        <div class="bf-card-actions">
+          <button class="btn-edit">✏️ Изменить</button>
+          <button class="btn-delete">🗑 Удалить</button>
         </div>
       `;
 
-      // ✅ Клик по карточке = редактировать
-      card.addEventListener("click", (e) => {
-        if (!e.target.closest(".btn-delete")) {
-          bfEditBuild(b);
-        }
-      });
+      // События
+      card.querySelector(".btn-edit").addEventListener("click", () => bfEditBuild(b));
 
       card.querySelector(".btn-delete").addEventListener("click", async (e) => {
         e.stopPropagation();
