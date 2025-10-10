@@ -155,9 +155,35 @@
   </div>
 
   <!-- Вкладки -->
+  <!-- Вкладки -->
   <div class="form-section">
     <label class="form-label">Вкладки (модули):</label>
     <div id="bf-tabs-container"></div>
+    
+    <!-- Шаблон вкладки -->
+    <template id="tab-template">
+      <div class="tab-block">
+        <input type="text" class="tab-title-input" placeholder="Название вкладки">
+        
+        <!-- Модули вкладки -->
+        <div class="tab-modules">
+          <div class="mod-row">
+            <input type="text" placeholder="Дуло">
+            <select class="mod-select">
+              <option value="">модуль</option>
+            </select>
+          </div>
+          <!-- Здесь будут добавляться новые модули -->
+        </div>
+        
+        <!-- Кнопки вкладки в одной строке -->
+        <div class="tab-actions">
+          <button class="btn add-mod">➕ Добавить модуль</button>
+          <button class="btn delete-tab">🗑️ Удалить вкладку</button>
+        </div>
+      </div>
+    </template>
+    
     <button class="btn btn-accent" id="bf-add-tab">➕ Добавить вкладку</button>
   </div>
 
