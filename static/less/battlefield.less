@@ -876,20 +876,32 @@ body.warzone-theme .card-btn:hover {
   padding: 16px;
 }
 
+/* Заголовки вкладок */
+.bf-tab-buttons {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #2a3a4a;
+  padding-bottom: 8px;
+  flex-wrap: wrap;
+}
 
 .bf-tab-btn {
-  background: none;
-  border: none;
-  padding: 8px 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 6px 12px;
   color: #8fa3b7;
   cursor: pointer;
-  border-bottom: 2px solid transparent;
+  border-radius: 6px;
+  font-size: 12px;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .bf-tab-btn.is-active {
-  color: #3a7bd5;
-  border-bottom-color: #3a7bd5;
+  background: #3a7bd5;
+  border-color: #3a7bd5;
+  color: white;
 }
 
 .bf-tab-content {
