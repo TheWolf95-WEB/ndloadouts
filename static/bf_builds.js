@@ -25,6 +25,7 @@ const bfWeaponTypeLabels = {};
 let bfCachedBuilds = [];
 let bfCurrentEditId = null;
 let bfScreenHistory = [];
+let bfHasUnsavedChanges = false;
 
 // === Инициализация ===
 // === Инициализация ===
@@ -43,6 +44,14 @@ document.addEventListener("DOMContentLoaded", async () => {
    🔹 Навигация
    ============== */
 function bfShowScreen(id) {
+  // Проверяем есть ли несохраненные изменения
+  if (bfHasUnsavedChanges && !id.includes("bf-form") && !id.includes("bf-edit-builds")) {
+    if (!confirm("У вас есть несохраненные изменения. Продолжить без сохранения?")) {
+      return;
+    }
+    bfHasUnsavedChanges = false;
+  }
+
   const current = document.querySelector(".screen.active")?.id;
   if (current && current !== id) bfScreenHistory.push(current);
 
@@ -272,6 +281,7 @@ async function bfLoadModules(type) {
 // === Кнопка "Добавить сборку" ===
 document.getElementById("bf-add-build-btn")?.addEventListener("click", () => {
   bfCurrentEditId = null;
+  bfHasUnsavedChanges = false; // Сбрасываем флаг изменений
   document.getElementById("bf-submit-build").textContent = "➕ Добавить сборку";
 
   // Очистка полей формы
@@ -284,6 +294,26 @@ document.getElementById("bf-add-build-btn")?.addEventListener("click", () => {
   document.getElementById("bf-tabs-container").innerHTML = "";
 
   bfShowScreen("screen-bf-form");
+});
+
+// Функция для отслеживания изменений в форме
+function bfTrackFormChanges() {
+  const formElements = [
+    '#bf-title', '#bf-weapon-type', '#bf-top1', '#bf-top2', '#bf-top3', 
+    '#bf-build-date', '.bf-build-category', '.tab-label', '.module-select'
+  ];
+
+  formElements.forEach(selector => {
+    document.querySelectorAll(selector).forEach(element => {
+      element.addEventListener('input', () => bfHasUnsavedChanges = true);
+      element.addEventListener('change', () => bfHasUnsavedChanges = true);
+    });
+  });
+}
+
+// Инициализация отслеживания изменений при загрузке
+document.addEventListener("DOMContentLoaded", () => {
+  bfTrackFormChanges();
 });
 
 
@@ -472,6 +502,7 @@ async function bfHandleSubmitBuild() {
     }
 
     alert(bfCurrentEditId ? "Сборка обновлена!" : "Сборка добавлена!");
+    bfHasUnsavedChanges = false; // Сбрасываем флаг после успешного сохранения
     bfShowScreen("screen-bf-edit-builds");
     await bfLoadBuildsTable();
     bfCurrentEditId = null;
@@ -480,6 +511,17 @@ async function bfHandleSubmitBuild() {
     alert("Error saving build");
   }
 }
+
+// Обработчик кнопки "Назад" на форме
+document.getElementById("bf-back-from-form")?.addEventListener("click", () => {
+  if (bfHasUnsavedChanges) {
+    if (!confirm("У вас есть несохраненные изменения. Продолжить без сохранения?")) {
+      return;
+    }
+  }
+  bfHasUnsavedChanges = false;
+  bfShowScreen("screen-battlefield-main");
+});
 
 /* ===============================
    📥 РЕДАКТИРОВАНИЕ СБОРКИ
