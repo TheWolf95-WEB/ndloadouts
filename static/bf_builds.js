@@ -632,23 +632,53 @@ function bfRenderBuilds(builds) {
       <button class="btn bf-toggle">Показать модули</button>
     `;
 
-    const tabsHTML = (b.tabs || [])
-      .map(
-        (tab) => `
-      <div class="bf-tab">
-        <h4>${tab.label}</h4>
-        <ul>
-          ${tab.items
-            .map(
-              (m) =>
-                `<li>${
-                  (bfModulesByType[b.weapon_type]?.byKey?.[m.toLowerCase()]?.category || "—"
-                )}: ${m}</li>`
-            )
-            .join("")}
-        </ul>
-      </div>`
-      )
+      const tabsHTML = (b.tabs || [])
+        .map((tab) => {
+          // Кол-во модулей
+          const modsCount = (tab.items || []).filter(Boolean).length;
+      
+          // Каждый модуль в карточке
+          const modsList = (tab.items || [])
+            .filter(Boolean)
+            .map((m) => {
+              const modInfo = bfModulesByType[b.weapon_type]?.byKey?.[m.toLowerCase()];
+              const category = modInfo?.category || "—";
+              return `
+                <div class="bf-mod-card">
+                  <div class="bf-mod-category">${category}</div>
+                  <div class="bf-mod-name">${m}</div>
+                </div>
+              `;
+            })
+            .join("");
+      
+          return `
+            <div class="bf-tab">
+              <button class="bf-tab-header">
+                <span>${tab.label || "Без названия"} (${modsCount} модулей)</span>
+                <span class="arrow">▼</span>
+              </button>
+              <div class="bf-tab-body">${modsList}</div>
+            </div>
+          `;
+        })
+        .join("");
+      
+      // вставляем tabsHTML в контент
+      const content = document.createElement("div");
+      content.className = "bf-build-content";
+      content.innerHTML = tabsHTML;
+      
+      // обработка аккордеона
+      content.querySelectorAll(".bf-tab-header").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const body = btn.nextElementSibling;
+          const expanded = body.style.display === "block";
+          body.style.display = expanded ? "none" : "block";
+          btn.querySelector(".arrow").textContent = expanded ? "▼" : "▲";
+        });
+      });
+
       .join("");
 
     const content = document.createElement("div");
