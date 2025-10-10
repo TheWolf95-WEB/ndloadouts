@@ -437,6 +437,9 @@ function bfShowAddForm(editId = null, build = null) {
 
     // Вкладки
     (build.tabs || []).forEach(t => bfAddTab(t));
+  } else {
+    // Добавляем пустую вкладку по умолчанию
+    bfAddTab();
   }
 
   console.log('🛠 Открыта форма добавления/редактирования сборки', currentBfEditId);
@@ -444,26 +447,37 @@ function bfShowAddForm(editId = null, build = null) {
 
 function bfAddTab(tabData = null) {
   const wrap = $('#bf-tabs-container');
-  const tab = el('div', 'bf-tab');
+  const tab = el('div', 'tab-block');
   const title = tabData?.title || '';
+  
   tab.innerHTML = `
-    <div class="bf-tab__header">
-      <input class="form-input bf-tab-title" placeholder="Название вкладки" value="${escapeAttr(title)}">
-      <button class="btn-mini danger bf-tab-remove">Удалить вкладку</button>
+    <input type="text" class="tab-title-input form-input" placeholder="Название вкладки" value="${escapeAttr(title)}">
+    
+    <div class="tab-modules">
+      <div class="mod-row">
+        <input type="text" class="form-input" placeholder="Дуло">
+        <select class="mod-select form-input">
+          <option value="">модуль</option>
+        </select>
+      </div>
     </div>
-    <div class="bf-tab-items"></div>
-    <button class="btn btn-secondary bf-add-item">+ модуль</button>
+    
+    <div class="tab-actions">
+      <button class="btn add-mod">➕ Добавить модуль</button>
+      <button class="btn delete-tab">🗑️ Удалить вкладку</button>
+    </div>
   `;
+  
   wrap.appendChild(tab);
 
-  const itemsWrap = $('.bf-tab-items', tab);
-  const addItemBtn = $('.bf-add-item', tab);
-  const removeTabBtn = $('.bf-tab-remove', tab);
+  const itemsWrap = $('.tab-modules', tab);
+  const addItemBtn = $('.add-mod', tab);
+  const removeTabBtn = $('.delete-tab', tab);
 
   removeTabBtn.addEventListener('click', () => tab.remove());
   addItemBtn.addEventListener('click', () => bfAddTabItem(itemsWrap));
 
-  // Предзаполнение модулей (категория + название)
+  // Предзаполнение модулей если есть данные
   if (Array.isArray(tabData?.items)) {
     tabData.items.forEach(it => {
       bfAddTabItem(itemsWrap, it.category || '', it.name || '');
@@ -472,13 +486,11 @@ function bfAddTab(tabData = null) {
 }
 
 function bfAddTabItem(container, cat = '', name = '') {
-  const row = el('div', 'bf-item-row');
+  const row = el('div', 'mod-row');
   row.innerHTML = `
-    <input class="form-input bf-item-cat" placeholder="Категория (напр. Дуло)" value="${escapeAttr(cat)}">
-    <input class="form-input bf-item-name" placeholder="Название модуля (напр. Suppressor)" value="${escapeAttr(name)}">
-    <button class="btn-mini danger">✖</button>
+    <input class="form-input" placeholder="Категория (напр. Дуло)" value="${escapeAttr(cat)}">
+    <input class="form-input" placeholder="Название модуля (напр. Suppressor)" value="${escapeAttr(name)}">
   `;
-  row.querySelector('.danger').addEventListener('click', () => row.remove());
   container.appendChild(row);
 }
 
@@ -496,18 +508,32 @@ async function bfSubmitBuild() {
 
   // Сбор вкладок
   const tabs = [];
-  $$('.bf-tab').forEach(tab => {
-    const tTitle = $('.bf-tab-title', tab).value.trim() || 'Без названия';
+  $$('.tab-block').forEach(tab => {
+    const tTitle = $('.tab-title-input', tab).value.trim() || 'Без названия';
     const items = [];
-    $$('.bf-item-row', tab).forEach(r => {
-      const cat = $('.bf-item-cat', r).value.trim();
-      const name = $('.bf-item-name', r).value.trim();
-      if (cat || name) items.push({ category: cat, name });
+    
+    $$('.mod-row', tab).forEach(r => {
+      const inputs = $$('input', r);
+      if (inputs.length >= 2) {
+        const cat = inputs[0].value.trim();
+        const name = inputs[1].value.trim();
+        if (cat || name) items.push({ category: cat, name });
+      }
     });
+    
     tabs.push({ title: tTitle, items });
   });
 
-  const payload = { title, weapon_type, categories, top1, top2, top3, date, tabs };
+  const payload = { 
+    title, 
+    weapon_type, 
+    categories, 
+    top1, 
+    top2, 
+    top3, 
+    date, 
+    tabs 
+  };
 
   try {
     if (currentBfEditId) {
@@ -523,7 +549,6 @@ async function bfSubmitBuild() {
     alert('Ошибка сохранения сборки');
   }
 }
-
 // ========================
 // 🧰 ВСПОМОГАТЕЛЬНЫЕ
 // ========================
