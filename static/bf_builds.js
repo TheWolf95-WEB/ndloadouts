@@ -324,32 +324,69 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // === Добавление вкладки ===
 // Улучшенная функция добавления вкладки
-document.getElementById("bf-add-tab")?.addEventListener("click", () => {
-  const type = document.getElementById("bf-weapon-type").value;
-  const mods = bfModulesByType[type];
-  if (!mods) {
-    alert("Сначала выберите тип оружия");
-    document.getElementById("bf-weapon-type").focus();
-    return;
-  }
-
-  const tabDiv = document.createElement("div");
-  tabDiv.className = "tab-block";
-  tabDiv.innerHTML = `
-    <input type="text" class="tab-label form-input" placeholder="Название вкладки (например: Основные модули)">
-    <div class="mod-selects"></div>
-    <div class="tab-actions">
-      <button type="button" class="btn add-mod">+ Модуль</button>
-      <button type="button" class="btn delete-tab">🗑 Удалить вкладку</button>
-    </div>
-  `;
-  
-  document.getElementById("bf-tabs-container").appendChild(tabDiv);
-
   // Добавляем первый модуль автоматически
   setTimeout(() => {
     bfAddModuleRow(tabDiv, type);
+
+    // ✅ После добавления — пересинхронизация всех вкладок
+    bfSyncAllTabs();
   }, 100);
+
+  tabDiv.querySelector(".add-mod").addEventListener("click", () => {
+    bfAddModuleRow(tabDiv, type);
+    bfSyncAllTabs(); // ✅ после добавления модуля тоже синхронизация
+  });
+
+  tabDiv.querySelector(".delete-tab").addEventListener("click", () => {
+    if (confirm("Удалить эту вкладку?")) {
+      tabDiv.remove();
+      bfHasUnsavedChanges = true;
+      bfSyncAllTabs(); // ✅ пересинхронизировать после удаления вкладки
+    }
+  });
+
+  tabDiv.querySelector(".tab-label").addEventListener("input", () => bfHasUnsavedChanges = true);
+
+  bfHasUnsavedChanges = true;
+});
+
+// === Глобальная функция пересинхронизации всех вкладок ===
+function bfSyncAllTabs() {
+  const type = document.getElementById("bf-weapon-type").value;
+  const modsWrap = bfModulesByType[type];
+  if (!modsWrap) return;
+
+  document.querySelectorAll("#bf-tabs-container .tab-block").forEach(tabDiv => {
+    const modRows = tabDiv.querySelectorAll(".mod-row");
+    const selectedGlobal = Array.from(document.querySelectorAll(".module-select")).map(s => s.value);
+
+    modRows.forEach(row => {
+      const catSel = row.querySelector(".category-select");
+      const modSel = row.querySelector(".module-select");
+      const cat = catSel.value;
+      const list = modsWrap.byCategory[cat] || [];
+      const currentValue = modSel.value;
+
+      modSel.innerHTML = "";
+
+      list.forEach(m => {
+        if (selectedGlobal.includes(m.en) && m.en !== currentValue) return;
+        const opt = document.createElement("option");
+        opt.value = m.en;
+        opt.textContent = m.en;
+        modSel.appendChild(opt);
+      });
+
+      // Восстанавливаем значение, если возможно
+      if ([...modSel.options].some(o => o.value === currentValue)) {
+        modSel.value = currentValue;
+      } else if (modSel.options.length) {
+        modSel.value = modSel.options[0].value;
+      }
+    });
+  });
+}
+
 
   tabDiv.querySelector(".add-mod").addEventListener("click", () => bfAddModuleRow(tabDiv, type));
   tabDiv.querySelector(".delete-tab").addEventListener("click", () => {
