@@ -289,22 +289,6 @@ document.getElementById("bf-weapon-type")?.addEventListener("change", async (e) 
 
 
 
-  const tabDiv = document.createElement("div");
-  tabDiv.className = "tab-block";
-  tabDiv.innerHTML = `
-    <input type="text" class="tab-label" placeholder="Название вкладки" style="margin-bottom: 10px;">
-    <div class="mod-selects"></div>
-    <div class="tab-actions">
-      <button type="button" class="btn add-mod">+ Модуль</button>
-      <button type="button" class="btn delete-tab">🗑 Удалить вкладку</button>
-    </div>
-  `;
-  document.getElementById("bf-tabs-container").appendChild(tabDiv);
-
-  tabDiv.querySelector(".add-mod").addEventListener("click", () => bfAddModuleRow(tabDiv, type));
-  tabDiv.querySelector(".delete-tab").addEventListener("click", () => tabDiv.remove());
-});
-
 // === Добавление строки модуля во вкладку ===
 function bfAddModuleRow(tabDiv, type) {
   const modsWrap = bfModulesByType[type];
