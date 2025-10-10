@@ -113,6 +113,115 @@
 }
 
 
+/* ===============================
+   🎨 Панель фильтров и поиска BF
+   =============================== */
+.filters-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.filters-row .form-section {
+  margin: 0;
+}
+
+.search-section {
+  margin-bottom: 12px;
+}
+
+#bf-weapon-filter,
+#bf-category-filter {
+  width: 100%;
+  height: 42px;
+  background: #121820;
+  border: 1px solid #1f2b38;
+  color: #e0e6ee;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+#bf-weapon-filter:hover,
+#bf-category-filter:hover {
+  border-color: #3a7bd5;
+}
+
+#bf-weapon-filter:focus,
+#bf-category-filter:focus {
+  border-color: #3a7bd5;
+  box-shadow: 0 0 0 3px rgba(58, 123, 213, 0.25);
+}
+
+/* Иконка поиска внутри */
+#bf-builds-search {
+  width: 100%;
+  height: 42px;
+  border-radius: 8px;
+  background: #121820;
+  border: 1px solid #1f2b38;
+  color: #e0e6ee;
+  padding: 0 38px 0 38px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  outline: none;
+  background-image: url("data:image/svg+xml,%3Csvg fill='%239cc9ff' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M15.5 14h-.79l-.28-.27a6.471 6.471 0 001.48-5.34C15.2 5.01 12.42 2 8.9 2 5.38 2 2.6 5.01 2.6 8.39c0 3.38 2.78 6.39 6.3 6.39 1.61 0 3.09-.59 4.23-1.56l.27.28v.79l4.99 5L20.5 19l-5-5zm-6.6 0C6.01 14 3.6 11.59 3.6 8.39S6.01 2.78 8.9 2.78s5.3 2.41 5.3 5.61S11.79 14 8.9 14z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  background-size: 18px;
+}
+
+#bf-builds-search::placeholder {
+  color: #7a8a9d;
+}
+
+#bf-builds-search:hover {
+  border-color: #3a7bd5;
+}
+
+#bf-builds-search:focus {
+  border-color: #3a7bd5;
+  box-shadow: 0 0 0 3px rgba(58, 123, 213, 0.25);
+}
+
+/* Общий контейнер фильтров */
+#screen-bf-builds {
+  background: #0f141a;
+  color: #e0e6ee;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+/* Надпись "Всего сборок" */
+.stats-bar {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #8da2b8;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+/* Адаптив */
+@media (max-width: 600px) {
+  .filters-row {
+    flex-direction: column;
+  }
+
+  #bf-weapon-filter,
+  #bf-category-filter,
+  #bf-builds-search {
+    height: 44px;
+    font-size: 1rem;
+  }
+}
+
+
 
 /* Кол-во испытаний в кнопках */
 .status-btn .count {
