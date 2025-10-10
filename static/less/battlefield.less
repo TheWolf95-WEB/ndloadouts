@@ -1331,81 +1331,115 @@ body.warzone-theme .card-btn:hover {
 
 
 /* Сетка сборок */
+/* === BATTLEFIELD BUILDS GRID === */
 .builds-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
+  gap: 18px;
+  padding-bottom: 40px;
 }
 
-.bf-build-card {
-  background: linear-gradient(145deg, #15202c, #1a2838);
-  border: 1px solid #2a3a4a;
+/* === Карточка сборки === */
+.build-card {
+  background: linear-gradient(145deg, #1b2329, #101418);
   border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
   padding: 16px;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.bf-build-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #3a7bd5, #5b86e5);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.bf-build-card:hover {
-  transform: translateY(-4px);
-  border-color: #3a7bd5;
-  box-shadow: 0 8px 25px rgba(58, 123, 213, 0.15);
-}
-
-.bf-build-card:hover::before {
-  opacity: 1;
-}
-
-.bf-build-card h4 {
-  color: #e0e6ee;
-  font-size: 16px;
-  font-weight: 600;
-  margin: 0 0 8px 0;
-  line-height: 1.3;
-}
-
-.bf-build-card p {
-  color: #8fa3b7;
-  font-size: 13px;
-  margin: 0 0 12px 0;
-}
-
-.bf-build-actions {
+  color: #fff;
   display: flex;
-  gap: 8px;
-  justify-content: flex-end;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.bf-build-actions .btn {
-  padding: 6px 10px;
-  font-size: 12px;
+.build-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+
+/* Заголовок и тип */
+.build-card h3 {
+  font-size: 1.1rem;
+  margin-bottom: 6px;
+  color: #fff;
+  font-weight: 600;
+}
+
+.build-card .weapon-type {
+  font-size: 0.85rem;
+  color: #89a1c1;
+  margin-bottom: 8px;
+}
+
+/* Категории (метки) */
+.build-card .categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.build-card .category {
+  background: #22303a;
   border-radius: 6px;
-  transition: all 0.2s ease;
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  color: #8fc8ff;
+  font-weight: 500;
 }
 
-
-.btn-delete {
-  background: rgba(220, 53, 69, 0.2);
-  border: 1px solid rgba(220, 53, 69, 0.3);
-  color: #e58c94;
+/* Вкладки */
+.build-card .tabs-info {
+  font-size: 0.8rem;
+  color: #9fbad1;
+  margin-bottom: 10px;
 }
 
-.btn-delete:hover {
-  background: rgba(220, 53, 69, 0.3);
-  border-color: rgba(220, 53, 69, 0.5);
+/* Кнопки */
+.build-card .actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.build-card .btn-edit {
+  background: #1b5e20;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background 0.25s;
+}
+
+.build-card .btn-edit:hover {
+  background: #2e7d32;
+}
+
+.build-card .btn-delete {
+  background: #7f1d1d;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background 0.25s;
+}
+
+.build-card .btn-delete:hover {
+  background: #b91c1c;
+}
+
+/* Тег позиции (#1, #2 и т.д.) */
+.build-card .position-tag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #00bcd4, #3f51b5);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  display: inline-block;
 }
 
 /* === Справочник модулей - выбор типа === */
