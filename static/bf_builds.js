@@ -561,6 +561,13 @@ async function bfEditBuild(build) {
 
   await bfLoadModules(build.weapon_type);
 
+   // ✅ Восстанавливаем категории (галочки)
+   document.querySelectorAll(".bf-build-category").forEach(cb => {
+     cb.checked = Array.isArray(build.categories)
+       ? build.categories.includes(cb.value)
+       : false;
+   });
+
   if (Array.isArray(build.tabs)) {
     build.tabs.forEach((tab) => {
       const tabDiv = document.createElement("div");
@@ -1016,25 +1023,40 @@ async function bfLoadBuildsTable() {
     const builds = await res.json();
     const grid = document.getElementById("bf-edit-builds-grid");
     const countEl = document.getElementById("bf-builds-count");
+
     grid.innerHTML = "";
-    countEl.textContent = `Всего сборок: ${builds.length} builds`;
+    countEl.textContent = `Всего: ${builds.length} сборок`;
 
     builds.forEach((b) => {
       const card = document.createElement("div");
       card.className = "bf-build-card";
+
+      const weaponLabel = bfWeaponTypeLabels[b.weapon_type] || b.weapon_type;
+
+      const cats = Array.isArray(b.categories)
+        ? b.categories.map(c => `<span class="bf-cat">${c}</span>`).join(" ")
+        : "";
+
       card.innerHTML = `
         <h4>${b.title}</h4>
-        <p>${bfWeaponTypeLabels[b.weapon_type] || b.weapon_type}</p>
+        <p>${weaponLabel}</p>
+        <div class="bf-cats">${cats}</div>
         <div class="bf-build-actions">
           <button class="btn btn-edit">Изменить</button>
           <button class="btn btn-delete">Удалить</button>
         </div>
       `;
-      grid.appendChild(card);
 
-      card.querySelector(".btn-edit").addEventListener("click", () => bfEditBuild(b));
-      card.querySelector(".btn-delete").addEventListener("click", async () => {
-        if (!confirm(`Delete ${b.title}?`)) return;
+      // ✅ Клик по карточке = редактировать
+      card.addEventListener("click", (e) => {
+        if (!e.target.closest(".btn-delete")) {
+          bfEditBuild(b);
+        }
+      });
+
+      card.querySelector(".btn-delete").addEventListener("click", async (e) => {
+        e.stopPropagation();
+        if (!confirm(`Удалить "${b.title}"?`)) return;
         await fetch(`/api/bf/builds/${b.id}`, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
@@ -1042,11 +1064,14 @@ async function bfLoadBuildsTable() {
         });
         await bfLoadBuildsTable();
       });
+
+      grid.appendChild(card);
     });
   } catch (e) {
     console.error("BF builds table load error:", e);
   }
 }
+
 
 /* ===============================
    🎨 ТЕМА
