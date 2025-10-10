@@ -1,8 +1,7 @@
 /* ===========================
    ⚔️ BATTLEFIELD BUILDS SCRIPT
    =========================== */
-
-const tg = window.Telegram.WebApp;
+tg = window.Telegram.WebApp;
 tg.expand();
 
 
