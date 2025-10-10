@@ -1017,7 +1017,7 @@ async function bfLoadBuildsTable() {
     const grid = document.getElementById("bf-edit-builds-grid");
     const countEl = document.getElementById("bf-builds-count");
     grid.innerHTML = "";
-    countEl.textContent = `Total: ${builds.length} builds`;
+    countEl.textContent = `Всего сборок: ${builds.length} builds`;
 
     builds.forEach((b) => {
       const card = document.createElement("div");
@@ -1026,8 +1026,8 @@ async function bfLoadBuildsTable() {
         <h4>${b.title}</h4>
         <p>${bfWeaponTypeLabels[b.weapon_type] || b.weapon_type}</p>
         <div class="bf-build-actions">
-          <button class="btn btn-edit">✏️</button>
-          <button class="btn btn-delete">🗑</button>
+          <button class="btn btn-edit">Изменить</button>
+          <button class="btn btn-delete">Удалить</button>
         </div>
       `;
       grid.appendChild(card);
