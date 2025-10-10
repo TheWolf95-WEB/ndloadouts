@@ -800,14 +800,12 @@ async def analytics_page(request: Request):
 
 # --- Battlefield: базы, сборки, модули, типы, испытания ---
 from database_bf import (
-    init_bf_db,
-    get_bf_conn,
+    init_bf_db, get_bf_conn,
     get_all_categories, add_category, delete_category,
     add_challenge, update_challenge, delete_challenge,
     get_all_bf_builds, add_bf_build, update_bf_build, delete_bf_build,
     get_bf_weapon_types, add_bf_weapon_type, delete_bf_weapon_type,
-    get_bf_modules_by_type, add_bf_module, delete_bf_module,
-    init_bf_builds_table, init_bf_types_modules_tables
+    get_bf_modules_by_type, add_bf_module, delete_bf_module
 )
 
 
@@ -868,7 +866,6 @@ async def api_delete_bf_build(build_id: int):
 # ⚙️ BATTLEFIELD TYPES & MODULES API
 # ==============================
 from database_bf import (
-    init_bf_types_modules_tables,
     get_bf_weapon_types,
     add_bf_weapon_type,
     delete_bf_weapon_type,
