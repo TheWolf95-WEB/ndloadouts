@@ -795,6 +795,77 @@ async def analytics_page(request: Request):
     return templates.TemplateResponse("analytics.html", {"request": request})
 
 
+
+# ==============================
+# 🎯 BATTLEFIELD BUILDS API
+# ==============================
+from database_bf import (
+    get_all_bf_builds,
+    add_bf_build,
+    update_bf_build,
+    delete_bf_build,
+    init_bf_builds_table
+)
+
+
+@app.on_event("startup")
+def init_bf_tables():
+    """Инициализация таблицы сборок Battlefield при запуске"""
+    try:
+        init_bf_builds_table()
+        print("[BF] ✅ Таблица bf_builds готова")
+    except Exception as e:
+        print("[BF] ⚠️ Ошибка инициализации bf_builds:", e)
+
+
+# === Получить все сборки ===
+@app.get("/api/bf/builds")
+async def api_get_bf_builds():
+    try:
+        builds = get_all_bf_builds()
+        return builds
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
+# === Добавить новую сборку ===
+@app.post("/api/bf/builds")
+async def api_add_bf_build(request: Request):
+    data = await request.json()
+    try:
+        add_bf_build(data)
+        return {"status": "ok", "message": "Build added"}
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
+# === Обновить сборку ===
+@app.put("/api/bf/builds/{build_id}")
+async def api_update_bf_build(build_id: int, request: Request):
+    data = await request.json()
+    try:
+        update_bf_build(build_id, data)
+        return {"status": "ok", "message": "Build updated"}
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
+# === Удалить сборку ===
+@app.delete("/api/bf/builds/{build_id}")
+async def api_delete_bf_build(build_id: int):
+    try:
+        delete_bf_build(build_id)
+        return {"status": "ok", "message": "Build deleted"}
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+
+
+
+
+
+
+
 # =========================
 # 🪖 BATTLEFIELD CHALLENGES API (персональный прогресс)
 # =========================
