@@ -64,6 +64,196 @@
 </div>
 
 
+<!-- ⚔️ Главный экран Battlefield -->
+<div id="screen-battlefield-main" class="screen">
+  <p class="subtext">
+    Добро пожаловать в мир <b>Battlefield</b>.<br><br>
+    Настраивай оружие, создавай собственные сборки и следи за актуальной метой.
+  </p>
+
+  <div id="bf-user-info" class="user-info-block"></div>
+  <h1>Battlefield</h1>
+
+  <div id="bf-role-buttons" class="form-section">
+    <!-- 👤 Пользователь -->
+    <div id="bf-user-buttons" class="button-grid three-column">
+      <div class="card-btn is-visible" id="bf-show-builds-btn">
+        <i class="fas fa-eye"></i>
+        <span>Все сборки</span>
+      </div>
+      <div class="card-btn is-visible" id="bf-search-btn">
+        <i class="fas fa-search"></i>
+        <span>Поиск</span>
+      </div>
+      <div class="card-btn is-visible" id="bf-modules-dict-btn">
+        <i class="fas fa-list"></i>
+        <span>Справочник модулей</span>
+      </div>
+    </div>
+
+    <!-- 🛡 Админ -->
+    <div id="bf-admin-buttons" style="margin-top:20px;">
+      <div class="button-grid two-column">
+        <div class="card-btn" id="bf-weapons-db-btn">
+          <i class="fas fa-database"></i>
+          <span>База сборок</span>
+        </div>
+        <div class="card-btn" id="bf-add-build-btn">
+          <i class="fas fa-plus"></i>
+          <span>Добавить сборку</span>
+        </div>
+      </div>
+
+      <div class="global-home-button" style="margin-top:10px;">
+        <button class="btn" onclick="showScreen('screen-home')">🏠 ГЛАВНОЕ МЕНЮ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- 📦 Список сборок -->
+<div id="screen-bf-builds" class="screen" style="display:none;">
+  <div class="filters-row">
+    <div class="form-section" style="width:50%;">
+      <select id="bf-weapon-filter" class="form-input">
+        <option value="all">Все типы</option>
+        <option value="assault">Штурмовые</option>
+        <option value="smg">ПП</option>
+        <option value="sniper">Снайперские</option>
+        <option value="support">Поддержка</option>
+        <option value="shotgun">Дробовики</option>
+      </select>
+    </div>
+    <div class="form-section" style="width:50%;">
+      <select id="bf-category-filter" class="form-input">
+        <option value="all">Все категории</option>
+        <option value="popular">Популярное</option>
+        <option value="new">Новинки</option>
+        <option value="topmeta">Топ мета</option>
+        <option value="meta">Мета</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="search-section">
+    <input type="text" id="bf-builds-search" class="form-input" placeholder="🔍 Поиск по сборкам...">
+  </div>
+
+  <div class="stats-bar">
+    <span id="bf-user-builds-count">Всего сборок: 0</span>
+  </div>
+
+  <div class="form-section" style="display:flex;justify-content:space-between;align-items:center;">
+    <h2>📦 Все сборки</h2>
+    <button id="bf-back-from-builds" class="btn btn-back">⬅ Назад</button>
+  </div>
+
+  <div id="bf-builds-list">
+    <p>Загрузка сборок...</p>
+  </div>
+  <p id="bf-no-results-message" style="display:none;text-align:center;margin-top:20px;">Ничего не найдено</p>
+</div>
+
+
+<!-- 🛠 Добавление / Редактирование сборки -->
+<div id="screen-bf-form" class="screen" style="display:none;">
+  <h2>🛠 Добавление / редактирование сборки</h2>
+
+  <div class="form-section">
+    <label>Название сборки:</label>
+    <input type="text" id="bf-title" class="form-input" placeholder="Введите название сборки">
+  </div>
+
+  <div class="form-section">
+    <label>Категории:</label>
+    <div class="categories-grid">
+      <label class="category-checkbox">
+        <input type="checkbox" class="bf-build-category" value="popular"><span class="checkmark"></span>Популярное
+      </label>
+      <label class="category-checkbox">
+        <input type="checkbox" class="bf-build-category" value="new"><span class="checkmark"></span>Новинки
+      </label>
+      <label class="category-checkbox">
+        <input type="checkbox" class="bf-build-category" value="topmeta"><span class="checkmark"></span>Топ мета
+      </label>
+      <label class="category-checkbox">
+        <input type="checkbox" class="bf-build-category" value="meta"><span class="checkmark"></span>Мета
+      </label>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <label>Тип оружия:</label>
+    <select id="bf-weapon-type" class="form-input"></select>
+  </div>
+
+  <div class="form-section">
+    <label>ТОП модули:</label>
+    <div class="top-modules-grid">
+      <input type="text" id="bf-top1" placeholder="🥇 Топ 1" class="form-input top-module-input">
+      <input type="text" id="bf-top2" placeholder="🥈 Топ 2" class="form-input top-module-input">
+      <input type="text" id="bf-top3" placeholder="🥉 Топ 3" class="form-input top-module-input">
+    </div>
+  </div>
+
+  <div class="form-section">
+    <label>Вкладки (модули):</label>
+    <div id="bf-tabs-container"></div>
+    <button type="button" id="bf-add-tab" class="btn add-tab-btn">➕ Добавить вкладку</button>
+  </div>
+
+  <div class="form-section">
+    <label>Дата:</label>
+    <input type="date" id="bf-build-date" class="form-input">
+  </div>
+
+  <div class="form-section btn-group">
+    <button id="bf-submit-build" class="btn">✅ Сохранить</button>
+    <button id="bf-back-to-main" class="btn btn-back">⬅ Назад</button>
+  </div>
+</div>
+
+
+<!-- 🧱 База сборок -->
+<div id="screen-bf-edit-builds" class="screen" style="display:none;">
+  <button class="btn back-btn" id="bf-back-from-edit">⬅ Назад</button>
+  <h2>🧱 База сборок Battlefield</h2>
+
+  <div class="stats-bar">
+    <span id="bf-builds-count">Всего: 0 сборок</span>
+  </div>
+
+  <div id="bf-edit-builds-grid" class="builds-grid">
+    <p>Загрузка сборок...</p>
+  </div>
+</div>
+
+
+<!-- 📚 Справочник модулей — выбор типа -->
+<div id="screen-bf-modules-types" class="screen" style="display:none;">
+  <h2>Справочник модулей — тип оружия</h2>
+  <div id="bf-modules-types-grid" class="button-grid"></div>
+  <button class="btn" id="bf-back-from-mod-types">⬅ Назад</button>
+</div>
+
+
+<!-- 📋 Список модулей выбранного типа -->
+<div id="screen-bf-modules-list" class="screen" style="display:none;">
+  <h2 id="bf-modules-title">Справочник модулей</h2>
+
+  <div id="bf-modules-toolbar" class="flex" style="gap:8px;margin-bottom:10px;">
+    <input id="bf-mod-category" class="form-input" placeholder="Категория (например: Дуло)">
+    <input id="bf-mod-en" class="form-input" placeholder="Название EN (Compensator)">
+    <input id="bf-mod-pos" class="form-input" type="number" placeholder="Порядок" style="width:100px;">
+    <button class="btn" id="bf-mod-add-btn">➕ Добавить</button>
+  </div>
+
+  <div id="bf-modules-list"></div>
+
+  <button class="btn" id="bf-back-from-mod-list">⬅ Назад</button>
+</div>
+
 
 <!-- 👥 Пользовательский экран испытаний -->
 <div id="screen-bf-challenges" class="screen" style="display:none;">
