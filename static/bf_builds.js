@@ -1083,14 +1083,14 @@ async function bfLoadBuildsTable() {
     countEl.textContent = `Всего: ${builds.length} сборок`;
 
     if (!builds.length) {
-      grid.innerHTML = `<p style="text-align:center;opacity:0.7;">Сборок пока нет</p>`;
+      grid.innerHTML = `<p style="text-align:center;opacity:0.7;color:#8fa3bf;">Сборок пока нет</p>`;
       return;
     }
 
     builds.forEach((b) => {
       const weaponLabel = bfWeaponTypeLabels[b.weapon_type] || b.weapon_type;
 
-      // 🎨 Цвета категорий (как в Warzone, но в синих тонах)
+      // 🎨 Цвета категорий в синих тонах Battlefield
       const cats = Array.isArray(b.categories)
         ? b.categories
             .map((c) => {
@@ -1101,27 +1101,50 @@ async function bfLoadBuildsTable() {
 
               if (["новинки", "new"].includes(cat)) {
                 bg = "linear-gradient(135deg, #1e3c72, #2a5298)";
-                label = "Новинка";
+                label = "Новинки";
               } else if (["топ мета", "topmeta"].includes(cat)) {
                 bg = "linear-gradient(135deg, #0052d4, #4364f7, #6fb1fc)";
-                label = "Топ мета";
+                label = "Топ Мета";
               } else if (["мета", "meta"].includes(cat)) {
                 bg = "linear-gradient(135deg, #0f2027, #203a43, #2c5364)";
                 label = "Мета";
               } else if (["популярное", "popular"].includes(cat)) {
                 bg = "linear-gradient(135deg, #2193b0, #6dd5ed)";
                 label = "Популярное";
+              } else if (["новички", "beginner"].includes(cat)) {
+                bg = "linear-gradient(135deg, #667eea, #764ba2)";
+                label = "Новички";
               }
 
-              return `<span class="bf-cat" style="background:${bg};color:${color}">${label}</span>`;
+              return `<span class="bf-cat" style="
+                background: ${bg};
+                color: ${color};
+                font-size: 0.75rem;
+                padding: 3px 10px;
+                border-radius: 6px;
+                font-weight: 500;
+                text-shadow: 0 1px 1px rgba(0,0,0,0.4);
+                border: 1px solid rgba(255,255,255,0.1);
+                display: inline-block;
+                margin-right: 6px;
+                margin-bottom: 6px;
+              ">${label}</span>`;
             })
             .join("")
         : "";
 
       // 🔹 Формат даты
-      const date = b.date?.includes("-")
-        ? b.date.split("-").reverse().join(".")
-        : b.date || "";
+      const formatDate = (dateStr) => {
+        if (!dateStr) return '';
+        if (dateStr.includes('.')) return dateStr;
+        if (dateStr.includes('-')) {
+          const [year, month, day] = dateStr.split('-');
+          return `${day}.${month}.${year}`;
+        }
+        return dateStr;
+      };
+
+      const date = formatDate(b.date);
 
       const card = document.createElement("div");
       card.className = "bf-build-card";
@@ -1149,22 +1172,28 @@ async function bfLoadBuildsTable() {
       // Удаление
       card.querySelector(".btn-delete").addEventListener("click", async (e) => {
         e.stopPropagation();
-        if (!confirm(`Удалить "${b.title}"?`)) return;
-        await fetch(`/api/bf/builds/${b.id}`, {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ initData: tg.initData }),
-        });
-        await bfLoadBuildsTable();
+        if (!confirm(`Удалить сборку "${b.title}"?`)) return;
+        try {
+          await fetch(`/api/bf/builds/${b.id}`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ initData: tg.initData }),
+          });
+          await bfLoadBuildsTable();
+        } catch (error) {
+          console.error("Delete build error:", error);
+          alert("Ошибка при удалении сборки");
+        }
       });
 
       grid.appendChild(card);
     });
   } catch (e) {
     console.error("BF builds table load error:", e);
+    const grid = document.getElementById("bf-edit-builds-grid");
+    grid.innerHTML = `<p style="text-align:center;color:#dc3545;">Ошибка загрузки сборок</p>`;
   }
 }
-
 /* ===============================
    🎨 ТЕМА
    =============================== */
