@@ -202,7 +202,7 @@ def get_challenge_goal(challenge_id: int) -> int:
 # =====================================================
 # 🔫 БАЗА СБОРК Battlefield (builds_bf.db)
 # =====================================================
-DB_PATH = Path(__file__).parent / "builds_bf.db"
+DB_PATH = Path("/opt/ndloadouts/builds_bf.db")
 
 def get_connection():
     conn = sqlite3.connect(DB_PATH)
