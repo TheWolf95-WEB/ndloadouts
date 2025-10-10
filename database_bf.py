@@ -297,6 +297,72 @@ def delete_bf_build(build_id: int):
     with get_bf_conn() as conn:
         conn.execute("DELETE FROM bf_builds WHERE id = ?", (build_id,))
 
+# ========================
+# ⚙️ BATTLEFIELD TYPES & MODULES
+# ========================
+
+def init_bf_types_modules_tables():
+    """Создание таблиц типов оружия и модулей"""
+    with get_bf_conn() as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS bf_weapon_types (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                key TEXT UNIQUE NOT NULL,
+                label TEXT NOT NULL
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS bf_modules (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                weapon_type TEXT NOT NULL,
+                category TEXT NOT NULL,
+                name TEXT NOT NULL
+            )
+        """)
+
+
+def add_bf_weapon_type(key: str, label: str):
+    with get_bf_conn() as conn:
+        conn.execute("INSERT OR IGNORE INTO bf_weapon_types (key, label) VALUES (?, ?)", (key, label))
+
+
+def get_bf_weapon_types():
+    with get_bf_conn(row_mode=True) as conn:
+        return [dict(r) for r in conn.execute("SELECT * FROM bf_weapon_types ORDER BY id ASC").fetchall()]
+
+
+def delete_bf_weapon_type(type_id: int):
+    with get_bf_conn() as conn:
+        conn.execute("DELETE FROM bf_weapon_types WHERE id = ?", (type_id,))
+        conn.execute("DELETE FROM bf_modules WHERE weapon_type IN (SELECT key FROM bf_weapon_types WHERE id=?)", (type_id,))
+
+
+def add_bf_module(weapon_type: str, category: str, name: str):
+    with get_bf_conn() as conn:
+        conn.execute("""
+            INSERT INTO bf_modules (weapon_type, category, name)
+            VALUES (?, ?, ?)
+        """, (weapon_type, category, name))
+
+
+def get_bf_modules_by_type(weapon_type: str):
+    with get_bf_conn(row_mode=True) as conn:
+        rows = conn.execute(
+            "SELECT * FROM bf_modules WHERE weapon_type = ? ORDER BY category ASC, name ASC",
+            (weapon_type,)
+        ).fetchall()
+        data = {}
+        for r in rows:
+            cat = r["category"]
+            if cat not in data:
+                data[cat] = []
+            data[cat].append(dict(r))
+        return data
+
+
+def delete_bf_module(module_id: int):
+    with get_bf_conn() as conn:
+        conn.execute("DELETE FROM bf_modules WHERE id = ?", (module_id,))
 
 
 
