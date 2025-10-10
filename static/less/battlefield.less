@@ -783,7 +783,34 @@ body.warzone-theme .card-btn:hover {
   padding-bottom: 120px;
 }
 
+/* Отступы и сетка */
+.form-section {
+  margin-bottom: 18px;
+}
 
+.form-label {
+  font-weight: 500;
+  margin-bottom: 6px;
+  display: block;
+  color: #9cc4ff;
+}
+
+.form-input {
+  background: #0c1018;
+  border: 1px solid #1f2b3c;
+  border-radius: 8px;
+  color: #fff;
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 15px;
+  transition: 0.2s ease;
+}
+
+.form-input:focus {
+  border-color: #3192ff;
+  outline: none;
+  box-shadow: 0 0 8px rgba(49,146,255,0.4);
+}
 
 /* Категории */
 .categories-grid {
@@ -832,5 +859,69 @@ body.warzone-theme .card-btn:hover {
 
 #bf-add-tab:hover {
   background: linear-gradient(90deg, #2a5bbd, #1c3c7a);
+}
+
+/* Кнопки */
+.btn-group {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, #3192ff, #1767d9);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(90deg, #1767d9, #3192ff);
+}
+
+.btn-back {
+  background: #1a1f2c;
+  color: #b0c4ff;
+}
+
+.btn-back:hover {
+  background: #2b3449;
+  color: #fff;
+}
+
+.btn-accent {
+  background: linear-gradient(90deg, #1e4bb8, #3d7fff);
+  color: #fff;
+}
+
+.btn-accent:hover {
+  background: linear-gradient(90deg, #3d7fff, #1e4bb8);
+}
+
+/* Tab block */
+.tab-block {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid #1a2534;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.tab-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+.tab-actions .btn {
+  flex: 1;
+  margin: 0 4px;
 }
 
