@@ -281,6 +281,19 @@ document.getElementById("bf-add-tab")?.addEventListener("click", () => {
     return;
   }
 
+document.getElementById("bf-weapon-type")?.addEventListener("change", async (e) => {
+  const type = e.target.value;
+  if (!type) return;
+
+  // Сброс вкладок при смене типа
+  document.getElementById("bf-tabs-container").innerHTML = "";
+
+  await bfLoadModules(type);
+  console.log("✅ Модули загружены:", type);
+});
+
+
+
   const tabDiv = document.createElement("div");
   tabDiv.className = "tab-block";
   tabDiv.innerHTML = `
