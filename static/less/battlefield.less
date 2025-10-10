@@ -768,107 +768,6 @@ body.warzone-theme .card-btn:hover {
 }
 
 
-
-// 
-
-/* ===============================
-   ⚔️ BATTLEFIELD — ДОПОЛНИТЕЛЬНЫЕ ЭКРАНЫ
-   =============================== */
-
-
-/* === Основной стиль форм Battlefield === */
-#screen-bf-add-build {
-  background: linear-gradient(145deg, #0d1116, #111823);
-  color: #fff;
-  padding-bottom: 120px;
-}
-
-/* Отступы и сетка */
-.form-section {
-  margin-bottom: 18px;
-}
-
-.form-label {
-  font-weight: 500;
-  margin-bottom: 6px;
-  display: block;
-  color: #9cc4ff;
-}
-
-.form-input {
-  background: #0c1018;
-  border: 1px solid #1f2b3c;
-  border-radius: 8px;
-  color: #fff;
-  width: 100%;
-  padding: 10px 12px;
-  font-size: 15px;
-  transition: 0.2s ease;
-}
-
-.form-input:focus {
-  border-color: #3192ff;
-  outline: none;
-  box-shadow: 0 0 8px rgba(49,146,255,0.4);
-}
-
-/* Категории */
-.categories-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-}
-
-.category-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255,255,255,0.04);
-  border-radius: 6px;
-  padding: 6px 10px;
-  border: 1px solid transparent;
-  transition: 0.2s;
-}
-
-.category-checkbox:hover {
-  border-color: #3192ff;
-}
-
-/* ТОП модули */
-.top-modules-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-}
-
-.top-module-input {
-  background: #0e1420;
-  border: 1px solid #1f2b3c;
-  border-radius: 8px;
-}
-
-/* Добавить вкладку */
-#bf-add-tab {
-  width: 100%;
-  margin-top: 8px;
-  background: linear-gradient(90deg, #1c3c7a, #2a5bbd);
-  color: #fff;
-  font-weight: 600;
-  border-radius: 8px;
-}
-
-#bf-add-tab:hover {
-  background: linear-gradient(90deg, #2a5bbd, #1c3c7a);
-}
-
-/* Кнопки */
-.btn-group {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 20px;
-}
-
 /* === Вкладки Battlefield === */
 #bf-tabs-container {
   margin-top: 10px;
@@ -927,6 +826,7 @@ body.warzone-theme .card-btn:hover {
   border-radius: 8px;
   transition: 0.2s ease;
   cursor: pointer;
+  font-size: 14px;
 }
 
 .tab-actions .btn.add-mod {
@@ -955,11 +855,13 @@ body.warzone-theme .card-btn:hover {
   color: #fff;
   font-weight: 600;
   border-radius: 8px;
+  border: none;
+  padding: 12px 0;
+  font-size: 15px;
+  cursor: pointer;
 }
 
 #bf-add-tab:hover {
   background: linear-gradient(90deg, #2a5bbd, #1c3c7a);
 }
-
-
 
