@@ -234,7 +234,8 @@ def init_bf_builds_table():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             weapon_type TEXT,
             category TEXT,
-            name TEXT
+            en TEXT,
+            pos INTEGER DEFAULT 0
         )
         """)
         conn.commit()
@@ -259,10 +260,13 @@ def delete_bf_weapon_type(type_id):
 
 def get_bf_modules_by_type(weapon_type):
     with get_connection() as conn:
-        rows = conn.execute(
-            "SELECT id, category, name FROM bf_modules WHERE weapon_type = ? ORDER BY category, name",
-            (weapon_type,)
-        ).fetchall()
+        rows = conn.execute("""
+            SELECT id, category, en, pos
+            FROM bf_modules
+            WHERE weapon_type = ?
+            ORDER BY category, pos, en
+        """, (weapon_type,)).fetchall()
+
         data = {}
         for r in rows:
             cat = r["category"]
@@ -271,15 +275,17 @@ def get_bf_modules_by_type(weapon_type):
 
 def add_bf_module(data):
     with get_connection() as conn:
-        name = data.get("en") or data.get("name") or "unknown"
-        ru = data.get("ru") or ""
-        full_name = f"{name} — {ru}" if ru else name
-
-        conn.execute(
-            "INSERT INTO bf_modules (weapon_type, category, name) VALUES (?, ?, ?)",
-            (data.get("weapon_type"), data.get("category"), full_name)
-        )
+        conn.execute("""
+            INSERT INTO bf_modules (weapon_type, category, en, pos)
+            VALUES (?, ?, ?, ?)
+        """, (
+            data.get("weapon_type"),
+            data.get("category"),
+            data.get("en"),
+            int(data.get("pos", 0))
+        ))
         conn.commit()
+
 
 
 def delete_bf_module(module_id):
