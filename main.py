@@ -830,9 +830,31 @@ def init_bf_tables():
 async def bf_get_builds():
     try:
         builds = get_all_bf_builds()
-        return builds
+
+        # Преобразуем записи в обычные словари
+        formatted = []
+        for b in builds:
+            if isinstance(b, (list, tuple)):
+                keys = ["id", "title", "weapon_type", "categories", "tabs", "top1", "top2", "top3", "date"]
+                b = dict(zip(keys, b[:len(keys)]))
+            if isinstance(b.get("tabs"), str):
+                try:
+                    b["tabs"] = json.loads(b["tabs"])
+                except:
+                    b["tabs"] = []
+            if isinstance(b.get("categories"), str):
+                try:
+                    b["categories"] = eval(b["categories"])
+                except:
+                    b["categories"] = []
+            formatted.append(b)
+
+        return JSONResponse(formatted)
+
     except Exception as e:
+        print(f"BF builds error: {e}")
         return JSONResponse({"error": str(e)}, status_code=500)
+
 
 
 # === Добавить новую сборку ===
