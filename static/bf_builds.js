@@ -605,131 +605,237 @@ async function bfLoadBuilds() {
 }
 
 // === Отображение сборок (аккордеон) ===
+// === Отображение сборок (аккордеон в стиле Warzone) ===
 function bfRenderBuilds(builds) {
   const list = document.getElementById("bf-builds-list");
-  if (!list) return;
+  const countEl = document.getElementById("bf-user-builds-count");
+  const noResults = document.getElementById("bf-no-results-message");
 
+  if (!list) return;
   list.innerHTML = "";
+  
+  countEl.textContent = `Всего сборок: ${builds.length}`;
+  noResults.style.display = builds.length ? "none" : "block";
 
   if (!Array.isArray(builds) || builds.length === 0) {
     list.innerHTML = '<p class="no-results">🔍 Сборок пока нет</p>';
     return;
   }
 
-  // Загружаем все типы оружия для переводов
+  // Загружаем модули для всех типов оружия
   const uniqueTypes = [...new Set(builds.map(b => b.weapon_type))];
   uniqueTypes.forEach(t => bfLoadModules(t));
 
-  builds.forEach((build, buildIndex) => {
-    const wrapper = document.createElement("div");
-    wrapper.className = "bf-loadout js-loadout";
+  // Сортировка по приоритету как в Warzone
+  function prioritySort(a, b) {
+    const normalizeCats = (cats = []) => cats.map(c => {
+      switch (c.toLowerCase()) {
+        case 'new': return 'Новинки';
+        case 'popular': return 'Популярное';
+        case 'meta': return 'Мета';
+        case 'topmeta': return 'Топ мета';
+        default: return c;
+      }
+    });
 
-    // 🔹 безопасный парсинг tabs
-    let tabs = [];
-    try {
-      tabs = typeof build.tabs === "string" ? JSON.parse(build.tabs) : (build.tabs || []);
-    } catch {
-      tabs = [];
-    }
+    const A = normalizeCats(a.categories || []);
+    const B = normalizeCats(b.categories || []);
 
-    const typeLabel = bfWeaponTypeLabels[build.weapon_type] || build.weapon_type;
+    const getPriority = (cats) => {
+      if (cats.includes("Новинки")) return 1;
+      if (cats.includes("Топ мета")) return 2;
+      if (cats.includes("Мета")) return 3;
+      return 4;
+    };
 
-    const top = [build.top1, build.top2, build.top3]
-      .filter(Boolean)
-      .map((t, i) => {
-        const colors = ["#b8a326", "#FF8C00", "#B0B0B0"];
-        return `<span class="bf-top bf-top${i + 1}" style="background:${colors[i]}">${t}</span>`;
-      })
-      .join("");
+    const pa = getPriority(A);
+    const pb = getPriority(B);
 
-    const categories = (build.categories || [])
-      .map((c) => `<span class="bf-badge">${c}</span>`)
-      .join("");
+    if (pa !== pb) return pa - pb;
 
-    const tabBtns = tabs
-      .map(
-        (tab, i) =>
-          `<button class="bf-tab-btn ${i === 0 ? "is-active" : ""}" data-tab="bf-${buildIndex}-${i}">
-             ${tab.label || "Вкладка"}
-           </button>`
-      )
-      .join("");
+    const getTime = (build) => {
+      let t = build.created_at ? Date.parse(build.created_at) : NaN;
+      if (Number.isNaN(t)) {
+        const [dd, mm, yyyy] = String(build.date || '').split('.');
+        if (dd && mm && yyyy) {
+          t = new Date(Number(yyyy), Number(mm) - 1, Number(dd)).getTime();
+        }
+      }
+      return t || 0;
+    };
 
-    const tabContents = tabs
-      .map(
-        (tab, i) => `
-        <div class="bf-tab-content ${i === 0 ? "is-active" : ""}" data-tab-content="bf-${buildIndex}-${i}">
-          <div class="bf-modules">
-            ${(tab.items || [])
-              .map((m) => {
-                const modInfo = bfModulesByType[build.weapon_type]?.byKey?.[m.toLowerCase()];
-                const category = modInfo?.category || "—";
-                return `
-                  <div class="bf-mod">
-                    <span class="bf-mod-slot">${category}</span>
-                    <span class="bf-mod-name">${m}</span>
-                  </div>
-                `;
-              })
-              .join("")}
-          </div>
-        </div>`
-      )
-      .join("");
+    const ta = getTime(a);
+    const tb = getTime(b);
+    return tb - ta;
+  }
 
-    wrapper.innerHTML = `
-      <div class="bf-loadout__header js-loadout-toggle">
-        <div class="bf-loadout__header-top">
-          <button class="bf-toggle-icon" type="button"><i class="fa-solid fa-chevron-down"></i></button>
-          <h3 class="bf-loadout__title">${build.title}</h3>
-          <span class="bf-loadout__date">${build.date || ""}</span>
-        </div>
-        <div class="bf-loadout__meta">
-          <div class="bf-tops">${top}</div>
-          <div class="bf-categories">${categories}</div>
-          <div class="bf-type">${typeLabel}</div>
-        </div>
-      </div>
-      <div class="bf-loadout__content" style="max-height:0; overflow:hidden;">
-        <div class="bf-loadout__inner">
-          <div class="bf-tabs">
-            <div class="bf-tab-buttons">${tabBtns}</div>
-            <div class="bf-tab-contents">${tabContents}</div>
-          </div>
-        </div>
-      </div>
-    `;
+  const sorted = [...builds].sort(prioritySort);
+  bfCachedBuilds = sorted;
 
-    list.appendChild(wrapper);
+  // Группировка по категориям
+  const groups = {
+    "Новинки": [],
+    "Топ мета": [],
+    "Мета": [],
+    "Остальное": []
+  };
+  
+  sorted.forEach(b => {
+    const cats = (b.categories || []).map(c => c.toLowerCase());
+    if (cats.includes("new") || cats.includes("новинки")) groups["Новинки"].push(b);
+    else if (cats.includes("topmeta") || cats.includes("топ мета")) groups["Топ мета"].push(b);
+    else if (cats.includes("meta") || cats.includes("мета")) groups["Мета"].push(b);
+    else groups["Остальное"].push(b);
   });
+  
+  const order = ["Новинки", "Топ мета", "Мета", "Остальное"];
+  
+  // === Рендер с разделителями ===
+  order.forEach((groupName, groupIndex) => {
+    const buildsInGroup = groups[groupName];
+    if (buildsInGroup.length === 0) return;
+  
+    // Добавляем разделитель (но не перед первой группой)
+    if (groupIndex > 0) {
+      const divider = document.createElement('div');
+      divider.className = 'bf-category-divider';
+      list.appendChild(divider);
+    }
+  
+    // Рендер карточек сборок
+    buildsInGroup.forEach((build, buildIndex) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'bf-loadout js-loadout';
 
-  // === Анимация аккордеона ===
-  document.querySelectorAll(".js-loadout-toggle").forEach((header) => {
-    header.addEventListener("click", () => {
-      const parent = header.closest(".bf-loadout");
-      const content = parent.querySelector(".bf-loadout__content");
-      parent.classList.toggle("is-open");
+      const weaponTypeRu = bfWeaponTypeLabels[build.weapon_type] || build.weapon_type;
 
-      content.style.maxHeight = parent.classList.contains("is-open")
-        ? content.scrollHeight + "px"
-        : "0";
+      const pickTopBg = (text) => {
+        const m = String(text).trim().match(/^#?(\d+)/);
+        const n = m ? parseInt(m[1], 10) : 0;
+        if (n === 1) return '#b8a326';
+        if (n === 2) return '#B0B0B0';
+        if (n === 3) return '#FF8C00';
+        return '#2f3336';
+      };
+
+      const tops = [build.top1, build.top2, build.top3]
+        .filter(Boolean)
+        .map(mod => {
+          const text = mod.trim();
+          const bg = pickTopBg(text);
+          return `<span class="bf-top" style="background:${bg}">${text}</span>`;
+        })
+        .join('');
+
+      const cats = Array.isArray(build.categories) ? build.categories : [];
+      const translatedCats = cats.map(cat => {
+        switch (String(cat).toLowerCase()) {
+          case 'all': return 'Все';
+          case 'new': return 'Новинка';
+          case 'popular': return 'Популярное';
+          case 'meta': return 'Мета';
+          case 'topmeta': return 'Топ мета';
+          default: return cat;
+        }
+      });
+
+      const categoryBadges = translatedCats
+        .map(name => `<span class="bf-badge" data-cat="${name}">${name}</span>`)
+        .join('');
+
+      // Безопасный парсинг вкладок
+      let tabs = [];
+      try {
+        tabs = typeof build.tabs === "string" ? JSON.parse(build.tabs) : (build.tabs || []);
+      } catch {
+        tabs = [];
+      }
+
+      // Вкладки
+      const tabBtns = tabs.map((tab, i) =>
+        `<button class="bf-tab-btn ${i === 0 ? 'is-active' : ''}" data-tab="bf-${groupIndex}-${buildIndex}-${i}">
+           ${tab.label || "Вкладка"}
+         </button>`
+      ).join('');
+      
+      const tabContents = tabs.map((tab, i) => `
+        <div class="bf-tab-content ${i === 0 ? 'is-active' : ''}" data-tab-content="bf-${groupIndex}-${buildIndex}-${i}">
+          <div class="bf-modules">
+            ${(tab.items || []).map(itemKey => {
+              const mods = bfModulesByType[build.weapon_type];
+              const norm = s => String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
+              const mod = mods?.byKey?.[itemKey] || mods?.byKey?.[norm(itemKey)] || null;
+              const slot = mod?.category || '—';
+              const name = mod?.en || itemKey;
+              return `
+                <div class="bf-module">
+                  <span class="bf-module-slot">${slot}</span>
+                  <span class="bf-module-name">${name}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
+      
+      wrapper.innerHTML = `
+        <div class="bf-loadout__header js-loadout-toggle">
+          <div class="bf-loadout__header-top">
+            <button class="bf-toggle-icon" type="button"><i class="fa-solid fa-chevron-down"></i></button>
+            <h3 class="bf-loadout__title">${build.title}</h3>
+            <span class="bf-loadout__date">${build.date || ''}</span>
+          </div>
+          <div class="bf-loadout__meta">
+            <div class="bf-tops">${tops}</div>
+            <div class="bf-categories">${categoryBadges}</div>
+            <div class="bf-type">${weaponTypeRu}</div>
+          </div>
+        </div>
+        <div class="bf-loadout__content" style="max-height: 0; overflow: hidden;">
+          <div class="bf-loadout__inner">
+            <div class="bf-tabs">
+              <div class="bf-tab-buttons">${tabBtns}</div>
+              <div class="bf-tab-contents">${tabContents}</div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      list.appendChild(wrapper);
     });
   });
 
+  // Сброс раскрытия
+  document.querySelectorAll('.js-loadout').forEach(el => {
+    el.classList.remove('is-open');
+    const content = el.querySelector('.bf-loadout__content');
+    if (content) content.style.maxHeight = '0';
+  });
+
   // === Переключение вкладок ===
-  document.querySelectorAll(".bf-tab-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const loadout = btn.closest(".bf-loadout");
-      const tab = btn.dataset.tab;
+  document.querySelectorAll('.bf-tab-btn').forEach(button => {
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const parent = button.closest('.bf-loadout');
+      const tab = button.dataset.tab;
 
-      loadout.querySelectorAll(".bf-tab-btn").forEach((b) => b.classList.remove("is-active"));
-      loadout.querySelectorAll(".bf-tab-content").forEach((c) => c.classList.remove("is-active"));
+      parent.querySelectorAll('.bf-tab-btn').forEach(b => b.classList.remove('is-active'));
+      parent.querySelectorAll('.bf-tab-content').forEach(c => c.classList.remove('is-active'));
+      button.classList.add('is-active');
+      parent.querySelector(`[data-tab-content="${tab}"]`)?.classList.add('is-active');
 
-      btn.classList.add("is-active");
-      loadout.querySelector(`[data-tab-content="${tab}"]`)?.classList.add("is-active");
+      const content = parent.querySelector('.bf-loadout__content');
+      content.style.maxHeight = content.scrollHeight + 'px';
+    });
+  });
 
-      const content = loadout.querySelector(".bf-loadout__content");
-      content.style.maxHeight = content.scrollHeight + "px";
+  // === Просмотр сборки (аккордеон) ===
+  document.querySelectorAll('.js-loadout-toggle').forEach(header => {
+    header.addEventListener('click', () => {
+      const loadout = header.closest('.js-loadout');
+      const content = loadout.querySelector('.bf-loadout__content');
+      loadout.classList.toggle('is-open');
+      content.style.maxHeight = loadout.classList.contains('is-open') ? content.scrollHeight + 'px' : '0';
     });
   });
 }
