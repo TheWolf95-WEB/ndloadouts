@@ -789,4 +789,88 @@ body.warzone-theme .card-btn:hover {
   color: #fff;
 }
 
+.bf-loadout {
+  background: linear-gradient(145deg, #1a232e, #111820);
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  margin-bottom: 16px;
+  color: #e0e6ee;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.bf-loadout.is-open {
+  box-shadow: 0 6px 14px rgba(0,0,0,0.5);
+}
+
+.bf-loadout__header {
+  padding: 16px;
+  cursor: pointer;
+}
+
+.bf-loadout__header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bf-loadout__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  gap: 10px;
+}
+
+.bf-top {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  margin-right: 6px;
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+.bf-tabs {
+  margin-top: 15px;
+}
+
+.bf-tab-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.bf-tab-btn {
+  background: #18222f;
+  border: 1px solid #2b3c4d;
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: #bcd0e0;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.bf-tab-btn.is-active {
+  background: #3a7bd5;
+  color: #fff;
+}
+
+.bf-modules {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.bf-mod {
+  background: #0f151c;
+  padding: 8px;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+}
 
