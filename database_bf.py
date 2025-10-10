@@ -3,13 +3,13 @@ from pathlib import Path
 from contextlib import contextmanager
 from datetime import datetime
 
+
+# =====================================================
+# 📘 БАЗА ИСПЫТАНИЙ (bf_challenges.db)
+# =====================================================
 BF_DB_PATH = Path("/opt/ndloadouts_storage/bf_challenges.db")
 BF_DB_PATH.parent.mkdir(exist_ok=True)
 
-
-# ========================
-# Подключение к базе
-# ========================
 
 @contextmanager
 def get_bf_conn(row_mode: bool = False):
@@ -25,15 +25,11 @@ def get_bf_conn(row_mode: bool = False):
         conn.close()
 
 
-# ========================
-# Инициализация базы
-# ========================
-
 def init_bf_db():
     with get_bf_conn() as conn:
         c = conn.cursor()
 
-        # Таблица категорий (вкладки)
+        # Таблица категорий
         c.execute("""
             CREATE TABLE IF NOT EXISTS challenge_categories (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -55,8 +51,7 @@ def init_bf_db():
             )
         """)
 
-
-        # === Прогресс пользователей ===
+        # Прогресс пользователей
         c.execute("""
             CREATE TABLE IF NOT EXISTS user_challenges (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -70,10 +65,7 @@ def init_bf_db():
         """)
 
 
-
-# ========================
-# CRUD категории (вкладки)
-# ========================
+# ---------------------- CRUD категории ----------------------
 
 def add_category(name: str):
     name = name.strip()
@@ -98,9 +90,7 @@ def delete_category(category_id: int):
         conn.execute("DELETE FROM challenge_categories WHERE id = ?", (category_id,))
 
 
-# ========================
-# CRUD испытаний
-# ========================
+# ---------------------- CRUD испытаний ----------------------
 
 def add_challenge(data: dict):
     with get_bf_conn() as conn:
@@ -154,12 +144,9 @@ def delete_challenge(challenge_id: int):
         conn.execute("DELETE FROM challenges WHERE id = ?", (challenge_id,))
 
 
-# ========================
-# Прогресс пользователя
-# ========================
+# ---------------------- Прогресс пользователя ----------------------
 
 def get_user_challenges(user_id: int):
-    """Возвращает список всех испытаний пользователя с текущим прогрессом"""
     with get_bf_conn(row_mode=True) as conn:
         rows = conn.execute("""
             SELECT 
@@ -176,9 +163,7 @@ def get_user_challenges(user_id: int):
 
 
 def update_user_progress(user_id: int, challenge_id: int, delta: int):
-    """Изменяет прогресс конкретного пользователя"""
     with get_bf_conn(row_mode=True) as conn:
-        # Проверяем, есть ли запись
         row = conn.execute("""
             SELECT uc.id, uc.current, c.goal
             FROM challenges c
@@ -187,7 +172,6 @@ def update_user_progress(user_id: int, challenge_id: int, delta: int):
         """, (user_id, challenge_id)).fetchone()
 
         if not row:
-            # создаём запись
             conn.execute("""
                 INSERT INTO user_challenges (user_id, challenge_id, current)
                 VALUES (?, ?, ?)
@@ -198,7 +182,6 @@ def update_user_progress(user_id: int, challenge_id: int, delta: int):
         goal = int(row["goal"] or 0)
         new_value = max(0, min(goal, current + delta))
 
-        # обновляем прогресс
         conn.execute("""
             UPDATE user_challenges
             SET current = ?, completed_at = CASE WHEN ? >= ? THEN CURRENT_TIMESTAMP ELSE NULL END
@@ -207,7 +190,6 @@ def update_user_progress(user_id: int, challenge_id: int, delta: int):
 
     return {"current": new_value, "goal": goal}
 
-
 def get_challenge_goal(challenge_id: int) -> int:
     with get_bf_conn(row_mode=True) as conn:
         row = conn.execute("SELECT goal FROM challenges WHERE id = ?", (challenge_id,)).fetchone()
@@ -215,162 +197,135 @@ def get_challenge_goal(challenge_id: int) -> int:
 
 
 
+# =====================================================
+# 🔫 БАЗА СБОРК Battlefield (builds_bf.db)
+# =====================================================
+DB_PATH = Path(__file__).parent / "builds_bf.db"
 
-# ========================
-# 🧱 BATTLEFIELD BUILDS
-# ========================
+def get_connection():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
 
 def init_bf_builds_table():
-    """Создание таблицы сборок Battlefield (если не существует)"""
-    with get_bf_conn() as conn:
+    with get_connection() as conn:
         conn.execute("""
-            CREATE TABLE IF NOT EXISTS bf_builds (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                title TEXT NOT NULL,
-                weapon_type TEXT NOT NULL,
-                top1 TEXT,
-                top2 TEXT,
-                top3 TEXT,
-                date TEXT,
-                tabs_json TEXT,
-                categories_json TEXT,
-                created_at TEXT DEFAULT CURRENT_TIMESTAMP
-            )
-        """)
-
-
-def add_bf_build(data: dict):
-    """Добавление новой сборки Battlefield"""
-    with get_bf_conn() as conn:
-        conn.execute("""
-            INSERT INTO bf_builds (title, weapon_type, top1, top2, top3, date, tabs_json, categories_json)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            data.get("title", "").strip(),
-            data.get("weapon_type", "").strip(),
-            data.get("top1", "").strip(),
-            data.get("top2", "").strip(),
-            data.get("top3", "").strip(),
-            data.get("date", "").strip(),
-            json.dumps(data.get("tabs", []), ensure_ascii=False),
-            json.dumps(data.get("categories", []), ensure_ascii=False)
-        ))
-
-
-def get_all_bf_builds():
-    """Получить все сборки Battlefield"""
-    with get_bf_conn(row_mode=True) as conn:
-        rows = conn.execute("SELECT * FROM bf_builds ORDER BY id DESC").fetchall()
-        builds = []
-        for r in rows:
-            item = dict(r)
-            # распаковка JSON
-            item["tabs"] = json.loads(item.get("tabs_json") or "[]")
-            item["categories"] = json.loads(item.get("categories_json") or "[]")
-            builds.append(item)
-        return builds
-
-
-def update_bf_build(build_id: int, data: dict):
-    """Обновление сборки Battlefield"""
-    with get_bf_conn() as conn:
-        conn.execute("""
-            UPDATE bf_builds
-            SET title = ?, weapon_type = ?, top1 = ?, top2 = ?, top3 = ?, 
-                date = ?, tabs_json = ?, categories_json = ?
-            WHERE id = ?
-        """, (
-            data.get("title", "").strip(),
-            data.get("weapon_type", "").strip(),
-            data.get("top1", "").strip(),
-            data.get("top2", "").strip(),
-            data.get("top3", "").strip(),
-            data.get("date", "").strip(),
-            json.dumps(data.get("tabs", []), ensure_ascii=False),
-            json.dumps(data.get("categories", []), ensure_ascii=False),
-            build_id
-        ))
-
-
-def delete_bf_build(build_id: int):
-    """Удаление сборки Battlefield"""
-    with get_bf_conn() as conn:
-        conn.execute("DELETE FROM bf_builds WHERE id = ?", (build_id,))
-
-# ========================
-# ⚙️ BATTLEFIELD TYPES & MODULES
-# ========================
-
-def init_bf_types_modules_tables():
-    """Создание таблиц типов оружия и модулей"""
-    with get_bf_conn() as conn:
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS bf_weapon_types (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                key TEXT UNIQUE NOT NULL,
-                label TEXT NOT NULL
-            )
+        CREATE TABLE IF NOT EXISTS bf_builds (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT,
+            weapon_type TEXT,
+            top1 TEXT,
+            top2 TEXT,
+            top3 TEXT,
+            date TEXT,
+            tabs TEXT,
+            categories TEXT
+        )
         """)
         conn.execute("""
-            CREATE TABLE IF NOT EXISTS bf_modules (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                weapon_type TEXT NOT NULL,
-                category TEXT NOT NULL,
-                name TEXT NOT NULL
-            )
+        CREATE TABLE IF NOT EXISTS bf_weapon_types (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            key TEXT UNIQUE,
+            label TEXT
+        )
         """)
+        conn.execute("""
+        CREATE TABLE IF NOT EXISTS bf_modules (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            weapon_type TEXT,
+            category TEXT,
+            name TEXT
+        )
+        """)
+        conn.commit()
 
 
-def add_bf_weapon_type(key: str, label: str):
-    with get_bf_conn() as conn:
-        conn.execute("INSERT OR IGNORE INTO bf_weapon_types (key, label) VALUES (?, ?)", (key, label))
-
-
+# =====================================================
+# CRUD типы / модули / сборки
+# =====================================================
 def get_bf_weapon_types():
-    with get_bf_conn(row_mode=True) as conn:
-        return [dict(r) for r in conn.execute("SELECT * FROM bf_weapon_types ORDER BY id ASC").fetchall()]
+    with get_connection() as conn:
+        return [dict(r) for r in conn.execute("SELECT * FROM bf_weapon_types ORDER BY label")]
 
+def add_bf_weapon_type(data):
+    with get_connection() as conn:
+        conn.execute("INSERT INTO bf_weapon_types (key, label) VALUES (?, ?)", (data["key"], data["label"]))
+        conn.commit()
 
-def delete_bf_weapon_type(type_id: int):
-    with get_bf_conn() as conn:
+def delete_bf_weapon_type(type_id):
+    with get_connection() as conn:
         conn.execute("DELETE FROM bf_weapon_types WHERE id = ?", (type_id,))
-        conn.execute("DELETE FROM bf_modules WHERE weapon_type IN (SELECT key FROM bf_weapon_types WHERE id=?)", (type_id,))
+        conn.commit()
 
-
-def add_bf_module(weapon_type: str, category: str, name: str):
-    with get_bf_conn() as conn:
-        conn.execute("""
-            INSERT INTO bf_modules (weapon_type, category, name)
-            VALUES (?, ?, ?)
-        """, (weapon_type, category, name))
-
-
-def get_bf_modules_by_type(weapon_type: str):
-    with get_bf_conn(row_mode=True) as conn:
+def get_bf_modules_by_type(weapon_type):
+    with get_connection() as conn:
         rows = conn.execute(
-            "SELECT * FROM bf_modules WHERE weapon_type = ? ORDER BY category ASC, name ASC",
+            "SELECT id, category, name FROM bf_modules WHERE weapon_type = ? ORDER BY category, name",
             (weapon_type,)
         ).fetchall()
         data = {}
         for r in rows:
             cat = r["category"]
-            if cat not in data:
-                data[cat] = []
-            data[cat].append(dict(r))
+            data.setdefault(cat, []).append(dict(r))
         return data
 
+def add_bf_module(data):
+    with get_connection() as conn:
+        conn.execute(
+            "INSERT INTO bf_modules (weapon_type, category, name) VALUES (?, ?, ?)",
+            (data["weapon_type"], data["category"], data["name"])
+        )
+        conn.commit()
 
-def delete_bf_module(module_id: int):
-    with get_bf_conn() as conn:
+def delete_bf_module(module_id):
+    with get_connection() as conn:
         conn.execute("DELETE FROM bf_modules WHERE id = ?", (module_id,))
+        conn.commit()
+
+def get_all_bf_builds():
+    with get_connection() as conn:
+        rows = conn.execute("SELECT * FROM bf_builds ORDER BY id DESC").fetchall()
+        return [dict(r) for r in rows]
+
+def add_bf_build(data):
+    with get_connection() as conn:
+        conn.execute("""
+            INSERT INTO bf_builds (title, weapon_type, top1, top2, top3, date, tabs, categories)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            data.get("title"), data.get("weapon_type"),
+            data.get("top1"), data.get("top2"), data.get("top3"),
+            data.get("date"), str(data.get("tabs")), str(data.get("categories"))
+        ))
+        conn.commit()
+
+def update_bf_build(build_id, data):
+    with get_connection() as conn:
+        conn.execute("""
+            UPDATE bf_builds
+            SET title=?, weapon_type=?, top1=?, top2=?, top3=?, date=?, tabs=?, categories=?
+            WHERE id=?
+        """, (
+            data.get("title"), data.get("weapon_type"),
+            data.get("top1"), data.get("top2"), data.get("top3"),
+            data.get("date"), str(data.get("tabs")), str(data.get("categories")),
+            build_id
+        ))
+        conn.commit()
+
+def delete_bf_build(build_id):
+    with get_connection() as conn:
+        conn.execute("DELETE FROM bf_builds WHERE id = ?", (build_id,))
+        conn.commit()
 
 
 
-# ========================
-# Инициализация вручную
-# ========================
-
+# =====================================================
+# ⚙️ Инициализация вручную
+# =====================================================
 if __name__ == "__main__":
     init_bf_db()
     init_bf_builds_table()
-    print("[+] Battlefield Challenges DB initialized:", BF_DB_PATH)
+    print("[+] Battlefield DBs initialized:")
+    print("  •", BF_DB_PATH)
+    print("  •", DB_PATH)
