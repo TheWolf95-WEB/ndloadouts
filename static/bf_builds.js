@@ -205,9 +205,6 @@ if (typeSelect) {
 }
 
 
-  
-}
-
 
 document.getElementById('bf-weapon-type')?.addEventListener('change', async (e) => {
   const typeKey = e.target.value;
