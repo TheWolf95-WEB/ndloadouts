@@ -319,28 +319,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // === Добавление вкладки ===
+// Улучшенная функция добавления вкладки
 document.getElementById("bf-add-tab")?.addEventListener("click", () => {
   const type = document.getElementById("bf-weapon-type").value;
   const mods = bfModulesByType[type];
   if (!mods) {
-    alert("Выберите тип оружия");
+    alert("Сначала выберите тип оружия");
+    document.getElementById("bf-weapon-type").focus();
     return;
   }
 
   const tabDiv = document.createElement("div");
   tabDiv.className = "tab-block";
   tabDiv.innerHTML = `
-    <input type="text" class="tab-label" placeholder="Название вкладки" style="margin-bottom: 10px;">
+    <input type="text" class="tab-label form-input" placeholder="Название вкладки (например: Основные модули)">
     <div class="mod-selects"></div>
     <div class="tab-actions">
       <button type="button" class="btn add-mod">+ Модуль</button>
       <button type="button" class="btn delete-tab">🗑 Удалить вкладку</button>
     </div>
   `;
+  
   document.getElementById("bf-tabs-container").appendChild(tabDiv);
 
+  // Добавляем первый модуль автоматически
+  setTimeout(() => {
+    bfAddModuleRow(tabDiv, type);
+  }, 100);
+
   tabDiv.querySelector(".add-mod").addEventListener("click", () => bfAddModuleRow(tabDiv, type));
-  tabDiv.querySelector(".delete-tab").addEventListener("click", () => tabDiv.remove());
+  tabDiv.querySelector(".delete-tab").addEventListener("click", () => {
+    if (confirm("Удалить эту вкладку?")) {
+      tabDiv.remove();
+      bfHasUnsavedChanges = true;
+    }
+  });
+
+  // Отслеживание изменений
+  tabDiv.querySelector(".tab-label").addEventListener("input", () => bfHasUnsavedChanges = true);
+  
+  bfHasUnsavedChanges = true;
 });
 
 // === При смене типа оружия ===
