@@ -1,8 +1,9 @@
 // ========================
-// ⚙️ BASE INIT
+// ⚙️ BASE INIT (без конфликтов и дублей)
 // ========================
-const tg = window.Telegram?.WebApp || window.tg;
-if (tg && tg.expand) tg.expand();
+const bfTg = window.Telegram?.WebApp || window.tg;
+if (bfTg && bfTg.expand) bfTg.expand();
+window.tg = bfTg; // сохраняем глобально, чтобы не потерялось
 
 if (!window.Analytics) window.Analytics = { trackEvent: () => {} };
 
@@ -11,6 +12,7 @@ let bfCachedBuilds = [];
 let bfWeaponTypes = [];
 let bfScreenHistory = [];
 let currentBfWeaponType = null;
+
 
 // ========================
 // 🚀 INIT APP
