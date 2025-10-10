@@ -222,6 +222,7 @@ def init_bf_builds_table():
             categories TEXT
         )
         """)
+
         conn.execute("""
         CREATE TABLE IF NOT EXISTS bf_weapon_types (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -229,16 +230,19 @@ def init_bf_builds_table():
             label TEXT
         )
         """)
+
         conn.execute("""
         CREATE TABLE IF NOT EXISTS bf_modules (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             weapon_type TEXT,
             category TEXT,
             en TEXT,
-            pos INTEGER DEFAULT 0
+            pos INTEGER DEFAULT 0,
+            UNIQUE (weapon_type, category, en)
         )
         """)
         conn.commit()
+
 
 
 # =====================================================
