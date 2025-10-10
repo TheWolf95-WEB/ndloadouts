@@ -1,0 +1,88 @@
+{
+  "Muzzle": [
+    "Flash hider",
+    "Linear comp",
+    "Standard suppressor",
+    "Double-port brake",
+    "Compensated brake",
+    "Long Suppressor",
+    "CQB suppressor",
+    "Lightened suppressor",
+    "Single-port brake"
+  ],
+  "Right accessory": [
+    "Flashlight",
+    "5mw red",
+    "5mw green",
+    "50mw green",
+    "50mw blue",
+    "120mw blue",
+    "Lazer/light combo green"
+  ],
+  "Top accessory": [
+    "5mw red",
+    "5mw green",
+    "50mw green",
+    "50mw blue",
+    "120mw blue",
+    "Lazer/light combo green"
+  ],
+  "Underbarrel": [
+    "Folding vertical",
+    "Alloy vertical",
+    "Ribbed vertical",
+    "Classic vertical",
+    "Underslung mount",
+    "6h64 vertical",
+    "Folding stubby",
+    "Ribbed stubby",
+    "Canted stubby",
+    "Stippled stubby",
+    "Low-profile stubby",
+    "Adjustable angled",
+    "Slim angled",
+    "Full angled",
+    "Bipod",
+    "Ptt grip pod",
+    "Qd grip pod",
+    "Classic grip pod"
+  ],
+  "Magazin": [
+    "30rnd magazine",
+    "20rnd fast mag",
+    "20rnd magazine",
+    "30rnd fast mag",
+    "36rnd magazine",
+    "40rnd magazine",
+    "40rnd fast mag",
+    "45rnd fast mag",
+    "45rnd magazine",
+    "15rnd magazine",
+    "15rnd fast mag",
+    "10rnd fast mag"
+  ],
+  "Ammunition": [
+    "Fmj",
+    "Tungsten core",
+    "Polymer case",
+    "Hollow point",
+    "Frangible",
+    "Synthetic tip",
+    "Match grade"
+  ],
+  "Optic accessory": [
+    "Canted iron sights",
+    "Canted reflex",
+    "Piggyback reflex"
+  ],
+  "Ergonomics": [
+    "Magwell flare",
+    "Match trigger",
+    "Improved mag catch"
+  ],
+  "Left accessory": [
+    "Flashlight",
+    "Range finder"
+  ],
+  "Optic": []
+}
