@@ -1,7 +1,9 @@
 import sqlite3
+import json
 from pathlib import Path
 from contextlib import contextmanager
 from datetime import datetime
+
 
 
 # =====================================================
@@ -296,24 +298,42 @@ def delete_bf_module(module_id):
         conn.execute("DELETE FROM bf_modules WHERE id = ?", (module_id,))
         conn.commit()
 
+import json
+
 def get_all_bf_builds():
     with get_connection() as conn:
         rows = conn.execute("SELECT * FROM bf_builds ORDER BY id DESC").fetchall()
         builds = []
         for r in rows:
             b = dict(r)
-            # tabs
+
+            # --- categories ---
             try:
-                b["tabs"] = json.loads(b["tabs"]) if isinstance(b["tabs"], str) and b["tabs"].startswith("[") else eval(b["tabs"])
-            except:
-                b["tabs"] = []
-            # categories
+                if isinstance(b["categories"], str):
+                    b["categories"] = json.loads(b["categories"])
+            except Exception:
+                try:
+                    b["categories"] = eval(b["categories"])
+                except Exception:
+                    b["categories"] = []
+
+            # --- tabs ---
             try:
-                b["categories"] = json.loads(b["categories"]) if isinstance(b["categories"], str) and b["categories"].startswith("[") else eval(b["categories"])
-            except:
-                b["categories"] = []
+                if isinstance(b["tabs"], str):
+                    b["tabs"] = json.loads(b["tabs"])
+                    # иногда items внутри вкладок тоже как строка
+                    for t in b["tabs"]:
+                        if isinstance(t.get("items"), str):
+                            t["items"] = json.loads(t["items"])
+            except Exception:
+                try:
+                    b["tabs"] = eval(b["tabs"])
+                except Exception:
+                    b["tabs"] = []
+
             builds.append(b)
         return builds
+
 
 
 def add_bf_build(data):
