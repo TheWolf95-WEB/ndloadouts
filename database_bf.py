@@ -276,7 +276,7 @@ def get_bf_modules_by_type(weapon_type):
 def add_bf_module(data):
     with get_connection() as conn:
         conn.execute("""
-            INSERT INTO bf_modules (weapon_type, category, en, pos)
+            INSERT OR IGNORE INTO bf_modules (weapon_type, category, en, pos)
             VALUES (?, ?, ?, ?)
         """, (
             data.get("weapon_type"),
@@ -285,7 +285,6 @@ def add_bf_module(data):
             int(data.get("pos", 0))
         ))
         conn.commit()
-
 
 
 def delete_bf_module(module_id):
