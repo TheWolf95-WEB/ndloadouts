@@ -65,6 +65,24 @@ async function bfLoadBuilds() {
     }
 }
 
+function bfShowAddForm(editId = null) {
+  currentBfEditId = editId;
+  showScreen('screen-bf-add-build');
+
+  // Очистка формы
+  document.getElementById('bf-title').value = '';
+  document.getElementById('bf-weapon-type').value = '';
+  document.getElementById('bf-top1').value = '';
+  document.getElementById('bf-top2').value = '';
+  document.getElementById('bf-top3').value = '';
+  document.getElementById('bf-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('bf-tabs-container').innerHTML = '';
+
+  console.log("🛠 Открыта форма добавления сборки");
+}
+
+
+
 function bfRenderBuildsAccordion(builds) {
     const listEl = document.getElementById('bf-builds-list');
     listEl.innerHTML = '';
@@ -190,20 +208,6 @@ async function bfLoadWeaponTypes() {
     });
   });
 }
-
-
-// После загрузки списка типов — обновляем select в форме добавления сборки
-const typeSelect = document.getElementById('bf-weapon-type');
-if (typeSelect) {
-  typeSelect.innerHTML = '<option value="">Выберите тип оружия</option>';
-  types.forEach(t => {
-    const opt = document.createElement('option');
-    opt.value = t.key;
-    opt.textContent = t.label;
-    typeSelect.appendChild(opt);
-  });
-}
-
 
 
 document.getElementById('bf-weapon-type')?.addEventListener('change', async (e) => {
