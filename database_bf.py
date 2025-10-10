@@ -321,21 +321,21 @@ def delete_bf_build(build_id):
 # =====================================================
 # ⚙️ TYPES & MODULES TABLES
 # =====================================================
-def init_bf_types_modules_tables():
-    """Создаёт таблицы типов и модулей, если их нет"""
+def init_bf_builds_table():
+    """Создаёт таблицу сборок Battlefield"""
     with get_connection() as conn:
         conn.execute("""
-        CREATE TABLE IF NOT EXISTS bf_weapon_types (
+        CREATE TABLE IF NOT EXISTS bf_builds (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            key TEXT UNIQUE,
-            label TEXT
-        )
-        """)
-        conn.execute("""
-        CREATE TABLE IF NOT EXISTS bf_modules (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT,
             weapon_type TEXT,
-            category TEXT,
-            name TEXT
+            top1 TEXT,
+            top2 TEXT,
+            top3 TEXT,
+            date TEXT,
+            tabs TEXT,
+            categories TEXT
         )
         """)
+        conn.commit()
+
