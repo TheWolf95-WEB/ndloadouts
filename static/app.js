@@ -165,28 +165,53 @@ async function checkAdminStatus() {
 let isGoingBack = false;
 
 function showScreen(id) {
-  // 📌 сохраняем текущий экран в историю (только если это не возврат назад)
   const current = document.querySelector('.screen.active')?.id;
+
+  // 📌 сохраняем историю экранов
   if (current && current !== id && !isGoingBack) {
     screenHistory.push(current);
   }
   isGoingBack = false;
 
-  // фиксируем событие открытия экрана
+  // 🎯 Аналитика
   Analytics.trackEvent('open_screen', { 
     screen: id,
     time: new Date().toISOString()
   });
 
-    // 🎨 Смена темы по экрану
+  // 🎨 Смена темы
   const body = document.body;
-  body.classList.remove('warzone-theme', 'bf-theme'); // сброс старой темы
-
+  body.classList.remove('warzone-theme', 'bf-theme');
   if (id === 'screen-warzone-main') {
-    body.classList.add('warzone-theme');   // зелёная тема для Warzone
-  } else if (id === 'screen-battlefield-main') {
-    body.classList.add('bf-theme');        // синяя тема для Battlefield
+    body.classList.add('warzone-theme');
+  } else if (id === 'screen-battlefield-main' || id.startsWith('screen-bf')) {
+    body.classList.add('bf-theme');
   }
+
+  // ⚡ Без мерцаний — плавная активация
+  const screens = document.querySelectorAll('.screen');
+  screens.forEach(screen => {
+    if (screen.id === id) {
+      screen.classList.add('active');
+      screen.style.display = 'block';
+      requestAnimationFrame(() => {
+        screen.style.opacity = '1';
+        screen.style.transform = 'translateY(0)';
+      });
+    } else if (screen.classList.contains('active')) {
+      // плавно скрываем предыдущий
+      screen.style.opacity = '0';
+      screen.style.transform = 'translateY(10px)';
+      setTimeout(() => {
+        screen.style.display = 'none';
+        screen.classList.remove('active');
+      }, 200); // 0.2s как transition
+    } else {
+      screen.style.display = 'none';
+    }
+  });
+}
+
 
 
   const protectedScreens = {
