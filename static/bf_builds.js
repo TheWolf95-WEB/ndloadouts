@@ -833,11 +833,11 @@ function bfRenderBuilds(builds) {
         <div class="bf-tab-content ${i === 0 ? 'is-active' : ''}" data-tab-content="bf-${groupIndex}-${buildIndex}-${i}">
           <div class="bf-modules">
             ${(tab.items || []).map(itemKey => {
-              const allMods = bfModulesByType[build.weapon_type];
-              const modKey = String(itemKey).toLowerCase().trim();
-              const mod = allMods?.flat?.find(m => m.en.toLowerCase() === modKey);
-              const slot = mod?.category || "—";
-              const name = mod?.en || itemKey;
+               const modsWrap = bfModulesByType[build.weapon_type];
+               const modKey = String(itemKey).toLowerCase().trim();
+               const mod = modsWrap?.flat?.find(m => m.en.toLowerCase() === modKey);
+               const slot = mod?.category || "—";
+               const name = mod?.en || itemKey;
               return `
                 <div class="bf-module">
                   <span class="bf-module-slot">${slot}</span>
