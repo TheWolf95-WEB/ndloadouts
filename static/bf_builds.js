@@ -361,14 +361,18 @@ function bfAddModuleRow(tabDiv, type) {
     const list = modsWrap.byCategory[cat] || [];
     moduleSelect.innerHTML = "";
 
-    // Собираем все уже выбранные модули во вкладке
-    const used = Array.from(tabDiv.querySelectorAll(".module-select"))
-      .map((s) => s.value)
+    // Собираем выбранные модули ТОЛЬКО ИЗ ТЕКУЩЕЙ КАТЕГОРИИ
+    const usedInThisCategory = Array.from(tabDiv.querySelectorAll(".mod-row"))
+      .filter(r => {
+        const catSel = r.querySelector(".category-select");
+        return catSel.value === cat;
+      })
+      .map(r => r.querySelector(".module-select").value)
       .filter(Boolean);
 
-    // Добавляем только те, которых ещё нет
+    // Добавляем только те, которых ещё нет в этой категории
     list.forEach((m) => {
-      if (!used.includes(m.en)) {
+      if (!usedInThisCategory.includes(m.en)) {
         const opt = document.createElement("option");
         opt.value = m.en;
         opt.textContent = m.en;
@@ -389,45 +393,54 @@ function bfAddModuleRow(tabDiv, type) {
   function updateAllSelects() {
     const allRows = tabDiv.querySelectorAll(".mod-row");
     
-    // Собираем ВСЕ выбранные модули во вкладке
-    const allUsed = Array.from(tabDiv.querySelectorAll(".module-select"))
-      .map((s) => s.value)
-      .filter(Boolean);
-
     allRows.forEach((r) => {
       const catSel = r.querySelector(".category-select");
       const modSel = r.querySelector(".module-select");
-      const list = modsWrap.byCategory[catSel.value] || [];
+      const cat = catSel.value;
+      const list = modsWrap.byCategory[cat] || [];
+
+      // Собираем выбранные модули ТОЛЬКО ИЗ ТЕКУЩЕЙ КАТЕГОРИИ
+      const usedInThisCategory = Array.from(tabDiv.querySelectorAll(".mod-row"))
+        .filter(row => {
+          const rowCatSel = row.querySelector(".category-select");
+          return rowCatSel.value === cat;
+        })
+        .map(row => row.querySelector(".module-select").value)
+        .filter(Boolean);
 
       const currentValue = modSel.value;
       modSel.innerHTML = "";
 
-      // Добавляем доступные модули (не выбранные в других селектах)
+      // Добавляем модули только из текущей категории
       list.forEach((m) => {
-        const opt = document.createElement("option");
-        opt.value = m.en;
-        opt.textContent = m.en;
-        
-        // Модуль доступен если: он текущий выбранный ИЛИ не выбран в других селектах
-        const isAvailable = m.en === currentValue || !allUsed.includes(m.en);
-        if (isAvailable) {
+        // Модуль доступен если он текущий выбранный ИЛИ не выбран в этой категории
+        if (m.en === currentValue || !usedInThisCategory.includes(m.en)) {
+          const opt = document.createElement("option");
+          opt.value = m.en;
+          opt.textContent = m.en;
           modSel.appendChild(opt);
         }
       });
 
-      // Восстанавливаем предыдущее значение, если оно доступно
+      // Восстанавливаем предыдущее значение
       if (Array.from(modSel.options).some((o) => o.value === currentValue)) {
         modSel.value = currentValue;
       } else if (modSel.options.length > 0) {
-        // Если предыдущее значение недоступно, выбираем первый доступный
         modSel.selectedIndex = 0;
+      } else {
+        // Если ничего не доступно, показываем "Все выбраны"
+        const empty = document.createElement("option");
+        empty.textContent = "Все выбраны";
+        empty.disabled = true;
+        empty.selected = true;
+        modSel.appendChild(empty);
       }
     });
   }
 
-  categorySelect.dispatchEvent(new Event("change"));
+  // Инициализируем первый раз
+  refreshModules();
 }
-
 
 /* ===============================
    💾 СОХРАНЕНИЕ СБОРКИ
