@@ -1,674 +1,662 @@
-// ========================
-// ⚙️ BASE INIT
-// ========================
-const bfTg = window.Telegram?.WebApp || window.tg;
-if (bfTg && bfTg.expand) bfTg.expand();
-window.tg = bfTg;
+/* ===========================
+   ⚔️ BATTLEFIELD BUILDS SCRIPT
+   =========================== */
 
-// Глобальное состояние
-let currentBfEditId = null;              // id редактируемой сборки
-let bfCachedBuilds = [];                 // кэш сборок
-let bfTypesCache = [];                   // кэш типов оружия
-let currentBfWeaponType = null;          // текущий тип в справочнике модулей
-let currentBfWeaponLabel = null;         // подпись текущего типа
-let currentBfModules = {};               // модули по текущему типу (категория -> [{id, name}])
-const isBfAdmin = !!window?.userInfo?.is_admin || !!window?.ADMIN_IDS?.length; // подстрой под свой флаг
+const tg = window.Telegram.WebApp;
+tg.expand();
 
-// Утилиты
-const $ = (sel, root = document) => root.querySelector(sel);
-const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-const el = (tag, cls, html) => {
-  const e = document.createElement(tag);
-  if (cls) e.className = cls;
-  if (html !== undefined) e.innerHTML = html;
-  return e;
-};
+const bfUser = tg.initDataUnsafe?.user || {};
+let bfUserInfo = null;
 
-// ========================
-// 🖥️ ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ
-// ========================
-function showScreen(id) {
-  $$('.screen').forEach(s => {
-    s.classList.remove('active');
-    s.style.display = 'none';
-  });
-  const scr = document.getElementById(id);
-  if (scr) {
-    scr.style.display = 'block';
-    setTimeout(() => scr.classList.add('active'), 10);
-  } else {
-    console.warn('Screen not found:', id);
-  }
-}
+const bfModulesByType = {};
+const bfWeaponTypeLabels = {};
+let bfCachedBuilds = [];
+let bfCurrentEditId = null;
+let bfScreenHistory = [];
 
-// ========================
-// 🚀 INIT APP
-// ========================
-document.addEventListener('DOMContentLoaded', async () => {
-  console.log('🔹 Battlefield module loaded');
-
-    $('#bf-back-from-modules')?.addEventListener('click', () => {
-    showScreen('screen-bf-modules-dict');
-  });
-  
-  $('#bf-add-module-btn')?.addEventListener('click', async () => {
-    const category = $('#bf-mod-category').value.trim();
-    const name = $('#bf-mod-name').value.trim();
-    
-    if (!currentBfWeaponType) return alert('Сначала выберите тип оружия');
-    if (!category) return alert('Введите категорию');
-    if (!name) return alert('Введите название модуля');
-  
-    try {
-      await apiPost('/api/bf/modules', {
-        weapon_type: currentBfWeaponType,
-        category,
-        name
-      });
-  
-      $('#bf-mod-category').value = '';
-      $('#bf-mod-name').value = '';
-      await bfLoadModulesForType(currentBfWeaponType);
-    } catch (error) {
-      console.error('Ошибка добавления модуля:', error);
-      alert('Ошибка при добавлении модуля');
-    }
-  });
-
-  
-  // Главные кнопки
-  $('#bf-show-builds-btn')?.addEventListener('click', async () => {
-    showScreen('screen-bf-builds');
-    await bfEnsureTypes();     // нужны для фильтра
-    await bfLoadBuilds();
-    bfFillFilters();
-  });
-
-  $('#bf-modules-dict-btn')?.addEventListener('click', async () => {
-    showScreen('screen-bf-modules-dict');
-    await bfLoadWeaponTypesGrid();
-  });
-
-  $('#bf-add-build-btn')?.addEventListener('click', async () => {
-    await bfEnsureTypes();
-    bfShowAddForm();
-  });
-
-  // Хендлеры формы добавления сборки
-  $('#bf-weapon-type')?.addEventListener('change', async (e) => {
-    const typeKey = e.target.value;
-    if (!typeKey) return;
-    const data = await apiGet(`/api/bf/modules/${typeKey}`);
-    currentBfModules = data || {};
-    console.log('Loaded modules for type:', typeKey, data);
-  });
-
-  $('#bf-add-tab')?.addEventListener('click', () => {
-    bfAddTab();
-  });
-
-  $('#bf-submit-build')?.addEventListener('click', async () => {
-    await bfSubmitBuild();
-  });
-
-  // Справочник типов
-  $('#bf-add-type-btn')?.addEventListener('click', async () => {
-    const key = $('#bf-type-key').value.trim();
-    const label = $('#bf-type-label').value.trim();
-    if (!key || !label) return alert('Введите ключ и название типа оружия');
-
-    await apiPost('/api/bf/types', { key, label });
-    $('#bf-type-key').value = '';
-    $('#bf-type-label').value = '';
-    await bfLoadWeaponTypes(true);
-  });
-
-  // Фильтры/поиск на экране сборок
-  $('#bf-filter-type')?.addEventListener('change', () => bfApplyBuildsFilters());
-  $('#bf-filter-category')?.addEventListener('change', () => bfApplyBuildsFilters());
-  $('#bf-search-builds')?.addEventListener('input', () => bfApplyBuildsFilters());
-});
-
-
-// ========================
-// 🔩 СПРАВОЧНИК МОДУЛЕЙ
-// ========================
-
-// Загрузка сетки типов оружия для справочника
-async function bfLoadWeaponTypesGrid() {
-  const grid = $('#bf-types-grid');
-  if (!grid) return;
-
-  await bfEnsureTypes();
-  
-  grid.innerHTML = '';
-  
-  bfTypesCache.forEach(type => {
-    const card = el('div', 'type-card');
-    card.innerHTML = `
-      <div class="type-name">${escapeHtml(type.label)}</div>
-      <div class="type-actions">
-        <button class="btn-mini primary" data-action="edit">✏️</button>
-        <button class="btn-mini danger" data-action="delete">🗑</button>
-      </div>
-    `;
-    
-    // Клик по карточке - открыть модули
-    card.addEventListener('click', (e) => {
-      if (!e.target.closest('.type-actions')) {
-        currentBfWeaponType = type.key;
-        currentBfWeaponLabel = type.label;
-        $('#bf-modules-title').textContent = `🔩 Справочник модулей — ${type.label}`;
-        showScreen('screen-bf-modules-list');
-        bfLoadModulesForType(currentBfWeaponType);
-      }
-    });
-    
-    // Редактирование типа
-    card.querySelector('[data-action="edit"]').addEventListener('click', async (e) => {
-      e.stopPropagation();
-      const newLabel = prompt('Новое название типа:', type.label);
-      if (!newLabel) return;
-      
-      try {
-        await apiPut(`/api/bf/types/${type.id}`, { key: type.key, label: newLabel });
-        await bfLoadWeaponTypesGrid();
-      } catch (error) {
-        console.error('Ошибка редактирования типа:', error);
-        alert('Ошибка при редактировании типа');
-      }
-    });
-    
-    // Удаление типа
-    card.querySelector('[data-action="delete"]').addEventListener('click', async (e) => {
-      e.stopPropagation();
-      if (!confirm(`Удалить тип "${type.label}"?`)) return;
-      
-      try {
-        await apiDelete(`/api/bf/types/${type.id}`);
-        await bfLoadWeaponTypesGrid();
-      } catch (error) {
-        console.error('Ошибка удаления типа:', error);
-        alert('Ошибка при удалении типа');
-      }
-    });
-    
-    grid.appendChild(card);
-  });
-}
-
-// ========================
-// 🌐 API helpers
-// ========================
-async function apiGet(url) {
+// === Инициализация ===
+document.addEventListener("DOMContentLoaded", async () => {
   try {
-    const r = await fetch(url);
-    if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-    return await r.json();
+    await bfLoadWeaponTypes();
+    bfShowScreen("screen-battlefield-main");
   } catch (e) {
-    console.error('GET error:', url, e);
-    return null;
+    console.error("BF init error:", e);
   }
-}
-async function apiPost(url, data) {
-  const r = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
-  if (!r.ok) {
-    const msg = await safeText(r);
-    throw new Error(`POST ${url}: ${r.status} ${msg}`);
-  }
-  return await r.json().catch(() => ({}));
-}
-async function apiPut(url, data) {
-  const r = await fetch(url, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data)
-  });
-  if (!r.ok) {
-    const msg = await safeText(r);
-    throw new Error(`PUT ${url}: ${r.status} ${msg}`);
-  }
-  return await r.json().catch(() => ({}));
-}
-async function apiDelete(url) {
-  const r = await fetch(url, { method: 'DELETE' });
-  if (!r.ok) {
-    const msg = await safeText(r);
-    throw new Error(`DELETE ${url}: ${r.status} ${msg}`);
-  }
-  return true;
-}
-async function safeText(r) {
-  try { return await r.text(); } catch { return ''; }
-}
+});
 
-// ========================
-// 📚 ТИПЫ ОРУЖИЯ
-// ========================
-async function bfEnsureTypes() {
-  if (bfTypesCache.length) return bfTypesCache;
-  await bfLoadWeaponTypes();
-  return bfTypesCache;
-}
+/* ==============
+   🔹 Навигация
+   ============== */
+function bfShowScreen(id) {
+  const current = document.querySelector(".screen.active")?.id;
+  if (current && current !== id) bfScreenHistory.push(current);
 
-// Загрузка типов (из API, фоллбек на /data/types-bf.json)
-async function bfLoadWeaponTypes(keepScreen = false) {
-  let types = await apiGet('/api/bf/types');
-  if (!Array.isArray(types)) {
-    // Fallback (локальный JSON)
-    try {
-      const fallback = await fetch('/data/types-bf.json');
-      if (fallback.ok) types = await fallback.json();
-    } catch (e) { /* ignore */ }
-  }
-  bfTypesCache = Array.isArray(types) ? types : [];
+  document.body.classList.remove("warzone-theme");
+  document.body.classList.add("bf-theme");
 
-  // Рендер сетки типов
-  const list = $('#bf-types-list');
-  if (list) {
-    list.innerHTML = '';
-    if (!bfTypesCache.length) {
-      list.innerHTML = '<p class="muted">Типов ещё нет</p>';
+  document.querySelectorAll(".screen").forEach((screen) => {
+    if (screen.id === id) {
+      screen.classList.add("active");
+      screen.style.display = "block";
+      requestAnimationFrame(() => {
+        screen.style.opacity = "1";
+        screen.style.transform = "translateY(0)";
+      });
+    } else if (screen.classList.contains("active")) {
+      screen.style.opacity = "0";
+      screen.style.transform = "translateY(10px)";
+      setTimeout(() => {
+        screen.classList.remove("active");
+        screen.style.display = "none";
+      }, 200);
     } else {
-      bfTypesCache.forEach(t => {
-        const card = el('div', 'bf-type-card');
-        const btn = el('button', 'bf-type-open', t.label);
-        btn.dataset.key = t.key;
-        btn.dataset.label = t.label;
-        btn.addEventListener('click', async () => {
-          currentBfWeaponType = t.key;
-          currentBfWeaponLabel = t.label;
-          $('#bf-modules-title').innerHTML = `🔩 Справочник модулей — ${escapeHtml(t.label)}`;
-          showScreen('screen-bf-modules');
-          await bfLoadModulesForType(currentBfWeaponType);
-        });
-
-        const actions = el('div', 'bf-type-actions');
-        const edit = el('button', 'btn-mini', '✏️');
-        edit.addEventListener('click', async () => {
-          const newLabel = prompt('Новое название типа:', t.label);
-          if (!newLabel) return;
-          // Если на бэке нет PUT типов, можно удалить и создать заново. Предположим есть:
-          try {
-            await apiPut(`/api/bf/types/${t.id}`, { key: t.key, label: newLabel });
-          } catch {
-            // фоллбек: удалить/создать
-            await apiDelete(`/api/bf/types/${t.id}`);
-            await apiPost('/api/bf/types', { key: t.key, label: newLabel });
-          }
-          await bfLoadWeaponTypes(true);
-        });
-
-        const del = el('button', 'btn-mini', '🗑');
-        del.addEventListener('click', async () => {
-          if (!confirm('Удалить тип оружия?')) return;
-          await apiDelete(`/api/bf/types/${t.id}`);
-          await bfLoadWeaponTypes(true);
-        });
-
-        actions.append(edit, del);
-        card.append(btn, actions);
-        list.appendChild(card);
-      });
+      screen.style.display = "none";
     }
-  }
-
-  // Заполнение селектов типов
-  const typeSelect = $('#bf-weapon-type');
-  const filterSelect = $('#bf-filter-type');
-  if (typeSelect) {
-    typeSelect.innerHTML = '<option value="">Выберите тип оружия</option>';
-    bfTypesCache.forEach(t => {
-      const opt = el('option');
-      opt.value = t.key;
-      opt.textContent = t.label;
-      typeSelect.appendChild(opt);
-    });
-  }
-  if (filterSelect) {
-    filterSelect.innerHTML = '<option value="">Все типы</option>';
-    bfTypesCache.forEach(t => {
-      const opt = el('option');
-      opt.value = t.key;
-      opt.textContent = t.label;
-      filterSelect.appendChild(opt);
-    });
-  }
-
-  if (!keepScreen) showScreen('screen-bf-types');
-}
-
-// ========================
-// 🔩 МОДУЛИ ПО ТИПУ
-// ========================
-// Загрузка модулей для типа
-async function bfLoadModulesForType(typeKey) {
-  const data = await apiGet(`/api/bf/modules/${typeKey}`) || {};
-  currentBfModules = data;
-
-  const container = $('#bf-modules-container');
-  if (!container) return;
-  container.innerHTML = '';
-
-  const categories = Object.keys(data).sort();
-  
-  if (!categories.length) {
-    container.innerHTML = '<p class="muted">Модулей ещё нет</p>';
-    return;
-  }
-
-  categories.forEach(category => {
-    const categorySection = el('div', 'category-section');
-    categorySection.innerHTML = `<h3 class="category-title">${escapeHtml(category)}</h3>`;
-    
-    const modulesList = el('div', 'modules-list');
-    
-    (data[category] || []).forEach(module => {
-      const moduleRow = el('div', 'module-row');
-      moduleRow.innerHTML = `
-        <span class="module-name">${escapeHtml(module.name)}</span>
-        <button class="btn-mini danger">🗑</button>
-      `;
-      
-      moduleRow.querySelector('.danger').addEventListener('click', async () => {
-        if (!confirm('Удалить модуль?')) return;
-        await apiDelete(`/api/bf/modules/${module.id}`);
-        await bfLoadModulesForType(typeKey);
-      });
-      
-      modulesList.appendChild(moduleRow);
-    });
-    
-    categorySection.appendChild(modulesList);
-    container.appendChild(categorySection);
   });
-}
-// Добавление модуля
-$('#bf-add-module-btn')?.addEventListener('click', async () => {
-  const category = $('#bf-mod-category').value.trim();
-  const name = $('#bf-mod-name').value.trim();
-  
-  if (!currentBfWeaponType) return alert('Сначала выберите тип оружия');
-  if (!category) return alert('Введите категорию');
-  if (!name) return alert('Введите название модуля');
 
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* ===============================
+   🔸 Загрузка типов оружия
+   =============================== */
+async function bfLoadWeaponTypes() {
   try {
-    await apiPost('/api/bf/modules', {
-      weapon_type: currentBfWeaponType,
-      category,
-      name
+    const res = await fetch("/data/types-bf.json");
+    const types = await res.json();
+    const select = document.getElementById("bf-weapon-type");
+    if (!select) return;
+
+    select.innerHTML = "";
+    types.forEach((t) => {
+      const opt = document.createElement("option");
+      opt.value = t.key;
+      opt.textContent = t.label;
+      select.appendChild(opt);
+      bfWeaponTypeLabels[t.key] = t.label;
     });
-
-    // Очистка формы
-    $('#bf-mod-category').value = '';
-    $('#bf-mod-name').value = '';
-    
-    // Обновление списка
-    await bfLoadModulesForType(currentBfWeaponType);
-  } catch (error) {
-    console.error('Ошибка добавления модуля:', error);
-    alert('Ошибка при добавлении модуля');
+  } catch (err) {
+    console.error("Failed to load weapon types:", err);
   }
+}
+
+/* ===============================
+   🔸 Справочник модулей
+   =============================== */
+
+// Открытие справочника
+document.getElementById("bf-modules-dict-btn")?.addEventListener("click", async () => {
+  await bfLoadWeaponTypesForModules();
+  bfShowScreen("screen-bf-modules-types");
 });
 
-// Назад из модулей
-$('#bf-back-from-modules')?.addEventListener('click', () => {
-  showScreen('screen-bf-modules-dict');
-});
+// Назад из типов
+document.getElementById("bf-back-from-mod-types")?.addEventListener("click", () =>
+  bfShowScreen("screen-battlefield-main")
+);
 
-// ========================
-// 📦 СБОРКИ (СПИСОК / ФИЛЬТР / ПОИСК)
-// ========================
-async function bfLoadBuilds() {
-  $('#bf-builds-list').innerHTML = '<div class="loading-spinner">Загрузка...</div>';
-  const builds = await apiGet('/api/bf/builds');
-  bfCachedBuilds = Array.isArray(builds) ? builds : [];
-  bfRenderBuildsCards(bfCachedBuilds);
-  $('#bf-total-builds').textContent = String(bfCachedBuilds.length);
-}
+// Назад из списка модулей
+document.getElementById("bf-back-from-mod-list")?.addEventListener("click", () =>
+  bfShowScreen("screen-bf-modules-types")
+);
 
-function bfFillFilters() {
-  // Категории фикс (как в форме)
-  const catSelect = $('#bf-filter-category');
-  if (!catSelect) return;
-  const cats = ['Популярное', 'Новинки', 'Топ Мета', 'Мета'];
-  catSelect.innerHTML = '<option value="">Все категории</option>';
-  cats.forEach(c => {
-    const opt = el('option');
-    opt.value = c;
-    opt.textContent = c;
-    catSelect.appendChild(opt);
-  });
-}
+// Загрузка типов оружия для справочника
+async function bfLoadWeaponTypesForModules() {
+  try {
+    const res = await fetch("/data/types-bf.json");
+    const types = await res.json();
+    const grid = document.getElementById("bf-modules-types-grid");
+    grid.innerHTML = "";
 
-function bfApplyBuildsFilters() {
-  const typeVal = $('#bf-filter-type')?.value || '';
-  const catVal  = $('#bf-filter-category')?.value || '';
-  const q = ($('#bf-search-builds')?.value || '').toLowerCase();
-
-  const filtered = bfCachedBuilds.filter(b => {
-    const okType = !typeVal || b.weapon_type === typeVal;
-    const okCat  = !catVal || (Array.isArray(b.categories) && b.categories.includes(catVal));
-    const okQ = !q || (b.title?.toLowerCase().includes(q) ||
-      JSON.stringify(b.tabs || []).toLowerCase().includes(q));
-    return okType && okCat && okQ;
-  });
-
-  bfRenderBuildsCards(filtered);
-  $('#bf-total-builds').textContent = String(filtered.length);
-}
-
-function bfRenderBuildsCards(builds) {
-  const grid = $('#bf-builds-list');
-  grid.innerHTML = '';
-
-  if (!builds.length) {
-    grid.innerHTML = '<p class="muted">Нет сборок для отображения</p>';
-    return;
+    types.forEach((t) => {
+      const btn = document.createElement("button");
+      btn.className = "modules-type-btn";
+      btn.textContent = t.label;
+      btn.addEventListener("click", () => bfLoadModulesList(t.key, t.label));
+      grid.appendChild(btn);
+    });
+  } catch (e) {
+    console.error("BF modules load error:", e);
   }
+}
 
-  builds.forEach((b, idx) => {
-    const title = b.title || 'Без названия';
-    const wt = b.weapon_type || '—';
-    const cats = Array.isArray(b.categories) ? b.categories : [];
-    const tabs = Array.isArray(b.tabs) ? b.tabs : [];
+// Загрузка модулей по типу
+async function bfLoadModulesList(weaponType, label) {
+  try {
+    const res = await fetch(`/api/bf/modules/${weaponType}`);
+    const data = await res.json();
+    const title = document.getElementById("bf-modules-title");
+    const list = document.getElementById("bf-modules-list");
+    title.textContent = `Modules — ${label}`;
+    list.innerHTML = "";
 
-    const card = el('div', 'bf-card');
-    card.innerHTML = `
-      <div class="bf-card__header">
-        <span class="bf-rank">#${idx + 1}</span>
-        <h3 class="bf-title">${escapeHtml(title)}</h3>
-      </div>
-      <div class="bf-badges">
-        ${cats.map(c => `<span class="bf-badge">${escapeHtml(c)}</span>`).join('')}
-      </div>
-      <div class="bf-meta">
-        <span class="bf-weapon">${escapeHtml(getTypeLabel(wt))}</span>
-        <span class="bf-tabs">${tabs.length || 0} вклад.</span>
-      </div>
-      <div class="bf-actions ${isBfAdmin ? '' : 'hidden'}">
-        <button class="btn-mini primary">✏️</button>
-        <button class="btn-mini danger">🗑</button>
-      </div>
-    `;
+    for (const category in data) {
+      const group = document.createElement("div");
+      group.className = "module-group";
+      group.innerHTML = `<h4>${category}</h4>`;
 
-    // Редактирование/Удаление
-    if (isBfAdmin) {
-      card.querySelector('.primary').addEventListener('click', async () => {
-        await bfEnsureTypes();
-        bfShowAddForm(b.id, b);
+      data[category].forEach((mod) => {
+        const row = document.createElement("div");
+        row.className = "module-row";
+        row.innerHTML = `
+          <span>${mod.en}</span>
+          <button class="btn btn-sm" data-id="${mod.id}">🗑</button>
+        `;
+        row.querySelector("button").addEventListener("click", async () => {
+          if (!confirm(`Delete module ${mod.en}?`)) return;
+          await fetch(`/api/bf/modules/${mod.id}`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ initData: tg.initData }),
+          });
+          await bfLoadModulesList(weaponType, label);
+        });
+        group.appendChild(row);
       });
-      card.querySelector('.danger').addEventListener('click', async () => {
-        if (!confirm('Удалить сборку?')) return;
-        await apiDelete(`/api/bf/builds/${b.id}`);
-        await bfLoadBuilds();
-      });
+
+      list.appendChild(group);
     }
 
-    grid.appendChild(card);
-  });
-}
-
-function getTypeLabel(key) {
-  const t = bfTypesCache.find(x => x.key === key);
-  return t ? t.label : key;
-}
-
-// ========================
-// 🧱 ФОРМА ДОБАВЛЕНИЯ / РЕДАКТИРОВАНИЯ
-// ========================
-function bfShowAddForm(editId = null, build = null) {
-  currentBfEditId = editId;
-  showScreen('screen-bf-add-build');
-
-  // Очистка
-  $('#bf-title').value = '';
-  $('#bf-weapon-type').value = '';
-  $('#bf-top1').value = '';
-  $('#bf-top2').value = '';
-  $('#bf-top3').value = '';
-  $('#bf-date').value = new Date().toISOString().split('T')[0];
-  $('#bf-tabs-container').innerHTML = '';
-  $$('.bf-cat').forEach(cb => (cb.checked = false));
-
-  if (build) {
-    $('#bf-title').value = build.title || '';
-    $('#bf-weapon-type').value = build.weapon_type || '';
-    $('#bf-top1').value = build.top1 || '';
-    $('#bf-top2').value = build.top2 || '';
-    $('#bf-top3').value = build.top3 || '';
-    if (build.date) $('#bf-date').value = (build.date || '').slice(0, 10);
-
-    // Категории
-    const cats = Array.isArray(build.categories) ? build.categories : [];
-    $$('.bf-cat').forEach(cb => (cb.checked = cats.includes(cb.value)));
-
-    // Вкладки
-    (build.tabs || []).forEach(t => bfAddTab(t));
-  } else {
-    // Добавляем пустую вкладку по умолчанию
-    bfAddTab();
-  }
-
-  console.log('🛠 Открыта форма добавления/редактирования сборки', currentBfEditId);
-}
-
-function bfAddTab(tabData = null) {
-  const wrap = $('#bf-tabs-container');
-  const tab = el('div', 'tab-block');
-  const title = tabData?.title || '';
-  
-  tab.innerHTML = `
-    <input type="text" class="tab-title-input form-input" placeholder="Название вкладки" value="${escapeAttr(title)}">
-    
-    <div class="tab-modules">
-      <div class="mod-row">
-        <input type="text" class="form-input" placeholder="Дуло">
-        <select class="mod-select form-input">
-          <option value="">модуль</option>
-        </select>
-      </div>
-    </div>
-    
-    <div class="tab-actions">
-      <button class="btn add-mod">➕ Добавить модуль</button>
-      <button class="btn delete-tab">🗑️ Удалить вкладку</button>
-    </div>
-  `;
-  
-  wrap.appendChild(tab);
-
-  const itemsWrap = $('.tab-modules', tab);
-  const addItemBtn = $('.add-mod', tab);
-  const removeTabBtn = $('.delete-tab', tab);
-
-  removeTabBtn.addEventListener('click', () => tab.remove());
-  addItemBtn.addEventListener('click', () => bfAddTabItem(itemsWrap));
-
-  // Предзаполнение модулей если есть данные
-  if (Array.isArray(tabData?.items)) {
-    tabData.items.forEach(it => {
-      bfAddTabItem(itemsWrap, it.category || '', it.name || '');
-    });
+    window.currentBFWeaponType = weaponType;
+    bfShowScreen("screen-bf-modules-list");
+  } catch (e) {
+    console.error("BF modules list error:", e);
   }
 }
 
-function bfAddTabItem(container, cat = '', name = '') {
-  const row = el('div', 'mod-row');
-  row.innerHTML = `
-    <input class="form-input" placeholder="Категория (напр. Дуло)" value="${escapeAttr(cat)}">
-    <input class="form-input" placeholder="Название модуля (напр. Suppressor)" value="${escapeAttr(name)}">
-  `;
-  container.appendChild(row);
-}
-
-async function bfSubmitBuild() {
-  const title = $('#bf-title').value.trim();
-  const weapon_type = $('#bf-weapon-type').value;
-  const top1 = $('#bf-top1').value.trim();
-  const top2 = $('#bf-top2').value.trim();
-  const top3 = $('#bf-top3').value.trim();
-  const date = $('#bf-date').value;
-  const categories = $$('.bf-cat').filter(cb => cb.checked).map(cb => cb.value);
-
-  if (!title) return alert('Заполни название сборки');
-  if (!weapon_type) return alert('Выбери тип оружия');
-
-  // Сбор вкладок
-  const tabs = [];
-  $$('.tab-block').forEach(tab => {
-    const tTitle = $('.tab-title-input', tab).value.trim() || 'Без названия';
-    const items = [];
-    
-    $$('.mod-row', tab).forEach(r => {
-      const inputs = $$('input', r);
-      if (inputs.length >= 2) {
-        const cat = inputs[0].value.trim();
-        const name = inputs[1].value.trim();
-        if (cat || name) items.push({ category: cat, name });
-      }
-    });
-    
-    tabs.push({ title: tTitle, items });
-  });
-
-  const payload = { 
-    title, 
-    weapon_type, 
-    categories, 
-    top1, 
-    top2, 
-    top3, 
-    date, 
-    tabs 
+// Добавление модуля
+document.getElementById("bf-mod-add-btn")?.addEventListener("click", async () => {
+  const payload = {
+    initData: tg.initData,
+    weapon_type: window.currentBFWeaponType,
+    category: document.getElementById("bf-mod-category").value.trim(),
+    en: document.getElementById("bf-mod-en").value.trim(),
+    pos: parseInt(document.getElementById("bf-mod-pos").value) || 0,
   };
 
+  if (!payload.category || !payload.en) {
+    alert("All fields are required");
+    return;
+  }
+
   try {
-    if (currentBfEditId) {
-      await apiPut(`/api/bf/builds/${currentBfEditId}`, payload);
-    } else {
-      await apiPost('/api/bf/builds', payload);
-    }
-    currentBfEditId = null;
-    showScreen('screen-bf-builds');
-    await bfLoadBuilds();
+    await fetch("/api/bf/modules", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    ["bf-mod-category", "bf-mod-en", "bf-mod-pos"].forEach(
+      (id) => (document.getElementById(id).value = "")
+    );
+
+    await bfLoadModulesList(payload.weapon_type, bfWeaponTypeLabels[payload.weapon_type]);
+    await bfLoadModules(payload.weapon_type);
   } catch (e) {
+    alert("Error while adding module");
     console.error(e);
-    alert('Ошибка сохранения сборки');
+  }
+});
+
+/* ===============================
+   🔸 Загрузка модулей для сборок
+   =============================== */
+async function bfLoadModules(type) {
+  try {
+    const res = await fetch(`/api/bf/modules/${type}`);
+    const byCategory = await res.json();
+    const byKey = {};
+    const flat = [];
+
+    for (const cat in byCategory) {
+      byCategory[cat].forEach((m) => {
+        flat.push({ ...m, category: cat });
+        byKey[m.en.toLowerCase()] = { en: m.en, category: cat };
+      });
+    }
+    bfModulesByType[type] = { byCategory, byKey, flat };
+  } catch (e) {
+    console.error("Failed to load modules for", type, e);
   }
 }
-// ========================
-// 🧰 ВСПОМОГАТЕЛЬНЫЕ
-// ========================
-function escapeHtml(s = '') {
-  return String(s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+
+/* ===============================
+   ⚙️  ДОБАВЛЕНИЕ / РЕДАКТИРОВАНИЕ СБОРКИ
+   =============================== */
+
+// Кнопка "Добавить сборку"
+document.getElementById("bf-add-build-btn")?.addEventListener("click", () => {
+  bfCurrentEditId = null;
+  document.getElementById("bf-submit-build").textContent = "➕ Add Build";
+
+  // очистка полей
+  document.getElementById("bf-title").value = "";
+  document.getElementById("bf-weapon-type").value = "";
+  document.getElementById("bf-top1").value = "";
+  document.getElementById("bf-top2").value = "";
+  document.getElementById("bf-top3").value = "";
+  document.getElementById("bf-build-date").value = new Date().toISOString().split("T")[0];
+  document.getElementById("bf-tabs-container").innerHTML = "";
+
+  bfShowScreen("screen-bf-form");
+});
+
+// Назад с формы
+document.getElementById("bf-back-to-main")?.addEventListener("click", () => {
+  bfShowScreen("screen-battlefield-main");
+});
+
+// === Добавление вкладки ===
+document.getElementById("bf-add-tab")?.addEventListener("click", () => {
+  const type = document.getElementById("bf-weapon-type").value;
+  const mods = bfModulesByType[type];
+  if (!mods) {
+    alert("Select weapon type first");
+    return;
+  }
+
+  const tabDiv = document.createElement("div");
+  tabDiv.className = "tab-block";
+  tabDiv.innerHTML = `
+    <input type="text" class="tab-label" placeholder="Tab name" style="margin-bottom: 10px;">
+    <div class="mod-selects"></div>
+    <div class="tab-actions">
+      <button type="button" class="btn add-mod">+ Module</button>
+      <button type="button" class="btn delete-tab">🗑 Delete Tab</button>
+    </div>
+  `;
+  document.getElementById("bf-tabs-container").appendChild(tabDiv);
+
+  tabDiv.querySelector(".add-mod").addEventListener("click", () => bfAddModuleRow(tabDiv, type));
+  tabDiv.querySelector(".delete-tab").addEventListener("click", () => tabDiv.remove());
+});
+
+// === Добавление строки модуля во вкладку ===
+function bfAddModuleRow(tabDiv, type) {
+  const modsWrap = bfModulesByType[type];
+  if (!modsWrap) return alert("Select weapon type first");
+
+  const row = document.createElement("div");
+  row.className = "mod-row";
+
+  const categorySelect = document.createElement("select");
+  categorySelect.className = "form-input category-select";
+
+  const moduleSelect = document.createElement("select");
+  moduleSelect.className = "form-input module-select";
+
+  Object.keys(modsWrap.byCategory).forEach((cat) => {
+    const opt = document.createElement("option");
+    opt.value = cat;
+    opt.textContent = cat;
+    categorySelect.appendChild(opt);
+  });
+
+  row.appendChild(categorySelect);
+  row.appendChild(moduleSelect);
+  tabDiv.querySelector(".mod-selects").appendChild(row);
+
+  categorySelect.addEventListener("change", refresh);
+  moduleSelect.addEventListener("change", refreshAll);
+
+  function refresh() {
+    const cat = categorySelect.value;
+    const list = modsWrap.byCategory[cat] || [];
+    moduleSelect.innerHTML = "";
+    list.forEach((m) => {
+      const opt = document.createElement("option");
+      opt.value = m.en;
+      opt.textContent = m.en;
+      moduleSelect.appendChild(opt);
+    });
+  }
+
+  function refreshAll() {
+    // no duplicate logic for BF
+  }
+
+  categorySelect.dispatchEvent(new Event("change"));
 }
-function escapeAttr(s = '') {
-  return escapeHtml(s).replace(/"/g, '&quot;');
+
+/* ===============================
+   💾 СОХРАНЕНИЕ СБОРКИ
+   =============================== */
+document.getElementById("bf-submit-build")?.addEventListener("click", bfHandleSubmitBuild);
+
+async function bfHandleSubmitBuild() {
+  const title = document.getElementById("bf-title").value.trim();
+  const weapon_type = document.getElementById("bf-weapon-type").value;
+  const date = document.getElementById("bf-build-date").value;
+  const top1 = document.getElementById("bf-top1").value.trim();
+  const top2 = document.getElementById("bf-top2").value.trim();
+  const top3 = document.getElementById("bf-top3").value.trim();
+
+  // категории
+  const selectedCategories = Array.from(document.querySelectorAll(".bf-build-category:checked")).map(
+    (cb) => cb.value
+  );
+
+  const tabs = Array.from(document.querySelectorAll("#bf-tabs-container .tab-block")).map((tab) => {
+    const label = tab.querySelector(".tab-label").value.trim();
+    const items = Array.from(tab.querySelectorAll(".module-select")).map((s) => s.value);
+    return { label, items };
+  });
+
+  const data = {
+    initData: tg.initData,
+    title,
+    weapon_type,
+    date,
+    top1,
+    top2,
+    top3,
+    tabs,
+    categories: selectedCategories,
+  };
+
+  const method = bfCurrentEditId ? "PUT" : "POST";
+  const url = bfCurrentEditId ? `/api/bf/builds/${bfCurrentEditId}` : "/api/bf/builds";
+
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(err);
+    }
+
+    alert(bfCurrentEditId ? "Build updated!" : "Build added!");
+    bfShowScreen("screen-bf-edit-builds");
+    await bfLoadBuildsTable();
+    bfCurrentEditId = null;
+  } catch (e) {
+    console.error("Save build error:", e);
+    alert("Error saving build");
+  }
 }
+
+/* ===============================
+   📥 РЕДАКТИРОВАНИЕ СБОРКИ
+   =============================== */
+async function bfEditBuild(build) {
+  bfCurrentEditId = build.id;
+  bfShowScreen("screen-bf-form");
+  document.getElementById("bf-submit-build").textContent = "💾 Save Changes";
+
+  document.getElementById("bf-title").value = build.title || "";
+  document.getElementById("bf-weapon-type").value = build.weapon_type || "";
+  document.getElementById("bf-top1").value = build.top1 || "";
+  document.getElementById("bf-top2").value = build.top2 || "";
+  document.getElementById("bf-top3").value = build.top3 || "";
+  document.getElementById("bf-build-date").value = build.date || new Date().toISOString().split("T")[0];
+
+  const container = document.getElementById("bf-tabs-container");
+  container.innerHTML = "";
+
+  await bfLoadModules(build.weapon_type);
+
+  if (Array.isArray(build.tabs)) {
+    build.tabs.forEach((tab) => {
+      const tabDiv = document.createElement("div");
+      tabDiv.className = "tab-block";
+      tabDiv.innerHTML = `
+        <input type="text" class="tab-label" value="${tab.label}" style="margin-bottom: 10px;">
+        <div class="mod-selects"></div>
+        <div class="tab-actions">
+          <button type="button" class="btn add-mod">+ Module</button>
+          <button type="button" class="btn delete-tab">🗑 Delete</button>
+        </div>
+      `;
+      container.appendChild(tabDiv);
+
+      tabDiv.querySelector(".add-mod").addEventListener("click", () =>
+        bfAddModuleRow(tabDiv, build.weapon_type)
+      );
+      tabDiv.querySelector(".delete-tab").addEventListener("click", () => tabDiv.remove());
+
+      tab.items.forEach((modKey) => {
+        const modsWrap = bfModulesByType[build.weapon_type];
+        const found = Object.entries(modsWrap.byCategory).find(([cat, list]) =>
+          list.some((m) => m.en === modKey)
+        );
+        if (found) {
+          const [cat] = found;
+          const row = document.createElement("div");
+          row.className = "mod-row";
+
+          const catSel = document.createElement("select");
+          catSel.className = "form-input category-select";
+          Object.keys(modsWrap.byCategory).forEach((c) => {
+            const opt = document.createElement("option");
+            opt.value = c;
+            opt.textContent = c;
+            if (c === cat) opt.selected = true;
+            catSel.appendChild(opt);
+          });
+
+          const modSel = document.createElement("select");
+          modSel.className = "form-input module-select";
+          modsWrap.byCategory[cat].forEach((m) => {
+            const opt = document.createElement("option");
+            opt.value = m.en;
+            opt.textContent = m.en;
+            if (m.en === modKey) opt.selected = true;
+            modSel.appendChild(opt);
+          });
+
+          row.appendChild(catSel);
+          row.appendChild(modSel);
+          tabDiv.querySelector(".mod-selects").appendChild(row);
+        }
+      });
+    });
+  }
+}
+
+/* ===============================
+   📦 ЗАГРУЗКА И ОТОБРАЖЕНИЕ СБОРОК
+   =============================== */
+
+// Кнопка "Все сборки"
+document.getElementById("bf-show-builds-btn")?.addEventListener("click", async () => {
+  bfShowScreen("screen-bf-builds");
+  await bfLoadBuilds();
+});
+
+// Кнопка "База сборок" (админ)
+document.getElementById("bf-weapons-db-btn")?.addEventListener("click", async () => {
+  bfShowScreen("screen-bf-edit-builds");
+  await bfLoadBuildsTable();
+});
+
+// Назад со списка сборок
+document.getElementById("bf-back-from-builds")?.addEventListener("click", () =>
+  bfShowScreen("screen-battlefield-main")
+);
+
+// Назад из базы
+document.getElementById("bf-back-from-edit")?.addEventListener("click", () =>
+  bfShowScreen("screen-battlefield-main")
+);
+
+// === Загрузка сборок для пользователей ===
+async function bfLoadBuilds() {
+  try {
+    const res = await fetch("/api/bf/builds");
+    bfCachedBuilds = await res.json();
+    bfRenderBuilds(bfCachedBuilds);
+  } catch (e) {
+    console.error("BF load builds error:", e);
+  }
+}
+
+// === Отображение сборок (аккордеон) ===
+function bfRenderBuilds(builds) {
+  const container = document.getElementById("bf-builds-list");
+  const countEl = document.getElementById("bf-user-builds-count");
+  const noResults = document.getElementById("bf-no-results-message");
+
+  if (!container) return;
+  container.innerHTML = "";
+  countEl.textContent = `Total builds: ${builds.length}`;
+  noResults.style.display = builds.length ? "none" : "block";
+
+  builds.forEach((b) => {
+    const item = document.createElement("div");
+    item.className = "bf-build-item";
+
+    const topBlock = `
+      <div class="bf-build-header">
+        <h3>${b.title}</h3>
+        <span class="bf-build-type">${bfWeaponTypeLabels[b.weapon_type] || b.weapon_type}</span>
+      </div>
+      <div class="bf-top-mods">
+        ${b.top1 ? `<span class="top1">🥇 ${b.top1}</span>` : ""}
+        ${b.top2 ? `<span class="top2">🥈 ${b.top2}</span>` : ""}
+        ${b.top3 ? `<span class="top3">🥉 ${b.top3}</span>` : ""}
+      </div>
+      <button class="btn bf-toggle">Show Modules</button>
+    `;
+
+    const tabsHTML = (b.tabs || [])
+      .map(
+        (tab) => `
+      <div class="bf-tab">
+        <h4>${tab.label}</h4>
+        <ul>
+          ${tab.items
+            .map(
+              (m) =>
+                `<li>${
+                  (bfModulesByType[b.weapon_type]?.byKey?.[m.toLowerCase()]?.category || "—"
+                )}: ${m}</li>`
+            )
+            .join("")}
+        </ul>
+      </div>`
+      )
+      .join("");
+
+    const content = document.createElement("div");
+    content.className = "bf-build-content";
+    content.innerHTML = tabsHTML;
+
+    item.innerHTML = topBlock;
+    item.appendChild(content);
+    container.appendChild(item);
+
+    const toggle = item.querySelector(".bf-toggle");
+    toggle.addEventListener("click", () => {
+      const visible = content.style.display === "block";
+      content.style.display = visible ? "none" : "block";
+      toggle.textContent = visible ? "Show Modules" : "Hide Modules";
+    });
+  });
+}
+
+/* ===============================
+   🧩 ФИЛЬТРЫ И ПОИСК
+   =============================== */
+document.getElementById("bf-category-filter")?.addEventListener("change", () => {
+  bfFilterBuilds();
+});
+
+document.getElementById("bf-weapon-filter")?.addEventListener("change", () => {
+  bfFilterBuilds();
+});
+
+document.getElementById("bf-builds-search")?.addEventListener("input", () => {
+  bfFilterBuilds();
+});
+
+function bfFilterBuilds() {
+  const cat = document.getElementById("bf-category-filter").value;
+  const type = document.getElementById("bf-weapon-filter").value;
+  const q = document.getElementById("bf-builds-search").value.toLowerCase();
+
+  let filtered = bfCachedBuilds;
+
+  if (cat !== "all") {
+    filtered = filtered.filter((b) => (b.categories || []).includes(cat));
+  }
+
+  if (type !== "all") {
+    filtered = filtered.filter((b) => b.weapon_type === type);
+  }
+
+  if (q) {
+    filtered = filtered.filter((b) => {
+      const text =
+        (b.title || "") +
+        (b.top1 || "") +
+        (b.top2 || "") +
+        (b.top3 || "") +
+        JSON.stringify(b.tabs || []);
+      return text.toLowerCase().includes(q);
+    });
+  }
+
+  bfRenderBuilds(filtered);
+}
+
+/* ===============================
+   🧱 БАЗА СБОРОК (АДМИН)
+   =============================== */
+async function bfLoadBuildsTable() {
+  try {
+    const res = await fetch("/api/bf/builds");
+    const builds = await res.json();
+    const grid = document.getElementById("bf-edit-builds-grid");
+    const countEl = document.getElementById("bf-builds-count");
+    grid.innerHTML = "";
+    countEl.textContent = `Total: ${builds.length} builds`;
+
+    builds.forEach((b) => {
+      const card = document.createElement("div");
+      card.className = "bf-build-card";
+      card.innerHTML = `
+        <h4>${b.title}</h4>
+        <p>${bfWeaponTypeLabels[b.weapon_type] || b.weapon_type}</p>
+        <div class="bf-build-actions">
+          <button class="btn btn-edit">✏️</button>
+          <button class="btn btn-delete">🗑</button>
+        </div>
+      `;
+      grid.appendChild(card);
+
+      card.querySelector(".btn-edit").addEventListener("click", () => bfEditBuild(b));
+      card.querySelector(".btn-delete").addEventListener("click", async () => {
+        if (!confirm(`Delete ${b.title}?`)) return;
+        await fetch(`/api/bf/builds/${b.id}`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ initData: tg.initData }),
+        });
+        await bfLoadBuildsTable();
+      });
+    });
+  } catch (e) {
+    console.error("BF builds table load error:", e);
+  }
+}
+
+/* ===============================
+   🎨 ТЕМА
+   =============================== */
+(function bfApplyTheme() {
+  const root = document.documentElement;
+  root.style.setProperty("--bf-bg", "#101821");
+  root.style.setProperty("--bf-card", "#15202c");
+  root.style.setProperty("--bf-text", "#e0e6ee");
+  root.style.setProperty("--bf-accent", "#3a7bd5");
+})();
+
+/* ===============================
+   ✅ ГОТОВО
+   =============================== */
+console.log("✅ Battlefield builds module initialized");
