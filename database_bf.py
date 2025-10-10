@@ -273,11 +273,21 @@ def get_bf_modules_by_type(weapon_type):
             ORDER BY category, pos, en
         """, (weapon_type,)).fetchall()
 
+        # если нет модулей для данного типа — взять общие (shv)
+        if not rows:
+            rows = conn.execute("""
+                SELECT id, category, en, pos
+                FROM bf_modules
+                WHERE weapon_type = 'shv'
+                ORDER BY category, pos, en
+            """).fetchall()
+
         data = {}
         for r in rows:
             cat = r["category"]
             data.setdefault(cat, []).append(dict(r))
         return data
+
 
 def add_bf_module(data):
     with get_connection() as conn:
