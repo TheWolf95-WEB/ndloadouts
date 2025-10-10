@@ -177,7 +177,6 @@
 </div>
 
 
-<!-- 🧱 База сборок Battlefield -->
 <div id="screen-bf-edit-builds" class="screen" style="display:none;">
   <div class="screen-header">
     <button class="btn btn-back" id="bf-back-from-edit">⬅ Назад</button>
@@ -188,11 +187,23 @@
     <span id="bf-builds-count">Всего: 0 сборок</span>
   </div>
 
+  <!-- Добавьте фильтры если нужно -->
+  <div class="filters-bar" style="padding: 0 16px 16px;">
+    <select class="form-input" style="max-width: 200px;">
+      <option value="all">Все типы</option>
+      <!-- опции типов оружия -->
+    </select>
+    <select class="form-input" style="max-width: 200px;">
+      <option value="all">Все категории</option>
+      <!-- опции категорий -->
+    </select>
+    <input type="text" class="form-input" placeholder="Поиск по названию..." style="max-width: 250px;">
+  </div>
+
   <div id="bf-edit-builds-grid" class="bf-builds-grid">
     <p>Загрузка сборок...</p>
   </div>
 </div>
-
 
 
 <!-- 📚 Справочник модулей — выбор типа -->
