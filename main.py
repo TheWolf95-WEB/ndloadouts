@@ -804,8 +804,7 @@ from database_bf import (
     add_challenge, update_challenge, delete_challenge,
     get_all_bf_builds, add_bf_build, update_bf_build, delete_bf_build,
     get_bf_weapon_types, add_bf_weapon_type, delete_bf_weapon_type,
-    get_bf_modules_by_type, add_bf_module, delete_bf_module,
-    init_bf_builds_table, init_bf_types_modules_tables
+    get_bf_modules_by_type, add_bf_module, delete_bf_module
 )
 
 
