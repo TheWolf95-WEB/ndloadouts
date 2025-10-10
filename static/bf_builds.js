@@ -47,6 +47,35 @@ function showScreen(id) {
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('🔹 Battlefield module loaded');
 
+    $('#bf-back-from-modules')?.addEventListener('click', () => {
+    showScreen('screen-bf-modules-dict');
+  });
+  
+  $('#bf-add-module-btn')?.addEventListener('click', async () => {
+    const category = $('#bf-mod-category').value.trim();
+    const name = $('#bf-mod-name').value.trim();
+    
+    if (!currentBfWeaponType) return alert('Сначала выберите тип оружия');
+    if (!category) return alert('Введите категорию');
+    if (!name) return alert('Введите название модуля');
+  
+    try {
+      await apiPost('/api/bf/modules', {
+        weapon_type: currentBfWeaponType,
+        category,
+        name
+      });
+  
+      $('#bf-mod-category').value = '';
+      $('#bf-mod-name').value = '';
+      await bfLoadModulesForType(currentBfWeaponType);
+    } catch (error) {
+      console.error('Ошибка добавления модуля:', error);
+      alert('Ошибка при добавлении модуля');
+    }
+  });
+
+  
   // Главные кнопки
   $('#bf-show-builds-btn')?.addEventListener('click', async () => {
     showScreen('screen-bf-builds');
@@ -55,14 +84,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     bfFillFilters();
   });
 
-  // “База оружий” и “Справочник модулей” ведут в справочник типов
-  $('#bf-weapons-db-btn')?.addEventListener('click', async () => {
-    showScreen('screen-bf-types');
-    await bfLoadWeaponTypes();
-  });
   $('#bf-modules-dict-btn')?.addEventListener('click', async () => {
-    showScreen('screen-bf-types');
-    await bfLoadWeaponTypes();
+    showScreen('screen-bf-modules-dict');
+    await bfLoadWeaponTypesGrid();
   });
 
   $('#bf-add-build-btn')?.addEventListener('click', async () => {
@@ -104,6 +128,74 @@ document.addEventListener('DOMContentLoaded', async () => {
   $('#bf-filter-category')?.addEventListener('change', () => bfApplyBuildsFilters());
   $('#bf-search-builds')?.addEventListener('input', () => bfApplyBuildsFilters());
 });
+
+
+// ========================
+// 🔩 СПРАВОЧНИК МОДУЛЕЙ
+// ========================
+
+// Загрузка сетки типов оружия для справочника
+async function bfLoadWeaponTypesGrid() {
+  const grid = $('#bf-types-grid');
+  if (!grid) return;
+
+  await bfEnsureTypes();
+  
+  grid.innerHTML = '';
+  
+  bfTypesCache.forEach(type => {
+    const card = el('div', 'type-card');
+    card.innerHTML = `
+      <div class="type-name">${escapeHtml(type.label)}</div>
+      <div class="type-actions">
+        <button class="btn-mini primary" data-action="edit">✏️</button>
+        <button class="btn-mini danger" data-action="delete">🗑</button>
+      </div>
+    `;
+    
+    // Клик по карточке - открыть модули
+    card.addEventListener('click', (e) => {
+      if (!e.target.closest('.type-actions')) {
+        currentBfWeaponType = type.key;
+        currentBfWeaponLabel = type.label;
+        $('#bf-modules-title').textContent = `🔩 Справочник модулей — ${type.label}`;
+        showScreen('screen-bf-modules-list');
+        bfLoadModulesForType(currentBfWeaponType);
+      }
+    });
+    
+    // Редактирование типа
+    card.querySelector('[data-action="edit"]').addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const newLabel = prompt('Новое название типа:', type.label);
+      if (!newLabel) return;
+      
+      try {
+        await apiPut(`/api/bf/types/${type.id}`, { key: type.key, label: newLabel });
+        await bfLoadWeaponTypesGrid();
+      } catch (error) {
+        console.error('Ошибка редактирования типа:', error);
+        alert('Ошибка при редактировании типа');
+      }
+    });
+    
+    // Удаление типа
+    card.querySelector('[data-action="delete"]').addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (!confirm(`Удалить тип "${type.label}"?`)) return;
+      
+      try {
+        await apiDelete(`/api/bf/types/${type.id}`);
+        await bfLoadWeaponTypesGrid();
+      } catch (error) {
+        console.error('Ошибка удаления типа:', error);
+        alert('Ошибка при удалении типа');
+      }
+    });
+    
+    grid.appendChild(card);
+  });
+}
 
 // ========================
 // 🌐 API helpers
@@ -253,59 +345,79 @@ async function bfLoadWeaponTypes(keepScreen = false) {
 // ========================
 // 🔩 МОДУЛИ ПО ТИПУ
 // ========================
+// Загрузка модулей для типа
 async function bfLoadModulesForType(typeKey) {
   const data = await apiGet(`/api/bf/modules/${typeKey}`) || {};
   currentBfModules = data;
 
-  const container = $('#bf-modules-list');
+  const container = $('#bf-modules-container');
   if (!container) return;
   container.innerHTML = '';
 
-  const cats = Object.keys(data);
-  if (!cats.length) {
+  const categories = Object.keys(data).sort();
+  
+  if (!categories.length) {
     container.innerHTML = '<p class="muted">Модулей ещё нет</p>';
     return;
   }
 
-  cats.forEach(cat => {
-    const group = el('div', 'bf-mod-group');
-    group.innerHTML = `<h4>${escapeHtml(cat)}</h4>`;
-    (data[cat] || []).forEach(m => {
-      const row = el('div', 'bf-mod-row');
-      row.innerHTML = `
-        <span>${escapeHtml(m.name)}</span>
+  categories.forEach(category => {
+    const categorySection = el('div', 'category-section');
+    categorySection.innerHTML = `<h3 class="category-title">${escapeHtml(category)}</h3>`;
+    
+    const modulesList = el('div', 'modules-list');
+    
+    (data[category] || []).forEach(module => {
+      const moduleRow = el('div', 'module-row');
+      moduleRow.innerHTML = `
+        <span class="module-name">${escapeHtml(module.name)}</span>
         <button class="btn-mini danger">🗑</button>
       `;
-      row.querySelector('.danger').addEventListener('click', async () => {
+      
+      moduleRow.querySelector('.danger').addEventListener('click', async () => {
         if (!confirm('Удалить модуль?')) return;
-        await apiDelete(`/api/bf/modules/${m.id}`);
+        await apiDelete(`/api/bf/modules/${module.id}`);
         await bfLoadModulesForType(typeKey);
       });
-      group.appendChild(row);
+      
+      modulesList.appendChild(moduleRow);
     });
-    container.appendChild(group);
+    
+    categorySection.appendChild(modulesList);
+    container.appendChild(categorySection);
   });
 }
-
+// Добавление модуля
 $('#bf-add-module-btn')?.addEventListener('click', async () => {
   const category = $('#bf-mod-category').value.trim();
   const name = $('#bf-mod-name').value.trim();
-  if (!currentBfWeaponType) return alert('Сначала выбери тип оружия');
-  if (!category || !name) return alert('Заполни категорию и название');
+  
+  if (!currentBfWeaponType) return alert('Сначала выберите тип оружия');
+  if (!category) return alert('Введите категорию');
+  if (!name) return alert('Введите название модуля');
 
-  await apiPost('/api/bf/modules', {
-    weapon_type: currentBfWeaponType,
-    category,
-    name
-  });
+  try {
+    await apiPost('/api/bf/modules', {
+      weapon_type: currentBfWeaponType,
+      category,
+      name
+    });
 
-  $('#bf-mod-category').value = '';
-  $('#bf-mod-name').value = '';
-  await bfLoadModulesForType(currentBfWeaponType);
+    // Очистка формы
+    $('#bf-mod-category').value = '';
+    $('#bf-mod-name').value = '';
+    
+    // Обновление списка
+    await bfLoadModulesForType(currentBfWeaponType);
+  } catch (error) {
+    console.error('Ошибка добавления модуля:', error);
+    alert('Ошибка при добавлении модуля');
+  }
 });
 
+// Назад из модулей
 $('#bf-back-from-modules')?.addEventListener('click', () => {
-  showScreen('screen-bf-types');
+  showScreen('screen-bf-modules-dict');
 });
 
 // ========================
