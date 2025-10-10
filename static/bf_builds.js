@@ -1076,6 +1076,10 @@ function bfFilterBuilds() {
    📦 ОБНОВЛЕННАЯ ФУНКЦИЯ ЗАГРУЗКИ БАЗЫ СБОРОК
    =============================== */
 
+/* ===============================
+   📦 ОБНОВЛЕННАЯ ФУНКЦИЯ ЗАГРУЗКИ БАЗЫ СБОРОК
+   =============================== */
+
 async function bfLoadBuildsTable() {
   try {
     const res = await fetch("/api/bf/builds");
@@ -1177,8 +1181,8 @@ async function bfLoadBuildsTable() {
         </div>
         
         <div class="bf-card-footer">
-          <button class="btn btn-edit">✏ Редактировать</button>
-          <button class="btn btn-delete">🗑 Удалить</button>
+          <button class="btn btn-edit" title="Редактировать">✏</button>
+          <button class="btn btn-delete" title="Удалить">🗑</button>
         </div>
       `;
 
@@ -1217,6 +1221,8 @@ async function bfLoadBuildsTable() {
     grid.innerHTML = `<p style="text-align:center;color:#dc3545;padding:40px;">Ошибка загрузки сборок</p>`;
   }
 }
+
+// Остальные функции фильтров остаются без изменений...
 
 /* ===============================
    🎯 ФИЛЬТРЫ ДЛЯ БАЗЫ СБОРОК
