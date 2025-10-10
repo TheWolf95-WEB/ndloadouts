@@ -130,33 +130,50 @@ function bfRenderBuildsAccordion(builds) {
 // ⚙️ ТИПЫ ОРУЖИЯ (ПРОСТАЯ ВЕРСИЯ)
 // ========================
 async function bfLoadWeaponTypes() {
-    try {
-        const res = await fetch('/api/bf/types');
-        const types = await res.json();
-        const list = document.getElementById('bf-types-list');
-        
-        if (!list) return;
-        
-        list.innerHTML = '';
-        
-        if (!types.length) {
-            list.innerHTML = '<p>Нет типов оружия</p>';
-            return;
-        }
+  try {
+    const res = await fetch('/api/bf/types');
+    const types = await res.json();
+    const list = document.getElementById('bf-types-list');
 
-        types.forEach(t => {
-            const row = document.createElement('div');
-            row.className = 'bf-type-row';
-            row.innerHTML = `
-                <span class="bf-type-label">${t.label} (${t.key})</span>
-                <div class="bf-type-actions">
-                    <button class="btn btn-sm bf-type-open" data-key="${t.key}">📖 Модули</button>
-                    <button class="btn btn-sm bf-type-del" data-id="${t.id}">🗑 Удалить</button>
-                </div>`;
-            list.appendChild(row);
-        });
+    if (!list) return;
 
+    list.innerHTML = '';
 
+    if (!types.length) {
+      list.innerHTML = '<p>Нет типов оружия</p>';
+      return;
+    }
+
+    types.forEach(t => {
+      const row = document.createElement('div');
+      row.className = 'bf-type-row';
+      row.innerHTML = `
+        <span class="bf-type-label">${t.label} (${t.key})</span>
+        <div class="bf-type-actions">
+          <button class="btn btn-sm bf-type-open" data-key="${t.key}" data-label="${t.label}">📖 Модули</button>
+          <button class="btn btn-sm bf-type-del" data-id="${t.id}">🗑 Удалить</button>
+        </div>`;
+      list.appendChild(row);
+    });
+
+    // После загрузки списка типов — обновляем select
+    const typeSelect = document.getElementById('bf-weapon-type');
+    if (typeSelect) {
+      typeSelect.innerHTML = '<option value="">Выберите тип оружия</option>';
+      types.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.key;
+        opt.textContent = t.label;
+        typeSelect.appendChild(opt);
+      });
+    }
+
+  } catch (err) {
+    console.error('Ошибка загрузки типов оружия:', err);
+  }
+
+  // Обработчики кнопок открываются вне try
+  const list = document.getElementById('bf-types-list');
   list.querySelectorAll('.bf-type-open').forEach(btn => {
     btn.addEventListener('click', async () => {
       currentBfWeaponType = btn.dataset.key;
@@ -172,6 +189,7 @@ async function bfLoadWeaponTypes() {
       await bfLoadWeaponTypes();
     });
   });
+}
 
 
 // После загрузки списка типов — обновляем select в форме добавления сборки
