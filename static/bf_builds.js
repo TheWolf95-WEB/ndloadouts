@@ -311,6 +311,7 @@ function bfAddModuleRow(tabDiv, type) {
   const moduleSelect = document.createElement("select");
   moduleSelect.className = "form-input module-select";
 
+  // Добавляем категории
   Object.keys(modsWrap.byCategory).forEach((cat) => {
     const opt = document.createElement("option");
     opt.value = cat;
@@ -325,24 +326,66 @@ function bfAddModuleRow(tabDiv, type) {
   categorySelect.addEventListener("change", refresh);
   moduleSelect.addEventListener("change", refreshAll);
 
+  // === Обновление списка модулей ===
   function refresh() {
     const cat = categorySelect.value;
     const list = modsWrap.byCategory[cat] || [];
     moduleSelect.innerHTML = "";
+
+    // Собираем уже выбранные модули в текущей вкладке
+    const used = Array.from(tabDiv.querySelectorAll(".module-select"))
+      .map((s) => s.value)
+      .filter((v) => v);
+
+    // Добавляем только те, которых нет среди выбранных
     list.forEach((m) => {
-      const opt = document.createElement("option");
-      opt.value = m.en;
-      opt.textContent = m.en;
-      moduleSelect.appendChild(opt);
+      if (!used.includes(m.en)) {
+        const opt = document.createElement("option");
+        opt.value = m.en;
+        opt.textContent = m.en;
+        moduleSelect.appendChild(opt);
+      }
     });
+
+    // Если всё удалили (например, все выбраны) — добавим пустую опцию
+    if (!moduleSelect.options.length) {
+      const empty = document.createElement("option");
+      empty.textContent = "Все выбраны";
+      empty.disabled = true;
+      empty.selected = true;
+      moduleSelect.appendChild(empty);
+    }
   }
 
   function refreshAll() {
-    // no duplicate logic for BF
+    // при смене модуля обновим все другие селекты, чтобы убрать дубликаты
+    tabDiv.querySelectorAll(".mod-row").forEach((r) => {
+      if (r !== row) {
+        const catSel = r.querySelector(".category-select");
+        const modSel = r.querySelector(".module-select");
+        if (catSel.value === categorySelect.value) {
+          const list = modsWrap.byCategory[catSel.value] || [];
+          const used = Array.from(tabDiv.querySelectorAll(".module-select"))
+            .map((s) => s.value)
+            .filter((v) => v);
+          modSel.innerHTML = "";
+          list.forEach((m) => {
+            if (!used.includes(m.en) || m.en === modSel.value) {
+              const opt = document.createElement("option");
+              opt.value = m.en;
+              opt.textContent = m.en;
+              if (m.en === modSel.value) opt.selected = true;
+              modSel.appendChild(opt);
+            }
+          });
+        }
+      }
+    });
   }
 
   categorySelect.dispatchEvent(new Event("change"));
 }
+
 
 /* ===============================
    💾 СОХРАНЕНИЕ СБОРКИ
