@@ -766,3 +766,205 @@ body.warzone-theme .card-btn:hover {
 .form-col {
   flex: 1;
 }
+
+
+
+// 
+
+/* ===============================
+   ⚔️ BATTLEFIELD — ДОПОЛНИТЕЛЬНЫЕ ЭКРАНЫ
+   =============================== */
+
+/* Главный экран */
+#screen-battlefield-main {
+  background: linear-gradient(145deg, #0e1624, #0a0f18);
+  color: #e6f1ff;
+  text-align: center;
+  padding: 30px 20px;
+  border-radius: 14px;
+  box-shadow: 0 0 20px rgba(0, 157, 255, 0.15);
+}
+
+#screen-battlefield-main h1 {
+  color: #00aaff;
+  font-size: 28px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 0 8px rgba(0, 180, 255, 0.4);
+  margin-bottom: 20px;
+}
+
+#screen-battlefield-main .subtext {
+  color: #9ab4d0;
+  font-size: 15px;
+  margin-bottom: 25px;
+  line-height: 1.6;
+}
+
+#bf-role-buttons .card-btn {
+  background: rgba(0, 157, 255, 0.08);
+  border: 1px solid rgba(0, 157, 255, 0.25);
+  border-radius: 12px;
+  padding: 16px;
+  color: #e6f1ff;
+  box-shadow: 0 0 10px rgba(0, 157, 255, 0.1);
+  transition: all 0.2s ease;
+}
+#bf-role-buttons .card-btn:hover {
+  background: rgba(0, 157, 255, 0.15);
+  border-color: #00aaff;
+  box-shadow: 0 0 20px rgba(0, 180, 255, 0.25);
+  transform: translateY(-2px);
+}
+#bf-role-buttons .card-btn i {
+  color: #00b4ff;
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+#bf-role-buttons .card-btn span {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Сетка карточек */
+.bf-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+/* Экран со сборками */
+#screen-bf-builds {
+  background: linear-gradient(145deg, #0d141f, #0a0f17);
+  color: #e6f1ff;
+}
+#screen-bf-builds .form-input {
+  background: rgba(15, 25, 40, 0.9);
+  border: 1px solid rgba(0, 157, 255, 0.25);
+  color: #fff;
+}
+#screen-bf-builds .form-input:focus {
+  border-color: #00aaff;
+  box-shadow: 0 0 8px rgba(0, 180, 255, 0.3);
+}
+
+/* Добавить / редактировать сборку */
+#screen-bf-add-build {
+  background: linear-gradient(145deg, #0f1622, #0a0f18);
+  color: #e6f1ff;
+}
+#screen-bf-add-build label {
+  color: #9ab4d0;
+  font-weight: 500;
+}
+#screen-bf-add-build .form-input {
+  background: rgba(15, 25, 40, 0.9);
+  border: 1px solid rgba(0, 157, 255, 0.25);
+  color: #fff;
+}
+#screen-bf-add-build .btn-success {
+  background: linear-gradient(90deg, #009dff, #00b4ff);
+  color: #fff;
+  border: none;
+  box-shadow: 0 0 10px rgba(0,180,255,0.3);
+}
+#screen-bf-add-build .btn-success:hover {
+  box-shadow: 0 0 20px rgba(0,200,255,0.5);
+}
+
+/* Типы оружия */
+#screen-bf-types {
+  background: linear-gradient(145deg, #0e1521, #0b1118);
+  color: #e6f1ff;
+}
+#bf-types-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+.bf-type-card {
+  background: rgba(0, 157, 255, 0.08);
+  border: 1px solid rgba(0, 157, 255, 0.25);
+  border-radius: 10px;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+.bf-type-card:hover {
+  border-color: #00aaff;
+  background: rgba(0,157,255,0.15);
+}
+.bf-type-open {
+  flex: 1;
+  text-align: left;
+  background: none;
+  border: none;
+  color: #e6f1ff;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+.bf-type-actions {
+  display: flex;
+  gap: 6px;
+}
+.bf-type-actions .btn-mini {
+  border: 1px solid rgba(0,157,255,0.25);
+  color: #00b4ff;
+}
+.bf-type-actions .btn-mini:hover {
+  background: rgba(0,157,255,0.2);
+}
+
+/* Экран модулей */
+#screen-bf-modules {
+  background: linear-gradient(145deg, #0c131d, #0a0f16);
+  color: #e6f1ff;
+}
+#screen-bf-modules h2 {
+  color: #00aaff;
+  text-shadow: 0 0 6px rgba(0,180,255,0.3);
+}
+#screen-bf-modules .form-input {
+  background: rgba(15,25,40,0.9);
+  border: 1px solid rgba(0,157,255,0.25);
+  color: #fff;
+}
+#screen-bf-modules .btn-success {
+  background: linear-gradient(90deg, #009dff, #00b4ff);
+  box-shadow: 0 0 10px rgba(0,180,255,0.3);
+}
+
+/* Группы модулей */
+.bf-modules-groups {
+  margin-top: 20px;
+}
+.bf-modules-groups .module-category {
+  background: rgba(0,157,255,0.08);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #00aaff;
+  margin-bottom: 8px;
+}
+.bf-modules-groups .module-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(0,157,255,0.15);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  transition: all 0.2s ease;
+}
+.bf-modules-groups .module-item:hover {
+  background: rgba(0,157,255,0.12);
+  border-color: #00aaff;
+}
+
