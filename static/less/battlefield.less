@@ -789,88 +789,182 @@ body.warzone-theme .card-btn:hover {
   color: #fff;
 }
 
+/* Battlefield аккордеон в стиле Warzone */
 .bf-loadout {
-  background: linear-gradient(145deg, #1a232e, #111820);
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  background: var(--bf-card);
+  border-radius: 12px;
   margin-bottom: 16px;
-  color: #e0e6ee;
+  border: 1px solid #2a3a4a;
   overflow: hidden;
   transition: all 0.3s ease;
-}
-
-.bf-loadout.is-open {
-  box-shadow: 0 6px 14px rgba(0,0,0,0.5);
 }
 
 .bf-loadout__header {
   padding: 16px;
   cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.bf-loadout__header:hover {
+  background: rgba(58, 123, 213, 0.1);
 }
 
 .bf-loadout__header-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.bf-toggle-icon {
+  background: none;
+  border: none;
+  color: #e0e6ee;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+.bf-loadout.is-open .bf-toggle-icon {
+  transform: rotate(180deg);
+}
+
+.bf-loadout__title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #e0e6ee;
+  margin: 0;
+  flex: 1;
+}
+
+.bf-loadout__date {
+  color: #8fa3b7;
+  font-size: 14px;
 }
 
 .bf-loadout__meta {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 12px;
   flex-wrap: wrap;
-  margin-top: 10px;
-  gap: 10px;
+}
+
+.bf-tops {
+  display: flex;
+  gap: 8px;
 }
 
 .bf-top {
-  display: inline-block;
-  padding: 4px 10px;
+  padding: 4px 8px;
   border-radius: 6px;
-  margin-right: 6px;
-  font-size: 0.85rem;
+  font-size: 12px;
+  font-weight: 600;
   color: #fff;
 }
 
-.bf-tabs {
-  margin-top: 15px;
+.bf-categories {
+  display: flex;
+  gap: 6px;
 }
 
+.bf-badge {
+  padding: 4px 8px;
+  background: #3a7bd5;
+  color: white;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.bf-type {
+  color: #8fa3b7;
+  font-size: 14px;
+  margin-left: auto;
+}
+
+.bf-loadout__content {
+  transition: max-height 0.3s ease;
+  background: #1a2838;
+}
+
+.bf-loadout__inner {
+  padding: 16px;
+}
+
+/* Вкладки */
 .bf-tab-buttons {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 10px;
+  gap: 8px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #2a3a4a;
 }
 
 .bf-tab-btn {
-  background: #18222f;
-  border: 1px solid #2b3c4d;
-  border-radius: 6px;
-  padding: 6px 12px;
-  color: #bcd0e0;
+  background: none;
+  border: none;
+  padding: 8px 16px;
+  color: #8fa3b7;
   cursor: pointer;
-  font-size: 0.9rem;
+  border-bottom: 2px solid transparent;
   transition: all 0.2s ease;
 }
 
 .bf-tab-btn.is-active {
-  background: #3a7bd5;
-  color: #fff;
+  color: #3a7bd5;
+  border-bottom-color: #3a7bd5;
 }
 
+.bf-tab-content {
+  display: none;
+}
+
+.bf-tab-content.is-active {
+  display: block;
+}
+
+/* Модули */
 .bf-modules {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.bf-mod {
-  background: #0f151c;
-  padding: 8px;
-  border-radius: 6px;
+.bf-module {
   display: flex;
   justify-content: space-between;
-  font-size: 0.85rem;
+  align-items: center;
+  padding: 12px;
+  background: #253447;
+  border-radius: 8px;
+  border-left: 4px solid #3a7bd5;
 }
 
+.bf-module-slot {
+  color: #8fa3b7;
+  font-size: 12px;
+  font-weight: 600;
+  min-width: 80px;
+}
+
+.bf-module-name {
+  color: #e0e6ee;
+  font-weight: 500;
+  flex: 1;
+  text-align: left;
+  margin-left: 12px;
+}
+
+/* Разделители категорий */
+.bf-category-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #3a7bd5, transparent);
+  margin: 20px 0;
+  opacity: 0.5;
+}
+
+/* Сообщение "нет результатов" */
+.bf-no-results {
+  text-align: center;
+  color: #8fa3b7;
+  padding: 40px 20px;
+  font-size: 16px;
+}
