@@ -436,13 +436,22 @@ function bfAddModuleRow(tabDiv, type) {
   const moduleSelect = document.createElement('select');
   moduleSelect.className = 'form-input module-select';
 
-  // 🔥 УБИРАЕМ ограничение - добавляем ВСЕ категории всегда
-  Object.keys(modsWrap.byCategory).forEach(cat => {
-    const opt = document.createElement('option');
-    opt.value = cat;
-    opt.textContent = cat;
-    categorySelect.appendChild(opt);
-  });
+   // ✅ Добавляем только те категории, которых ещё нет во вкладке
+   const usedCategories = Array.from(tabDiv.querySelectorAll('.category-select')).map(s => s.value);
+   const availableCategories = Object.keys(modsWrap.byCategory).filter(cat => !usedCategories.includes(cat));
+   
+   if (availableCategories.length === 0) {
+     alert("Все категории уже добавлены во вкладке");
+     return;
+   }
+   
+   availableCategories.forEach(cat => {
+     const opt = document.createElement('option');
+     opt.value = cat;
+     opt.textContent = cat;
+     categorySelect.appendChild(opt);
+   });
+
 
   row.appendChild(categorySelect);
   row.appendChild(moduleSelect);
