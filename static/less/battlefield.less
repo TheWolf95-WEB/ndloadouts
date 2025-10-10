@@ -929,28 +929,28 @@ body.warzone-theme .card-btn:hover {
 }
 
 .bf-module {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  background: #253447;
-  border-radius: 8px;
-  border-left: 4px solid #3a7bd5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    background: #253447;
+    border-radius: 8px;
+    border-left: 4px solid #3a7bd5;
+    flex-direction: column;
 }
 
 .bf-module-slot {
   color: #8fa3b7;
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 600;
-  min-width: 80px;
+  text-transform: capitalize;
 }
 
 .bf-module-name {
   color: #e0e6ee;
   font-weight: 500;
   flex: 1;
-  text-align: left;
-  margin-left: 12px;
 }
 
 /* Разделители категорий */
@@ -967,4 +967,204 @@ body.warzone-theme .card-btn:hover {
   color: #8fa3b7;
   padding: 40px 20px;
   font-size: 16px;
+}
+
+
+/* Battlefield форма добавления сборки */
+#screen-bf-form {
+  max-width: 100%;
+  padding: 20px;
+}
+
+#screen-bf-form .form-section {
+  margin-bottom: 25px;
+  padding: 15px;
+  background: var(--bf-card);
+  border-radius: 12px;
+  border: 1px solid #2a3a4a;
+}
+
+#screen-bf-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #e0e6ee;
+  font-size: 14px;
+}
+
+#screen-bf-form .form-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #3a7bd5;
+  border-radius: 8px;
+  background: #1a2838;
+  color: #e0e6ee;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+#screen-bf-form .form-input:focus {
+  outline: none;
+  border-color: #5b86e5;
+  box-shadow: 0 0 0 2px rgba(58, 123, 213, 0.2);
+}
+
+/* Категории в сетку */
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.category-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: #1a2838;
+  border-radius: 8px;
+  border: 1px solid #2a3a4a;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.category-checkbox:hover {
+  background: #253447;
+  border-color: #3a7bd5;
+}
+
+.category-checkbox input[type="checkbox"] {
+  margin: 0;
+}
+
+/* Топ модули в строку */
+.top-modules-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.top-module-input {
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Вкладки и модули */
+.tab-block {
+  background: #1a2838;
+  border: 1px solid #2a3a4a;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.tab-label {
+  width: 100%;
+  margin-bottom: 15px !important;
+  font-weight: 600;
+}
+
+.mod-selects {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.mod-row {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 10px;
+  align-items: center;
+}
+
+.mod-row select {
+  width: 100%;
+}
+
+/* Кнопки действий вкладки в одну строку */
+.tab-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.tab-actions .btn {
+  flex: 1;
+  padding: 10px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.add-mod {
+  background: #28a745;
+  border-color: #28a745;
+}
+
+.add-mod:hover {
+  background: #218838;
+  border-color: #1e7e34;
+}
+
+.delete-tab {
+  background: #dc3545;
+  border-color: #dc3545;
+}
+
+.delete-tab:hover {
+  background: #c82333;
+  border-color: #bd2130;
+}
+
+/* Кнопка добавления вкладки */
+.add-tab-btn {
+  width: 100%;
+  background: #3a7bd5;
+  border-color: #3a7bd5;
+  padding: 12px;
+  font-weight: 600;
+}
+
+.add-tab-btn:hover {
+  background: #2d68c4;
+  border-color: #2d68c4;
+}
+
+/* Группа кнопок формы */
+.btn-group {
+  display: flex;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.btn-group .btn {
+  flex: 1;
+  padding: 14px;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.btn-primary {
+  background: #3a7bd5;
+  border-color: #3a7bd5;
+}
+
+.btn-primary:hover {
+  background: #2d68c4;
+  border-color: #2d68c4;
+}
+
+.btn-back {
+  background: #6c757d;
+  border-color: #6c757d;
+}
+
+.btn-back:hover {
+  background: #5a6268;
+  border-color: #545b62;
 }
