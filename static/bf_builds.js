@@ -763,40 +763,62 @@ async function bfRenderBuilds(builds) {
 
       const cats = Array.isArray(build.categories) ? build.categories : [];
       
-      // 🔥 Цвета категорий как в Warzone
+      // 🎨 Цвета категорий как в Warzone (один в один)
       const categoryBadges = cats.map(cat => {
         const categoryName = String(cat).toLowerCase();
-        let color = '#3a7bd5'; // синий по умолчанию
-        
+        let bg = '#2a2f36';   // фон по умолчанию
+        let text = '#fff';    // цвет текста
+        let label = '';
+      
         switch (categoryName) {
           case 'new':
+          case 'новинка':
           case 'новинки':
-            color = '#FF6B6B'; // красный для новинок
+            bg = 'linear-gradient(135deg, #ff4e50, #f9d423)'; // красно-жёлтый
+            text = '#fff';
+            label = 'Новинка';
             break;
           case 'topmeta':
           case 'топ мета':
-            color = '#4ECDC4'; // бирюзовый для топ меты
+            bg = 'linear-gradient(135deg, #ffb347, #ffcc33)'; // золотистый
+            text = '#222';
+            label = 'Топ мета';
             break;
           case 'meta':
           case 'мета':
-            color = '#45B7D1'; // голубой для меты
+            bg = 'linear-gradient(135deg, #56ab2f, #a8e063)'; // зелёный
+            text = '#fff';
+            label = 'Мета';
             break;
           case 'popular':
           case 'популярное':
-            color = '#96CEB4'; // зеленый для популярного
+            bg = 'linear-gradient(135deg, #36d1dc, #5b86e5)'; // голубой
+            text = '#fff';
+            label = 'Популярное';
             break;
+          default:
+            bg = 'linear-gradient(135deg, #232a33, #1b1f25)'; // серый по умолчанию
+            text = '#ccc';
+            label = cat;
         }
-        
-        const displayName = {
-          'all': 'Все',
-          'new': 'Новинка',
-          'popular': 'Популярное',
-          'meta': 'Мета',
-          'topmeta': 'Топ мета'
-        }[categoryName] || cat;
-        
-        return `<span class="bf-badge" style="background:${color}">${displayName}</span>`;
+      
+        return `
+          <span class="bf-badge" style="
+            background: ${bg};
+            color: ${text};
+            font-weight: 500;
+            border-radius: 6px;
+            padding: 3px 10px;
+            font-size: 0.8rem;
+            margin-right: 4px;
+            display: inline-block;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.4);
+          ">
+            ${label}
+          </span>
+        `;
       }).join('');
+
 
       // Безопасный парсинг вкладок
       let tabs = [];
