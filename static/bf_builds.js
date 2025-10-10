@@ -73,6 +73,16 @@ function bfShowScreen(id) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".btn");
+  if (btn && btn.textContent.includes("Главное меню")) {
+    document.body.classList.remove("bf-theme");
+    document.body.classList.add("warzone-theme");
+    console.log("🏠 Вернулся в NDHQ — тема Warzone восстановлена");
+  }
+});
+
+
 /* ===============================
    🔸 Загрузка типов оружия
    =============================== */
