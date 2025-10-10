@@ -1038,108 +1038,164 @@ body.warzone-theme .card-btn:hover {
   margin: 0;
 }
 
-/* Топ модули в строку */
-.top-modules-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.top-module-input {
-  text-align: center;
-  font-weight: 600;
-}
-
-/* Вкладки и модули */
-.tab-block {
-  background: #1a2838;
-  border: 1px solid #2a3a4a;
-  border-radius: 12px;
-  padding: 15px;
-  margin-bottom: 15px;
-}
-
-.tab-label {
-  width: 100%;
-  margin-bottom: 15px !important;
-  font-weight: 600;
-}
-
-.mod-selects {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 15px;
-}
-
-.mod-row {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 10px;
-  align-items: center;
-}
-
-.mod-row select {
-  width: 100%;
-}
-
-/* Кнопки действий вкладки в одну строку */
+/* Улучшенные стили для формы Battlefield */
 .tab-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   justify-content: space-between;
 }
 
 .tab-actions .btn {
   flex: 1;
-  padding: 10px;
-  font-size: 14px;
+  padding: 8px 12px;
+  font-size: 13px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: 4px;
+  background: rgba(58, 123, 213, 0.15);
+  border: 1px solid rgba(58, 123, 213, 0.3);
+  color: #9cc9ff;
+  transition: all 0.2s ease;
+}
+
+.tab-actions .btn:hover {
+  background: rgba(58, 123, 213, 0.25);
+  border-color: rgba(58, 123, 213, 0.5);
+  color: #e0e6ee;
 }
 
 .add-mod {
-  background: #28a745;
-  border-color: #28a745;
+  background: rgba(40, 167, 69, 0.15) !important;
+  border-color: rgba(40, 167, 69, 0.3) !important;
+  color: #75b798 !important;
 }
 
 .add-mod:hover {
-  background: #218838;
-  border-color: #1e7e34;
+  background: rgba(40, 167, 69, 0.25) !important;
+  border-color: rgba(40, 167, 69, 0.5) !important;
+  color: #a3d9b1 !important;
 }
 
 .delete-tab {
-  background: #dc3545;
-  border-color: #dc3545;
+  background: rgba(220, 53, 69, 0.15) !important;
+  border-color: rgba(220, 53, 69, 0.3) !important;
+  color: #e58c94 !important;
 }
 
 .delete-tab:hover {
-  background: #c82333;
-  border-color: #bd2130;
+  background: rgba(220, 53, 69, 0.25) !important;
+  border-color: rgba(220, 53, 69, 0.5) !important;
+  color: #f1aeb5 !important;
 }
 
-/* Кнопка добавления вкладки */
+/* Выравнивание селектов 50/50 */
+.mod-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Теперь точно пополам */
+  gap: 8px;
+  align-items: center;
+}
+
+.mod-row select {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+/* Кнопка добавления вкладки - меньше и темнее */
 .add-tab-btn {
   width: 100%;
-  background: #3a7bd5;
-  border-color: #3a7bd5;
-  padding: 12px;
-  font-weight: 600;
+  background: rgba(58, 123, 213, 0.15);
+  border: 1px solid rgba(58, 123, 213, 0.3);
+  color: #9cc9ff;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 .add-tab-btn:hover {
-  background: #2d68c4;
-  border-color: #2d68c4;
+  background: rgba(58, 123, 213, 0.25);
+  border-color: rgba(58, 123, 213, 0.5);
+  color: #e0e6ee;
 }
 
-/* Группа кнопок формы */
-.btn-group {
-  display: flex;
-  gap: 12px;
-  margin-top: 25px;
+/* Основные кнопки формы тоже делаем меньше */
+.btn-group .btn {
+  flex: 1;
+  padding: 12px;
+  font-weight: 600;
+  font-size: 14px;
 }
 
+/* Уменьшаем отступы в форме */
+#screen-bf-form .form-section {
+  margin-bottom: 20px;
+  padding: 12px;
+}
 
+/* Уменьшаем размеры инпутов */
+#screen-bf-form .form-input {
+  padding: 10px;
+  font-size: 13px;
+}
+
+/* Категории - более компактные */
+.categories-grid {
+  gap: 8px;
+}
+
+.category-checkbox {
+  padding: 8px;
+  font-size: 13px;
+}
+
+/* Топ модули - компактнее */
+.top-modules-grid {
+  gap: 8px;
+}
+
+.top-module-input {
+  padding: 10px;
+  font-size: 13px;
+}
+
+/* Вкладки - более компактные */
+.tab-block {
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.tab-label {
+  margin-bottom: 12px !important;
+  font-size: 13px;
+  padding: 8px 10px;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .tab-actions {
+    flex-direction: row; /* Оставляем в строке даже на мобильных */
+  }
+  
+  .tab-actions .btn {
+    font-size: 12px;
+    padding: 6px 8px;
+  }
+  
+  .mod-row {
+    grid-template-columns: 1fr; /* На мобильных в колонку */
+    gap: 6px;
+  }
+  
+  .add-tab-btn {
+    padding: 8px;
+    font-size: 12px;
+  }
+  
+  .btn-group .btn {
+    padding: 10px;
+    font-size: 13px;
+  }
+}
