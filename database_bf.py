@@ -318,24 +318,5 @@ def delete_bf_build(build_id):
         conn.execute("DELETE FROM bf_builds WHERE id = ?", (build_id,))
         conn.commit()
 
-# =====================================================
-# ⚙️ TYPES & MODULES TABLES
-# =====================================================
-def init_bf_builds_table():
-    """Создаёт таблицу сборок Battlefield"""
-    with get_connection() as conn:
-        conn.execute("""
-        CREATE TABLE IF NOT EXISTS bf_builds (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT,
-            weapon_type TEXT,
-            top1 TEXT,
-            top2 TEXT,
-            top3 TEXT,
-            date TEXT,
-            tabs TEXT,
-            categories TEXT
-        )
-        """)
-        conn.commit()
+
 
