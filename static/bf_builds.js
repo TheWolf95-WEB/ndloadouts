@@ -15,14 +15,17 @@ let bfCurrentEditId = null;
 let bfScreenHistory = [];
 
 // === Инициализация ===
+// === Инициализация ===
 document.addEventListener("DOMContentLoaded", async () => {
   try {
+    // Загружаем типы, но не открываем экран
     await bfLoadWeaponTypes();
-    bfShowScreen("screen-battlefield-main");
+    console.log("✅ BF module ready (not auto-opened)");
   } catch (e) {
     console.error("BF init error:", e);
   }
 });
+
 
 /* ==============
    🔹 Навигация
