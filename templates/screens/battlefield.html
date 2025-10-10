@@ -110,7 +110,9 @@
 
 <!-- 🛠 Добавление / Редактирование сборки -->
 <div id="screen-bf-form" class="screen" style="display:none;">
-  <h2>🛠 Добавление / редактирование сборки</h2>
+  <div class="form-section">
+    <h2>🛠 Добавление / редактирование сборки</h2>
+  </div>
 
   <div class="form-section">
     <label>Название сборки:</label>
@@ -121,16 +123,24 @@
     <label>Категории:</label>
     <div class="categories-grid">
       <label class="category-checkbox">
-        <input type="checkbox" class="bf-build-category" value="popular"><span class="checkmark"></span>Популярное
+        <input type="checkbox" class="bf-build-category" value="popular">
+        <span class="checkmark"></span>
+        <span>Популярное</span>
       </label>
       <label class="category-checkbox">
-        <input type="checkbox" class="bf-build-category" value="new"><span class="checkmark"></span>Новинки
+        <input type="checkbox" class="bf-build-category" value="new">
+        <span class="checkmark"></span>
+        <span>Новинки</span>
       </label>
       <label class="category-checkbox">
-        <input type="checkbox" class="bf-build-category" value="topmeta"><span class="checkmark"></span>Топ мета
+        <input type="checkbox" class="bf-build-category" value="topmeta">
+        <span class="checkmark"></span>
+        <span>Топ мета</span>
       </label>
       <label class="category-checkbox">
-        <input type="checkbox" class="bf-build-category" value="meta"><span class="checkmark"></span>Мета
+        <input type="checkbox" class="bf-build-category" value="meta">
+        <span class="checkmark"></span>
+        <span>Мета</span>
       </label>
     </div>
   </div>
@@ -160,9 +170,9 @@
     <input type="date" id="bf-build-date" class="form-input">
   </div>
 
-  <div class="form-section btn-group">
-    <button id="bf-submit-build" class="btn">✅ Сохранить</button>
-    <button id="bf-back-to-main bf-back-from-form"" class="btn btn-back">⬅ Назад</button>
+  <div class="btn-group">
+    <button id="bf-submit-build" class="btn btn-primary">✅ Сохранить сборку</button>
+    <button id="bf-back-from-form" class="btn btn-back">⬅ Назад</button>
   </div>
 </div>
 
