@@ -798,32 +798,36 @@ async def analytics_page(request: Request):
 
 
 
-# --- Battlefield: базы, сборки, модули, типы, испытания ---
+# =====================================================
+# ⚔️ BATTLEFIELD BUILDS API
+# =====================================================
 from database_bf import (
-    init_bf_db, get_bf_conn,
-    get_all_categories, add_category, delete_category,
-    add_challenge, update_challenge, delete_challenge,
-    get_all_bf_builds, add_bf_build, update_bf_build, delete_bf_build,
-    get_bf_weapon_types, add_bf_weapon_type, delete_bf_weapon_type,
-    get_bf_modules_by_type, add_bf_module, delete_bf_module
+    init_bf_builds_table,
+    get_all_bf_builds,
+    add_bf_build,
+    update_bf_build,
+    delete_bf_build,
+    get_bf_weapon_types,
+    add_bf_weapon_type,
+    delete_bf_weapon_type,
+    get_bf_modules_by_type,
+    add_bf_module,
+    delete_bf_module
 )
 
-
-
+# Инициализация таблиц при старте
 @app.on_event("startup")
-def init_bf_types_modules():
+def init_bf_tables():
     try:
-        from database_bf import init_bf_builds_table
         init_bf_builds_table()
-        print("[BF] ✅ Таблицы bf_builds / bf_weapon_types / bf_modules готовы")
+        print("✅ Battlefield tables ready: bf_builds / bf_weapon_types / bf_modules")
     except Exception as e:
-        print("[BF] ⚠️ Ошибка инициализации Battlefield таблиц:", e)
-
+        print(f"⚠️ BF init error: {e}")
 
 
 # === Получить все сборки ===
 @app.get("/api/bf/builds")
-async def api_get_bf_builds():
+async def bf_get_builds():
     try:
         builds = get_all_bf_builds()
         return builds
@@ -833,7 +837,7 @@ async def api_get_bf_builds():
 
 # === Добавить новую сборку ===
 @app.post("/api/bf/builds")
-async def api_add_bf_build(request: Request):
+async def bf_add_build(request: Request):
     data = await request.json()
     try:
         add_bf_build(data)
@@ -844,7 +848,7 @@ async def api_add_bf_build(request: Request):
 
 # === Обновить сборку ===
 @app.put("/api/bf/builds/{build_id}")
-async def api_update_bf_build(build_id: int, request: Request):
+async def bf_update_build(build_id: int, request: Request):
     data = await request.json()
     try:
         update_bf_build(build_id, data)
@@ -855,7 +859,7 @@ async def api_update_bf_build(build_id: int, request: Request):
 
 # === Удалить сборку ===
 @app.delete("/api/bf/builds/{build_id}")
-async def api_delete_bf_build(build_id: int):
+async def bf_delete_build(build_id: int):
     try:
         delete_bf_build(build_id)
         return {"status": "ok", "message": "Build deleted"}
@@ -863,60 +867,65 @@ async def api_delete_bf_build(build_id: int):
         return JSONResponse({"error": str(e)}, status_code=500)
 
 
-# ==============================
-# ⚙️ BATTLEFIELD TYPES & MODULES API
-# ==============================
-from database_bf import (
-    get_bf_weapon_types,
-    add_bf_weapon_type,
-    delete_bf_weapon_type,
-    get_bf_modules_by_type,
-    add_bf_module,
-    delete_bf_module
-)
-
-@app.on_event("startup")
-def init_bf_types_modules():
-    try:
-        init_bf_types_modules_tables()
-        print("[BF] ✅ Таблицы типов и модулей готовы")
-    except Exception as e:
-        print("[BF] ⚠️ Ошибка инициализации типов/модулей:", e)
-
-
-# === Типы оружия ===
+# =====================================================
+# ⚙️ BATTLEFIELD TYPES API
+# =====================================================
 @app.get("/api/bf/types")
-async def api_bf_get_types():
-    return get_bf_weapon_types()
+async def bf_get_types():
+    try:
+        return get_bf_weapon_types()
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
 
 @app.post("/api/bf/types")
-async def api_bf_add_type(request: Request):
+async def bf_add_type(request: Request):
     data = await request.json()
-    add_bf_weapon_type(data)
-    return {"status": "ok"}
+    try:
+        add_bf_weapon_type(data)
+        return {"status": "ok", "message": "Type added"}
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 
 @app.delete("/api/bf/types/{type_id}")
-async def api_bf_del_type(type_id: int):
-    delete_bf_weapon_type(type_id)
-    return {"status": "ok"}
+async def bf_delete_type(type_id: int):
+    try:
+        delete_bf_weapon_type(type_id)
+        return {"status": "ok", "message": "Type deleted"}
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 
-# === Модули ===
+# =====================================================
+# 🧩 BATTLEFIELD MODULES API
+# =====================================================
 @app.get("/api/bf/modules/{weapon_type}")
-async def api_bf_get_modules(weapon_type: str):
-    return get_bf_modules_by_type(weapon_type)
+async def bf_get_modules(weapon_type: str):
+    try:
+        return get_bf_modules_by_type(weapon_type)
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
 
 @app.post("/api/bf/modules")
-async def api_bf_add_module(request: Request):
+async def bf_add_module(request: Request):
     data = await request.json()
-    add_bf_module(data.get("weapon_type"), data.get("category"), data.get("name"))
-    return {"status": "ok"}
+    try:
+        add_bf_module(data)
+        return {"status": "ok", "message": "Module added"}
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
 
 @app.delete("/api/bf/modules/{module_id}")
-async def api_bf_del_module(module_id: int):
-    delete_bf_module(module_id)
-    return {"status": "ok"}
+async def bf_delete_module(module_id: int):
+    try:
+        delete_bf_module(module_id)
+        return {"status": "ok", "message": "Module deleted"}
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
 
 
 
