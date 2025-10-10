@@ -339,16 +339,8 @@ function bfAddModuleRow(tabDiv, type) {
   const moduleSelect = document.createElement('select');
   moduleSelect.className = 'form-input module-select';
 
-  // 🔥 Ключевое исправление: фильтруем категории как в Warzone
-  const usedCategories = Array.from(tabDiv.querySelectorAll('.category-select')).map(s => s.value);
-  const availableCategories = Object.keys(modsWrap.byCategory).filter(cat => !usedCategories.includes(cat));
-  
-  if (availableCategories.length === 0) {
-    alert("Все категории уже добавлены");
-    return;
-  }
-
-  availableCategories.forEach(cat => {
+  // 🔥 УБИРАЕМ ограничение - добавляем ВСЕ категории всегда
+  Object.keys(modsWrap.byCategory).forEach(cat => {
     const opt = document.createElement('option');
     opt.value = cat;
     opt.textContent = cat;
@@ -363,14 +355,14 @@ function bfAddModuleRow(tabDiv, type) {
     const cat = categorySelect.value;
     const list = modsWrap.byCategory[cat] || [];
     
-    // 🔥 Собираем ВСЕ выбранные модули во вкладке
+    // Собираем ВСЕ выбранные модули во вкладке
     const selected = Array.from(tabDiv.querySelectorAll('.module-select')).map(s => s.value);
 
     const currentValue = moduleSelect.value;
     moduleSelect.innerHTML = '';
 
     list.forEach(m => {
-      // 🔥 Модуль доступен если: он текущий выбранный ИЛИ не выбран в других селектах
+      // Модуль доступен если: он текущий выбранный ИЛИ не выбран в других селектах
       if (selected.includes(m.en) && m.en !== currentValue) return;
       
       const opt = document.createElement('option');
@@ -385,7 +377,7 @@ function bfAddModuleRow(tabDiv, type) {
   }
 
   function syncAllModuleSelects() {
-    // 🔥 Собираем ВСЕ выбранные модули во вкладке
+    // Собираем ВСЕ выбранные модули во вкладке
     const selected = Array.from(tabDiv.querySelectorAll('.module-select')).map(s => s.value);
 
     tabDiv.querySelectorAll('.mod-row').forEach(r => {
@@ -398,7 +390,7 @@ function bfAddModuleRow(tabDiv, type) {
       modSel.innerHTML = '';
       
       list.forEach(m => {
-        // 🔥 Тот же принцип: текущий выбранный ИЛИ не выбран в других
+        // Тот же принцип: текущий выбранный ИЛИ не выбран в других
         if (selected.includes(m.en) && m.en !== currentValue) return;
         
         const opt = document.createElement('option');
