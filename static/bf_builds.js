@@ -1,3 +1,6 @@
+// ========================
+// ⚙️ BASE INIT
+// ========================
 const tg = window.Telegram.WebApp;
 tg.expand();
 
@@ -5,20 +8,24 @@ if (!window.Analytics) window.Analytics = { trackEvent: () => {} };
 
 let currentBfEditId = null;
 let bfCachedBuilds = [];
-let bfWeaponTypes = []; // например ["Assault", "SMG", ...]
+let bfWeaponTypes = [];
 let bfScreenHistory = [];
+let currentBfWeaponType = null;
 
 // ========================
-// ⚙️ INIT
+// 🚀 INIT APP
 // ========================
 document.addEventListener('DOMContentLoaded', async () => {
   console.log("🔹 Battlefield module loaded");
   await bfLoadBuilds();
+  await bfLoadWeaponTypes();
 });
 
-// ========================
-// 📦 LOAD BUILDS
-// ========================
+
+// ===================================================================
+// 🧱 BATTLEFIELD BUILDS (CRUD)
+// ===================================================================
+
 async function bfLoadBuilds() {
   try {
     const res = await fetch('/api/bf/builds');
@@ -38,9 +45,6 @@ async function bfLoadBuilds() {
   }
 }
 
-// ========================
-// 🎨 RENDER BUILDS
-// ========================
 function bfRenderBuilds(builds) {
   const listEl = document.getElementById('bf-builds-list');
   listEl.innerHTML = '';
@@ -87,7 +91,6 @@ function bfRenderBuilds(builds) {
         </div>
       </div>
     `;
-
     listEl.appendChild(wrapper);
   });
 
@@ -116,10 +119,6 @@ function bfRenderBuilds(builds) {
   });
 }
 
-// ========================
-// ➕ ADD / EDIT / DELETE
-// ========================
-
 async function bfHandleSubmit() {
   const title = document.getElementById('bf-title').value.trim();
   const weaponType = document.getElementById('bf-weapon-type').value.trim();
@@ -135,7 +134,6 @@ async function bfHandleSubmit() {
   });
 
   const cats = Array.from(document.querySelectorAll('.bf-cat-checkbox:checked')).map(cb => cb.value);
-
   const payload = { title, weapon_type: weaponType, top1, top2, top3, date, tabs, categories: cats };
 
   const method = currentBfEditId ? 'PUT' : 'POST';
@@ -167,20 +165,12 @@ async function bfDeleteBuild(id) {
   if (!confirm('Delete build?')) return;
   try {
     const res = await fetch(`/api/bf/builds/${id}`, { method: 'DELETE' });
-    if (res.ok) {
-      await bfLoadBuilds();
-    } else {
-      alert('Delete failed');
-    }
+    if (res.ok) await bfLoadBuilds();
   } catch (err) {
     console.error(err);
     alert('Error deleting build');
   }
 }
-
-// ========================
-// 🧩 ADD TAB / MODULES
-// ========================
 
 document.getElementById('bf-add-tab')?.addEventListener('click', () => {
   const container = document.getElementById('bf-tabs-container');
@@ -204,10 +194,6 @@ document.getElementById('bf-add-tab')?.addEventListener('click', () => {
   tabDiv.querySelector('.bf-del-tab').addEventListener('click', () => tabDiv.remove());
 });
 
-// ========================
-// 🎮 UTILS
-// ========================
-
 function bfShowAddForm() {
   currentBfEditId = null;
   document.getElementById('bf-title').value = '';
@@ -230,9 +216,7 @@ function bfEditBuild(id) {
   document.getElementById('bf-top2').value = build.top2 || '';
   document.getElementById('bf-top3').value = build.top3 || '';
   document.getElementById('bf-date').value = build.date || '';
-  document.querySelectorAll('.bf-cat-checkbox').forEach(cb => {
-    cb.checked = (build.categories || []).includes(cb.value);
-  });
+  document.querySelectorAll('.bf-cat-checkbox').forEach(cb => cb.checked = (build.categories || []).includes(cb.value));
 
   const container = document.getElementById('bf-tabs-container');
   container.innerHTML = '';
@@ -270,3 +254,123 @@ function bfEditBuild(id) {
 
 document.getElementById('bf-submit-build')?.addEventListener('click', bfHandleSubmit);
 document.getElementById('bf-add-build-btn')?.addEventListener('click', bfShowAddForm);
+
+
+// ===================================================================
+// 🔫 WEAPON TYPES MANAGEMENT
+// ===================================================================
+
+async function bfLoadWeaponTypes() {
+  const res = await fetch('/api/bf/types');
+  const types = await res.json();
+  const list = document.getElementById('bf-types-list');
+  if (!list) return;
+  list.innerHTML = '';
+  if (!types.length) {
+    list.innerHTML = '<p>No weapon types yet.</p>';
+    return;
+  }
+
+  types.forEach(t => {
+    const row = document.createElement('div');
+    row.className = 'bf-type-row';
+    row.innerHTML = `
+      <span class="bf-type-label">${t.label}</span>
+      <div class="bf-type-actions">
+        <button class="btn btn-sm bf-type-open" data-key="${t.key}" data-label="${t.label}">📖</button>
+        <button class="btn btn-sm bf-type-del" data-id="${t.id}">🗑</button>
+      </div>`;
+    list.appendChild(row);
+  });
+
+  list.querySelectorAll('.bf-type-open').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      currentBfWeaponType = btn.dataset.key;
+      await bfLoadModulesForType(currentBfWeaponType, btn.dataset.label);
+      showScreen('screen-bf-modules');
+    });
+  });
+
+  list.querySelectorAll('.bf-type-del').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Delete this weapon type?')) return;
+      await fetch(`/api/bf/types/${btn.dataset.id}`, { method: 'DELETE' });
+      await bfLoadWeaponTypes();
+    });
+  });
+}
+
+document.getElementById('bf-add-type-btn')?.addEventListener('click', async () => {
+  const key = document.getElementById('bf-type-key').value.trim();
+  const label = document.getElementById('bf-type-label').value.trim();
+  if (!key || !label) return alert("Enter both key and label");
+
+  await fetch('/api/bf/types', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key, label })
+  });
+
+  document.getElementById('bf-type-key').value = '';
+  document.getElementById('bf-type-label').value = '';
+  await bfLoadWeaponTypes();
+});
+
+
+// ===================================================================
+// ⚙️ MODULES MANAGEMENT
+// ===================================================================
+
+async function bfLoadModulesForType(typeKey, label) {
+  const res = await fetch(`/api/bf/modules/${typeKey}`);
+  const data = await res.json();
+  const title = document.getElementById('bf-modules-title');
+  const container = document.getElementById('bf-modules-list');
+  if (!title || !container) return;
+
+  title.textContent = `Modules for ${label}`;
+  container.innerHTML = '';
+
+  if (Object.keys(data).length === 0) container.innerHTML = '<p>No modules yet.</p>';
+
+  for (const cat in data) {
+    const group = document.createElement('div');
+    group.className = 'bf-mod-group';
+    group.innerHTML = `<h4>${cat}</h4>`;
+    data[cat].forEach(m => {
+      const row = document.createElement('div');
+      row.className = 'bf-mod-row';
+      row.innerHTML = `<span>${m.name}</span><button class="btn btn-sm bf-mod-del" data-id="${m.id}">🗑</button>`;
+      group.appendChild(row);
+    });
+    container.appendChild(group);
+  }
+
+  container.querySelectorAll('.bf-mod-del').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Delete module?')) return;
+      await fetch(`/api/bf/modules/${btn.dataset.id}`, { method: 'DELETE' });
+      await bfLoadModulesForType(typeKey, label);
+    });
+  });
+}
+
+document.getElementById('bf-add-module-btn')?.addEventListener('click', async () => {
+  const category = document.getElementById('bf-mod-category').value.trim();
+  const name = document.getElementById('bf-mod-name').value.trim();
+  if (!category || !name) return alert("Enter both fields");
+
+  await fetch('/api/bf/modules', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ weapon_type: currentBfWeaponType, category, name })
+  });
+
+  document.getElementById('bf-mod-category').value = '';
+  document.getElementById('bf-mod-name').value = '';
+  await bfLoadModulesForType(currentBfWeaponType, document.getElementById('bf-modules-title').textContent.replace('Modules for ', ''));
+});
+
+document.getElementById('bf-back-from-modules')?.addEventListener('click', () => {
+  showScreen('screen-bf-types');
+});
