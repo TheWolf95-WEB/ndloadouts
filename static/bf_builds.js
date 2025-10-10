@@ -1072,6 +1072,10 @@ function bfFilterBuilds() {
   bfRenderBuilds(filtered);
 }
 
+/* ===============================
+   📦 ОБНОВЛЕННАЯ ФУНКЦИЯ ЗАГРУЗКИ БАЗЫ СБОРОК
+   =============================== */
+
 async function bfLoadBuildsTable() {
   try {
     const res = await fetch("/api/bf/builds");
@@ -1083,57 +1087,49 @@ async function bfLoadBuildsTable() {
     countEl.textContent = `Всего: ${builds.length} сборок`;
 
     if (!builds.length) {
-      grid.innerHTML = `<p style="text-align:center;opacity:0.7;color:#8fa3bf;">Сборок пока нет</p>`;
+      grid.innerHTML = `<p style="text-align:center;opacity:0.7;color:#8fa3bf;padding:40px;">Сборок пока нет</p>`;
       return;
     }
+
+    // Загружаем типы оружия для фильтра
+    await bfLoadWeaponTypesForFilter();
 
     builds.forEach((b) => {
       const weaponLabel = bfWeaponTypeLabels[b.weapon_type] || b.weapon_type;
 
-      // 🎨 Цвета категорий в синих тонах Battlefield
+      // Категории с классами для стилизации
       const cats = Array.isArray(b.categories)
         ? b.categories
             .map((c) => {
               const cat = String(c).toLowerCase();
-              let bg = "#1c2431";
-              let color = "#d2e5ff";
+              let className = 'bf-cat';
               let label = c;
 
               if (["новинки", "new"].includes(cat)) {
-                bg = "linear-gradient(135deg, #1e3c72, #2a5298)";
+                className += ' bf-cat-new';
                 label = "Новинки";
               } else if (["топ мета", "topmeta"].includes(cat)) {
-                bg = "linear-gradient(135deg, #0052d4, #4364f7, #6fb1fc)";
+                className += ' bf-cat-topmeta';
                 label = "Топ Мета";
               } else if (["мета", "meta"].includes(cat)) {
-                bg = "linear-gradient(135deg, #0f2027, #203a43, #2c5364)";
+                className += ' bf-cat-meta';
                 label = "Мета";
               } else if (["популярное", "popular"].includes(cat)) {
-                bg = "linear-gradient(135deg, #2193b0, #6dd5ed)";
+                className += ' bf-cat-popular';
                 label = "Популярное";
               } else if (["новички", "beginner"].includes(cat)) {
-                bg = "linear-gradient(135deg, #667eea, #764ba2)";
+                className += ' bf-cat-beginner';
                 label = "Новички";
+              } else {
+                className += ' bf-cat-default';
               }
 
-              return `<span class="bf-cat" style="
-                background: ${bg};
-                color: ${color};
-                font-size: 0.75rem;
-                padding: 3px 10px;
-                border-radius: 6px;
-                font-weight: 500;
-                text-shadow: 0 1px 1px rgba(0,0,0,0.4);
-                border: 1px solid rgba(255,255,255,0.1);
-                display: inline-block;
-                margin-right: 6px;
-                margin-bottom: 6px;
-              ">${label}</span>`;
+              return `<span class="${className}">${label}</span>`;
             })
             .join("")
         : "";
 
-      // 🔹 Формат даты
+      // Формат даты
       const formatDate = (dateStr) => {
         if (!dateStr) return '';
         if (dateStr.includes('.')) return dateStr;
@@ -1146,20 +1142,43 @@ async function bfLoadBuildsTable() {
 
       const date = formatDate(b.date);
 
+      // Количество вкладок
+      let tabsCount = 0;
+      try {
+        const tabs = typeof b.tabs === "string" ? JSON.parse(b.tabs) : (b.tabs || []);
+        tabsCount = tabs.length;
+      } catch {
+        tabsCount = 0;
+      }
+
       const card = document.createElement("div");
       card.className = "bf-build-card";
+      card.setAttribute('data-weapon-type', b.weapon_type);
+      card.setAttribute('data-categories', Array.isArray(b.categories) ? b.categories.join(',') : '');
+      card.setAttribute('data-title', b.title.toLowerCase());
+      
       card.innerHTML = `
         <div class="bf-card-header">
           <h3>${b.title}</h3>
-          <span class="bf-date">${date}</span>
         </div>
-        <div class="bf-card-body">
-          <div class="bf-weapon">${weaponLabel}</div>
-          <div class="bf-cats">${cats}</div>
+        
+        <div class="bf-card-meta">
+          <span class="bf-meta-item">${date}</span>
+          <span class="bf-meta-item">•</span>
+          <span class="bf-meta-item">${tabsCount} вклад.</span>
         </div>
+        
+        <div class="bf-categories">
+          ${cats}
+        </div>
+        
+        <div class="bf-weapon-type">
+          ${weaponLabel}
+        </div>
+        
         <div class="bf-card-footer">
-          <button class="btn btn-edit">✏</button>
-          <button class="btn btn-delete">🗑</button>
+          <button class="btn btn-edit">✏ Редактировать</button>
+          <button class="btn btn-delete">🗑 Удалить</button>
         </div>
       `;
 
@@ -1188,12 +1207,94 @@ async function bfLoadBuildsTable() {
 
       grid.appendChild(card);
     });
+
+    // Инициализация фильтров
+    bfInitEditBuildsFilters();
+
   } catch (e) {
     console.error("BF builds table load error:", e);
     const grid = document.getElementById("bf-edit-builds-grid");
-    grid.innerHTML = `<p style="text-align:center;color:#dc3545;">Ошибка загрузки сборок</p>`;
+    grid.innerHTML = `<p style="text-align:center;color:#dc3545;padding:40px;">Ошибка загрузки сборок</p>`;
   }
 }
+
+/* ===============================
+   🎯 ФИЛЬТРЫ ДЛЯ БАЗЫ СБОРОК
+   =============================== */
+
+async function bfLoadWeaponTypesForFilter() {
+  try {
+    const res = await fetch("/data/types-bf.json");
+    const types = await res.json();
+    const select = document.getElementById("bf-edit-type-filter");
+    if (!select) return;
+
+    // Очищаем и добавляем опции
+    select.innerHTML = '<option value="all">Все</option>';
+    types.forEach((t) => {
+      const opt = document.createElement("option");
+      opt.value = t.key;
+      opt.textContent = t.label;
+      select.appendChild(opt);
+    });
+  } catch (err) {
+    console.error("Failed to load weapon types for filter:", err);
+  }
+}
+
+function bfInitEditBuildsFilters() {
+  const typeFilter = document.getElementById('bf-edit-type-filter');
+  const categoryFilter = document.getElementById('bf-edit-category-filter');
+  const searchInput = document.getElementById('bf-edit-search');
+  
+  if (typeFilter) {
+    typeFilter.addEventListener('change', bfFilterEditBuilds);
+  }
+  if (categoryFilter) {
+    categoryFilter.addEventListener('change', bfFilterEditBuilds);
+  }
+  if (searchInput) {
+    searchInput.addEventListener('input', bfFilterEditBuilds);
+  }
+
+  // Применяем фильтры сразу после загрузки
+  setTimeout(bfFilterEditBuilds, 100);
+}
+
+function bfFilterEditBuilds() {
+  const typeFilter = document.getElementById('bf-edit-type-filter')?.value || 'all';
+  const categoryFilter = document.getElementById('bf-edit-category-filter')?.value || 'all';
+  const searchQuery = document.getElementById('bf-edit-search')?.value.toLowerCase() || '';
+  
+  const cards = document.querySelectorAll('.bf-build-card');
+  let visibleCount = 0;
+  
+  cards.forEach(card => {
+    const weaponType = card.getAttribute('data-weapon-type') || '';
+    const categories = card.getAttribute('data-categories') || '';
+    const title = card.getAttribute('data-title') || '';
+    
+    const typeMatch = typeFilter === 'all' || weaponType === typeFilter;
+    const categoryMatch = categoryFilter === 'all' || categories.includes(categoryFilter);
+    const searchMatch = searchQuery === '' || title.includes(searchQuery);
+    
+    const isVisible = typeMatch && categoryMatch && searchMatch;
+    card.style.display = isVisible ? 'block' : 'none';
+    
+    if (isVisible) visibleCount++;
+  });
+  
+  // Обновляем счетчик
+  const countEl = document.getElementById('bf-builds-count');
+  if (countEl) {
+    countEl.textContent = `Показано: ${visibleCount} из ${cards.length} сборок`;
+  }
+}
+
+// Инициализация при загрузке
+document.addEventListener("DOMContentLoaded", () => {
+  // Уже есть в основном коде
+});
 /* ===============================
    🎨 ТЕМА
    =============================== */
