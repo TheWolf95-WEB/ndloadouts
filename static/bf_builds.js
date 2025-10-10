@@ -300,7 +300,35 @@ async function bfLoadWeaponTypes() {
       await bfLoadWeaponTypes();
     });
   });
+
+
+// После загрузки списка типов — обновляем select в форме добавления сборки
+const typeSelect = document.getElementById('bf-weapon-type');
+if (typeSelect) {
+  typeSelect.innerHTML = '<option value="">Выберите тип оружия</option>';
+  types.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t.key;
+    opt.textContent = t.label;
+    typeSelect.appendChild(opt);
+  });
 }
+
+
+  
+}
+
+
+document.getElementById('bf-weapon-type')?.addEventListener('change', async (e) => {
+  const typeKey = e.target.value;
+  if (!typeKey) return;
+  const res = await fetch(`/api/bf/modules/${typeKey}`);
+  const data = await res.json();
+  window.currentBfModules = data;
+  console.log('Loaded modules:', data);
+});
+
+
 
 document.getElementById('bf-add-type-btn')?.addEventListener('click', async () => {
   const key = document.getElementById('bf-type-key').value.trim();
@@ -376,3 +404,14 @@ document.getElementById('bf-add-module-btn')?.addEventListener('click', async ()
 document.getElementById('bf-back-from-modules')?.addEventListener('click', () => {
   showScreen('screen-bf-types');
 });
+
+
+document.getElementById('bf-weapons-db-btn')?.addEventListener('click', () => {
+  showScreen('screen-bf-types');
+});
+
+document.getElementById('bf-modules-dict-btn')?.addEventListener('click', () => {
+  showScreen('screen-bf-types');
+});
+
+
