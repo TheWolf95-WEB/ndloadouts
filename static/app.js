@@ -165,55 +165,7 @@ async function checkAdminStatus() {
 let isGoingBack = false;
 
 function showScreen(id) {
-  const current = document.querySelector('.screen.active')?.id;
-
-  // 📌 сохраняем историю экранов
-  if (current && current !== id && !isGoingBack) {
-    screenHistory.push(current);
-  }
-  isGoingBack = false;
-
-  // 🎯 Аналитика
-  Analytics.trackEvent('open_screen', { 
-    screen: id,
-    time: new Date().toISOString()
-  });
-
-  // 🎨 Смена темы
-  const body = document.body;
-  body.classList.remove('warzone-theme', 'bf-theme');
-  if (id === 'screen-warzone-main') {
-    body.classList.add('warzone-theme');
-  } else if (id === 'screen-battlefield-main' || id.startsWith('screen-bf')) {
-    body.classList.add('bf-theme');
-  }
-
-  // ⚡ Без мерцаний — плавная активация
-  const screens = document.querySelectorAll('.screen');
-  screens.forEach(screen => {
-    if (screen.id === id) {
-      screen.classList.add('active');
-      screen.style.display = 'block';
-      requestAnimationFrame(() => {
-        screen.style.opacity = '1';
-        screen.style.transform = 'translateY(0)';
-      });
-    } else if (screen.classList.contains('active')) {
-      // плавно скрываем предыдущий
-      screen.style.opacity = '0';
-      screen.style.transform = 'translateY(10px)';
-      setTimeout(() => {
-        screen.style.display = 'none';
-        screen.classList.remove('active');
-      }, 200); // 0.2s как transition
-    } else {
-      screen.style.display = 'none';
-    }
-  });
-}
-
-
-
+  // 🔒 Проверка доступа
   const protectedScreens = {
     'screen-form': 'is_admin',
     'screen-edit-builds': 'is_admin',
@@ -227,29 +179,56 @@ function showScreen(id) {
     return;
   }
 
-  const allScreens = document.querySelectorAll('.screen');
-  allScreens.forEach(screen => {
+  const current = document.querySelector('.screen.active')?.id;
+
+  if (current && current !== id && !isGoingBack) {
+    screenHistory.push(current);
+  }
+  isGoingBack = false;
+
+  Analytics.trackEvent('open_screen', { 
+    screen: id,
+    time: new Date().toISOString()
+  });
+
+  const body = document.body;
+  body.classList.remove('warzone-theme', 'bf-theme');
+  if (id === 'screen-warzone-main') {
+    body.classList.add('warzone-theme');
+  } else if (id === 'screen-battlefield-main' || id.startsWith('screen-bf')) {
+    body.classList.add('bf-theme');
+  }
+
+  // 🎬 Плавный переход
+  const screens = document.querySelectorAll('.screen');
+  screens.forEach(screen => {
     if (screen.id === id) {
+      screen.classList.add('active');
       screen.style.display = 'block';
-      screen.classList.remove('active');
-      requestAnimationFrame(() => screen.classList.add('active'));
+      requestAnimationFrame(() => {
+        screen.style.opacity = '1';
+        screen.style.transform = 'translateY(0)';
+      });
+    } else if (screen.classList.contains('active')) {
+      screen.style.opacity = '0';
+      screen.style.transform = 'translateY(10px)';
+      setTimeout(() => {
+        screen.style.display = 'none';
+        screen.classList.remove('active');
+      }, 200);
     } else {
-      screen.classList.remove('active');
-      setTimeout(() => screen.style.display = 'none', 300);
+      screen.style.display = 'none';
     }
   });
 
+  // 👇 остальная логика (кнопки, roleButtons и т.д.)
   roleButtons.style.display = (id === 'screen-warzone-main') ? 'flex' : 'none';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  // Кнопка "Главное меню"
   const globalHomeBtn = document.getElementById('global-home-btn');
-  if (id === 'screen-warzone-main') {
-    globalHomeBtn.style.display = 'block';
-  } else {
-    globalHomeBtn.style.display = 'none';
-  }
+  globalHomeBtn.style.display = (id === 'screen-warzone-main') ? 'block' : 'none';
 }
+
 
 
 // === Кнопки перехода ===
