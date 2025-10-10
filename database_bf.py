@@ -1,4 +1,4 @@
-что не так теперь опять ? так правильно ? import sqlite3
+import sqlite3
 from pathlib import Path
 from contextlib import contextmanager
 from datetime import datetime
