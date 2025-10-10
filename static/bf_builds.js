@@ -293,8 +293,12 @@ document.getElementById("bf-add-build-btn")?.addEventListener("click", () => {
   document.getElementById("bf-build-date").value = new Date().toISOString().split("T")[0];
   document.getElementById("bf-tabs-container").innerHTML = "";
 
+  // ✅ Сбрасываем все категории
+  document.querySelectorAll(".bf-build-category").forEach(cb => cb.checked = false);
+
   bfShowScreen("screen-bf-form");
 });
+
 
 // Функция для отслеживания изменений в форме
 function bfTrackFormChanges() {
