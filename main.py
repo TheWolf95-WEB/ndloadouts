@@ -1,3 +1,4 @@
+from fastapi import FastAPI
 from fastapi import Query
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -891,8 +892,9 @@ async def api_bf_get_types():
 @app.post("/api/bf/types")
 async def api_bf_add_type(request: Request):
     data = await request.json()
-    add_bf_weapon_type(data.get("key"), data.get("label"))
+    add_bf_weapon_type(data)
     return {"status": "ok"}
+
 
 @app.delete("/api/bf/types/{type_id}")
 async def api_bf_del_type(type_id: int):
