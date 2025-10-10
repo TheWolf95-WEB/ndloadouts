@@ -679,8 +679,6 @@ function bfRenderBuilds(builds) {
         });
       });
 
-      .join("");
-
     const content = document.createElement("div");
     content.className = "bf-build-content";
     content.innerHTML = tabsHTML;
