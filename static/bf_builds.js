@@ -1072,12 +1072,6 @@ function bfFilterBuilds() {
   bfRenderBuilds(filtered);
 }
 
-/* ===============================
-   🧱 БАЗА СБОРОК (АДМИН)
-   =============================== */
-/* ===============================
-   🧱 БАЗА СБОРОК (АДМИН)
-   =============================== */
 async function bfLoadBuildsTable() {
   try {
     const res = await fetch("/api/bf/builds");
@@ -1089,76 +1083,70 @@ async function bfLoadBuildsTable() {
     countEl.textContent = `Всего: ${builds.length} сборок`;
 
     if (!builds.length) {
-      grid.innerHTML = `<p class="no-results">🔍 Сборок пока нет</p>`;
+      grid.innerHTML = `<p style="text-align:center;opacity:0.7;">Сборок пока нет</p>`;
       return;
     }
 
     builds.forEach((b) => {
+      const weaponLabel = bfWeaponTypeLabels[b.weapon_type] || b.weapon_type;
+
+      // 🎨 Цвета категорий (как в Warzone, но в синих тонах)
+      const cats = Array.isArray(b.categories)
+        ? b.categories
+            .map((c) => {
+              const cat = String(c).toLowerCase();
+              let bg = "#1c2431";
+              let color = "#d2e5ff";
+              let label = c;
+
+              if (["новинки", "new"].includes(cat)) {
+                bg = "linear-gradient(135deg, #1e3c72, #2a5298)";
+                label = "Новинка";
+              } else if (["топ мета", "topmeta"].includes(cat)) {
+                bg = "linear-gradient(135deg, #0052d4, #4364f7, #6fb1fc)";
+                label = "Топ мета";
+              } else if (["мета", "meta"].includes(cat)) {
+                bg = "linear-gradient(135deg, #0f2027, #203a43, #2c5364)";
+                label = "Мета";
+              } else if (["популярное", "popular"].includes(cat)) {
+                bg = "linear-gradient(135deg, #2193b0, #6dd5ed)";
+                label = "Популярное";
+              }
+
+              return `<span class="bf-cat" style="background:${bg};color:${color}">${label}</span>`;
+            })
+            .join("")
+        : "";
+
+      // 🔹 Формат даты
+      const date = b.date?.includes("-")
+        ? b.date.split("-").reverse().join(".")
+        : b.date || "";
+
       const card = document.createElement("div");
       card.className = "bf-build-card";
-
-      const weaponLabel = bfWeaponTypeLabels[b.weapon_type] || b.weapon_type;
-      const cats = Array.isArray(b.categories) ? b.categories : [];
-
-      // 🎨 Метки категорий как в Warzone
-      const categoryBadges = cats.map(cat => {
-        const categoryName = String(cat).toLowerCase();
-        let bg = '#2a2f36', text = '#fff', label = '';
-
-        switch (categoryName) {
-          case 'new': case 'новинки':
-            bg = 'linear-gradient(135deg, #ff4e50, #f9d423)';
-            label = 'Новинка'; break;
-          case 'topmeta': case 'топ мета':
-            bg = 'linear-gradient(135deg, #ffb347, #ffcc33)';
-            text = '#222'; label = 'Топ Мета'; break;
-          case 'meta': case 'мета':
-            bg = 'linear-gradient(135deg, #56ab2f, #a8e063)';
-            label = 'Мета'; break;
-          case 'popular': case 'популярное':
-            bg = 'linear-gradient(135deg, #36d1dc, #5b86e5)';
-            label = 'Популярное'; break;
-          default:
-            label = cat;
-        }
-
-        return `
-          <span class="bf-badge" style="
-            background:${bg};
-            color:${text};
-            border-radius:6px;
-            padding:3px 8px;
-            font-size:0.75rem;
-            font-weight:500;
-            text-shadow:0 1px 1px rgba(0,0,0,0.4);
-          ">${label}</span>
-        `;
-      }).join('');
-
-      // 🔸 Карточка
       card.innerHTML = `
-        <div class="bf-card-top">
-          <h3 class="bf-title">${b.title}</h3>
-          <div class="bf-type">${weaponLabel}</div>
+        <div class="bf-card-header">
+          <h3>${b.title}</h3>
+          <span class="bf-date">${date}</span>
         </div>
-
-        <div class="bf-categories">${categoryBadges}</div>
-
-        <div class="bf-tops">
-          ${[b.top1, b.top2, b.top3].filter(Boolean).map((t, i) => `
-            <span class="bf-top bf-top${i + 1}">${t}</span>
-          `).join('')}
+        <div class="bf-card-body">
+          <div class="bf-weapon">${weaponLabel}</div>
+          <div class="bf-cats">${cats}</div>
         </div>
-
-        <div class="bf-card-actions">
-          <button class="btn-edit">✏️ Изменить</button>
-          <button class="btn-delete">🗑 Удалить</button>
+        <div class="bf-card-footer">
+          <button class="btn btn-edit">✏</button>
+          <button class="btn btn-delete">🗑</button>
         </div>
       `;
 
-      // События
-      card.querySelector(".btn-edit").addEventListener("click", () => bfEditBuild(b));
+      // Редактирование
+      card.querySelector(".btn-edit").addEventListener("click", (e) => {
+        e.stopPropagation();
+        bfEditBuild(b);
+      });
 
+      // Удаление
       card.querySelector(".btn-delete").addEventListener("click", async (e) => {
         e.stopPropagation();
         if (!confirm(`Удалить "${b.title}"?`)) return;
@@ -1176,7 +1164,6 @@ async function bfLoadBuildsTable() {
     console.error("BF builds table load error:", e);
   }
 }
-
 
 /* ===============================
    🎨 ТЕМА
