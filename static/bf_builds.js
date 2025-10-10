@@ -666,7 +666,7 @@ async function bfRenderBuilds(builds) {
   if (!list) return;
   list.innerHTML = "";
   
-  countEl.textContent = `Всего: ${ сборок.length}`;
+  countEl.textContent = `Всего сборок: ${ builds.length}`;
   noResults.style.display = builds.length ? "none" : "block";
 
   if (!Array.isArray(builds) || builds.length === 0) {
