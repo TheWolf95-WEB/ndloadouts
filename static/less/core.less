@@ -69,22 +69,23 @@ body {
   left: 0;
   width: 100%;
   min-height: 100vh;
-  padding: var(--nd-padding);
   opacity: 0;
   transform: translateY(10px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
   pointer-events: none;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  display: none;
-  flex-direction: column;
-  gap: var(--nd-gap);
 }
 
 .screen.active {
   opacity: 1;
   transform: translateY(0);
   pointer-events: all;
-  z-index: 1;
+  z-index: 5;
 }
+
+.screen.hidden {
+  display: none;
+}
+
 
 
 /* 🔹 Анимации для свайпа */
