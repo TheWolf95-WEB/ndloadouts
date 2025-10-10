@@ -63,6 +63,95 @@
   </div>
 </div>
 
+
+
+
+
+<!-- 📦 Экран: список сборок -->
+<div id="screen-bf-builds" class="screen" style="display:none;">
+  <div class="screen-header">
+    <h2>📦 Все сборки Battlefield</h2>
+  </div>
+  <div id="bf-builds-list" class="bf-builds-list">
+    <div class="loading-spinner">Загрузка...</div>
+  </div>
+  <button class="btn" onclick="showScreen('screen-battlefield-main')">⬅ Назад</button>
+</div>
+
+<!-- 🧱 Экран: добавление / редактирование сборки -->
+<div id="screen-bf-add-build" class="screen" style="display:none;">
+  <div class="screen-header">
+    <h2>🛠 Добавить / Редактировать сборку</h2>
+  </div>
+
+  <div class="form-section">
+    <input id="bf-title" class="form-input" placeholder="Название сборки">
+    <input id="bf-weapon-type" class="form-input" placeholder="Тип оружия">
+    <input id="bf-top1" class="form-input" placeholder="Топ 1 модуль">
+    <input id="bf-top2" class="form-input" placeholder="Топ 2 модуль">
+    <input id="bf-top3" class="form-input" placeholder="Топ 3 модуль">
+    <input id="bf-date" type="date" class="form-input">
+  </div>
+
+  <div id="bf-tabs-container" class="bf-tabs-container"></div>
+  <button class="btn" id="bf-add-tab">➕ Добавить сетап</button>
+
+  <div class="btn-group">
+    <button class="btn btn-primary" id="bf-submit-build">💾 Сохранить</button>
+    <button class="btn btn-back" onclick="showScreen('screen-battlefield-main')">⬅ Назад</button>
+  </div>
+</div>
+
+<!-- ⚙️ Экран: типы оружия -->
+<div id="screen-bf-types" class="screen" style="display:none;">
+  <div class="screen-header">
+    <h2>⚙️ Типы оружия</h2>
+  </div>
+  <div class="form-inline">
+    <input id="bf-type-key" class="form-input" placeholder="Ключ (assault, smg...)">
+    <input id="bf-type-label" class="form-input" placeholder="Название (Assault Rifle)">
+    <button id="bf-add-type-btn" class="btn">➕ Добавить тип</button>
+  </div>
+  <div id="bf-types-list" class="bf-types-list"></div>
+  <button class="btn" onclick="showScreen('screen-battlefield-main')">⬅ Назад</button>
+</div>
+
+<!-- 🔩 Экран: модули -->
+<div id="screen-bf-modules" class="screen" style="display:none;">
+  <div class="screen-header">
+    <h2 id="bf-modules-title">🔩 Модули</h2>
+  </div>
+  <div class="form-inline">
+    <input id="bf-mod-category" class="form-input" placeholder="Категория (Оптика)">
+    <input id="bf-mod-name" class="form-input" placeholder="Название модуля (ACOG)">
+    <button id="bf-add-module-btn" class="btn">➕ Добавить модуль</button>
+  </div>
+  <div id="bf-modules-list" class="bf-modules-list"></div>
+  <button class="btn" id="bf-back-from-modules">⬅ Назад</button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <!-- 👥 Пользовательский экран испытаний -->
 <!-- 👥 Пользовательский экран испытаний -->
 <div id="screen-bf-challenges" class="screen" style="display:none;">
@@ -178,3 +267,6 @@
     <button class="btn btn-back" id="bf-back-from-add">⬅ Назад</button>
   </div>
 </div>
+
+
+<script src="/static/js/bf_builds.js?v={{ version }}"></script>
