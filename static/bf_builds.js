@@ -835,9 +835,11 @@ function bfRenderBuilds(builds) {
             ${(tab.items || []).map(itemKey => {
               const mods = bfModulesByType[build.weapon_type];
               const norm = s => String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
-              const mod = mods?.byKey?.[itemKey] || mods?.byKey?.[norm(itemKey)] || null;
-              const slot = mod?.category || '—';
-              const name = mod?.en || itemKey;
+               const mods = bfModulesByType[build.weapon_type];
+               const modKey = String(itemKey).toLowerCase().trim();
+               const mod = mods?.flat?.find(m => m.en.toLowerCase() === modKey);
+               const slot = mod?.category || "—";
+               const name = mod?.en || itemKey;
               return `
                 <div class="bf-module">
                   <span class="bf-module-slot">${slot}</span>
