@@ -323,32 +323,55 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // === Добавление вкладки ===
-// Улучшенная функция добавления вкладки
+document.getElementById("bf-add-tab")?.addEventListener("click", () => {
+  const type = document.getElementById("bf-weapon-type").value;
+  const mods = bfModulesByType[type];
+  if (!mods) {
+    alert("Сначала выберите тип оружия");
+    document.getElementById("bf-weapon-type").focus();
+    return;
+  }
+
+  const tabDiv = document.createElement("div");
+  tabDiv.className = "tab-block";
+  tabDiv.innerHTML = `
+    <input type="text" class="tab-label form-input" placeholder="Название вкладки (например: Основные модули)">
+    <div class="mod-selects"></div>
+    <div class="tab-actions">
+      <button type="button" class="btn add-mod">+ Модуль</button>
+      <button type="button" class="btn delete-tab">🗑 Удалить вкладку</button>
+    </div>
+  `;
+
+  document.getElementById("bf-tabs-container").appendChild(tabDiv);
+
   // Добавляем первый модуль автоматически
   setTimeout(() => {
     bfAddModuleRow(tabDiv, type);
-
-    // ✅ После добавления — пересинхронизация всех вкладок
-    bfSyncAllTabs();
+    bfSyncAllTabs(); // ✅ пересинхронизация всех вкладок
   }, 100);
 
+  // Добавление ещё одного модуля
   tabDiv.querySelector(".add-mod").addEventListener("click", () => {
     bfAddModuleRow(tabDiv, type);
-    bfSyncAllTabs(); // ✅ после добавления модуля тоже синхронизация
+    bfSyncAllTabs();
   });
 
+  // Удаление вкладки
   tabDiv.querySelector(".delete-tab").addEventListener("click", () => {
     if (confirm("Удалить эту вкладку?")) {
       tabDiv.remove();
       bfHasUnsavedChanges = true;
-      bfSyncAllTabs(); // ✅ пересинхронизировать после удаления вкладки
+      bfSyncAllTabs();
     }
   });
 
+  // Отслеживание изменений
   tabDiv.querySelector(".tab-label").addEventListener("input", () => bfHasUnsavedChanges = true);
 
   bfHasUnsavedChanges = true;
 });
+
 
 // === Глобальная функция пересинхронизации всех вкладок ===
 function bfSyncAllTabs() {
@@ -377,7 +400,6 @@ function bfSyncAllTabs() {
         modSel.appendChild(opt);
       });
 
-      // Восстанавливаем значение, если возможно
       if ([...modSel.options].some(o => o.value === currentValue)) {
         modSel.value = currentValue;
       } else if (modSel.options.length) {
@@ -387,20 +409,6 @@ function bfSyncAllTabs() {
   });
 }
 
-
-  tabDiv.querySelector(".add-mod").addEventListener("click", () => bfAddModuleRow(tabDiv, type));
-  tabDiv.querySelector(".delete-tab").addEventListener("click", () => {
-    if (confirm("Удалить эту вкладку?")) {
-      tabDiv.remove();
-      bfHasUnsavedChanges = true;
-    }
-  });
-
-  // Отслеживание изменений
-  tabDiv.querySelector(".tab-label").addEventListener("input", () => bfHasUnsavedChanges = true);
-  
-  bfHasUnsavedChanges = true;
-});
 
 // === При смене типа оружия ===
 document.getElementById("bf-weapon-type")?.addEventListener("change", async (e) => {
