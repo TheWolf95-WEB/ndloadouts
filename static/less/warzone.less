@@ -1180,8 +1180,8 @@ select option:focus {
 }
 
 
-   /* ===========================
-   🎯 BATTLEFIELD BUILDS STYLES
+ /* ===========================
+   🎯 BATTLEFIELD BUILDS STYLES (Admin)
    =========================== */
 
 .bf-builds-grid {
@@ -1221,7 +1221,7 @@ select option:focus {
 
 .bf-card-header {
   display: flex;
-  justify-content: between;
+  justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 12px;
   border-bottom: 1px solid #2a3a5a;
@@ -1267,15 +1267,6 @@ select option:focus {
   flex-wrap: wrap;
   gap: 6px;
   margin-top: 8px;
-}
-
-.bf-cat {
-  font-size: 0.75rem;
-  padding: 3px 10px;
-  border-radius: 6px;
-  font-weight: 500;
-  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .bf-card-footer {
@@ -1335,44 +1326,6 @@ select option:focus {
   .bf-card-header h3 {
     font-size: 1rem;
   }
-}
-
-/* Анимация появления */
-@keyframes bfCardAppear {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.bf-build-card {
-  animation: bfCardAppear 0.3s ease-out;
-}
-
-
-/* СТИЛИ ДЛЯ ФИЛЬТРОВ */
-.filters-row {
-  display: flex;
-  gap: 10px;
-  margin: 16px 0 12px 0;
-}
-
-.filters-row .form-section {
-  margin: 0;
-}
-
-
-/* АНИМАЦИЯ ДЛЯ ФИЛЬТРАЦИИ */
-.builds-grid {
-  transition: all 0.3s ease;
-}
-
-.compact-build-card {
-  transition: all 0.3s ease;
 }
 
 
