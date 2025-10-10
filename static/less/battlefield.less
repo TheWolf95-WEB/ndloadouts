@@ -1329,117 +1329,244 @@ body.warzone-theme .card-btn:hover {
   border-radius: 8px;
 }
 
+/* ===========================
+   🎯 BATTLEFIELD BUILDS STYLES (Admin)
+   =========================== */
 
-/* Сетка сборок */
-/* === BATTLEFIELD BUILDS GRID === */
-.builds-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 18px;
-  padding-bottom: 40px;
-}
-
-/* === Карточка сборки === */
-.build-card {
-  background: linear-gradient(145deg, #1b2329, #101418);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-  padding: 16px;
-  color: #fff;
+.bf-builds-grid {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  gap: 16px;
+  padding: 16px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
-.build-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+.bf-build-card {
+  background: linear-gradient(135deg, #1c2b45, #15202c);
+  border: 1px solid #2a3a5a;
+  border-radius: 12px;
+  padding: 20px;
+  color: #e0e6ee;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
 }
 
-/* Заголовок и тип */
-.build-card h3 {
-  font-size: 1.1rem;
-  margin-bottom: 6px;
-  color: #fff;
-  font-weight: 600;
+.bf-build-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3a7bd5, #00d2ff);
 }
 
-.build-card .weapon-type {
-  font-size: 0.85rem;
-  color: #89a1c1;
-  margin-bottom: 8px;
+.bf-build-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(58, 123, 213, 0.25);
+  border-color: #3a7bd5;
 }
 
-/* Категории (метки) */
-.build-card .categories {
+.bf-card-header {
+  margin-bottom: 12px;
+}
+
+.bf-card-header h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.3;
+}
+
+.bf-card-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-
-.build-card .category {
-  background: #22303a;
-  border-radius: 6px;
-  padding: 3px 8px;
-  font-size: 0.75rem;
-  color: #8fc8ff;
-  font-weight: 500;
-}
-
-/* Вкладки */
-.build-card .tabs-info {
-  font-size: 0.8rem;
-  color: #9fbad1;
-  margin-bottom: 10px;
-}
-
-/* Кнопки */
-.build-card .actions {
-  display: flex;
-  justify-content: space-between;
   gap: 8px;
+  margin-bottom: 12px;
 }
 
-.build-card .btn-edit {
-  background: #1b5e20;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 10px;
-  cursor: pointer;
-  transition: background 0.25s;
+.bf-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: #8fa3bf;
 }
 
-.build-card .btn-edit:hover {
-  background: #2e7d32;
+.bf-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
-.build-card .btn-delete {
-  background: #7f1d1d;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 10px;
-  cursor: pointer;
-  transition: background 0.25s;
-}
-
-.build-card .btn-delete:hover {
-  background: #b91c1c;
-}
-
-/* Тег позиции (#1, #2 и т.д.) */
-.build-card .position-tag {
-  font-size: 0.8rem;
+.bf-cat {
+  font-size: 0.75rem;
+  padding: 4px 12px;
+  border-radius: 20px;
   font-weight: 600;
-  background: linear-gradient(90deg, #00bcd4, #3f51b5);
-  color: #fff;
-  padding: 2px 8px;
-  border-radius: 6px;
-  margin-bottom: 8px;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.15);
   display: inline-block;
+}
+
+.bf-cat-new {
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  color: #ffffff;
+}
+
+.bf-cat-topmeta {
+  background: linear-gradient(135deg, #0052d4, #4364f7, #6fb1fc);
+  color: #ffffff;
+}
+
+.bf-cat-meta {
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: #ffffff;
+}
+
+.bf-cat-popular {
+  background: linear-gradient(135deg, #2193b0, #6dd5ed);
+  color: #ffffff;
+}
+
+.bf-cat-beginner {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #ffffff;
+}
+
+.bf-weapon-type {
+  display: inline-block;
+  background: rgba(58, 123, 213, 0.15);
+  color: #9cc9ff;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  border: 1px solid rgba(58, 123, 213, 0.3);
+  margin-bottom: 12px;
+  text-transform: capitalize;
+  font-weight: 600;
+}
+
+.bf-tabs-count {
+  color: #8fa3bf;
+  font-size: 0.85rem;
+  margin-bottom: 16px;
+}
+
+.bf-card-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-top: 1px solid #2a3a5a;
+  padding-top: 16px;
+}
+
+.bf-card-footer .btn {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+.btn-edit {
+  background: rgba(58, 123, 213, 0.2);
+  color: #3a7bd5;
+  border: 1px solid rgba(58, 123, 213, 0.4);
+}
+
+.btn-edit:hover {
+  background: rgba(58, 123, 213, 0.3);
+  border-color: #3a7bd5;
+  transform: translateY(-1px);
+}
+
+.btn-delete {
+  background: rgba(220, 53, 69, 0.2);
+  color: #dc3545;
+  border: 1px solid rgba(220, 53, 69, 0.4);
+}
+
+.btn-delete:hover {
+  background: rgba(220, 53, 69, 0.3);
+  border-color: #dc3545;
+  transform: translateY(-1px);
+}
+
+/* Стили фильтров */
+.bf-filter-select {
+  background: rgba(42, 58, 90, 0.6);
+  border: 1px solid #3a4a6a;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #e0e6ee;
+  font-size: 14px;
+  min-width: 120px;
+}
+
+.bf-search-input {
+  background: rgba(42, 58, 90, 0.6);
+  border: 1px solid #3a4a6a;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #e0e6ee;
+  font-size: 14px;
+  width: 100%;
+}
+
+.bf-search-input::placeholder {
+  color: #8fa3bf;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .bf-builds-grid {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .bf-build-card {
+    padding: 16px;
+  }
+  
+  .bf-filters-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .bf-filter-group {
+    justify-content: space-between;
+  }
+  
+  .bf-card-footer {
+    flex-direction: column;
+  }
+  
+  .bf-card-footer .btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Анимация появления */
+@keyframes bfCardAppear {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bf-build-card {
+  animation: bfCardAppear 0.3s ease-out;
 }
 
 /* === Справочник модулей - выбор типа === */
