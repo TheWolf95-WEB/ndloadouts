@@ -326,23 +326,30 @@ document.getElementById("bf-weapon-type")?.addEventListener("change", async (e) 
 });
 
 
-
 function bfAddModuleRow(tabDiv, type) {
   const modsWrap = bfModulesByType[type];
   if (!modsWrap) return alert("Select weapon type first");
 
-  const row = document.createElement("div");
-  row.className = "mod-row";
+  const row = document.createElement('div');
+  row.className = 'mod-row';
 
-  const categorySelect = document.createElement("select");
-  categorySelect.className = "form-input category-select";
+  const categorySelect = document.createElement('select');
+  categorySelect.className = 'form-input category-select';
 
-  const moduleSelect = document.createElement("select");
-  moduleSelect.className = "form-input module-select";
+  const moduleSelect = document.createElement('select');
+  moduleSelect.className = 'form-input module-select';
 
-  // Добавляем категории
-  Object.keys(modsWrap.byCategory).forEach((cat) => {
-    const opt = document.createElement("option");
+  // 🔥 Ключевое исправление: фильтруем категории как в Warzone
+  const usedCategories = Array.from(tabDiv.querySelectorAll('.category-select')).map(s => s.value);
+  const availableCategories = Object.keys(modsWrap.byCategory).filter(cat => !usedCategories.includes(cat));
+  
+  if (availableCategories.length === 0) {
+    alert("Все категории уже добавлены");
+    return;
+  }
+
+  availableCategories.forEach(cat => {
+    const opt = document.createElement('option');
     opt.value = cat;
     opt.textContent = cat;
     categorySelect.appendChild(opt);
@@ -350,96 +357,75 @@ function bfAddModuleRow(tabDiv, type) {
 
   row.appendChild(categorySelect);
   row.appendChild(moduleSelect);
-  tabDiv.querySelector(".mod-selects").appendChild(row);
+  tabDiv.querySelector('.mod-selects').appendChild(row);
 
-  categorySelect.addEventListener("change", refreshModules);
-  moduleSelect.addEventListener("change", updateAllSelects);
-
-  // === Функция для обновления списка модулей ===
-  function refreshModules() {
+  function refreshModuleOptions() {
     const cat = categorySelect.value;
     const list = modsWrap.byCategory[cat] || [];
-    moduleSelect.innerHTML = "";
+    
+    // 🔥 Собираем ВСЕ выбранные модули во вкладке
+    const selected = Array.from(tabDiv.querySelectorAll('.module-select')).map(s => s.value);
 
-    // Собираем выбранные модули ТОЛЬКО ИЗ ТЕКУЩЕЙ КАТЕГОРИИ
-    const usedInThisCategory = Array.from(tabDiv.querySelectorAll(".mod-row"))
-      .filter(r => {
-        const catSel = r.querySelector(".category-select");
-        return catSel.value === cat;
-      })
-      .map(r => r.querySelector(".module-select").value)
-      .filter(Boolean);
+    const currentValue = moduleSelect.value;
+    moduleSelect.innerHTML = '';
 
-    // Добавляем только те, которых ещё нет в этой категории
-    list.forEach((m) => {
-      if (!usedInThisCategory.includes(m.en)) {
-        const opt = document.createElement("option");
-        opt.value = m.en;
-        opt.textContent = m.en;
-        moduleSelect.appendChild(opt);
-      }
+    list.forEach(m => {
+      // 🔥 Модуль доступен если: он текущий выбранный ИЛИ не выбран в других селектах
+      if (selected.includes(m.en) && m.en !== currentValue) return;
+      
+      const opt = document.createElement('option');
+      opt.value = m.en;
+      opt.textContent = m.en;
+      moduleSelect.appendChild(opt);
     });
 
-    if (!moduleSelect.options.length) {
-      const empty = document.createElement("option");
-      empty.textContent = "Все выбраны";
-      empty.disabled = true;
-      empty.selected = true;
-      moduleSelect.appendChild(empty);
+    if (!moduleSelect.value && moduleSelect.options.length) {
+      moduleSelect.value = moduleSelect.options[0].value;
     }
   }
 
-  // === Обновляем все селекты во вкладке при выборе любого модуля ===
-  function updateAllSelects() {
-    const allRows = tabDiv.querySelectorAll(".mod-row");
-    
-    allRows.forEach((r) => {
-      const catSel = r.querySelector(".category-select");
-      const modSel = r.querySelector(".module-select");
+  function syncAllModuleSelects() {
+    // 🔥 Собираем ВСЕ выбранные модули во вкладке
+    const selected = Array.from(tabDiv.querySelectorAll('.module-select')).map(s => s.value);
+
+    tabDiv.querySelectorAll('.mod-row').forEach(r => {
+      const catSel = r.querySelector('.category-select');
+      const modSel = r.querySelector('.module-select');
       const cat = catSel.value;
       const list = modsWrap.byCategory[cat] || [];
-
-      // Собираем выбранные модули ТОЛЬКО ИЗ ТЕКУЩЕЙ КАТЕГОРИИ
-      const usedInThisCategory = Array.from(tabDiv.querySelectorAll(".mod-row"))
-        .filter(row => {
-          const rowCatSel = row.querySelector(".category-select");
-          return rowCatSel.value === cat;
-        })
-        .map(row => row.querySelector(".module-select").value)
-        .filter(Boolean);
-
       const currentValue = modSel.value;
-      modSel.innerHTML = "";
 
-      // Добавляем модули только из текущей категории
-      list.forEach((m) => {
-        // Модуль доступен если он текущий выбранный ИЛИ не выбран в этой категории
-        if (m.en === currentValue || !usedInThisCategory.includes(m.en)) {
-          const opt = document.createElement("option");
-          opt.value = m.en;
-          opt.textContent = m.en;
-          modSel.appendChild(opt);
-        }
+      modSel.innerHTML = '';
+      
+      list.forEach(m => {
+        // 🔥 Тот же принцип: текущий выбранный ИЛИ не выбран в других
+        if (selected.includes(m.en) && m.en !== currentValue) return;
+        
+        const opt = document.createElement('option');
+        opt.value = m.en;
+        opt.textContent = m.en;
+        modSel.appendChild(opt);
       });
 
-      // Восстанавливаем предыдущее значение
-      if (Array.from(modSel.options).some((o) => o.value === currentValue)) {
+      // Восстанавливаем выбор
+      if ([...modSel.options].some(o => o.value === currentValue)) {
         modSel.value = currentValue;
-      } else if (modSel.options.length > 0) {
-        modSel.selectedIndex = 0;
-      } else {
-        // Если ничего не доступно, показываем "Все выбраны"
-        const empty = document.createElement("option");
-        empty.textContent = "Все выбраны";
-        empty.disabled = true;
-        empty.selected = true;
-        modSel.appendChild(empty);
+      } else if (modSel.options.length) {
+        modSel.value = modSel.options[0].value;
       }
     });
   }
 
-  // Инициализируем первый раз
-  refreshModules();
+  categorySelect.addEventListener('change', () => { 
+    refreshModuleOptions(); 
+    syncAllModuleSelects(); 
+  });
+  
+  moduleSelect.addEventListener('change', syncAllModuleSelects);
+
+  // Первичная инициализация
+  refreshModuleOptions();
+  syncAllModuleSelects();
 }
 
 /* ===============================
