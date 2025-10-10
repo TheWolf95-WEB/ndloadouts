@@ -253,7 +253,7 @@ async function bfLoadModules(type) {
 // Кнопка "Добавить сборку"
 document.getElementById("bf-add-build-btn")?.addEventListener("click", () => {
   bfCurrentEditId = null;
-  document.getElementById("bf-submit-build").textContent = "➕ Add Build";
+  document.getElementById("bf-submit-build").textContent = "➕ Добавить сборку";
 
   // очистка полей
   document.getElementById("bf-title").value = "";
@@ -284,11 +284,11 @@ document.getElementById("bf-add-tab")?.addEventListener("click", () => {
   const tabDiv = document.createElement("div");
   tabDiv.className = "tab-block";
   tabDiv.innerHTML = `
-    <input type="text" class="tab-label" placeholder="Tab name" style="margin-bottom: 10px;">
+    <input type="text" class="tab-label" placeholder="Название вкладки" style="margin-bottom: 10px;">
     <div class="mod-selects"></div>
     <div class="tab-actions">
-      <button type="button" class="btn add-mod">+ Module</button>
-      <button type="button" class="btn delete-tab">🗑 Delete Tab</button>
+      <button type="button" class="btn add-mod">+ Модуль</button>
+      <button type="button" class="btn delete-tab">🗑 Удалить вкладку</button>
     </div>
   `;
   document.getElementById("bf-tabs-container").appendChild(tabDiv);
@@ -395,7 +395,7 @@ async function bfHandleSubmitBuild() {
       throw new Error(err);
     }
 
-    alert(bfCurrentEditId ? "Build updated!" : "Build added!");
+    alert(bfCurrentEditId ? "Сборка обновлена!" : "Сборка добавлена!");
     bfShowScreen("screen-bf-edit-builds");
     await bfLoadBuildsTable();
     bfCurrentEditId = null;
@@ -411,7 +411,7 @@ async function bfHandleSubmitBuild() {
 async function bfEditBuild(build) {
   bfCurrentEditId = build.id;
   bfShowScreen("screen-bf-form");
-  document.getElementById("bf-submit-build").textContent = "💾 Save Changes";
+  document.getElementById("bf-submit-build").textContent = "💾 Сохранить изм";
 
   document.getElementById("bf-title").value = build.title || "";
   document.getElementById("bf-weapon-type").value = build.weapon_type || "";
@@ -433,8 +433,8 @@ async function bfEditBuild(build) {
         <input type="text" class="tab-label" value="${tab.label}" style="margin-bottom: 10px;">
         <div class="mod-selects"></div>
         <div class="tab-actions">
-          <button type="button" class="btn add-mod">+ Module</button>
-          <button type="button" class="btn delete-tab">🗑 Delete</button>
+          <button type="button" class="btn add-mod">+ Модуль</button>
+          <button type="button" class="btn delete-tab">🗑 Удалить</button>
         </div>
       `;
       container.appendChild(tabDiv);
@@ -528,7 +528,7 @@ function bfRenderBuilds(builds) {
 
   if (!container) return;
   container.innerHTML = "";
-  countEl.textContent = `Total builds: ${builds.length}`;
+  countEl.textContent = `Всего сборок: ${builds.length}`;
   noResults.style.display = builds.length ? "none" : "block";
 
   builds.forEach((b) => {
@@ -545,7 +545,7 @@ function bfRenderBuilds(builds) {
         ${b.top2 ? `<span class="top2">🥈 ${b.top2}</span>` : ""}
         ${b.top3 ? `<span class="top3">🥉 ${b.top3}</span>` : ""}
       </div>
-      <button class="btn bf-toggle">Show Modules</button>
+      <button class="btn bf-toggle">Показать модули</button>
     `;
 
     const tabsHTML = (b.tabs || [])
