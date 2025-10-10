@@ -1125,49 +1125,248 @@ body.warzone-theme .card-btn:hover {
   font-size: 13px;
 }
 
-/* Категории - более компактные */
+/* === Battlefield форма - исправления === */
+
+/* Категории в 2 колонки */
 .categories-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
   gap: 8px;
-  display:flex;
+  margin-top: 10px;
 }
 
 .category-checkbox {
-  padding: 8px;
-  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: #1a2838;
+  border-radius: 8px;
+  border: 1px solid #2a3a4a;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 0 !important;
 }
 
-/* Топ модули - компактнее */
+/* Топ модули в строку */
 .top-modules-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr 1fr !important;
   gap: 8px;
+  margin-top: 10px;
 }
 
 .top-module-input {
+  text-align: center;
+  font-weight: 600;
+  width: 100% !important;
+}
+
+/* Селекты модулей в ряд */
+.mod-row {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.mod-row select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #3a7bd5;
+  border-radius: 6px;
+  background: #15202c;
+  color: #e0e6ee;
+  font-size: 13px;
+}
+
+/* Кнопки действий вкладки */
+.tab-actions {
+  display: flex !important;
+  gap: 8px;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.tab-actions .btn {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* Стили для просмотра сборок */
+.bf-modules {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bf-module {
+  display: grid !important;
+  grid-template-columns: 1fr 2fr !important;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px !important;
+  background: #253447;
+  border-radius: 8px;
+  border-left: 4px solid #3a7bd5;
+  flex-direction: row !important;
+}
+
+.bf-module-slot {
+  color: #8fa3b7;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  text-align: left;
+}
+
+.bf-module-name {
+  color: #e0e6ee;
+  font-weight: 500;
+  font-size: 14px;
+  text-align: left;
+}
+
+/* Заголовки вкладок */
+.bf-tab-buttons {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #2a3a4a;
+  padding-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.bf-tab-btn {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 6px 12px;
+  color: #8fa3b7;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 12px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.bf-tab-btn.is-active {
+  background: #3a7bd5;
+  border-color: #3a7bd5;
+  color: white;
+}
+
+/* Мета-информация сборки */
+.bf-loadout__meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.bf-tops {
+  display: flex;
+  gap: 6px;
+}
+
+.bf-top {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.bf-categories {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.bf-badge {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.bf-type {
+  background: rgba(58,123,213,0.15);
+  border: 1px solid rgba(58,123,213,0.3);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: #9cc9ff;
+  margin-left: auto;
+}
+
+
+
+/* Убираем лишние отступы */
+#screen-bf-form .form-section {
+  margin-bottom: 16px;
+  padding: 12px;
+}
+
+#screen-bf-form label {
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+/* Улучшаем внешний вид инпутов */
+#screen-bf-form .form-input {
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: #15202c;
+  color: #e0e6ee;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+#screen-bf-form .form-input:focus {
+  outline: none;
+  border-color: #5b86e5;
+  box-shadow: 0 0 0 2px rgba(58, 123, 213, 0.2);
+}
+
+/* Кнопка добавления вкладки */
+.add-tab-btn {
+  width: 100%;
+  background: rgba(58, 123, 213, 0.15);
+  color: #9cc9ff;
   padding: 10px;
   font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  margin-top: 8px;
 }
 
-/* Вкладки - более компактные */
-.tab-block {
+.add-tab-btn:hover {
+  background: rgba(58, 123, 213, 0.25);
+  border-color: rgba(58, 123, 213, 0.5);
+  color: #e0e6ee;
+}
+
+/* Основные кнопки формы */
+.btn-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-group .btn {
+  flex: 1;
   padding: 12px;
-  margin-bottom: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  border-radius: 8px;
 }
 
-.tab-label {
-  margin-bottom: 12px !important;
-  font-size: 13px;
-  padding: 8px 10px;
-}
-
-/* Адаптивность для мобильных */
-@media (max-width: 768px) {
-  .tab-actions {
-    flex-direction: row; /* Оставляем в строке даже на мобильных */
-  }
-    
-  .mod-row {
-    grid-template-columns: 1fr; /* На мобильных в колонку */
-    gap: 6px;
-  }
-
-
-}
