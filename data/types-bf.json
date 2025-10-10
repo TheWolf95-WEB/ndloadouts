@@ -1,0 +1,10 @@
+[
+  { "key": "assault", "label": "Штурмовые винтовки" },
+  { "key": "carbine", "label": "Карабины" },
+  { "key": "pp", "label": "Пистолеты-пулемёты (ПП)" },
+  { "key": "lmg", "label": "Пулемёты (LMG)" },
+  { "key": "sniper", "label": "Снайперские винтовки" },
+  { "key": "dmr", "label": "Марксманки (DMR)" },
+  { "key": "shotgun", "label": "Дробовики" },
+  { "key": "pistol", "label": "Пистолеты" }
+]
