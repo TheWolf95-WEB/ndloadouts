@@ -632,7 +632,7 @@ async function bfLoadBuilds() {
   try {
     const res = await fetch("/api/bf/builds");
     bfCachedBuilds = await res.json();
-    bfRenderBuilds(bfCachedBuilds);
+    await bfRenderBuilds(bfCachedBuilds);
   } catch (e) {
     console.error("BF load builds error:", e);
   }
@@ -640,7 +640,7 @@ async function bfLoadBuilds() {
 
 // === Отображение сборок (аккордеон) ===
 // === Отображение сборок (аккордеон в стиле Warzone) ===
-function bfRenderBuilds(builds) {
+async function bfRenderBuilds(builds) {
   const list = document.getElementById("bf-builds-list");
   const countEl = document.getElementById("bf-user-builds-count");
   const noResults = document.getElementById("bf-no-results-message");
@@ -655,10 +655,9 @@ function bfRenderBuilds(builds) {
     list.innerHTML = '<p class="no-results">🔍 Сборок пока нет</p>';
     return;
   }
-
-  // Загружаем модули для всех типов оружия
-  const uniqueTypes = [...new Set(builds.map(b => b.weapon_type))];
-  uniqueTypes.forEach(t => bfLoadModules(t));
+     // Загружаем модули для всех типов оружия (ожидаем завершения)
+   const uniqueTypes = [...new Set(builds.map(b => b.weapon_type))];
+   await Promise.all(uniqueTypes.map(t => bfLoadModules(t)));
 
   // Сортировка по приоритету как в Warzone
   function prioritySort(a, b) {
@@ -860,7 +859,18 @@ function bfRenderBuilds(builds) {
           <div class="bf-loadout__meta">
             <div class="bf-tops">${tops}</div>
             <div class="bf-categories">${categoryBadges}</div>
-            <div class="bf-type">${weaponTypeRu}</div>
+            <div class="bf-type" style="
+              background: rgba(58,123,213,0.15);
+              border: 1px solid rgba(58,123,213,0.3);
+              padding: 3px 10px;
+              border-radius: 8px;
+              font-size: 0.85rem;
+              color: #9cc9ff;
+              text-transform: capitalize;
+            ">
+              ${weaponTypeRu}
+            </div>
+
           </div>
         </div>
         <div class="bf-loadout__content" style="max-height: 0; overflow: hidden;">
