@@ -1166,8 +1166,12 @@ async function bfLoadBuildsTable() {
           <h3>${b.title}</h3>
         </div>
     
-        <div class="bf-categories">
+         <div class="bf-categories">
           ${cats}
+        </div>
+        
+        <div class="bf-weapon-type">
+          ${weaponLabel}
         </div>
         
         <div class="bf-card-footer">
