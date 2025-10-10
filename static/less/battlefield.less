@@ -1393,21 +1393,6 @@ body.warzone-theme .card-btn:hover {
   align-items: center;
 }
 
-.bf-meta-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.85rem;
-  color: #8fa3bf;
-}
-
-.bf-categories {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 16px;
-}
-
 .bf-cat {
   font-size: 0.7rem;
   padding: 3px 10px;
@@ -1477,29 +1462,7 @@ body.warzone-theme .card-btn:hover {
   justify-content: center;
 }
 
-.btn-edit {
-  background: rgba(58, 123, 213, 0.2);
-  color: #3a7bd5;
-  border: 1px solid rgba(58, 123, 213, 0.4);
-}
 
-.btn-edit:hover {
-  background: rgba(58, 123, 213, 0.3);
-  border-color: #3a7bd5;
-  transform: translateY(-1px);
-}
-
-.btn-delete {
-  background: rgba(220, 53, 69, 0.2);
-  color: #dc3545;
-  border: 1px solid rgba(220, 53, 69, 0.4);
-}
-
-.btn-delete:hover {
-  background: rgba(220, 53, 69, 0.3);
-  border-color: #dc3545;
-  transform: translateY(-1px);
-}
 
 /* Стили фильтров */
 .bf-filter-select {
@@ -1512,51 +1475,7 @@ body.warzone-theme .card-btn:hover {
   min-width: 120px;
 }
 
-.bf-search-input {
-  background: rgba(42, 58, 90, 0.6);
-  border: 1px solid #3a4a6a;
-  border-radius: 8px;
-  padding: 8px 12px;
-  color: #e0e6ee;
-  font-size: 14px;
-  width: 100%;
-}
 
-.bf-search-input::placeholder {
-  color: #8fa3bf;
-}
-
-/* Адаптивность */
-@media (max-width: 1024px) {
-  .bf-builds-grid {
-    grid-template-columns: 1fr;
-    max-width: 600px;
-  }
-}
-
-@media (max-width: 768px) {
-  .bf-builds-grid {
-    padding: 12px;
-    gap: 12px;
-  }
-  
-  .bf-build-card {
-    padding: 16px;
-  }
-  
-  .bf-filters-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .bf-filter-group {
-    justify-content: space-between;
-  }
-  
-  .bf-card-footer {
-    justify-content: center;
-  }
-}
 
 /* Анимация появления */
 @keyframes bfCardAppear {
