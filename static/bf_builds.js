@@ -5,6 +5,19 @@
 const tg = window.Telegram.WebApp;
 tg.expand();
 
+
+// === Ensure global showScreen exists ===
+if (typeof window.showScreen === "undefined") {
+  window.showScreen = function (id) {
+    document.querySelectorAll(".screen").forEach((s) => {
+      s.style.display = s.id === id ? "block" : "none";
+      s.classList.toggle("active", s.id === id);
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+}
+
+
 const bfUser = tg.initDataUnsafe?.user || {};
 let bfUserInfo = null;
 
