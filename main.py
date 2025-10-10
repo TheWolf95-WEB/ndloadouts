@@ -934,10 +934,17 @@ async def bf_get_modules(weapon_type: str):
 async def bf_add_module(request: Request):
     data = await request.json()
     try:
+        # если модуль добавляется не для конкретного типа — сохраняем в общие (shv)
+        if not data.get("weapon_type"):
+            data["weapon_type"] = "shv"
+
+        # гарантируем, что при добавлении ничего не перезаписывается
         add_bf_module(data)
+
         return {"status": "ok", "message": "Module added"}
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
+
 
 
 @app.delete("/api/bf/modules/{module_id}")
