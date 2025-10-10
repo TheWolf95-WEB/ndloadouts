@@ -65,38 +65,90 @@
 
 
 
-
-
-<!-- 📦 Экран: список сборок -->
+<!-- 📦 Экран: ВСЕ СБОРКИ (пользовательский список) -->
 <div id="screen-bf-builds" class="screen" style="display:none;">
   <div class="screen-header">
+    <button class="btn btn-back" onclick="showScreen('screen-battlefield-main')">⬅ Назад</button>
     <h2>📦 Все сборки Battlefield</h2>
   </div>
-  <div id="bf-builds-list" class="bf-builds-list">
+
+  <!-- Фильтры -->
+  <div class="filters-row">
+    <select id="bf-filter-type" class="form-input">
+      <option value="">Все типы</option>
+    </select>
+    <select id="bf-filter-category" class="form-input">
+      <option value="">Все категории</option>
+    </select>
+  </div>
+
+  <!-- Поиск и счётчик -->
+  <div class="filters-row">
+    <input id="bf-search-builds" class="form-input" placeholder="🔎 Поиск по названию, модулям...">
+  </div>
+  <div class="meta-row">
+    <span class="muted">Всего: <b id="bf-total-builds">0</b> сборок</span>
+  </div>
+
+  <!-- Список (карточки в 2 колонки на десктопе) -->
+  <div id="bf-builds-list" class="bf-cards-grid">
     <div class="loading-spinner">Загрузка...</div>
   </div>
-  <button class="btn" onclick="showScreen('screen-battlefield-main')">⬅ Назад</button>
+
+  <div class="footer-actions">
+    <button class="btn" onclick="showScreen('screen-battlefield-main')">⬅ Назад</button>
+  </div>
 </div>
 
-<!-- 🧱 Экран: добавление / редактирование сборки -->
+
+<!-- 🧱 Экран: ДОБАВИТЬ / РЕДАКТИРОВАТЬ СБОРКУ -->
 <div id="screen-bf-add-build" class="screen" style="display:none;">
   <div class="screen-header">
+    <button class="btn btn-back" onclick="showScreen('screen-battlefield-main')">⬅ Назад</button>
     <h2>🛠 Добавить / Редактировать сборку</h2>
   </div>
 
   <div class="form-section">
-    <input id="bf-title" class="form-input" placeholder="Название сборки">
+    <label class="form-label">Название сборки:</label>
+    <input id="bf-title" class="form-input" placeholder="Введите название сборки">
+  </div>
+
+  <div class="form-section">
+    <label class="form-label">Категории:</label>
+    <div class="bf-tags-choices">
+      <label class="tag-checkbox"><input type="checkbox" value="Популярное" class="bf-cat"> <span>Популярное</span></label>
+      <label class="tag-checkbox"><input type="checkbox" value="Новинки" class="bf-cat"> <span>Новинки</span></label>
+      <label class="tag-checkbox"><input type="checkbox" value="Топ Мета" class="bf-cat"> <span>Топ Мета</span></label>
+      <label class="tag-checkbox"><input type="checkbox" value="Мета" class="bf-cat"> <span>Мета</span></label>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <label class="form-label">Тип оружия:</label>
     <select id="bf-weapon-type" class="form-input">
       <option value="">Выберите тип оружия</option>
+      <!-- Заполняется из data/types-bf.json или /api/bf/types -->
     </select>
-    <input id="bf-top1" class="form-input" placeholder="Топ 1 модуль">
-    <input id="bf-top2" class="form-input" placeholder="Топ 2 модуль">
-    <input id="bf-top3" class="form-input" placeholder="Топ 3 модуль">
+  </div>
+
+  <div class="form-section">
+    <label class="form-label">ТОП модули:</label>
+    <input id="bf-top1" class="form-input" placeholder="🥇 Топ 1">
+    <input id="bf-top2" class="form-input" placeholder="🥈 Топ 2">
+    <input id="bf-top3" class="form-input" placeholder="🥉 Топ 3">
+  </div>
+
+  <div class="form-section">
+    <label class="form-label">Дата создания:</label>
     <input id="bf-date" type="date" class="form-input">
   </div>
 
-  <div id="bf-tabs-container" class="bf-tabs-container"></div>
-  <button class="btn" id="bf-add-tab">➕ Добавить сетап</button>
+  <!-- Вкладки (сеты модулей) -->
+  <div class="form-section">
+    <label class="form-label">Вкладки (модули):</label>
+    <div id="bf-tabs-container" class="bf-tabs-container"><!-- динамика --></div>
+    <button class="btn btn-success" id="bf-add-tab">➕ Добавить вкладку</button>
+  </div>
 
   <div class="btn-group">
     <button class="btn btn-primary" id="bf-submit-build">💾 Сохранить</button>
@@ -104,48 +156,63 @@
   </div>
 </div>
 
-<!-- ⚙️ Экран: типы оружия -->
+
+<!-- ⚙️ Экран: СПРАВОЧНИК МОДУЛЕЙ — ТИПЫ ОРУЖИЯ -->
 <div id="screen-bf-types" class="screen" style="display:none;">
   <div class="screen-header">
-    <h2>⚙️ Типы оружия</h2>
+    <button class="btn btn-back" onclick="showScreen('screen-battlefield-main')">⬅ Назад</button>
+    <h2>🔩 Справочник модулей — тип оружия</h2>
   </div>
+
+  <!-- Добавление нового типа -->
   <div class="form-inline">
-    <input id="bf-type-key" class="form-input" placeholder="Ключ (assault, smg...)">
-    <input id="bf-type-label" class="form-input" placeholder="Название (Assault Rifle)">
-    <button id="bf-add-type-btn" class="btn">➕ Добавить тип</button>
+    <input id="bf-type-key" class="form-input" placeholder="Ключ (например, assault)">
+    <input id="bf-type-label" class="form-input" placeholder="Название (например, Штурмовые винтовки)">
+    <button id="bf-add-type-btn" class="btn btn-success">➕ Добавить тип</button>
   </div>
-  <div id="bf-types-list" class="bf-types-list"></div>
-  <button class="btn" onclick="showScreen('screen-battlefield-main')">⬅ Назад</button>
+
+  <!-- Сетка типов (кнопки с ред/удал) -->
+  <div id="bf-types-list" class="bf-types-grid">
+    <!-- Пример карточки:
+    <div class="bf-type-card">
+      <button class="bf-type-open" data-key="assault" data-label="Штурмовые винтовки">Штурмовые винтовки</button>
+      <div class="bf-type-actions">
+        <button class="btn-mini bf-type-edit" data-id="1" data-key="assault" data-label="Штурмовые винтовки">✏️</button>
+        <button class="btn-mini bf-type-del" data-id="1">🗑</button>
+      </div>
+    </div>
+    -->
+  </div>
+
+  <div class="footer-actions">
+    <button class="btn" onclick="showScreen('screen-battlefield-main')">⬅ Назад</button>
+  </div>
 </div>
 
-<!-- 🔩 Экран: модули -->
+
+<!-- 🔩 Экран: СПРАВОЧНИК МОДУЛЕЙ — КОНКРЕТНЫЙ ТИП -->
 <div id="screen-bf-modules" class="screen" style="display:none;">
   <div class="screen-header">
-    <h2 id="bf-modules-title">🔩 Модули</h2>
+    <button class="btn btn-back" onclick="showScreen('screen-bf-types')">⬅ Назад</button>
+    <h2 id="bf-modules-title">🔩 Справочник модулей — <span class="muted">Тип не выбран</span></h2>
   </div>
+
+  <!-- Добавление модуля (категория + название) -->
   <div class="form-inline">
-    <input id="bf-mod-category" class="form-input" placeholder="Категория (Оптика)">
-    <input id="bf-mod-name" class="form-input" placeholder="Название модуля (ACOG)">
-    <button id="bf-add-module-btn" class="btn">➕ Добавить модуль</button>
+    <input id="bf-mod-category" class="form-input" placeholder="Категория (напр. Дуло / Muzzle)">
+    <input id="bf-mod-name" class="form-input" placeholder="Название (напр. Suppressor)">
+    <button id="bf-add-module-btn" class="btn btn-success">➕ Добавить</button>
   </div>
-  <div id="bf-modules-list" class="bf-modules-list"></div>
-  <button class="btn" id="bf-back-from-modules">⬅ Назад</button>
+
+  <!-- Группы категорий с модулями -->
+  <div id="bf-modules-list" class="bf-modules-groups">
+    <!-- Генерируется: группы по категории, строки модуля + кнопка удаления -->
+  </div>
+
+  <div class="footer-actions">
+    <button class="btn" onclick="showScreen('screen-bf-types')">⬅ Назад</button>
+  </div>
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
