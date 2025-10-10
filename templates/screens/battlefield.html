@@ -187,24 +187,35 @@
     <span id="bf-builds-count">Всего: 0 сборок</span>
   </div>
 
-  <!-- Фильтры (опционально) -->
-  <div class="filters-bar" style="padding: 16px; display: flex; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid #2a3a5a;">
-    <select class="form-input" style="min-width: 150px;">
-      <option value="all">Все типы</option>
-      <!-- опции будут добавляться через JS -->
-    </select>
-    <select class="form-input" style="min-width: 150px;">
-      <option value="all">Все категории</option>
-      <option value="новинки">Новинки</option>
-      <option value="топ мета">Топ Мета</option>
-      <option value="мета">Мета</option>
-      <option value="популярное">Популярное</option>
-      <option value="новички">Новички</option>
-    </select>
-    <input type="text" class="form-input" placeholder="Поиск по названию..." style="min-width: 200px;">
+  <!-- Фильтры как на скриншоте -->
+  <div class="bf-filters-container" style="padding: 16px; border-bottom: 1px solid #2a3a5a;">
+    <div class="bf-filters-row" style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+      <div class="bf-filter-group" style="display: flex; gap: 8px; align-items: center;">
+        <strong style="color: #e0e6ee; font-size: 14px;">Все типы</strong>
+        <select id="bf-edit-type-filter" class="bf-filter-select">
+          <option value="all">Все</option>
+        </select>
+      </div>
+      
+      <div class="bf-filter-group" style="display: flex; gap: 8px; align-items: center;">
+        <strong style="color: #e0e6ee; font-size: 14px;">Все категории</strong>
+        <select id="bf-edit-category-filter" class="bf-filter-select">
+          <option value="all">Все</option>
+          <option value="новинки">Новинки</option>
+          <option value="топ мета">Топ Мета</option>
+          <option value="мета">Мета</option>
+          <option value="популярное">Популярное</option>
+          <option value="новички">Новички</option>
+        </select>
+      </div>
+      
+      <div class="bf-search-group" style="flex: 1; min-width: 200px;">
+        <input type="text" id="bf-edit-search" class="bf-search-input" placeholder="Поиск по названию...">
+      </div>
+    </div>
   </div>
 
-  <!-- Контейнер для синих карточек -->
+  <!-- Контейнер для карточек -->
   <div id="bf-edit-builds-grid" class="bf-builds-grid">
     <p>Загрузка сборок...</p>
   </div>
