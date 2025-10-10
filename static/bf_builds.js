@@ -1,8 +1,8 @@
 // ========================
 // ⚙️ BASE INIT
 // ========================
-const tg = window.Telegram.WebApp;
-tg.expand();
+const tg = window.Telegram?.WebApp || window.tg;
+if (tg && tg.expand) tg.expand();
 
 if (!window.Analytics) window.Analytics = { trackEvent: () => {} };
 
