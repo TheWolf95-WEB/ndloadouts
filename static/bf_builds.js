@@ -1,289 +1,161 @@
 // ========================
-// ⚙️ BASE INIT (без конфликтов и дублей)
+// ⚙️ BASE INIT
 // ========================
 const bfTg = window.Telegram?.WebApp || window.tg;
 if (bfTg && bfTg.expand) bfTg.expand();
-window.tg = bfTg; // сохраняем глобально, чтобы не потерялось
-
-if (!window.Analytics) window.Analytics = { trackEvent: () => {} };
+window.tg = bfTg;
 
 let currentBfEditId = null;
 let bfCachedBuilds = [];
-let bfWeaponTypes = [];
-let bfScreenHistory = [];
-let currentBfWeaponType = null;
-
 
 // ========================
 // 🚀 INIT APP
 // ========================
 document.addEventListener('DOMContentLoaded', async () => {
-  console.log("🔹 Battlefield module loaded");
-  await bfLoadBuilds();
-  await bfLoadWeaponTypes();
+    console.log("🔹 Battlefield module loaded");
+    
+    // Простые обработчики кнопок
+    document.getElementById('bf-show-builds-btn')?.addEventListener('click', () => {
+        showScreen('screen-bf-builds');
+        bfLoadBuilds();
+    });
+    
+    document.getElementById('bf-weapons-db-btn')?.addEventListener('click', () => {
+        showScreen('screen-bf-types');
+        bfLoadWeaponTypes();
+    });
+    
+    document.getElementById('bf-modules-dict-btn')?.addEventListener('click', () => {
+        showScreen('screen-bf-types');
+        bfLoadWeaponTypes();
+    });
+    
+    document.getElementById('bf-add-build-btn')?.addEventListener('click', () => {
+        bfShowAddForm();
+    });
 });
 
-
-// ===================================================================
-// 🧱 BATTLEFIELD BUILDS (CRUD)
-// ===================================================================
-
+// ========================
+// 📦 ЗАГРУЗКА СБОРОК (АККОРДЕОН)
+// ========================
 async function bfLoadBuilds() {
-  try {
-    const res = await fetch('/api/bf/builds');
-    const builds = await res.json();
+    try {
+        console.log("🔄 Загрузка сборок...");
+        const res = await fetch('/api/bf/builds');
+        
+        if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        
+        const builds = await res.json();
+        console.log("✅ Сборки загружены:", builds);
 
-    if (!Array.isArray(builds) || builds.length === 0) {
-      document.getElementById('bf-builds-list').innerHTML = '<p>No builds yet.</p>';
-      bfCachedBuilds = [];
-      return;
+        if (!Array.isArray(builds) || builds.length === 0) {
+            document.getElementById('bf-builds-list').innerHTML = '<p>Нет сборок для отображения</p>';
+            bfCachedBuilds = [];
+            return;
+        }
+
+        bfCachedBuilds = builds;
+        bfRenderBuildsAccordion(builds);
+
+    } catch (err) {
+        console.error('❌ Ошибка загрузки сборок:', err);
+        document.getElementById('bf-builds-list').innerHTML = '<p>Ошибка загрузки сборок</p>';
     }
-
-    bfCachedBuilds = builds;
-    bfRenderBuilds(builds);
-
-  } catch (err) {
-    console.error('Error loading BF builds:', err);
-  }
 }
 
-function bfRenderBuilds(builds) {
-  const listEl = document.getElementById('bf-builds-list');
-  listEl.innerHTML = '';
+function bfRenderBuildsAccordion(builds) {
+    const listEl = document.getElementById('bf-builds-list');
+    listEl.innerHTML = '';
 
-  builds.forEach(build => {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'bf-build js-bf-build';
+    builds.forEach(build => {
+        const accordion = document.createElement('div');
+        accordion.className = 'bf-build-accordion';
+        
+        // Безопасное получение данных
+        const title = build.title || 'Без названия';
+        const weaponType = build.weapon_type || 'Не указан';
+        const categories = Array.isArray(build.categories) ? build.categories : [];
+        const tabs = Array.isArray(build.tabs) ? build.tabs : [];
+        const firstTab = tabs[0] || {items: []};
+        
+        const categoriesHtml = categories.map(cat => 
+            `<span class="bf-badge">${cat}</span>`
+        ).join('');
 
-    const tops = [build.top1, build.top2, build.top3]
-      .filter(Boolean)
-      .map((mod, i) => `<span class="bf-top bf-top-${i+1}">${mod}</span>`)
-      .join('');
+        const modulesHtml = firstTab.items.map(item => {
+            if (typeof item === 'string' && item.includes('\t')) {
+                const parts = item.split('\t');
+                return `<div class="bf-module-row">
+                    <span class="bf-module-category">${parts[0]}</span>
+                    <span class="bf-module-name">${parts[1]}</span>
+                </div>`;
+            } else {
+                return `<div class="bf-module-row">
+                    <span class="bf-module-name">${item}</span>
+                </div>`;
+            }
+        }).join('');
 
-    const cats = (build.categories || []).map(c => `<span class="bf-badge">${c}</span>`).join('');
-
-    const tabs = (build.tabs || []).map((tab, tIndex) => `
-      <button class="bf-tab-btn ${tIndex===0?'is-active':''}" data-tab="${build.id}-${tIndex}">
-        ${tab.label || `Setup ${tIndex+1}`}
-      </button>
-    `).join('');
-
-    const tabsContent = (build.tabs || []).map((tab, tIndex) => `
-      <div class="bf-tab-content ${tIndex===0?'is-active':''}" data-tab-content="${build.id}-${tIndex}">
-        ${(tab.items || []).map(m => `
-          <div class="bf-module-row">
-            <span class="bf-module">${m}</span>
-          </div>
-        `).join('')}
-      </div>
-    `).join('');
-
-    wrapper.innerHTML = `
-      <div class="bf-build-header js-bf-toggle">
-        <h3 class="bf-title">${build.title}</h3>
-        <span class="bf-type">${build.weapon_type}</span>
-        <div class="bf-tops">${tops}</div>
-        <div class="bf-categories">${cats}</div>
-        <span class="bf-date">${build.date || ''}</span>
-      </div>
-      <div class="bf-build-content" style="max-height: 0; overflow: hidden;">
-        <div class="bf-tabs">
-          <div class="bf-tab-buttons">${tabs}</div>
-          <div class="bf-tab-contents">${tabsContent}</div>
-        </div>
-      </div>
-    `;
-    listEl.appendChild(wrapper);
-  });
-
-  // раскрытие сборок
-  document.querySelectorAll('.js-bf-toggle').forEach(header => {
-    header.addEventListener('click', () => {
-      const buildEl = header.closest('.js-bf-build');
-      const content = buildEl.querySelector('.bf-build-content');
-      buildEl.classList.toggle('is-open');
-      content.style.maxHeight = buildEl.classList.contains('is-open')
-        ? content.scrollHeight + 'px'
-        : '0';
+        accordion.innerHTML = `
+            <div class="bf-accordion-header" onclick="this.parentElement.classList.toggle('open')">
+                <div class="bf-build-info">
+                    <h3>${title}</h3>
+                    <div class="bf-build-meta">
+                        <span class="bf-weapon-type">${weaponType}</span>
+                        <span class="bf-tabs-count">${tabs.length} вклад.</span>
+                    </div>
+                </div>
+                <div class="bf-build-categories">
+                    ${categoriesHtml}
+                </div>
+                <div class="bf-accordion-arrow">▼</div>
+            </div>
+            <div class="bf-accordion-content">
+                <div class="bf-modules-section">
+                    <h4>Модули (${firstTab.items.length}):</h4>
+                    <div class="bf-modules-list">
+                        ${modulesHtml || '<p>Нет модулей</p>'}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        listEl.appendChild(accordion);
     });
-  });
-
-  // табы
-  document.querySelectorAll('.bf-tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const parent = btn.closest('.js-bf-build');
-      const tabId = btn.dataset.tab;
-      parent.querySelectorAll('.bf-tab-btn').forEach(b => b.classList.remove('is-active'));
-      parent.querySelectorAll('.bf-tab-content').forEach(c => c.classList.remove('is-active'));
-      btn.classList.add('is-active');
-      parent.querySelector(`[data-tab-content="${tabId}"]`)?.classList.add('is-active');
-    });
-  });
 }
 
-async function bfHandleSubmit() {
-  const title = document.getElementById('bf-title').value.trim();
-  const weaponType = document.getElementById('bf-weapon-type').value.trim();
-  const top1 = document.getElementById('bf-top1').value.trim();
-  const top2 = document.getElementById('bf-top2').value.trim();
-  const top3 = document.getElementById('bf-top3').value.trim();
-  const date = document.getElementById('bf-date').value;
-
-  const tabs = Array.from(document.querySelectorAll('.bf-tab-block')).map(tab => {
-    const label = tab.querySelector('.bf-tab-label').value.trim();
-    const items = Array.from(tab.querySelectorAll('.bf-mod-input')).map(i => i.value.trim()).filter(Boolean);
-    return { label, items };
-  });
-
-  const cats = Array.from(document.querySelectorAll('.bf-cat-checkbox:checked')).map(cb => cb.value);
-  const payload = { title, weapon_type: weaponType, top1, top2, top3, date, tabs, categories: cats };
-
-  const method = currentBfEditId ? 'PUT' : 'POST';
-  const url = currentBfEditId ? `/api/bf/builds/${currentBfEditId}` : '/api/bf/builds';
-
-  try {
-    const res = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    if (res.ok) {
-      alert(currentBfEditId ? 'Build updated!' : 'Build added!');
-      await bfLoadBuilds();
-      currentBfEditId = null;
-      showScreen('screen-battlefield-main');
-    } else {
-      const txt = await res.text();
-      alert(`Error saving build: ${txt}`);
-    }
-  } catch (e) {
-    console.error(e);
-    alert('Connection error');
-  }
-}
-
-async function bfDeleteBuild(id) {
-  if (!confirm('Delete build?')) return;
-  try {
-    const res = await fetch(`/api/bf/builds/${id}`, { method: 'DELETE' });
-    if (res.ok) await bfLoadBuilds();
-  } catch (err) {
-    console.error(err);
-    alert('Error deleting build');
-  }
-}
-
-document.getElementById('bf-add-tab')?.addEventListener('click', () => {
-  const container = document.getElementById('bf-tabs-container');
-  const tabDiv = document.createElement('div');
-  tabDiv.className = 'bf-tab-block';
-  tabDiv.innerHTML = `
-    <input type="text" class="bf-tab-label" placeholder="Setup name">
-    <div class="bf-modules"></div>
-    <button class="btn bf-add-mod">+ Module</button>
-    <button class="btn bf-del-tab">🗑 Remove Setup</button>
-  `;
-  container.appendChild(tabDiv);
-
-  tabDiv.querySelector('.bf-add-mod').addEventListener('click', () => {
-    const modInput = document.createElement('input');
-    modInput.className = 'bf-mod-input';
-    modInput.placeholder = 'Module name';
-    tabDiv.querySelector('.bf-modules').appendChild(modInput);
-  });
-
-  tabDiv.querySelector('.bf-del-tab').addEventListener('click', () => tabDiv.remove());
-});
-
-function bfShowAddForm() {
-  currentBfEditId = null;
-  document.getElementById('bf-title').value = '';
-  document.getElementById('bf-top1').value = '';
-  document.getElementById('bf-top2').value = '';
-  document.getElementById('bf-top3').value = '';
-  document.getElementById('bf-tabs-container').innerHTML = '';
-  document.querySelectorAll('.bf-cat-checkbox').forEach(cb => cb.checked = false);
-  showScreen('screen-bf-add-build');
-}
-
-function bfEditBuild(id) {
-  const build = bfCachedBuilds.find(b => b.id === id);
-  if (!build) return alert('Build not found');
-
-  currentBfEditId = id;
-  document.getElementById('bf-title').value = build.title || '';
-  document.getElementById('bf-weapon-type').value = build.weapon_type || '';
-  document.getElementById('bf-top1').value = build.top1 || '';
-  document.getElementById('bf-top2').value = build.top2 || '';
-  document.getElementById('bf-top3').value = build.top3 || '';
-  document.getElementById('bf-date').value = build.date || '';
-  document.querySelectorAll('.bf-cat-checkbox').forEach(cb => cb.checked = (build.categories || []).includes(cb.value));
-
-  const container = document.getElementById('bf-tabs-container');
-  container.innerHTML = '';
-
-  (build.tabs || []).forEach(tab => {
-    const tabDiv = document.createElement('div');
-    tabDiv.className = 'bf-tab-block';
-    tabDiv.innerHTML = `
-      <input type="text" class="bf-tab-label" value="${tab.label || ''}">
-      <div class="bf-modules"></div>
-      <button class="btn bf-add-mod">+ Module</button>
-      <button class="btn bf-del-tab">🗑 Remove Setup</button>
-    `;
-    container.appendChild(tabDiv);
-
-    const modsDiv = tabDiv.querySelector('.bf-modules');
-    (tab.items || []).forEach(m => {
-      const inp = document.createElement('input');
-      inp.className = 'bf-mod-input';
-      inp.value = m;
-      modsDiv.appendChild(inp);
-    });
-
-    tabDiv.querySelector('.bf-add-mod').addEventListener('click', () => {
-      const modInput = document.createElement('input');
-      modInput.className = 'bf-mod-input';
-      modInput.placeholder = 'Module name';
-      modsDiv.appendChild(modInput);
-    });
-    tabDiv.querySelector('.bf-del-tab').addEventListener('click', () => tabDiv.remove());
-  });
-
-  showScreen('screen-bf-add-build');
-}
-
-document.getElementById('bf-submit-build')?.addEventListener('click', bfHandleSubmit);
-document.getElementById('bf-add-build-btn')?.addEventListener('click', bfShowAddForm);
-
-
-// ===================================================================
-// 🔫 WEAPON TYPES MANAGEMENT
-// ===================================================================
-
+// ========================
+// ⚙️ ТИПЫ ОРУЖИЯ (ПРОСТАЯ ВЕРСИЯ)
+// ========================
 async function bfLoadWeaponTypes() {
-  const res = await fetch('/api/bf/types');
-  const types = await res.json();
-  const list = document.getElementById('bf-types-list');
-  if (!list) return;
-  list.innerHTML = '';
-  if (!types.length) {
-    list.innerHTML = '<p>No weapon types yet.</p>';
-    return;
-  }
+    try {
+        const res = await fetch('/api/bf/types');
+        const types = await res.json();
+        const list = document.getElementById('bf-types-list');
+        
+        if (!list) return;
+        
+        list.innerHTML = '';
+        
+        if (!types.length) {
+            list.innerHTML = '<p>Нет типов оружия</p>';
+            return;
+        }
 
-  types.forEach(t => {
-    const row = document.createElement('div');
-    row.className = 'bf-type-row';
-    row.innerHTML = `
-      <span class="bf-type-label">${t.label}</span>
-      <div class="bf-type-actions">
-        <button class="btn btn-sm bf-type-open" data-key="${t.key}" data-label="${t.label}">📖</button>
-        <button class="btn btn-sm bf-type-del" data-id="${t.id}">🗑</button>
-      </div>`;
-    list.appendChild(row);
-  });
+        types.forEach(t => {
+            const row = document.createElement('div');
+            row.className = 'bf-type-row';
+            row.innerHTML = `
+                <span class="bf-type-label">${t.label} (${t.key})</span>
+                <div class="bf-type-actions">
+                    <button class="btn btn-sm bf-type-open" data-key="${t.key}">📖 Модули</button>
+                    <button class="btn btn-sm bf-type-del" data-id="${t.id}">🗑 Удалить</button>
+                </div>`;
+            list.appendChild(row);
+        });
+
 
   list.querySelectorAll('.bf-type-open').forEach(btn => {
     btn.addEventListener('click', async () => {
