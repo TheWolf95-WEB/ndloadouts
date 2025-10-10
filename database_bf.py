@@ -266,27 +266,32 @@ def delete_bf_weapon_type(type_id):
 
 def get_bf_modules_by_type(weapon_type):
     with get_connection() as conn:
-        rows = conn.execute("""
+        # Модули конкретного типа
+        rows_specific = conn.execute("""
             SELECT id, category, en, pos
             FROM bf_modules
             WHERE weapon_type = ?
             ORDER BY category, pos, en
         """, (weapon_type,)).fetchall()
 
-        # если нет модулей для данного типа — взять общие (shv)
-        if not rows:
-            rows = conn.execute("""
-                SELECT id, category, en, pos
-                FROM bf_modules
-                WHERE weapon_type = 'shv'
-                ORDER BY category, pos, en
-            """).fetchall()
+        # Общие модули (shv)
+        rows_common = conn.execute("""
+            SELECT id, category, en, pos
+            FROM bf_modules
+            WHERE weapon_type = 'shv'
+            ORDER BY category, pos, en
+        """).fetchall()
 
+        # Объединяем всё
+        all_rows = rows_common + rows_specific
+
+        # Группируем по категориям
         data = {}
-        for r in rows:
+        for r in all_rows:
             cat = r["category"]
             data.setdefault(cat, []).append(dict(r))
         return data
+
 
 
 def add_bf_module(data):
