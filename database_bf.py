@@ -299,7 +299,22 @@ def delete_bf_module(module_id):
 def get_all_bf_builds():
     with get_connection() as conn:
         rows = conn.execute("SELECT * FROM bf_builds ORDER BY id DESC").fetchall()
-        return [dict(r) for r in rows]
+        builds = []
+        for r in rows:
+            b = dict(r)
+            # tabs
+            try:
+                b["tabs"] = json.loads(b["tabs"]) if isinstance(b["tabs"], str) and b["tabs"].startswith("[") else eval(b["tabs"])
+            except:
+                b["tabs"] = []
+            # categories
+            try:
+                b["categories"] = json.loads(b["categories"]) if isinstance(b["categories"], str) and b["categories"].startswith("[") else eval(b["categories"])
+            except:
+                b["categories"] = []
+            builds.append(b)
+        return builds
+
 
 def add_bf_build(data):
     with get_connection() as conn:
