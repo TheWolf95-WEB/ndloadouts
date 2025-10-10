@@ -811,13 +811,14 @@ from database_bf import (
 
 
 @app.on_event("startup")
-def init_bf_tables():
-    """Инициализация таблицы сборок Battlefield при запуске"""
+def init_all_tables():
+    """Инициализация ВСЕХ таблиц при запуске"""
     try:
-        init_bf_builds_table()
-        print("[BF] ✅ Таблица bf_builds готова")
+        from database_bf import init_bf_db
+        init_bf_db()  # Создает все таблицы Battlefield
+        print("[BF] ✅ Все таблицы Battlefield готовы")
     except Exception as e:
-        print("[BF] ⚠️ Ошибка инициализации bf_builds:", e)
+        print("[BF] ⚠️ Ошибка инициализации:", e)
 
 
 # === Получить все сборки ===
@@ -874,14 +875,6 @@ from database_bf import (
     add_bf_module,
     delete_bf_module
 )
-
-@app.on_event("startup")
-def init_bf_types_modules():
-    try:
-        init_bf_types_modules_tables()
-        print("[BF] ✅ Таблицы типов и модулей готовы")
-    except Exception as e:
-        print("[BF] ⚠️ Ошибка инициализации типов/модулей:", e)
 
 
 # === Типы оружия ===
