@@ -277,7 +277,7 @@ document.getElementById("bf-add-tab")?.addEventListener("click", () => {
   const type = document.getElementById("bf-weapon-type").value;
   const mods = bfModulesByType[type];
   if (!mods) {
-    alert("Select weapon type first");
+    alert("Выберите тип оружия");
     return;
   }
 
