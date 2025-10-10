@@ -1591,15 +1591,10 @@ body.warzone-theme .card-btn:hover {
 }
 
 #screen-bf-modules-list .btn {
-  width: 100%;
-  background: rgba(58, 123, 213, 0.15);
-  border: 1px solid rgba(58, 123, 213, 0.3);
-  color: #9cc9ff;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 14px;
-  margin-top: 20px;
-  transition: all 0.2s ease;
+    background: rgba(58, 123, 213, 0.15);
+    padding: 12px;
+    font-size: 14px;
+    transition: all 0.2s ease;
 }
 
 #screen-bf-modules-list .btn:hover {
@@ -1608,42 +1603,6 @@ body.warzone-theme .card-btn:hover {
   color: #e0e6ee;
 }
 
-/* Адаптивность */
-@media (max-width: 768px) {
-  .builds-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  #bf-modules-types-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  #bf-modules-toolbar {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-  
-  #bf-modules-toolbar .form-input {
-    width: 100%;
-  }
-  
-  .module-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  
-  .module-row .btn-sm {
-    align-self: flex-end;
-  }
-  
-  #screen-bf-edit-builds .back-btn {
-    position: relative;
-    top: auto;
-    left: auto;
-    margin-bottom: 15px;
-  }
-}
 
 /* Пустые состояния */
 .builds-grid:empty::before,
