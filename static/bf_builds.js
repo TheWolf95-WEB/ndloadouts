@@ -250,28 +250,6 @@ async function bfLoadModules(type) {
    ⚙️  ДОБАВЛЕНИЕ / РЕДАКТИРОВАНИЕ СБОРКИ
    =============================== */
 
-// Кнопка "Добавить сборку"
-document.getElementById("bf-add-build-btn")?.addEventListener("click", () => {
-  bfCurrentEditId = null;
-  document.getElementById("bf-submit-build").textContent = "➕ Добавить сборку";
-
-  // очистка полей
-  document.getElementById("bf-title").value = "";
-  document.getElementById("bf-weapon-type").value = "";
-  document.getElementById("bf-top1").value = "";
-  document.getElementById("bf-top2").value = "";
-  document.getElementById("bf-top3").value = "";
-  document.getElementById("bf-build-date").value = new Date().toISOString().split("T")[0];
-  document.getElementById("bf-tabs-container").innerHTML = "";
-
-  bfShowScreen("screen-bf-form");
-});
-
-// Назад с формы
-document.getElementById("bf-back-to-main")?.addEventListener("click", () => {
-  bfShowScreen("screen-battlefield-main");
-});
-
 // === Добавление вкладки ===
 document.getElementById("bf-add-tab")?.addEventListener("click", () => {
   const type = document.getElementById("bf-weapon-type").value;
@@ -281,6 +259,23 @@ document.getElementById("bf-add-tab")?.addEventListener("click", () => {
     return;
   }
 
+  const tabDiv = document.createElement("div");
+  tabDiv.className = "tab-block";
+  tabDiv.innerHTML = `
+    <input type="text" class="tab-label" placeholder="Название вкладки" style="margin-bottom: 10px;">
+    <div class="mod-selects"></div>
+    <div class="tab-actions">
+      <button type="button" class="btn add-mod">+ Модуль</button>
+      <button type="button" class="btn delete-tab">🗑 Удалить вкладку</button>
+    </div>
+  `;
+  document.getElementById("bf-tabs-container").appendChild(tabDiv);
+
+  tabDiv.querySelector(".add-mod").addEventListener("click", () => bfAddModuleRow(tabDiv, type));
+  tabDiv.querySelector(".delete-tab").addEventListener("click", () => tabDiv.remove());
+});
+
+// === При смене типа оружия ===
 document.getElementById("bf-weapon-type")?.addEventListener("change", async (e) => {
   const type = e.target.value;
   if (!type) return;
