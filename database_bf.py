@@ -216,6 +216,86 @@ def get_challenge_goal(challenge_id: int) -> int:
 
 
 
+# ========================
+# 🧱 BATTLEFIELD BUILDS
+# ========================
+
+def init_bf_builds_table():
+    """Создание таблицы сборок Battlefield (если не существует)"""
+    with get_bf_conn() as conn:
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS bf_builds (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                weapon_type TEXT NOT NULL,
+                top1 TEXT,
+                top2 TEXT,
+                top3 TEXT,
+                date TEXT,
+                tabs_json TEXT,
+                categories_json TEXT,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+
+
+def add_bf_build(data: dict):
+    """Добавление новой сборки Battlefield"""
+    with get_bf_conn() as conn:
+        conn.execute("""
+            INSERT INTO bf_builds (title, weapon_type, top1, top2, top3, date, tabs_json, categories_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            data.get("title", "").strip(),
+            data.get("weapon_type", "").strip(),
+            data.get("top1", "").strip(),
+            data.get("top2", "").strip(),
+            data.get("top3", "").strip(),
+            data.get("date", "").strip(),
+            json.dumps(data.get("tabs", []), ensure_ascii=False),
+            json.dumps(data.get("categories", []), ensure_ascii=False)
+        ))
+
+
+def get_all_bf_builds():
+    """Получить все сборки Battlefield"""
+    with get_bf_conn(row_mode=True) as conn:
+        rows = conn.execute("SELECT * FROM bf_builds ORDER BY id DESC").fetchall()
+        builds = []
+        for r in rows:
+            item = dict(r)
+            # распаковка JSON
+            item["tabs"] = json.loads(item.get("tabs_json") or "[]")
+            item["categories"] = json.loads(item.get("categories_json") or "[]")
+            builds.append(item)
+        return builds
+
+
+def update_bf_build(build_id: int, data: dict):
+    """Обновление сборки Battlefield"""
+    with get_bf_conn() as conn:
+        conn.execute("""
+            UPDATE bf_builds
+            SET title = ?, weapon_type = ?, top1 = ?, top2 = ?, top3 = ?, 
+                date = ?, tabs_json = ?, categories_json = ?
+            WHERE id = ?
+        """, (
+            data.get("title", "").strip(),
+            data.get("weapon_type", "").strip(),
+            data.get("top1", "").strip(),
+            data.get("top2", "").strip(),
+            data.get("top3", "").strip(),
+            data.get("date", "").strip(),
+            json.dumps(data.get("tabs", []), ensure_ascii=False),
+            json.dumps(data.get("categories", []), ensure_ascii=False),
+            build_id
+        ))
+
+
+def delete_bf_build(build_id: int):
+    """Удаление сборки Battlefield"""
+    with get_bf_conn() as conn:
+        conn.execute("DELETE FROM bf_builds WHERE id = ?", (build_id,))
 
 
 
@@ -226,4 +306,5 @@ def get_challenge_goal(challenge_id: int) -> int:
 
 if __name__ == "__main__":
     init_bf_db()
+    init_bf_builds_table()
     print("[+] Battlefield Challenges DB initialized:", BF_DB_PATH)
