@@ -1535,3 +1535,96 @@ body.warzone-theme .card-btn:hover {
 .module-group {
   animation: fadeIn 0.3s ease;
 }
+
+
+
+/* ===============================
+   🎨 СТИЛИ БАЗЫ СБОРОК BATTLEFIELD
+   =============================== */
+#screen-bf-edit-builds {
+  background: #0f141a;
+  min-height: 100vh;
+  color: #e0e6ee;
+  padding: 20px;
+}
+
+#screen-bf-edit-builds h2 {
+  color: #9cc9ff;
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.stats-bar {
+  text-align: right;
+  color: #8da2b8;
+  margin-bottom: 20px;
+}
+
+.builds-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 16px;
+}
+
+.bf-build-card {
+  background: linear-gradient(145deg, #141c25, #0e1318);
+  border: 1px solid #1f2b38;
+  border-radius: 12px;
+  padding: 18px;
+  color: #e0e6ee;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  transition: all 0.25s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.bf-build-card:hover {
+  border-color: #3a7bd5;
+  box-shadow: 0 4px 16px rgba(58,123,213,0.3);
+  transform: translateY(-3px);
+}
+
+.bf-build-card h4 {
+  font-size: 1.1rem;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.bf-build-card p {
+  font-size: 0.9rem;
+  color: #8da2b8;
+  margin-bottom: 10px;
+}
+
+.bf-build-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.bf-build-actions .btn {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  transition: background 0.2s ease;
+}
+
+.btn-edit {
+  background: #2e8b57;
+  color: #fff;
+}
+
+.btn-edit:hover {
+  background: #37a46b;
+}
+
+.btn-delete {
+  background: #b22222;
+  color: #fff;
+}
+
+.btn-delete:hover {
+  background: #cc3333;
+}
