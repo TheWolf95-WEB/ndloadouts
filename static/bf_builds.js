@@ -240,6 +240,9 @@ document.getElementById("bf-mod-add-btn")?.addEventListener("click", async () =>
    =============================== */
 async function bfLoadModules(type) {
   try {
+    // Перед загрузкой очищаем старые данные
+    delete bfModulesByType[type];
+
     const res = await fetch(`/api/bf/modules/${type}`);
     const byCategory = await res.json();
     const byKey = {};
@@ -251,7 +254,11 @@ async function bfLoadModules(type) {
         byKey[m.en.toLowerCase()] = { en: m.en, category: cat };
       });
     }
+
+    // Сохраняем только свежие данные
     bfModulesByType[type] = { byCategory, byKey, flat };
+
+    console.log(`✅ Модули обновлены: ${type}`, bfModulesByType[type]);
   } catch (e) {
     console.error("Failed to load modules for", type, e);
   }
