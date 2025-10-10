@@ -250,6 +250,25 @@ async function bfLoadModules(type) {
    ⚙️  ДОБАВЛЕНИЕ / РЕДАКТИРОВАНИЕ СБОРКИ
    =============================== */
 
+// === Кнопка "Добавить сборку" ===
+document.getElementById("bf-add-build-btn")?.addEventListener("click", () => {
+  bfCurrentEditId = null;
+  document.getElementById("bf-submit-build").textContent = "➕ Добавить сборку";
+
+  // Очистка полей формы
+  document.getElementById("bf-title").value = "";
+  document.getElementById("bf-weapon-type").value = "";
+  document.getElementById("bf-top1").value = "";
+  document.getElementById("bf-top2").value = "";
+  document.getElementById("bf-top3").value = "";
+  document.getElementById("bf-build-date").value = new Date().toISOString().split("T")[0];
+  document.getElementById("bf-tabs-container").innerHTML = "";
+
+  bfShowScreen("screen-bf-form");
+});
+
+
+
 // === Добавление вкладки ===
 document.getElementById("bf-add-tab")?.addEventListener("click", () => {
   const type = document.getElementById("bf-weapon-type").value;
