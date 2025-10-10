@@ -1334,11 +1334,11 @@ body.warzone-theme .card-btn:hover {
    =========================== */
 
 .bf-builds-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   padding: 16px;
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -1352,6 +1352,9 @@ body.warzone-theme .card-btn:hover {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
 }
 
 .bf-build-card::before {
@@ -1387,6 +1390,7 @@ body.warzone-theme .card-btn:hover {
   flex-wrap: wrap;
   gap: 8px;
   margin-bottom: 12px;
+  align-items: center;
 }
 
 .bf-meta-item {
@@ -1400,14 +1404,14 @@ body.warzone-theme .card-btn:hover {
 .bf-categories {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 16px;
 }
 
 .bf-cat {
-  font-size: 0.75rem;
-  padding: 4px 12px;
-  border-radius: 20px;
+  font-size: 0.7rem;
+  padding: 3px 10px;
+  border-radius: 12px;
   font-weight: 600;
   text-shadow: 0 1px 1px rgba(0,0,0,0.4);
   border: 1px solid rgba(255,255,255,0.15);
@@ -1443,35 +1447,34 @@ body.warzone-theme .card-btn:hover {
   display: inline-block;
   background: rgba(58, 123, 213, 0.15);
   color: #9cc9ff;
-  padding: 6px 14px;
+  padding: 6px 12px;
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   border: 1px solid rgba(58, 123, 213, 0.3);
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   text-transform: capitalize;
   font-weight: 600;
-}
-
-.bf-tabs-count {
-  color: #8fa3bf;
-  font-size: 0.85rem;
-  margin-bottom: 16px;
 }
 
 .bf-card-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
+  gap: 8px;
   border-top: 1px solid #2a3a5a;
   padding-top: 16px;
+  margin-top: auto;
 }
 
 .bf-card-footer .btn {
-  padding: 8px 16px;
+  padding: 8px 12px;
   font-size: 0.9rem;
   border-radius: 8px;
   transition: all 0.2s ease;
   font-weight: 600;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-edit {
@@ -1524,6 +1527,13 @@ body.warzone-theme .card-btn:hover {
 }
 
 /* Адаптивность */
+@media (max-width: 1024px) {
+  .bf-builds-grid {
+    grid-template-columns: 1fr;
+    max-width: 600px;
+  }
+}
+
 @media (max-width: 768px) {
   .bf-builds-grid {
     padding: 12px;
@@ -1544,12 +1554,7 @@ body.warzone-theme .card-btn:hover {
   }
   
   .bf-card-footer {
-    flex-direction: column;
-  }
-  
-  .bf-card-footer .btn {
-    width: 100%;
-    text-align: center;
+    justify-content: center;
   }
 }
 
@@ -1568,7 +1573,6 @@ body.warzone-theme .card-btn:hover {
 .bf-build-card {
   animation: bfCardAppear 0.3s ease-out;
 }
-
 /* === Справочник модулей - выбор типа === */
 #screen-bf-modules-types {
   padding: 20px;
