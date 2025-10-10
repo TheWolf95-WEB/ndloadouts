@@ -1076,10 +1076,6 @@ function bfFilterBuilds() {
    📦 ОБНОВЛЕННАЯ ФУНКЦИЯ ЗАГРУЗКИ БАЗЫ СБОРОК
    =============================== */
 
-/* ===============================
-   📦 ОБНОВЛЕННАЯ ФУНКЦИЯ ЗАГРУЗКИ БАЗЫ СБОРОК
-   =============================== */
-
 async function bfLoadBuildsTable() {
   try {
     const res = await fetch("/api/bf/builds");
@@ -1133,28 +1129,6 @@ async function bfLoadBuildsTable() {
             .join("")
         : "";
 
-      // Формат даты
-      const formatDate = (dateStr) => {
-        if (!dateStr) return '';
-        if (dateStr.includes('.')) return dateStr;
-        if (dateStr.includes('-')) {
-          const [year, month, day] = dateStr.split('-');
-          return `${day}.${month}.${year}`;
-        }
-        return dateStr;
-      };
-
-      const date = formatDate(b.date);
-
-      // Количество вкладок
-      let tabsCount = 0;
-      try {
-        const tabs = typeof b.tabs === "string" ? JSON.parse(b.tabs) : (b.tabs || []);
-        tabsCount = tabs.length;
-      } catch {
-        tabsCount = 0;
-      }
-
       const card = document.createElement("div");
       card.className = "bf-build-card";
       card.setAttribute('data-weapon-type', b.weapon_type);
@@ -1164,18 +1138,14 @@ async function bfLoadBuildsTable() {
         <div class="bf-card-header">
           <h3>${b.title}</h3>
         </div>
-        
-        <div class="bf-card-meta">
-          <span class="bf-meta-item">${date}</span>
-            <div class="bf-weapon-type">
-             ${weaponLabel}
-           </div>
-        </div>
     
         <div class="bf-categories">
           ${cats}
         </div>
         
+        <div class="bf-weapon-type">
+          ${weaponLabel}
+        </div>
         
         <div class="bf-card-footer">
           <button class="btn btn-edit" title="Редактировать">✏</button>
@@ -1218,7 +1188,6 @@ async function bfLoadBuildsTable() {
     grid.innerHTML = `<p style="text-align:center;color:#dc3545;padding:40px;">Ошибка загрузки сборок</p>`;
   }
 }
-
 /* ===============================
    🎯 ФИЛЬТРЫ ДЛЯ БАЗЫ СБОРОК (ТОЛЬКО ТИПЫ И ПОИСК)
    =============================== */
