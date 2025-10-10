@@ -606,98 +606,133 @@ async function bfLoadBuilds() {
 
 // === Отображение сборок (аккордеон) ===
 function bfRenderBuilds(builds) {
-  const container = document.getElementById("bf-builds-list");
-  const countEl = document.getElementById("bf-user-builds-count");
-  const noResults = document.getElementById("bf-no-results-message");
+  const list = document.getElementById("bf-builds-list");
+  if (!list) return;
 
-  if (!container) return;
-  container.innerHTML = "";
-  countEl.textContent = `Всего сборок: ${builds.length}`;
-  noResults.style.display = builds.length ? "none" : "block";
+  list.innerHTML = "";
 
-  builds.forEach((b) => {
-    const item = document.createElement("div");
-    item.className = "bf-build-item";
+  if (!Array.isArray(builds) || builds.length === 0) {
+    list.innerHTML = '<p class="no-results">🔍 Сборок пока нет</p>';
+    return;
+  }
 
-       // ✅ безопасно парсим tabs
-     let tabs = [];
-     try {
-       tabs = typeof b.tabs === "string" ? JSON.parse(b.tabs) : (b.tabs || []);
-     } catch {
-       tabs = [];
-     }
+  // Загружаем все типы оружия для переводов
+  const uniqueTypes = [...new Set(builds.map(b => b.weapon_type))];
+  uniqueTypes.forEach(t => bfLoadModules(t));
 
-    const topBlock = `
-      <div class="bf-build-header">
-        <h3>${b.title}</h3>
-        <span class="bf-build-type">${bfWeaponTypeLabels[b.weapon_type] || b.weapon_type}</span>
+  builds.forEach((build, buildIndex) => {
+    const wrapper = document.createElement("div");
+    wrapper.className = "bf-loadout js-loadout";
+
+    // 🔹 безопасный парсинг tabs
+    let tabs = [];
+    try {
+      tabs = typeof build.tabs === "string" ? JSON.parse(build.tabs) : (build.tabs || []);
+    } catch {
+      tabs = [];
+    }
+
+    const typeLabel = bfWeaponTypeLabels[build.weapon_type] || build.weapon_type;
+
+    const top = [build.top1, build.top2, build.top3]
+      .filter(Boolean)
+      .map((t, i) => {
+        const colors = ["#b8a326", "#FF8C00", "#B0B0B0"];
+        return `<span class="bf-top bf-top${i + 1}" style="background:${colors[i]}">${t}</span>`;
+      })
+      .join("");
+
+    const categories = (build.categories || [])
+      .map((c) => `<span class="bf-badge">${c}</span>`)
+      .join("");
+
+    const tabBtns = tabs
+      .map(
+        (tab, i) =>
+          `<button class="bf-tab-btn ${i === 0 ? "is-active" : ""}" data-tab="bf-${buildIndex}-${i}">
+             ${tab.label || "Вкладка"}
+           </button>`
+      )
+      .join("");
+
+    const tabContents = tabs
+      .map(
+        (tab, i) => `
+        <div class="bf-tab-content ${i === 0 ? "is-active" : ""}" data-tab-content="bf-${buildIndex}-${i}">
+          <div class="bf-modules">
+            ${(tab.items || [])
+              .map((m) => {
+                const modInfo = bfModulesByType[build.weapon_type]?.byKey?.[m.toLowerCase()];
+                const category = modInfo?.category || "—";
+                return `
+                  <div class="bf-mod">
+                    <span class="bf-mod-slot">${category}</span>
+                    <span class="bf-mod-name">${m}</span>
+                  </div>
+                `;
+              })
+              .join("")}
+          </div>
+        </div>`
+      )
+      .join("");
+
+    wrapper.innerHTML = `
+      <div class="bf-loadout__header js-loadout-toggle">
+        <div class="bf-loadout__header-top">
+          <button class="bf-toggle-icon" type="button"><i class="fa-solid fa-chevron-down"></i></button>
+          <h3 class="bf-loadout__title">${build.title}</h3>
+          <span class="bf-loadout__date">${build.date || ""}</span>
+        </div>
+        <div class="bf-loadout__meta">
+          <div class="bf-tops">${top}</div>
+          <div class="bf-categories">${categories}</div>
+          <div class="bf-type">${typeLabel}</div>
+        </div>
       </div>
-      <div class="bf-top-mods">
-        ${b.top1 ? `<span class="top1">🥇 ${b.top1}</span>` : ""}
-        ${b.top2 ? `<span class="top2">🥈 ${b.top2}</span>` : ""}
-        ${b.top3 ? `<span class="top3">🥉 ${b.top3}</span>` : ""}
+      <div class="bf-loadout__content" style="max-height:0; overflow:hidden;">
+        <div class="bf-loadout__inner">
+          <div class="bf-tabs">
+            <div class="bf-tab-buttons">${tabBtns}</div>
+            <div class="bf-tab-contents">${tabContents}</div>
+          </div>
+        </div>
       </div>
-      <button class="btn bf-toggle">Показать модули</button>
     `;
 
-   const tabsHTML = tabs
-     .map((tab) => {
-       const modsCount = (tab.items || []).filter(Boolean).length;
-   
-       const modsList = (tab.items || [])
-         .filter(Boolean)
-         .map((m) => {
-           const modInfo = bfModulesByType[b.weapon_type]?.byKey?.[m.toLowerCase()];
-           const category = modInfo?.category || "—";
-           return `
-             <div class="bf-mod-card">
-               <div class="bf-mod-category">${category}</div>
-               <div class="bf-mod-name">${m}</div>
-             </div>
-           `;
-         })
-         .join("");
-   
-       return `
-         <div class="bf-tab">
-           <button class="bf-tab-header">
-             <span>${tab.label || "Без названия"} (${modsCount} модулей)</span>
-             <span class="arrow">▼</span>
-           </button>
-           <div class="bf-tab-body">${modsList}</div>
-         </div>
-       `;
-     })
-     .join("");
+    list.appendChild(wrapper);
+  });
 
+  // === Анимация аккордеона ===
+  document.querySelectorAll(".js-loadout-toggle").forEach((header) => {
+    header.addEventListener("click", () => {
+      const parent = header.closest(".bf-loadout");
+      const content = parent.querySelector(".bf-loadout__content");
+      parent.classList.toggle("is-open");
 
-    const content = document.createElement("div");
-    content.className = "bf-build-content";
-    content.innerHTML = tabsHTML;
-
-    // обработка аккордеона
-    content.querySelectorAll(".bf-tab-header").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const body = btn.nextElementSibling;
-        const expanded = body.style.display === "block";
-        body.style.display = expanded ? "none" : "block";
-        btn.querySelector(".arrow").textContent = expanded ? "▼" : "▲";
-      });
+      content.style.maxHeight = parent.classList.contains("is-open")
+        ? content.scrollHeight + "px"
+        : "0";
     });
+  });
 
-    item.innerHTML = topBlock;
-    item.appendChild(content);
-    container.appendChild(item);
+  // === Переключение вкладок ===
+  document.querySelectorAll(".bf-tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const loadout = btn.closest(".bf-loadout");
+      const tab = btn.dataset.tab;
 
-    const toggle = item.querySelector(".bf-toggle");
-    toggle.addEventListener("click", () => {
-      const visible = content.style.display === "block";
-      content.style.display = visible ? "none" : "block";
-      toggle.textContent = visible ? "Показать модули" : "Скрыть модули";
+      loadout.querySelectorAll(".bf-tab-btn").forEach((b) => b.classList.remove("is-active"));
+      loadout.querySelectorAll(".bf-tab-content").forEach((c) => c.classList.remove("is-active"));
+
+      btn.classList.add("is-active");
+      loadout.querySelector(`[data-tab-content="${tab}"]`)?.classList.add("is-active");
+
+      const content = loadout.querySelector(".bf-loadout__content");
+      content.style.maxHeight = content.scrollHeight + "px";
     });
   });
 }
-
 
 /* ===============================
    🧩 ФИЛЬТРЫ И ПОИСК
