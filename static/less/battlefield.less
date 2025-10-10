@@ -46,13 +46,9 @@
   white-space: nowrap;
 }
 
-.form-section {
-  margin-bottom: 25px;
-  padding: 15px;
-  background: var(--bf-card);
-  border-radius: 12px;
-}
-
+.form-section { display: flex; flex-direction: column; margin:20px 0; } 
+.form-input select { width: 100%; padding: 11px 14px; background: linear-gradient(145deg, #1b2324, #101617); border: none; color: #fff; border-radius: 8px; font-size: 0.95rem; height: 44px; transition: 0.2s; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 -1px 4px rgba(255, 255, 255, 0.05); }
+.form-input:focus, select:focus { background: linear-gradient(145deg, #223234, #141c1d); box-shadow: 0 0 0 2px var(--wz-accent-glow), inset 0 -1px 4px rgba(255, 255, 255, 0.1); outline: none; } select:disabled { color: #888; }
 
 /* === Battlefield Tabs — чуть крупнее и с мягкими краями === */
 #bf-tabs .tab-btn {
