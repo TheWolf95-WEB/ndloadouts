@@ -1107,7 +1107,6 @@ body.warzone-theme .card-btn:hover {
 .add-tab-btn {
   width: 100%;
   background: rgba(58, 123, 213, 0.15);
-  border: 1px solid rgba(58, 123, 213, 0.3);
   color: #9cc9ff;
   padding: 10px;
   font-size: 13px;
@@ -1144,6 +1143,7 @@ body.warzone-theme .card-btn:hover {
 /* Категории - более компактные */
 .categories-grid {
   gap: 8px;
+  display:flex;
 }
 
 .category-checkbox {
@@ -1178,24 +1178,11 @@ body.warzone-theme .card-btn:hover {
   .tab-actions {
     flex-direction: row; /* Оставляем в строке даже на мобильных */
   }
-  
-  .tab-actions .btn {
-    font-size: 12px;
-    padding: 6px 8px;
-  }
-  
+    
   .mod-row {
     grid-template-columns: 1fr; /* На мобильных в колонку */
     gap: 6px;
   }
-  
-  .add-tab-btn {
-    padding: 8px;
-    font-size: 12px;
-  }
-  
-  .btn-group .btn {
-    padding: 10px;
-    font-size: 13px;
-  }
+
+
 }
