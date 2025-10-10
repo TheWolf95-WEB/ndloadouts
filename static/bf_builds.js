@@ -203,6 +203,18 @@ document.getElementById("bf-mod-add-btn")?.addEventListener("click", async () =>
     alert("All fields are required");
     return;
   }
+   
+   const resCheck = await fetch(`/api/bf/modules/${payload.weapon_type}`);
+   const existing = await resCheck.json();
+   const exists = Object.values(existing).some(list =>
+     list.some(m => m.category === payload.category && m.en.toLowerCase() === payload.en.toLowerCase())
+   );
+   
+   if (exists) {
+     alert("Такой модуль уже существует!");
+     return;
+   }
+
 
   try {
     await fetch("/api/bf/modules", {
