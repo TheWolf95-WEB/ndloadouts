@@ -1167,17 +1167,15 @@ async function bfLoadBuildsTable() {
         
         <div class="bf-card-meta">
           <span class="bf-meta-item">${date}</span>
-          <span class="bf-meta-item">•</span>
-          <span class="bf-meta-item">${tabsCount} вклад.</span>
+            <div class="bf-weapon-type">
+             ${weaponLabel}
+           </div>
         </div>
     
         <div class="bf-categories">
           ${cats}
         </div>
         
-        <div class="bf-weapon-type">
-          ${weaponLabel}
-        </div>
         
         <div class="bf-card-footer">
           <button class="btn btn-edit" title="Редактировать">✏</button>
