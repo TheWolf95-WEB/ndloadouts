@@ -1158,15 +1158,20 @@ async function bfLoadBuildsTable() {
       const card = document.createElement("div");
       card.className = "bf-build-card";
       card.setAttribute('data-weapon-type', b.weapon_type);
-      card.setAttribute('data-categories', Array.isArray(b.categories) ? b.categories.join(',') : '');
       card.setAttribute('data-title', b.title.toLowerCase());
       
       card.innerHTML = `
         <div class="bf-card-header">
           <h3>${b.title}</h3>
         </div>
+        
+        <div class="bf-card-meta">
+          <span class="bf-meta-item">${date}</span>
+          <span class="bf-meta-item">•</span>
+          <span class="bf-meta-item">${tabsCount} вклад.</span>
+        </div>
     
-         <div class="bf-categories">
+        <div class="bf-categories">
           ${cats}
         </div>
         
@@ -1216,10 +1221,8 @@ async function bfLoadBuildsTable() {
   }
 }
 
-// Остальные функции фильтров остаются без изменений...
-
 /* ===============================
-   🎯 ФИЛЬТРЫ ДЛЯ БАЗЫ СБОРОК
+   🎯 ФИЛЬТРЫ ДЛЯ БАЗЫ СБОРОК (ТОЛЬКО ТИПЫ И ПОИСК)
    =============================== */
 
 async function bfLoadWeaponTypesForFilter() {
@@ -1244,14 +1247,10 @@ async function bfLoadWeaponTypesForFilter() {
 
 function bfInitEditBuildsFilters() {
   const typeFilter = document.getElementById('bf-edit-type-filter');
-  const categoryFilter = document.getElementById('bf-edit-category-filter');
   const searchInput = document.getElementById('bf-edit-search');
   
   if (typeFilter) {
     typeFilter.addEventListener('change', bfFilterEditBuilds);
-  }
-  if (categoryFilter) {
-    categoryFilter.addEventListener('change', bfFilterEditBuilds);
   }
   if (searchInput) {
     searchInput.addEventListener('input', bfFilterEditBuilds);
@@ -1263,7 +1262,6 @@ function bfInitEditBuildsFilters() {
 
 function bfFilterEditBuilds() {
   const typeFilter = document.getElementById('bf-edit-type-filter')?.value || 'all';
-  const categoryFilter = document.getElementById('bf-edit-category-filter')?.value || 'all';
   const searchQuery = document.getElementById('bf-edit-search')?.value.toLowerCase() || '';
   
   const cards = document.querySelectorAll('.bf-build-card');
@@ -1271,14 +1269,12 @@ function bfFilterEditBuilds() {
   
   cards.forEach(card => {
     const weaponType = card.getAttribute('data-weapon-type') || '';
-    const categories = card.getAttribute('data-categories') || '';
     const title = card.getAttribute('data-title') || '';
     
     const typeMatch = typeFilter === 'all' || weaponType === typeFilter;
-    const categoryMatch = categoryFilter === 'all' || categories.includes(categoryFilter);
     const searchMatch = searchQuery === '' || title.includes(searchQuery);
     
-    const isVisible = typeMatch && categoryMatch && searchMatch;
+    const isVisible = typeMatch && searchMatch;
     card.style.display = isVisible ? 'block' : 'none';
     
     if (isVisible) visibleCount++;
