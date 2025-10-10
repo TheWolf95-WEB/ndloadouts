@@ -1167,8 +1167,6 @@ async function bfLoadBuildsTable() {
         </div>
         
         <div class="bf-card-meta">
-          <span class="bf-meta-item">${date}</span>
-          <span class="bf-meta-item">•</span>
           <span class="bf-meta-item">${tabsCount} вклад.</span>
         </div>
         
