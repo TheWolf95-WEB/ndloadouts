@@ -719,12 +719,6 @@ async function loadBuilds(category = 'all') {
   const res = await fetch(`/api/builds?category=${category}`);
   const builds = await res.json();
 
-  // Сохраняем builds для фильтрации
-  window.userBuilds = builds;
-
-  // Обновляем статистику
-  updateUserStats(builds.length, builds.length);
-
   // если пусто
   if (!Array.isArray(builds) || builds.length === 0) {
     buildsList.innerHTML = '<p>Сборок пока нет.</p>';
@@ -831,7 +825,6 @@ async function loadBuilds(category = 'all') {
     });
 
     renderUserBuilds(filtered);
-    updateUserStats(builds.length, filtered.length);
   }
 
   // Слушатели событий для фильтров
@@ -845,20 +838,6 @@ async function loadBuilds(category = 'all') {
   });
 }
 
-// Функция обновления статистики для пользователей
-function updateUserStats(total, filtered) {
-  const totalCount = document.getElementById('user-builds-count');
-  const filteredCount = document.getElementById('user-filtered-count');
-  
-  totalCount.textContent = `Всего сборок: ${total}`;
-  
-  if (filtered !== total) {
-    filteredCount.textContent = `Найдено: ${filtered}`;
-    filteredCount.style.display = 'inline';
-  } else {
-    filteredCount.style.display = 'none';
-  }
-}
 
 // Функция рендера сборок для пользователей
 function renderUserBuilds(buildsToRender) {
