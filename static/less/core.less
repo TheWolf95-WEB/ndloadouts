@@ -382,20 +382,20 @@ body {
 
 
 /* ===============================
-   📱 NDHQ GLOBAL SWIPE ANIMATION
+   📱 NDHQ SWIPE ANIMATION STYLE
    =============================== */
-
 .screen {
   transition:
     transform 0.25s ease-out,
     opacity 0.25s ease-out;
   will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
 }
 
 .slide-out-right {
   transform: translateX(100%);
   opacity: 0;
-  transition: transform 0.25s ease-out, opacity 0.2s ease-out;
 }
 
 .slide-in-left {
@@ -412,13 +412,4 @@ body {
     opacity: 1;
   }
 }
-
-/* 💡 Обязательно, чтобы не было миганий при переключении экранов */
-.screen,
-.slide-in-left,
-.slide-out-right {
-  backface-visibility: hidden;
-  -webkit-transform: translateZ(0);
-}
-
 
