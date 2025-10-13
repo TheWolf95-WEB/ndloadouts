@@ -1,148 +1,129 @@
 // ===========================================
-// 📱 NDHQ Swipe System v7.1 — Debug + Fix Start
+// 📱 NDHQ Swipe System v8.0 (Hammer.js Edition)
 // ===========================================
 
 (function () {
   if (window.__NDHQSwipeInstalled) return;
   window.__NDHQSwipeInstalled = true;
 
+  // === Конфигурация ===
+  const EDGE_ZONE = 50;  // активная зона свайпа от левого края
+  const TRANSITION = 200;
+
+  // === Инициализация ===
+  const hammer = new Hammer(document.body);
+  hammer.get('pan').set({ direction: Hammer.DIRECTION_HORIZONTAL, threshold: 5 });
+
+  let isPanning = false;
   let startX = 0;
-  let startY = 0;
-  let deltaX = 0;
-  let deltaY = 0;
-  let active = false;
-  let startTime = 0;
-  let currentScreen = null;
-  let prevScreen = null;
-  let prevId = null;
 
-  const EDGE_ZONE = 60;         // ← увеличим зону
-  const DIST_TRIGGER = 90;
-  const SPEED_TRIGGER = 0.35;
-  const TRANSITION = 220;
-  const PARALLAX = 0.25;
+  hammer.on('panstart', (ev) => {
+    // свайп разрешён только от левого края
+    if (ev.center.x > EDGE_ZONE) return;
+    const active = document.querySelector('.screen.active');
+    if (!active || active.id === 'screen-home') return;
 
-  document.addEventListener("touchstart", (e) => {
-    if (e.touches.length !== 1) return;
-    const t = e.touches[0];
-    const x = t.clientX;
-    const y = t.clientY;
+    const prevId = window.screenHistory?.[window.screenHistory.length - 1];
+    if (!prevId) return;
 
-    console.log("👉 touchstart at", x, y);
+    isPanning = true;
+    startX = ev.center.x;
 
-    if (x > EDGE_ZONE) return; // свайп только от края
-
-    currentScreen = document.querySelector(".screen.active");
-    if (!currentScreen) return console.log("⚠️ нет активного экрана");
-
-    // отключаем свайп только на home
-    if (currentScreen.id === "screen-home") {
-      console.log("🚫 свайп отключён на home");
-      return;
+    const prev = document.getElementById(prevId);
+    if (prev) {
+      prev.style.display = 'block';
+      prev.style.transform = 'translateX(-25px)';
+      prev.style.opacity = '0.5';
+      prev.style.zIndex = '5';
     }
+  });
 
-    prevId = window.screenHistory?.[window.screenHistory.length - 1];
-    if (!prevId) return console.log("⚠️ нет предыдущего экрана в истории");
-
-    prevScreen = document.getElementById(prevId);
-    if (!prevScreen) return console.log("⚠️ нет prevScreen");
-
-    prevScreen.style.display = "block";
-    prevScreen.style.transform = "translateX(-30px)";
-    prevScreen.style.opacity = "0.6";
-    prevScreen.style.zIndex = "5";
-
-    startX = x;
-    startY = y;
-    deltaX = deltaY = 0;
-    startTime = Date.now();
-    active = true;
-
-    console.log("✅ свайп активирован на", currentScreen.id, "→", prevId);
-  }, { passive: true });
-
-  document.addEventListener("touchmove", (e) => {
+  hammer.on('panmove', (ev) => {
+    if (!isPanning) return;
+    const active = document.querySelector('.screen.active');
     if (!active) return;
-    const t = e.touches[0];
-    deltaX = t.clientX - startX;
-    deltaY = t.clientY - startY;
 
-    if (Math.abs(deltaY) > Math.abs(deltaX)) {
-      active = false;
-      return;
-    }
-
-    if (deltaX < 0) return;
-
-    e.preventDefault();
+    const deltaX = Math.max(ev.deltaX, 0);
     const progress = Math.min(deltaX / window.innerWidth, 1);
-    const prevShift = (-30 + progress * 30 * PARALLAX).toFixed(2);
-    const prevOpacity = (0.6 + progress * 0.4).toFixed(2);
 
-    currentScreen.style.transition = "none";
-    currentScreen.style.transform = `translateX(${deltaX}px)`;
-    currentScreen.style.boxShadow = "0 0 25px rgba(0,0,0,0.35)";
+    active.style.transition = 'none';
+    active.style.transform = `translateX(${deltaX}px)`;
+    active.style.boxShadow = '0 0 25px rgba(0,0,0,0.3)';
 
-    if (prevScreen) {
-      prevScreen.style.transform = `translateX(${prevShift}px)`;
-      prevScreen.style.opacity = prevOpacity;
+    const prevId = window.screenHistory?.[window.screenHistory.length - 1];
+    const prev = document.getElementById(prevId);
+    if (prev) {
+      prev.style.transform = `translateX(${(-25 + progress * 25)}px)`;
+      prev.style.opacity = `${0.5 + progress * 0.5}`;
     }
-  }, { passive: false });
+  });
 
-  document.addEventListener("touchend", () => {
-    if (!active || !currentScreen) return;
-    active = false;
+  hammer.on('panend pancancel', (ev) => {
+    if (!isPanning) return;
+    isPanning = false;
 
-    const time = Date.now() - startTime;
-    const speed = deltaX / time;
-    const fastSwipe = speed > SPEED_TRIGGER;
-    const farSwipe = deltaX > DIST_TRIGGER;
+    const active = document.querySelector('.screen.active');
+    if (!active) return;
 
-    console.log("🏁 touchend ΔX:", deltaX, "speed:", speed.toFixed(2));
+    const deltaX = ev.deltaX;
+    const velocity = ev.velocityX;
 
-    if ((fastSwipe || farSwipe) && prevId) {
-      console.log("⬅️ выполняем возврат назад:", prevId);
-      currentScreen.style.transition = `transform ${TRANSITION}ms ease-out, opacity ${TRANSITION}ms ease-out`;
-      currentScreen.style.transform = "translateX(100%)";
-      currentScreen.style.opacity = "0";
+    const prevId = window.screenHistory?.[window.screenHistory.length - 1];
+    const prev = document.getElementById(prevId);
 
-      if (prevScreen) {
-        prevScreen.style.transition = `transform ${TRANSITION}ms ease-out, opacity ${TRANSITION}ms ease-out`;
-        prevScreen.style.transform = "translateX(0)";
-        prevScreen.style.opacity = "1";
+    const shouldGoBack = (deltaX > 100 || velocity > 0.35) && prevId;
+
+    if (shouldGoBack) {
+      // ✅ Переход назад
+      active.style.transition = `transform ${TRANSITION}ms ease-out, opacity ${TRANSITION}ms ease-out`;
+      active.style.transform = 'translateX(100%)';
+      active.style.opacity = '0';
+
+      if (prev) {
+        prev.style.transition = `transform ${TRANSITION}ms ease-out, opacity ${TRANSITION}ms ease-out`;
+        prev.style.transform = 'translateX(0)';
+        prev.style.opacity = '1';
       }
 
       setTimeout(() => {
-        if (typeof window.showScreen === "function") {
+        if (typeof window.showScreen === 'function') {
           window.isGoingBack = true;
           window.showScreen(prevId);
         }
 
-        currentScreen.style.transition = "";
-        currentScreen.style.transform = "";
-        currentScreen.style.opacity = "";
-        currentScreen.style.boxShadow = "none";
-        prevScreen.style.transition = "";
-        prevScreen.style.zIndex = "";
-        prevScreen = null;
-        prevId = null;
+        active.style.transition = '';
+        active.style.transform = '';
+        active.style.opacity = '';
+        active.style.boxShadow = 'none';
+
+        if (prev) {
+          prev.style.transition = '';
+          prev.style.zIndex = '';
+        }
+
+        try {
+          if (window.Telegram?.WebApp?.HapticFeedback) {
+            Telegram.WebApp.HapticFeedback.impactOccurred('light');
+          } else if (navigator.vibrate) {
+            navigator.vibrate(10);
+          }
+        } catch {}
+
       }, TRANSITION);
     } else {
-      currentScreen.style.transition = `transform ${TRANSITION}ms ease-out`;
-      currentScreen.style.transform = "translateX(0)";
-      currentScreen.style.boxShadow = "none";
+      // ❌ Возврат назад
+      active.style.transition = `transform ${TRANSITION}ms ease-out`;
+      active.style.transform = 'translateX(0)';
+      active.style.boxShadow = 'none';
 
-      if (prevScreen) {
-        prevScreen.style.transition = `transform ${TRANSITION}ms ease-out, opacity ${TRANSITION}ms ease-out`;
-        prevScreen.style.transform = "translateX(-30px)";
-        prevScreen.style.opacity = "0.6";
-        setTimeout(() => {
-          prevScreen.style.display = "none";
-          prevScreen = null;
-        }, TRANSITION);
+      if (prev) {
+        prev.style.transition = `transform ${TRANSITION}ms ease-out, opacity ${TRANSITION}ms ease-out`;
+        prev.style.transform = 'translateX(-25px)';
+        prev.style.opacity = '0.5';
+        setTimeout(() => { prev.style.display = 'none'; }, TRANSITION);
       }
     }
-  }, { passive: true });
+  });
 
-  console.log("✅ NDHQ Swipe System v7.1 — debug enabled");
+  console.log("✅ NDHQ Swipe System v8.0 (Hammer.js) loaded successfully");
 })();
