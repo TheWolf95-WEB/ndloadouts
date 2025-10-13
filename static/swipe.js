@@ -1,118 +1,127 @@
 // =======================================
-// 📱 NDHQ GLOBAL SWIPE SYSTEM (v2.1 FINAL)
+// 📱 NDHQ GLOBAL SWIPE SYSTEM (v2.2 STABLE)
 // =======================================
-// Реалистичный свайп-назад с "живым" откликом, работает на всех экранах кроме home
-// Поддержка iPhone, Android, Telegram Haptic Feedback
+// Работает на iPhone / Android без зависаний
+// Реалистичный отклик, корректное восстановление transform
 
 (function() {
-  let touchStartX = 0;
-  let touchStartY = 0;
-  let touchMoveX = 0;
-  let touchMoveY = 0;
-  let startTime = 0;
-  let isTracking = false;
+  let startX = 0;
+  let startY = 0;
+  let currentX = 0;
+  let currentY = 0;
+  let isSwiping = false;
   let activeScreen = null;
 
-  const SWIPE_THRESHOLD_X = 100;   // минимальная длина свайпа вправо
-  const SWIPE_THRESHOLD_Y = 70;    // максимально допустимое вертикальное смещение
-  const SWIPE_TIME_LIMIT = 700;    // максимум 0.7 сек
-  const SWIPE_ELASTICITY = 0.4;    // "сопротивление" движения
+  const SWIPE_X_MIN = 70;     // минимальное смещение для "назад"
+  const SWIPE_Y_MAX = 70;     // вертикальный порог
+  const SWIPE_ELASTICITY = 0.35;
+  const SWIPE_VELOCITY_MIN = 0.25; // защита от медленного свайпа
+
+  let startTime = 0;
 
   window.setupGlobalSwipeBack = function() {
-    document.addEventListener('touchstart', onTouchStart, { passive: true });
-    document.addEventListener('touchmove', onTouchMove, { passive: false });
-    document.addEventListener('touchend', onTouchEnd, { passive: true });
+    document.addEventListener("touchstart", onStart, { passive: true });
+    document.addEventListener("touchmove", onMove, { passive: false });
+    document.addEventListener("touchend", onEnd, { passive: true });
   };
 
-  function onTouchStart(e) {
+  function onStart(e) {
     const t = e.changedTouches[0];
-    touchStartX = t.clientX;
-    touchStartY = t.clientY;
-    touchMoveX = touchStartX;
-    touchMoveY = touchStartY;
+    startX = t.clientX;
+    startY = t.clientY;
+    currentX = startX;
+    currentY = startY;
+    isSwiping = false;
     startTime = Date.now();
-    isTracking = true;
 
-    activeScreen = document.querySelector('.screen.active');
+    activeScreen = document.querySelector(".screen.active");
+    if (!activeScreen) return;
+    activeScreen.style.transition = "none";
   }
 
-  function onTouchMove(e) {
-    if (!isTracking || !activeScreen) return;
+  function onMove(e) {
+    if (!activeScreen) return;
 
     const t = e.changedTouches[0];
-    touchMoveX = t.clientX;
-    touchMoveY = t.clientY;
+    currentX = t.clientX;
+    currentY = t.clientY;
+    const deltaX = currentX - startX;
+    const deltaY = Math.abs(currentY - startY);
 
-    const deltaX = touchMoveX - touchStartX;
-    const deltaY = Math.abs(touchMoveY - touchStartY);
-
-    // если движение вертикальное — отменяем свайп
-    if (deltaY > SWIPE_THRESHOLD_Y) {
-      isTracking = false;
-      activeScreen.style.transform = '';
+    // если пользователь начал вертикальный скролл — отменяем свайп
+    if (deltaY > SWIPE_Y_MAX) {
+      resetPosition();
       return;
     }
 
-    // двигаем только вправо
-    if (deltaX > 0) {
-      e.preventDefault(); // блокируем прокрутку
-      const translate = deltaX * SWIPE_ELASTICITY;
-      activeScreen.style.transition = 'none';
-      activeScreen.style.transform = `translateX(${translate}px)`;
-      activeScreen.style.opacity = `${1 - deltaX / 400}`;
+    // активируем свайп при движении вправо
+    if (deltaX > 10 && deltaY < SWIPE_Y_MAX) {
+      isSwiping = true;
+      e.preventDefault();
+      const shift = deltaX * SWIPE_ELASTICITY;
+      activeScreen.style.transform = `translateX(${shift}px)`;
+      activeScreen.style.opacity = `${1 - deltaX / 300}`;
     }
   }
 
-  function onTouchEnd(e) {
-    if (!isTracking || !activeScreen) return;
+  function onEnd(e) {
+    if (!activeScreen) return;
 
-    const deltaX = touchMoveX - touchStartX;
-    const deltaY = Math.abs(touchMoveY - touchStartY);
-    const elapsed = Date.now() - startTime;
+    const deltaX = currentX - startX;
+    const deltaT = Date.now() - startTime;
+    const velocity = deltaX / deltaT; // скорость свайпа (px/ms)
 
-    activeScreen.style.transition = 'transform 0.25s ease-out, opacity 0.25s ease-out';
-
-    if (deltaX > SWIPE_THRESHOLD_X && deltaY < SWIPE_THRESHOLD_Y && elapsed < SWIPE_TIME_LIMIT) {
-      triggerGoBack();
-    } else {
-      // если недосвайп — вернуть экран обратно
-      activeScreen.style.transform = 'translateX(0)';
-      activeScreen.style.opacity = '1';
+    // Если это был "живой свайп", но не дотянут — вернём обратно
+    if (!isSwiping || deltaX < 0) {
+      resetPosition();
+      return;
     }
 
-    isTracking = false;
+    const isFast = velocity > SWIPE_VELOCITY_MIN;
+    const isFar = deltaX > SWIPE_X_MIN;
+
+    activeScreen.style.transition = "transform 0.25s ease-out, opacity 0.25s ease-out";
+
+    if ((isFast || isFar) && window.goBack) {
+      triggerGoBack();
+    } else {
+      resetPosition();
+    }
+  }
+
+  function resetPosition() {
+    if (!activeScreen) return;
+    activeScreen.style.transition = "transform 0.25s ease-out, opacity 0.25s ease-out";
+    activeScreen.style.transform = "translateX(0)";
+    activeScreen.style.opacity = "1";
+    activeScreen = null;
+    isSwiping = false;
   }
 
   function triggerGoBack() {
-    if (!window.goBack) return;
+    const current = document.querySelector(".screen.active");
+    if (!current) return;
 
-    const active = document.querySelector('.screen.active');
-    if (!active) return;
-
-    const currentId = active.id;
-    if (currentId === 'screen-home') {
-      // 👇 Только экран Home блокирует свайп-назад
-      active.style.transform = 'translateX(0)';
-      active.style.opacity = '1';
+    if (current.id === "screen-home") {
+      resetPosition();
       return;
     }
 
-    // Анимация ухода вправо
-    active.style.transform = 'translateX(100%)';
-    active.style.opacity = '0';
+    current.style.transform = "translateX(100%)";
+    current.style.opacity = "0";
 
     setTimeout(() => {
-      window.goBack();
-      active.style.transform = '';
-      active.style.opacity = '';
-    }, 200);
+      window.goBack?.();
+      current.style.transform = "";
+      current.style.opacity = "";
+      current.style.transition = "";
+    }, 180);
 
-    // Вибрация для реализма
     try {
       if (window.Telegram?.WebApp?.HapticFeedback) {
-        Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+        Telegram.WebApp.HapticFeedback.impactOccurred("medium");
       } else if (navigator.vibrate) {
-        navigator.vibrate(15);
+        navigator.vibrate(10);
       }
     } catch {}
   }
