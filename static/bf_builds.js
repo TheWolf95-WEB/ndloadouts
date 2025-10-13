@@ -725,13 +725,13 @@ async function bfLoadBuilds() {
 // === Отображение сборок (аккордеон в стиле Warzone) ===
 async function bfRenderBuilds(builds) {
   const list = document.getElementById("bf-builds-list");
-  const countEl = document.getElementById("bf-user-builds-count");
+  // const countEl = document.getElementById("bf-user-builds-count");
   const noResults = document.getElementById("bf-no-results-message");
 
   if (!list) return;
   list.innerHTML = "";
   
-  countEl.textContent = `Всего сборок: ${ builds.length}`;
+  // countEl.textContent = `Всего сборок: ${ builds.length}`;
   noResults.style.display = builds.length ? "none" : "block";
 
   if (!Array.isArray(builds) || builds.length === 0) {
