@@ -600,7 +600,7 @@ async function loadModulesForType(weaponType, label) {
       groupDiv.innerHTML = `
         <div class="module-group-header">
           <h4>${category}</h4>
-          <button class="btn btn-danger delete-category-btn" data-category="${category}">Удалить категорию</button>
+          <button class="btn btn-danger delete-category-btn" data-category="${category}">Удалить</button>
         </div>
         <div class="modules-grid"></div>
       `;
