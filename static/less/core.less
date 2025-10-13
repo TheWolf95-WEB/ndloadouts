@@ -387,11 +387,12 @@ body {
   left: 0;
   width: 100%;
   min-height: 100vh;
+  background: var(--wz-bg, #0a0f0a);
   will-change: transform, opacity;
   transition: transform 0.25s ease-out, opacity 0.25s ease-out;
   touch-action: pan-y;
-  z-index: 0;
 }
-.screen.active { z-index: 10; }
-.screen.active-behind { z-index: 5; }
-.screen.swiping { box-shadow: 0 0 25px rgba(0, 0, 0, 0.25); }
+.screen.active {
+  z-index: 10;
+}
+
