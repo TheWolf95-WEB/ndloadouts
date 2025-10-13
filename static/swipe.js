@@ -1,3 +1,9 @@
+// ==========================================
+// 📱 NDHQ GLOBAL SWIPE SYSTEM (v4.1 STABLE)
+// ==========================================
+// Плавный свайп-назад с виброоткликом и защитой от скролла
+// Работает во всех экранах Warzone / Battlefield
+
 (function () {
   let startX = 0;
   let startY = 0;
@@ -7,21 +13,13 @@
   let allowSwipe = false;
   let startTime = 0;
 
-  const EDGE_ZONE = 50;          // Увеличено до 50 пикселей
-  const SWIPE_DISTANCE = 80;     // Минимальная дистанция для свайпа
-  const MAX_VERTICAL_DRIFT = 100; // Увеличено до 100 пикселей
-  const ELASTICITY = 0.35;       // Пружина
-  const SWIPE_TIME_LIMIT = 700;  // Максимум времени, мс
-
-  window.setupGlobalSwipeBack = function () {
-    console.log("🚀 Swipe system initialized");
-    document.addEventListener("touchstart", onStart, { passive: false });
-    document.addEventListener("touchmove", onMove, { passive: false });
-    document.addEventListener("touchend", onEnd, { passive: false });
-  };
+  const EDGE_ZONE = 25;          // зона активации (от левого края)
+  const SWIPE_DISTANCE = 80;     // минимум пикселей для возврата
+  const MAX_VERTICAL_DRIFT = 60; // максимум вертикального отклонения
+  const ELASTICITY = 0.35;       // коэффициент пружины
+  const SWIPE_TIME_LIMIT = 700;  // лимит по времени (мс)
 
   function onStart(e) {
-    console.log("👇 Touch start:", e.changedTouches[0].clientX, e.changedTouches[0].clientY);
     const t = e.changedTouches[0];
     startX = t.clientX;
     startY = t.clientY;
@@ -30,16 +28,11 @@
     isSwiping = false;
     allowSwipe = false;
 
-    if (startX > EDGE_ZONE) {
-      console.log("🚫 Swipe ignored: touch started outside EDGE_ZONE", startX);
-      return;
-    }
+    // свайп только от левого края
+    if (startX > EDGE_ZONE) return;
 
     activeScreen = document.querySelector(".screen.active");
-    if (!activeScreen) {
-      console.log("🚫 No active screen found");
-      return;
-    }
+    if (!activeScreen || activeScreen.id === "screen-home") return;
 
     allowSwipe = true;
     activeScreen.style.transition = "none";
@@ -54,21 +47,20 @@
     const deltaX = currentX - startX;
     const deltaY = Math.abs(t.clientY - startY);
 
+    // отменяем, если сильное вертикальное движение
     if (deltaY > MAX_VERTICAL_DRIFT) {
-      console.log("🚫 Swipe cancelled: vertical drift too large", deltaY);
       resetPosition();
       return;
     }
 
+    // активируем свайп при горизонтальном движении
     if (!isSwiping && deltaX > 10) {
-      console.log("🚀 Swipe activated");
       isSwiping = true;
     }
 
     if (isSwiping && deltaX > 0) {
-      e.preventDefault();
+      e.preventDefault(); // блокируем скролл
       const shift = deltaX * ELASTICITY;
-      console.log("🎢 Swiping: transform=translateX(", shift, "px), opacity=", 1 - Math.min(deltaX / 300, 0.3));
       activeScreen.style.transform = `translateX(${shift}px)`;
       activeScreen.style.opacity = `${1 - Math.min(deltaX / 300, 0.3)}`;
     }
@@ -81,18 +73,16 @@
     const deltaT = Date.now() - startTime;
     const velocity = deltaX / deltaT;
 
-    console.log("👆 Touch end, deltaX:", deltaX, "velocity:", velocity);
-
-    activeScreen.style.transition = "transform 0.25s ease-out, opacity 0.25s ease-out";
+    activeScreen.style.transition =
+      "transform 0.25s ease-out, opacity 0.25s ease-out";
     activeScreen.style.willChange = "auto";
 
-    const shouldGoBack = deltaX > SWIPE_DISTANCE || (velocity > 0.5 && deltaX > 20);
+    const shouldGoBack =
+      deltaX > SWIPE_DISTANCE || (velocity > 0.5 && deltaX > 20);
 
     if (shouldGoBack) {
-      console.log("✅ Triggering goBack");
       triggerGoBack();
     } else {
-      console.log("🔄 Resetting position");
       resetPosition();
     }
 
@@ -108,7 +98,6 @@
       activeScreen.style.transition = "";
       activeScreen.style.willChange = "";
       activeScreen = null;
-      console.log("🏁 Reset complete");
     }, 250);
   }
 
@@ -131,18 +120,26 @@
         current.style.transition = "";
         current.style.willChange = "";
       }
-      console.log("🏁 goBack triggered");
     }, 150);
 
+    // Вибрация / отклик
     try {
       if (window.Telegram?.WebApp?.HapticFeedback) {
-        console.log("Attempting haptic feedback");
-        window.Telegram.WebApp.HapticFeedback.impactOccurred("light");
+        Telegram.WebApp.HapticFeedback.impactOccurred("light");
       } else if (navigator.vibrate) {
         navigator.vibrate(10);
       }
-    } catch (e) {
-      console.error("Haptic feedback error:", e);
-    }
+    } catch {}
   }
+
+  // === Активируем свайп ===
+  window.setupGlobalSwipeBack = function () {
+    document.addEventListener("touchstart", onStart, { passive: true });
+    document.addEventListener("touchmove", onMove, { passive: false });
+    document.addEventListener("touchend", onEnd, { passive: true });
+    console.log("✅ NDHQ Swipe System activated");
+  };
 })();
+
+// === Автоинициализация ===
+window.setupGlobalSwipeBack();
