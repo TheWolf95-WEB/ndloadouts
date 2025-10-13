@@ -435,10 +435,39 @@ tabDiv.querySelector(".add-universal").addEventListener("click", () => {
   row.className = "universal-row";
   row.style = "display:flex; gap:8px; margin-top:6px;";
   row.innerHTML = `
-    <input type="text" class="form-input universal-name" placeholder="Категория (например: Barrel)" style="flex:1;">
-    <input type="text" class="form-input universal-value" placeholder="Название модуля (например: 16.5'' FLUTED)" style="flex:1;">
-    <button type="button" class="btn btn-sm btn-remove-universal" style="flex:0;">🗑</button>
-  `;
+     <div style="flex:1; position:relative;">
+       <select class="form-input universal-name">
+         <option value="">Выберите категорию...</option>
+         ${Object.keys(bfModulesByType[type]?.byCategory || {})
+           .map(cat => `<option value="${cat}">${cat}</option>`)
+           .join("")}
+       </select>
+       <input type="text" class="form-input universal-name-input" placeholder="Или введите вручную..." 
+              style="margin-top:6px;width:100%;">
+     </div>
+     <input type="text" class="form-input universal-value" placeholder="Название модуля (например: 16.5'' FLUTED)" style="flex:1;">
+     <button type="button" class="btn btn-sm btn-remove-universal" style="flex:0;">🗑</button>
+   `;
+
+   const select = row.querySelector(".universal-name");
+   const input = row.querySelector(".universal-name-input");
+   
+   select.addEventListener("change", () => {
+     if (select.value) {
+       input.value = select.value;
+       input.style.opacity = "0.6";
+     } else {
+       input.value = "";
+       input.style.opacity = "1";
+     }
+   });
+   
+   input.addEventListener("input", () => {
+     input.style.opacity = "1";
+     select.value = "";
+   });
+
+
   row.querySelector(".btn-remove-universal").addEventListener("click", () => row.remove());
   container.appendChild(row);
 });
