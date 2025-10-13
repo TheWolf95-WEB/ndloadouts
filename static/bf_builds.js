@@ -170,7 +170,7 @@ async function bfLoadModulesList(weaponType, label) {
      group.innerHTML = `
        <div class="module-group-header">
          <h4 class="module-title">${category}</h4>
-         <button class="btn delete-category" title="Удалить категорию">Удалить категорию</button>
+         <button class="btn delete-category" title="Удалить категорию">Удалить</button>
        </div>
        <div class="modules-grid"></div>
      `;
