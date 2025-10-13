@@ -27,26 +27,59 @@
   <script src="/static/bf.js?v={{ version }}"></script>
 
 
-  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.touchswipe/1.6.19/jquery.touchSwipe.min.js"></script>
   <script>
-  $(function() {
-    $(".screen").swipe({
-      swipeRight:function() {
-        const active = document.querySelector('.screen.active');
-        if (active && active.id !== 'screen-home') {
+  (() => {
+    let startX = 0;
+    let startY = 0;
+    let deltaX = 0;
+    let deltaY = 0;
+    let isTouching = false;
+    const EDGE_ZONE = 40;   // ширина зоны от края
+    const TRIGGER = 80;     // минимальное расстояние свайпа
+  
+    document.addEventListener("touchstart", (e) => {
+      if (e.touches.length !== 1) return;
+      const t = e.touches[0];
+      if (t.clientX > EDGE_ZONE) return; // только с левого края
+      startX = t.clientX;
+      startY = t.clientY;
+      deltaX = deltaY = 0;
+      isTouching = true;
+    }, { passive: true });
+  
+    document.addEventListener("touchmove", (e) => {
+      if (!isTouching) return;
+      const t = e.touches[0];
+      deltaX = t.clientX - startX;
+      deltaY = t.clientY - startY;
+      if (Math.abs(deltaY) > Math.abs(deltaX)) {
+        // если больше движение по вертикали — отменяем
+        isTouching = false;
+        return;
+      }
+    }, { passive: true });
+  
+    document.addEventListener("touchend", () => {
+      if (!isTouching) return;
+      isTouching = false;
+      if (deltaX > TRIGGER) {
+        const active = document.querySelector(".screen.active");
+        if (active && active.id !== "screen-home") {
           const prevId = window.screenHistory?.[window.screenHistory.length - 1];
-          if (prevId && typeof window.showScreen === 'function') {
+          if (prevId && typeof window.showScreen === "function") {
             window.isGoingBack = true;
             window.showScreen(prevId);
+            // Вибрация для ощущения
+            if (navigator.vibrate) navigator.vibrate(15);
           }
         }
-      },
-      threshold: 60, // расстояние в пикселях
-      allowPageScroll: "vertical" // не блокирует скролл
-    });
-  });
+      }
+    }, { passive: true });
+  
+    console.log("✅ NDHQ Minimal Swipe active");
+  })();
   </script>
+
 
 </body>
 </html>
