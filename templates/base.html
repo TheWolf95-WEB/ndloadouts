@@ -25,8 +25,29 @@
   <script src="/static/analytics.js?v={{ version }}"></script>
   <script src="/static/app.js?v={{ version }}"></script>
   <script src="/static/bf.js?v={{ version }}"></script>
-  <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
-  <script src="/static/swipe.js"></script>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.touchswipe/1.6.19/jquery.touchSwipe.min.js"></script>
+  <script>
+  $(function() {
+    $(".screen").swipe({
+      swipeRight:function() {
+        const active = document.querySelector('.screen.active');
+        if (active && active.id !== 'screen-home') {
+          const prevId = window.screenHistory?.[window.screenHistory.length - 1];
+          if (prevId && typeof window.showScreen === 'function') {
+            window.isGoingBack = true;
+            window.showScreen(prevId);
+          }
+        }
+      },
+      threshold: 60, // расстояние в пикселях
+      allowPageScroll: "vertical" // не блокирует скролл
+    });
+  });
+  </script>
+
 </body>
 </html>
 
