@@ -382,27 +382,17 @@ body {
 /* === SWIPE TRANSITION BASE === */
 /* === Swipe transition base === */
 .screen {
-  will-change: transform, opacity;
-  transition: transform 0.25s ease-out, opacity 0.25s ease-out;
-  touch-action: pan-y; /* позволяет свайпить по горизонтали, не ломая вертикальный скролл */
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   min-height: 100vh;
+  will-change: transform, opacity;
+  transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+  touch-action: pan-y;
+  background: var(--wz-bg, #0a0f0a);
+  z-index: 0;
 }
-
-/* активный экран всегда выше */
-.screen.active {
-  z-index: 10;
-}
-
-/* скрытые — под активным */
-.screen:not(.active) {
-  z-index: 5;
-}
-
-/* небольшая тень во время свайпа */
-.screen.swiping {
-  box-shadow: 0 0 25px rgba(0, 0, 0, 0.25);
-}
+.screen.active { z-index: 10; }
+.screen.active-behind { z-index: 5; }
+.screen.swiping { box-shadow: 0 0 25px rgba(0, 0, 0, 0.25); }
