@@ -1,32 +1,50 @@
 /* ==========================================================
-   swipe-back.js — Smooth Edge Swipe Back (v5)
-   Телеграм-вэбвью: iOS / Android / Desktop WebView
-   — плавная анимация как в ТГ (медленнее, с «резинкой»)
-   — не мешает вертикальному скроллу
-   — edge hit-area для iOS (левый край 30px)
+   swipe-back.js — Edge Swipe Back (v6, universal)
+   iOS / Android / Desktop WebView (Telegram)
+   — плавная анимация (iOS-like), «резинка», мягкий возврат
+   — direction lock: не мешает вертикальному скроллу
    — корректный back отдельно для Warzone и Battlefield
-   — без библиотек
+   — поддерживает let screenHistory / bfScreenHistory (не window.*)
+   — edge hit-area 30px для iOS WKWebView
    ========================================================== */
 (function () {
   'use strict';
 
-  // ===== Настройки =====
-  const EDGE_START_PX = 40;           // старт только от левого края
-  const EDGE_HIT_WIDTH = 30;          // хит-зона для iOS (перехват touchstart)
-  const COMPLETE_DISTANCE_PX = 90;    // дистанция для успеха (чуть больше для уверенного жеста)
-  const VELOCITY_THRESHOLD = 0.35;    // px/ms быстрый свайп
-  const ACTIVATE_MOVE_THRESHOLD = 10; // до решения по направлению
-  const BASE_ANIM_MS = 360;           // базовая длительность (медленнее = плавнее)
-  const EASE = 'cubic-bezier(.22,.61,.36,1)';   // iOS-подобный ease out
-  const CANCEL_EASE = 'cubic-bezier(.2,.8,.2,1)'; // мягкий возврат
+  // --- Tune ---
+  const EDGE_START_PX = 40;
+  const EDGE_HIT_WIDTH = 30;         // iOS hit area
+  const COMPLETE_DISTANCE_PX = 90;   // feel like TG
+  const VELOCITY_THRESHOLD = 0.35;   // px/ms
+  const ACTIVATE_MOVE_THRESHOLD = 10;
+  const BASE_ANIM_MS = 420;          // slower = smoother
+  const EASE_GO = 'cubic-bezier(.22,.61,.36,1)';
+  const EASE_BACK = 'cubic-bezier(.2,.8,.2,1)';
 
-  // ===== Служебные =====
+  // --- State ---
   let dragging = false, decided = false, horizontal = false, finished = false;
   let startX = 0, startY = 0, lastX = 0, lastTime = 0, startTime = 0, instVX = 0;
   let inputKind = null; // 'touch' | 'pointer' | 'mouse'
   let activeEl = null, scrimEl = null, edgeArea = null, rafId = 0;
 
-  // ===== Навигационный контекст (Warzone vs Battlefield) =====
+  // ===== Helpers: history detection (supports top-level let) =====
+  function getWarHistory() {
+    if (Array.isArray(window.screenHistory)) return window.screenHistory;
+    try { /* eslint-disable no-undef */ if (Array.isArray(screenHistory)) return screenHistory; /* eslint-enable */ } catch {}
+    return null;
+  }
+  function getBFHistory() {
+    if (Array.isArray(window.bfScreenHistory)) return window.bfScreenHistory;
+    try { /* eslint-disable no-undef */ if (Array.isArray(bfScreenHistory)) return bfScreenHistory; /* eslint-enable */ } catch {}
+    return null;
+  }
+  function peek(arr) { return arr && arr.length ? arr[arr.length - 1] : null; }
+
+  function setGoingBackTrue() {
+    window.isGoingBack = true;
+    try { /* eslint-disable no-undef */ isGoingBack = true; /* eslint-enable */ } catch {}
+  }
+
+  // ===== Active screen =====
   function getActiveScreen() {
     let el = document.querySelector('.screen.active');
     if (!el) {
@@ -38,54 +56,51 @@
   }
   function isBFScreenId(id) { return /^screen-bf/.test(String(id || '')); }
 
+  // ===== Context (Warzone vs Battlefield) =====
   function getNavCtx() {
-    const active = getActiveScreen();
-    const bfMode = active ? isBFScreenId(active.id) : false;
+    const act = getActiveScreen();
+    const bfMode = act ? isBFScreenId(act.id) : false;
 
-    function peekWarPrev() {
-      const h = Array.isArray(window.screenHistory) ? window.screenHistory : null;
-      return h && h[h.length - 1];
-    }
-    function showWar(id) {
-      window.isGoingBack = true; // showScreen учитывает этот флаг и НЕ пушит
-      if (typeof window.showScreen === 'function') window.showScreen(id);
+    const warHist = getWarHistory();
+    const bfHist  = getBFHistory();
+
+    function peekPrev() {
+      return bfMode ? peek(bfHist) : peek(warHist);
     }
 
-    function getBfHist() {
-      try { /* eslint-disable no-undef */ return bfScreenHistory; /* eslint-enable */ } catch {}
-      return window.bfScreenHistory || null;
-    }
-    function peekBfPrev() {
-      const h = getBfHist(); return h && h[h.length - 1];
-    }
-    function showBf(id, fromId) {
-      // В bfShowScreen нет флага isGoingBack -> она пушит текущий экран.
-      // Делаем fix-up после вызова: если последний = fromId, выпилим.
-      if (typeof window.bfShowScreen === 'function') {
-        window.bfShowScreen(id);
-        const h = getBfHist();
-        if (h && h.length && h[h.length - 1] === fromId) h.pop();
+    function goBack(prevId, fromId) {
+      if (!prevId) return;
+
+      if (bfMode) {
+        // BF: bfShowScreen всегда пушит current -> убираем лишнее после вызова
+        if (typeof window.bfShowScreen === 'function') {
+          window.bfShowScreen(prevId);
+          const h = getBFHistory();
+          if (h && h.length && h[h.length - 1] === fromId) h.pop();
+        } else if (typeof window.showScreen === 'function') {
+          // fallback
+          window.showScreen(prevId);
+        }
       } else {
-        // fallback: хотя бы покажем нужный экран, если bfShowScreen недоступен
-        if (typeof window.showScreen === 'function') window.showScreen(id);
+        // Warzone: у тебя есть флаг isGoingBack — используем как в ТЗ
+        setGoingBackTrue();
+        if (typeof window.showScreen === 'function') {
+          window.showScreen(prevId);
+        }
+        // Важно: НЕ попаем history — как в твоём контракте
       }
     }
 
-    return {
-      bfMode,
-      peekPrev: bfMode ? peekBfPrev : peekWarPrev,
-      goTo: (id, fromId) => bfMode ? showBf(id, fromId) : showWar(id),
-      afterNavUpdate: updateEdgeArea
-    };
+    return { bfMode, peekPrev, goBack };
   }
 
-  // ===== Хаптика =====
+  // ===== Haptics =====
   function haptic() {
     try { Telegram?.WebApp?.HapticFeedback?.impactOccurred('light'); } catch {}
     if (navigator.vibrate) { try { navigator.vibrate(15); } catch {} }
   }
 
-  // ===== Скрим (градиент) =====
+  // ===== Scrim =====
   function ensureScrim() {
     if (!scrimEl) {
       scrimEl = document.createElement('div');
@@ -104,7 +119,7 @@
     }
   }
 
-  // ===== Edge hit-area для iOS =====
+  // ===== Edge Hit Area (iOS) =====
   function ensureEdgeArea() {
     if (!edgeArea) {
       edgeArea = document.createElement('div');
@@ -120,18 +135,18 @@
       });
       document.body.appendChild(edgeArea);
 
-      edgeArea.addEventListener('touchstart', (e) => onTouchStart(e, true), { capture: true, passive: true });
-      edgeArea.addEventListener('pointerdown', (e) => onPointerStart(e, true), { capture: true, passive: true });
-      edgeArea.addEventListener('mousedown', (e) => onMouseDown(e, true), { capture: true, passive: true });
+      edgeArea.addEventListener('touchstart',  (e) => onTouchStart(e, true),  { capture: true, passive: true });
+      edgeArea.addEventListener('pointerdown', (e) => onPointerStart(e, true),{ capture: true, passive: true });
+      edgeArea.addEventListener('mousedown',   (e) => onMouseDown(e, true),   { capture: true, passive: true });
     }
     updateEdgeArea();
   }
 
   function canGoBackNow() {
-    const { peekPrev } = getNavCtx();
     const act = getActiveScreen();
     if (!act) return false;
     if (act.id === 'screen-home') return false;
+    const { peekPrev } = getNavCtx();
     return Boolean(peekPrev());
   }
 
@@ -140,12 +155,12 @@
     edgeArea.style.pointerEvents = canGoBackNow() ? 'auto' : 'none';
   }
 
-  // ===== Рендер с резинкой (после 120px — сопротивление) =====
+  // ===== Render with resistance (after 120px) =====
   function renderTranslate(rawDx) {
     if (!activeEl) return;
     const dx = Math.max(0, rawDx);
     let shown = dx;
-    if (dx > 120) shown = 120 + (dx - 120) * 0.35; // резинка как в iOS
+    if (dx > 120) shown = 120 + (dx - 120) * 0.35; // iOS-like rubber band
     if (rafId) cancelAnimationFrame(rafId);
     rafId = requestAnimationFrame(() => {
       activeEl.style.transform = `translate3d(${shown}px,0,0)`;
@@ -154,7 +169,7 @@
     });
   }
 
-  // ===== Очистка =====
+  // ===== Cleanup =====
   function cleanupStyles() {
     if (activeEl) {
       activeEl.style.transition = '';
@@ -186,31 +201,31 @@
     activeEl = null;
   }
 
-  // ===== Длительность (медленнее и плавнее) =====
-  function computeDurMs({ remaining, base = BASE_ANIM_MS, velo = 0 }) {
-    // Чем меньше оставшаяся дистанция и выше скорость — тем короче.
-    let ms = base * (remaining / Math.max(remaining, 1));
-    ms = 220 + (ms * 0.55);
-    ms -= Math.min(100, Math.max(0, velo * 230)); // быстрый свайп — быстрее докатываем
-    return Math.max(200, Math.min(420, Math.round(ms)));
+  // ===== Duration calculator (smooth & slow) =====
+  function computeDurMs(remainingPx, velo, baseMs = BASE_ANIM_MS) {
+    // remainingPx: сколько осталось пройти; velo: px/ms (>=0)
+    let factor = Math.min(1, remainingPx / 320);      // 0..1
+    let ms = baseMs * (0.35 + 0.65 * factor);         // 35%-100% от base
+    ms -= Math.min(120, Math.max(0, velo * 200));     // быстрый свайп — короче
+    return Math.max(260, Math.min(520, Math.round(ms)));
   }
 
-  // ===== Завершение =====
+  // ===== Finish =====
   function finishGesture({ complete, rawDx, velocity }) {
     if (!activeEl || finished) { cancelGesture(); return; }
     finished = true;
 
     const el = activeEl;
+    const { peekPrev, goBack } = getNavCtx();
+    const prevId = peekPrev();
+    const fromId = el.id;
     const width = Math.max(window.innerWidth, el.offsetWidth || 0);
 
     if (complete) {
       const remaining = Math.max(0, width - Math.max(0, rawDx));
-      const dur = computeDurMs({ remaining, base: BASE_ANIM_MS, velo: velocity });
-      el.style.transition = `transform ${dur}ms ${EASE}`;
+      const dur = computeDurMs(remaining, Math.max(0, velocity), BASE_ANIM_MS);
+      el.style.transition = `transform ${dur}ms ${EASE_GO}`;
 
-      const fromId = el.id;
-      const { peekPrev, goTo, afterNavUpdate } = getNavCtx();
-      const prevId = peekPrev();
       let done = false;
       const endOnce = () => {
         if (done) return; done = true;
@@ -218,13 +233,13 @@
         cleanupStyles();
         if (prevId) {
           haptic();
-          goTo(prevId, fromId);
+          goBack(prevId, fromId);
         }
         activeEl = null;
-        afterNavUpdate && afterNavUpdate();
+        updateEdgeArea();
       };
       el.addEventListener('transitionend', endOnce);
-      setTimeout(endOnce, dur + 80); // фолбэк
+      setTimeout(endOnce, dur + 80); // fallback if transitionend lost
 
       requestAnimationFrame(() => {
         el.style.transform = `translate3d(${width}px,0,0)`;
@@ -232,19 +247,17 @@
       });
 
     } else {
-      // Возврат с лёгким «торможением»
+      // мягкий возврат + лёгкий отскок
       const remainingBack = Math.max(0, Math.max(0, rawDx));
-      const dur = computeDurMs({ remaining: remainingBack, base: BASE_ANIM_MS * 0.85, velo: velocity });
-      el.style.transition = `transform ${dur}ms ${CANCEL_EASE}`;
-
+      const dur = computeDurMs(remainingBack, Math.max(0, velocity), BASE_ANIM_MS * 0.85);
+      el.style.transition = `transform ${dur}ms ${EASE_BACK}`;
       const onTe = () => {
         el.removeEventListener('transitionend', onTe);
-        // небольшой «отскок» для настоящей нативности
-        el.style.transition = `transform 150ms ${EASE}`;
+        el.style.transition = `transform 160ms ${EASE_GO}`;
         el.style.transform = 'translate3d(-6px,0,0)';
         setTimeout(() => {
           el.style.transform = 'translate3d(0,0,0)';
-          setTimeout(() => { cleanupStyles(); activeEl = null; updateEdgeArea(); }, 150);
+          setTimeout(() => { cleanupStyles(); activeEl = null; updateEdgeArea(); }, 160);
         }, 0);
       };
       el.addEventListener('transitionend', onTe);
@@ -260,12 +273,11 @@
     removeMoveEndListeners();
   }
 
-  // ===== База жеста =====
+  // ===== Gesture core =====
   function onStartBase(clientX, clientY, srcEvent, forceEdge = false) {
     if (dragging) return;
     if (!forceEdge && clientX > EDGE_START_PX) return;
 
-    // пропускаем инпуты и contentEditable
     const t = srcEvent.target;
     const tag = (t?.tagName || '').toLowerCase();
     if (['input', 'textarea', 'select', 'button', 'label'].includes(tag)) return;
@@ -286,12 +298,11 @@
     ensureScrim();
     activeEl.style.willChange = 'transform';
     activeEl.style.transition = 'none';
-    activeEl.style.touchAction = 'pan-y'; // вертикаль до lock
+    activeEl.style.touchAction = 'pan-y'; // allow vertical until lock
   }
 
   function onMoveBase(clientX, clientY, timeStamp, preventDefaultCb) {
     if (!dragging) return;
-
     const dx = clientX - startX;
     const dy = clientY - startY;
 
@@ -304,7 +315,7 @@
     }
 
     if (!horizontal) return;
-    if (preventDefaultCb) preventDefaultCb(); // блокируем прокрутку только после lock
+    if (preventDefaultCb) preventDefaultCb();
 
     const now = timeStamp || Date.now();
     const dt = Math.max(1, now - lastTime);
@@ -322,7 +333,7 @@
     const avgVX = totalDx / totalDt;
     const v = Math.max(instVX, avgVX);
 
-    // «Проекция» с учётом скорости (как будто дотянет)
+    // Projection: how far it would go with current speed
     const projected = totalDx + Math.max(0, v) * 280;
 
     const complete =
@@ -333,7 +344,7 @@
     finishGesture({ complete, rawDx: totalDx, velocity: v });
   }
 
-  // ===== Низкоуровневые прокси =====
+  // ===== Low-level wiring =====
   const capTrue  = { capture: true,  passive: true  };
   const capFalse = { capture: true,  passive: false };
 
@@ -394,7 +405,7 @@
     if (inputKind === 'mouse'   && e.type === 'mouseup') return onMouseUp(e);
   }
 
-  // ===== Инициализация =====
+  // ===== Init =====
   document.addEventListener('touchstart',  (e) => onTouchStart(e, false),  { capture: true, passive: true });
   document.addEventListener('pointerdown', (e) => onPointerStart(e, false),{ capture: true, passive: true });
   document.addEventListener('mousedown',   (e) => onMouseDown(e, false),   { capture: true, passive: true });
@@ -403,7 +414,7 @@
   ensureScrim();
   updateEdgeArea();
 
-  // Обновляем хит-зону после переходов
+  // Update edge area after navigation
   function wrapNav(fnName) {
     const fn = window[fnName];
     if (typeof fn === 'function' && !fn.__swipewrapped) {
@@ -418,25 +429,25 @@
   wrapNav('showScreen');
   wrapNav('bfShowScreen');
 
-  // Если меняют history вручную — обновим зону
   try {
-    if (Array.isArray(window.screenHistory) && !window.screenHistory.__patched) {
-      const push = window.screenHistory.push.bind(window.screenHistory);
-      window.screenHistory.push = function () { const r = push.apply(this, arguments); updateEdgeArea(); return r; };
-      window.screenHistory.__patched = true;
+    const h = getWarHistory();
+    if (h && !h.__swipepatched) {
+      const push = h.push.bind(h);
+      h.push = function () { const r = push.apply(this, arguments); updateEdgeArea(); return r; };
+      h.__swipepatched = true;
     }
-  } catch {}
-  try {
-    /* eslint-disable no-undef */
-    if (Array.isArray(bfScreenHistory) && !bfScreenHistory.__patched) {
-      const push = bfScreenHistory.push.bind(bfScreenHistory);
-      bfScreenHistory.push = function () { const r = push.apply(this, arguments); updateEdgeArea(); return r; };
-      bfScreenHistory.__patched = true;
-    }
-    /* eslint-enable */
   } catch {}
 
-  // Публичный выключатель
+  try {
+    const hb = getBFHistory();
+    if (hb && !hb.__swipepatched) {
+      const push = hb.push.bind(hb);
+      hb.push = function () { const r = push.apply(this, arguments); updateEdgeArea(); return r; };
+      hb.__swipepatched = true;
+    }
+  } catch {}
+
+  // Public switch
   window.DisableSwipeBack = function () {
     if (edgeArea) edgeArea.style.pointerEvents = 'none';
     document.removeEventListener('touchstart',  onTouchStart,  { capture: true, passive: true });
