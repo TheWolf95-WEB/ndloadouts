@@ -983,25 +983,26 @@ function renderUserBuilds(buildsToRender) {
       
         switch (n) {
           case 1:
-            return 'linear-gradient(145deg, #FFD700, #E5C100)'; // золото
+            return { bg: 'linear-gradient(135deg, #ffcc00, #ffb300)', color: '#000' }; // золото
           case 2:
-            return 'linear-gradient(145deg, #C0C0C0, #A9A9A9)'; // серебро
+            return { bg: 'linear-gradient(135deg, #d7d7d7, #bcbcbc)', color: '#000' }; // серебро
           case 3:
-            return 'linear-gradient(145deg, #CD7F32, #B87333)'; // бронза
+            return { bg: 'linear-gradient(135deg, #c47b32, #a15e1a)', color: '#000' }; // бронза
           default:
-            return 'linear-gradient(145deg, #1b2324, #101617)'; // Warzone фон
+            return { bg: 'linear-gradient(145deg, #202a22, #141a15)', color: '#fff' }; // Warzone фон
         }
       };
 
+        
+        const tops = [build.top1, build.top2, build.top3]
+          .filter(Boolean)
+          .map(mod => {
+            const text = mod.trim();
+            const { bg, color } = pickTopBg(text);
+            return `<span class="loadout__top" style="background:${bg}; color:${color}; text-transform:uppercase;">${text}</span>`;
+          })
+          .join('');
 
-      const tops = [build.top1, build.top2, build.top3]
-        .filter(Boolean)
-        .map(mod => {
-          const text = mod.trim();
-          const bg = pickTopBg(text);
-          return `<span class="loadout__top" style="background:${bg}; color:#000;">${text}</span>`;
-        })
-        .join('');
 
       const cats = Array.isArray(build.categories) ? build.categories : [];
       const translatedCats = cats.map(cat => {
@@ -1015,9 +1016,21 @@ function renderUserBuilds(buildsToRender) {
         }
       });
 
+      const categoryColors = {
+        'Новинка': { bg: 'linear-gradient(135deg, #7f00ff, #e100ff)', color: '#fff' },
+        'Топ мета': { bg: 'linear-gradient(135deg, #00b4db, #0083b0)', color: '#fff' },
+        'Мета': { bg: 'linear-gradient(135deg, #2ed573, #1e9e52)', color: '#fff' },
+        'Популярное': { bg: 'linear-gradient(135deg, #ff7e5f, #feb47b)', color: '#000' },
+        'Все': { bg: 'linear-gradient(145deg, #1b2324, #101617)', color: '#ccc' },
+      };
+      
       const categoryBadges = translatedCats
-        .map(name => `<span class="badge badge-category" data-cat="${name}">${name}</span>`)
+        .map(name => {
+          const style = categoryColors[name] || { bg: 'linear-gradient(145deg, #1b2324, #101617)', color: '#ccc' };
+          return `<span class="badge badge-category" style="background:${style.bg}; color:${style.color}; text-transform:uppercase;">${name}</span>`;
+        })
         .join('');
+
 
         // === вкладки ===
         const tabBtns = (build.tabs || []).map((tab, i) =>
