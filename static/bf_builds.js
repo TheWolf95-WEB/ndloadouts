@@ -167,7 +167,43 @@ async function bfLoadModulesList(weaponType, label) {
     for (const category in data) {
       const group = document.createElement("div");
       group.className = "module-group";
-      group.innerHTML = `<h4>${category}</h4>`;
+      group.innerHTML = `
+        <div class="module-group-header" style="display:flex;align-items:center;justify-content:space-between;">
+          <h4 style="margin:0;">${category}</h4>
+          <button class="btn btn-sm delete-category" title="Удалить категорию" style="
+            background:#2a2f36;
+            border:1px solid rgba(255,255,255,0.1);
+            color:#f66;
+            padding:4px 8px;
+            border-radius:6px;
+            font-size:0.8rem;
+            transition:all 0.2s ease;
+          ">🗑</button>
+        </div>
+      `;
+
+       // === Удаление всей категории ===
+      group.querySelector(".delete-category").addEventListener("click", async () => {
+        if (!confirm(`Удалить категорию "${category}" со всеми модулями?`)) return;
+      
+        try {
+          await Promise.all(
+            data[category].map(mod =>
+              fetch(`/api/bf/modules/${mod.id}`, {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ initData: tg.initData }),
+              })
+            )
+          );
+          await bfLoadModulesList(weaponType, label);
+        } catch (err) {
+          console.error("Ошибка при удалении категории:", err);
+          alert("Не удалось удалить категорию");
+        }
+      });
+
+
 
       data[category].forEach((mod) => {
         const row = document.createElement("div");
@@ -177,7 +213,7 @@ async function bfLoadModulesList(weaponType, label) {
           <button class="btn btn-sm" data-id="${mod.id}">🗑</button>
         `;
         row.querySelector("button").addEventListener("click", async () => {
-          if (!confirm(`Delete module ${mod.en}?`)) return;
+          if (!confirm(`Удалить модуль ${mod.en}?`)) return;
           await fetch(`/api/bf/modules/${mod.id}`, {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
