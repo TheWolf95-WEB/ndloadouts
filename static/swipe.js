@@ -15,7 +15,7 @@
   let isVertical = false;
 
   const EDGE_ZONE = 40;     // отступ от левого края
-  const TRIGGER = 80;       // длина свайпа для goBack()
+  const TRIGGER = 35;       // длина свайпа для goBack()
   const MAX_OPACITY = 0.3;  // тень при перетаскивании
 
   document.addEventListener('touchstart', (e) => {
@@ -67,17 +67,18 @@
 
     // если свайп длинный — возвращаемся назад
     if (deltaX > TRIGGER) {
+      // длинный свайп — возврат
       currentScreen.style.transition = 'transform 0.25s ease-out, opacity 0.25s ease-out';
       currentScreen.style.transform = `translateX(100%)`;
       currentScreen.style.opacity = '0';
-
+    
       setTimeout(() => {
         currentScreen.style.transform = '';
         currentScreen.style.opacity = '';
         currentScreen.style.boxShadow = '';
         currentScreen.style.transition = '';
         currentScreen = null;
-
+    
         try {
           if (window.Telegram?.WebApp?.HapticFeedback) {
             Telegram.WebApp.HapticFeedback.impactOccurred('light');
@@ -85,23 +86,23 @@
             navigator.vibrate(10);
           }
         } catch {}
-
+    
         if (typeof window.goBack === 'function') {
           window.goBack();
-        } else {
-          console.warn('⚠️ goBack() не определён');
         }
-      }, 150);
-    } else {
-      // короткий свайп — вернуть экран назад
-      currentScreen.style.transition = 'transform 0.25s ease-out';
+      }, 120);
+    } else if (deltaX > 0 && deltaX <= TRIGGER) {
+      // короткий свайп — вернуть с эффектом "отката"
+      currentScreen.style.transition = 'transform 0.2s ease-out';
       currentScreen.style.transform = 'translateX(0)';
-      currentScreen.style.boxShadow = 'none';
+      currentScreen.style.opacity = '1';
       setTimeout(() => {
         currentScreen.style.transition = '';
+        currentScreen.style.boxShadow = 'none';
         currentScreen = null;
-      }, 250);
+      }, 200);
     }
+
   }, { passive: true });
 
   console.log('✅ NDHQ Swipe System v5.0 activated');
