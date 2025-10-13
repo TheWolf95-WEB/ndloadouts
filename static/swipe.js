@@ -1,12 +1,3 @@
-// ==========================================
-// 📱 NDHQ GLOBAL SWIPE SYSTEM (v4.0 FINAL)
-// ==========================================
-// Работает везде, корректно вызывает goBack()
-// Реалистичный отклик, плавная анимация, защита от скролла
-window.setupGlobalSwipeBack = function () {
-  console.log("🚀 Swipe system initialized");
-  document.addEventListener("touchstart", onStart, { passive: true });
-
 (function () {
   let startX = 0;
   let startY = 0;
@@ -16,19 +7,21 @@ window.setupGlobalSwipeBack = function () {
   let allowSwipe = false;
   let startTime = 0;
 
-  const EDGE_ZONE = 25;          // зона активации (от левого края)
-  const SWIPE_DISTANCE = 80;     // минимум пикселей для возврата
-  const MAX_VERTICAL_DRIFT = 60; // максимум вертикального отклонения
-  const ELASTICITY = 0.35;       // пружина
-  const SWIPE_TIME_LIMIT = 700;  // максимум по времени, мс
+  const EDGE_ZONE = 50;          // Увеличено до 50 пикселей
+  const SWIPE_DISTANCE = 80;     // Минимальная дистанция для свайпа
+  const MAX_VERTICAL_DRIFT = 100; // Увеличено до 100 пикселей
+  const ELASTICITY = 0.35;       // Пружина
+  const SWIPE_TIME_LIMIT = 700;  // Максимум времени, мс
 
   window.setupGlobalSwipeBack = function () {
-    document.addEventListener("touchstart", onStart, { passive: true });
+    console.log("🚀 Swipe system initialized");
+    document.addEventListener("touchstart", onStart, { passive: false });
     document.addEventListener("touchmove", onMove, { passive: false });
-    document.addEventListener("touchend", onEnd, { passive: true });
+    document.addEventListener("touchend", onEnd, { passive: false });
   };
 
   function onStart(e) {
+    console.log("👇 Touch start:", e.changedTouches[0].clientX, e.changedTouches[0].clientY);
     const t = e.changedTouches[0];
     startX = t.clientX;
     startY = t.clientY;
@@ -37,11 +30,16 @@ window.setupGlobalSwipeBack = function () {
     isSwiping = false;
     allowSwipe = false;
 
-    // свайп только от левого края
-    if (startX > EDGE_ZONE) return;
+    if (startX > EDGE_ZONE) {
+      console.log("🚫 Swipe ignored: touch started outside EDGE_ZONE", startX);
+      return;
+    }
 
     activeScreen = document.querySelector(".screen.active");
-    if (!activeScreen || activeScreen.id === "screen-home") return;
+    if (!activeScreen) {
+      console.log("🚫 No active screen found");
+      return;
+    }
 
     allowSwipe = true;
     activeScreen.style.transition = "none";
@@ -56,20 +54,21 @@ window.setupGlobalSwipeBack = function () {
     const deltaX = currentX - startX;
     const deltaY = Math.abs(t.clientY - startY);
 
-    // если движение вверх/вниз — отменяем свайп
     if (deltaY > MAX_VERTICAL_DRIFT) {
+      console.log("🚫 Swipe cancelled: vertical drift too large", deltaY);
       resetPosition();
       return;
     }
 
-    // активируем свайп только при горизонтальном движении
     if (!isSwiping && deltaX > 10) {
+      console.log("🚀 Swipe activated");
       isSwiping = true;
     }
 
     if (isSwiping && deltaX > 0) {
-      e.preventDefault(); // блокируем вертикальную прокрутку
+      e.preventDefault();
       const shift = deltaX * ELASTICITY;
+      console.log("🎢 Swiping: transform=translateX(", shift, "px), opacity=", 1 - Math.min(deltaX / 300, 0.3));
       activeScreen.style.transform = `translateX(${shift}px)`;
       activeScreen.style.opacity = `${1 - Math.min(deltaX / 300, 0.3)}`;
     }
@@ -82,16 +81,18 @@ window.setupGlobalSwipeBack = function () {
     const deltaT = Date.now() - startTime;
     const velocity = deltaX / deltaT;
 
-    activeScreen.style.transition =
-      "transform 0.25s ease-out, opacity 0.25s ease-out";
+    console.log("👆 Touch end, deltaX:", deltaX, "velocity:", velocity);
+
+    activeScreen.style.transition = "transform 0.25s ease-out, opacity 0.25s ease-out";
     activeScreen.style.willChange = "auto";
 
-    const shouldGoBack =
-      deltaX > SWIPE_DISTANCE || (velocity > 0.5 && deltaX > 20);
+    const shouldGoBack = deltaX > SWIPE_DISTANCE || (velocity > 0.5 && deltaX > 20);
 
     if (shouldGoBack) {
+      console.log("✅ Triggering goBack");
       triggerGoBack();
     } else {
+      console.log("🔄 Resetting position");
       resetPosition();
     }
 
@@ -107,6 +108,7 @@ window.setupGlobalSwipeBack = function () {
       activeScreen.style.transition = "";
       activeScreen.style.willChange = "";
       activeScreen = null;
+      console.log("🏁 Reset complete");
     }, 250);
   }
 
@@ -129,17 +131,18 @@ window.setupGlobalSwipeBack = function () {
         current.style.transition = "";
         current.style.willChange = "";
       }
+      console.log("🏁 goBack triggered");
     }, 150);
 
-    // Вибрация для эффекта
     try {
       if (window.Telegram?.WebApp?.HapticFeedback) {
-        Telegram.WebApp.HapticFeedback.impactOccurred("light");
+        console.log("Attempting haptic feedback");
+        window.Telegram.WebApp.HapticFeedback.impactOccurred("light");
       } else if (navigator.vibrate) {
         navigator.vibrate(10);
       }
-    } catch {}
+    } catch (e) {
+      console.error("Haptic feedback error:", e);
+    }
   }
 })();
-
-};
