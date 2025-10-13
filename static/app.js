@@ -1620,3 +1620,56 @@ tg.onEvent('web_app_close', () => {
   });
 });
 
+
+
+// =========================================
+// 🔙 Глобальная функция возврата (для свайпа)
+// =========================================
+window.goBack = function() {
+  if (!window.screenHistory || window.screenHistory.length === 0) {
+    console.log("⚠️ История экранов пуста");
+    return;
+  }
+
+  const prevId = window.screenHistory.pop();
+  const current = document.querySelector(".screen.active");
+  const previous = document.getElementById(prevId);
+
+  if (!previous) {
+    console.warn("⚠️ Не найден предыдущий экран:", prevId);
+    return;
+  }
+
+  window.isGoingBack = true;
+
+  if (current) {
+    current.style.transition = "transform 0.25s ease-out, opacity 0.25s ease-out";
+    current.style.transform = "translateX(100%)";
+    current.style.opacity = "0";
+
+    setTimeout(() => {
+      current.classList.remove("active");
+      current.style.display = "none";
+    }, 200);
+  }
+
+  previous.style.display = "block";
+  previous.classList.add("active");
+  previous.style.transition = "transform 0.25s ease-out, opacity 0.25s ease-out";
+  previous.style.transform = "translateX(0)";
+  previous.style.opacity = "1";
+
+  setTimeout(() => {
+    window.isGoingBack = false;
+  }, 250);
+
+  try {
+    if (window.Telegram?.WebApp?.HapticFeedback) {
+      Telegram.WebApp.HapticFeedback.impactOccurred("light");
+    } else if (navigator.vibrate) {
+      navigator.vibrate(10);
+    }
+  } catch {}
+
+  console.log("⬅️ Возврат на экран:", prevId);
+};
