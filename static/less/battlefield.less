@@ -1570,115 +1570,110 @@ body.warzone-theme .card-btn:hover {
   box-shadow: 0 0 0 2px rgba(58, 123, 213, 0.2);
 }
 
-/* Список модулей */
-.module-group {
-  background: var(--bf-card);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 10px;
-  padding: 14px;
-  margin-bottom: 18px;
+// /* Список модулей */
+// .module-group {
+//   background: var(--bf-card);
+//   border: 1px solid rgba(255,255,255,0.08);
+//   border-radius: 10px;
+//   padding: 14px;
+//   margin-bottom: 18px;
+// }
+
+// .module-group h4 {
+//   font-size: 1rem;
+//   font-weight: 600;
+//   color: #6cb2ff;
+//   letter-spacing: 0.5px;
+// }
+
+// .module-row {
+//   display: flex;
+//   justify-content: space-between;
+//   align-items: center;
+//   padding: 10px 12px;
+//   background: rgba(255, 255, 255, 0.03);
+//   border-radius: 6px;
+//   margin-bottom: 6px;
+//   transition: all 0.2s ease;
+// }
+
+// .module-row:hover {
+//   background: rgba(255, 255, 255, 0.06);
+// }
+
+// .module-row:last-child {
+//   margin-bottom: 0;
+// }
+
+// .module-row span {
+//   color: #e0e6ee;
+//   font-size: 14px;
+//   font-weight: 500;
+// }
+
+// .module-row .btn-sm {
+//   background: rgba(220, 53, 69, 0.15);
+//   border: 1px solid rgba(220, 53, 69, 0.3);
+//   color: #e58c94;
+//   padding: 4px 8px;
+//   border-radius: 4px;
+//   font-size: 11px;
+//   transition: all 0.2s ease;
+// }
+
+// .module-row .btn-sm:hover {
+//   background: rgba(220, 53, 69, 0.25);
+//   border-color: rgba(220, 53, 69, 0.5);
+//   color: #f1aeb5;
+// }
+
+
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 }
 
-.module-group h4 {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #6cb2ff;
-  letter-spacing: 0.5px;
-}
-
-.module-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border-radius: 6px;
-  margin-bottom: 6px;
-  transition: all 0.2s ease;
-}
-
-.module-row:hover {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.module-row:last-child {
-  margin-bottom: 0;
-}
-
-.module-row span {
-  color: #e0e6ee;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.module-row .btn-sm {
-  background: rgba(220, 53, 69, 0.15);
-  border: 1px solid rgba(220, 53, 69, 0.3);
-  color: #e58c94;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  transition: all 0.2s ease;
-}
-
-.module-row .btn-sm:hover {
-  background: rgba(220, 53, 69, 0.25);
-  border-color: rgba(220, 53, 69, 0.5);
-  color: #f1aeb5;
-}
-
-/* Пустые состояния */
-.builds-grid:empty::before,
-#bf-modules-types-grid:empty::before,
-#bf-modules-list:empty::before {
-  content: "Ничего не найдено";
-  display: block;
-  text-align: center;
-  color: #8fa3b7;
-  padding: 40px 20px;
-  font-size: 14px;
-  grid-column: 1 / -1;
-}
-
-/* Анимации */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.bf-build-card,
-.modules-type-btn,
-.module-group {
-  animation: fadeIn 0.3s ease;
-}
-
-/* === сетка карточек модулей === */
-.module-group .module-row {
+.module-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
   background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.07);
   border-radius: 8px;
-  padding: 8px 10px;
+  padding: 8px 12px;
   transition: 0.2s ease;
 }
 
-.module-group .module-row:hover {
+.module-card:hover {
   background: rgba(255,255,255,0.08);
 }
 
-/* === Сетка === */
-.module-group {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(48%, 1fr));
-  gap: 10px;
+.module-card .mod-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #fff;
+}
+
+.delete-mod {
+  background: rgba(255,80,80,0.1);
+  border: 1px solid rgba(255,80,80,0.3);
+  color: #ff7070;
+  border-radius: 6px;
+  padding: 4px 8px;
+  transition: 0.2s ease;
+}
+
+.delete-mod:hover {
+  background: rgba(255,80,80,0.2);
+  color: #fff;
+}
+
+.module-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
 }
 
 
