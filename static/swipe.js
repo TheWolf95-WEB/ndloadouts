@@ -3,6 +3,9 @@
 // ==========================================
 // Работает везде, корректно вызывает goBack()
 // Реалистичный отклик, плавная анимация, защита от скролла
+window.setupGlobalSwipeBack = function () {
+  console.log("🚀 Swipe system initialized");
+  document.addEventListener("touchstart", onStart, { passive: true });
 
 (function () {
   let startX = 0;
@@ -138,3 +141,5 @@
     } catch {}
   }
 })();
+
+};
