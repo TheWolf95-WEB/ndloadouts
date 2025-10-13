@@ -191,6 +191,51 @@ async function bfLoadModulesList(weaponType, label) {
       list.appendChild(group);
     }
 
+     // === Обновляем селект категорий ===
+// === Обновляем селект категорий ===
+const categorySelect = document.getElementById("bf-mod-category-select");
+if (categorySelect) {
+  categorySelect.innerHTML = '<option value="">Выберите категорию...</option>';
+  Object.keys(data).forEach(cat => {
+    const opt = document.createElement("option");
+    opt.value = cat;
+    opt.textContent = cat;
+    categorySelect.appendChild(opt);
+  });
+
+  const manualInput = document.getElementById("bf-mod-category");
+
+   // ✅ Автоподстановка при выборе (только один раз)
+   if (!categorySelect.dataset.bound) {
+     categorySelect.dataset.bound = "true";
+     categorySelect.addEventListener("change", (e) => {
+       if (!manualInput) return;
+       if (e.target.value) {
+         manualInput.value = e.target.value; // при выборе — подставляем
+         manualInput.style.opacity = "0.6";  // показываем, что связано
+         manualInput.style.border = "";      // убираем рамку
+       } else {
+         manualInput.value = "";             // если вернулся на пустое — очищаем
+         manualInput.style.opacity = "1";
+         manualInput.style.border = "";      // убираем рамку
+       }
+     });
+   }
+
+
+  // ✅ Подсветка при ручном вводе новой категории
+  if (manualInput) {
+    manualInput.addEventListener("input", () => {
+      const value = manualInput.value.trim();
+      const isNew = value && ![...categorySelect.options].some(o => o.value === value);
+      manualInput.style.border = isNew ? "1px solid #3a7bd5" : "";
+      manualInput.style.opacity = "1";
+    });
+  }
+}
+
+
+
     window.currentBFWeaponType = weaponType;
     bfShowScreen("screen-bf-modules-list");
   } catch (e) {
@@ -198,32 +243,33 @@ async function bfLoadModulesList(weaponType, label) {
   }
 }
 
-// Добавление модуля
+// === Добавление модуля ===
 document.getElementById("bf-mod-add-btn")?.addEventListener("click", async () => {
+  const selectedCategory = document.getElementById("bf-mod-category-select").value.trim();
+  const manualCategory = document.getElementById("bf-mod-category").value.trim();
+  const category = manualCategory || selectedCategory;
+
   const payload = {
     initData: tg.initData,
     weapon_type: window.currentBFWeaponType,
-    category: document.getElementById("bf-mod-category").value.trim(),
-    en: document.getElementById("bf-mod-en").value.trim(),
-    pos: parseInt(document.getElementById("bf-mod-pos").value) || 0,
+    category,
+    en: document.getElementById("bf-mod-en").value.trim()
   };
 
   if (!payload.category || !payload.en) {
-    alert("All fields are required");
+    alert("Все поля обязательны для заполнения");
     return;
   }
-   
-   const resCheck = await fetch(`/api/bf/modules/${payload.weapon_type}`);
-   const existing = await resCheck.json();
-   const exists = Object.values(existing).some(list =>
-     list.some(m => m.category === payload.category && m.en.toLowerCase() === payload.en.toLowerCase())
-   );
-   
-   if (exists) {
-     alert("Такой модуль уже существует!");
-     return;
-   }
 
+  const resCheck = await fetch(`/api/bf/modules/${payload.weapon_type}`);
+  const existing = await resCheck.json();
+  const exists = Object.values(existing).some(list =>
+    list.some(m => m.category === payload.category && m.en.toLowerCase() === payload.en.toLowerCase())
+  );
+  if (exists) {
+    alert("Такой модуль уже существует!");
+    return;
+  }
 
   try {
     await fetch("/api/bf/modules", {
@@ -232,14 +278,13 @@ document.getElementById("bf-mod-add-btn")?.addEventListener("click", async () =>
       body: JSON.stringify(payload),
     });
 
-    ["bf-mod-category", "bf-mod-en", "bf-mod-pos"].forEach(
-      (id) => (document.getElementById(id).value = "")
-    );
+    ["bf-mod-category", "bf-mod-en"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("bf-mod-category-select").value = "";
 
     await bfLoadModulesList(payload.weapon_type, bfWeaponTypeLabels[payload.weapon_type]);
     await bfLoadModules(payload.weapon_type);
   } catch (e) {
-    alert("Error while adding module");
+    alert("Ошибка при добавлении модуля");
     console.error(e);
   }
 });
@@ -1006,13 +1051,6 @@ async function bfRenderBuilds(builds) {
           <span class="bf-badge" style="
             background: ${bg};
             color: ${text};
-            font-weight: 500;
-            border-radius: 6px;
-            padding: 3px 10px;
-            font-size: 0.8rem;
-            margin-right: 4px;
-            display: inline-block;
-            text-shadow: 0 1px 1px rgba(0,0,0,0.4);
           ">
             ${label}
           </span>
