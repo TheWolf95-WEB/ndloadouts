@@ -88,21 +88,6 @@ body {
 }
 
 
-
-/* 🔹 Анимации для свайпа */
-.screen.slide-out-right {
-  transform: translateX(100%) !important;
-  opacity: 0 !important;
-}
-
-.screen.slide-in-left {
-  transform: translateX(-100%) !important;
-  opacity: 0 !important;
-}
-
-
-/* === 🧩 NDHQ Buttons & Grids === */
-
 /* === 🧩 NDHQ — Единый стиль кнопок и отступов === */
 
 /* Сетка */
@@ -392,6 +377,48 @@ body {
 .card-btn.full-width {
   grid-column: 1 / -1;
   width: 100%;
+}
+
+
+
+/* ===============================
+   📱 NDHQ GLOBAL SWIPE ANIMATION
+   =============================== */
+
+.screen {
+  transition:
+    transform 0.25s ease-out,
+    opacity 0.25s ease-out;
+  will-change: transform, opacity;
+}
+
+.slide-out-right {
+  transform: translateX(100%);
+  opacity: 0;
+  transition: transform 0.25s ease-out, opacity 0.2s ease-out;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.25s ease-out forwards;
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-20%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* 💡 Обязательно, чтобы не было миганий при переключении экранов */
+.screen,
+.slide-in-left,
+.slide-out-right {
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
 }
 
 
