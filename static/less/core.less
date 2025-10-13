@@ -379,32 +379,30 @@ body {
   width: 100%;
 }
 
-
-
-/* ===============================
-   📱 NDHQ SWIPE ANIMATION STYLE
-   =============================== */
 /* === SWIPE TRANSITION BASE === */
+/* === Swipe transition base === */
 .screen {
-  transition: transform 0.25s ease-out, opacity 0.25s ease-out;
   will-change: transform, opacity;
-  backface-visibility: hidden;
-  -webkit-transform: translateZ(0);
+  transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+  touch-action: pan-y; /* позволяет свайпить по горизонтали, не ломая вертикальный скролл */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 100vh;
 }
 
-.screen.slide-back {
-  transform: translateX(100%);
-  opacity: 0;
+/* активный экран всегда выше */
+.screen.active {
+  z-index: 10;
 }
 
-
-/* Разрешаем естественный вертикальный скролл, но горизонтальный под контролем JS */
-.screen {
-  touch-action: pan-y;
+/* скрытые — под активным */
+.screen:not(.active) {
+  z-index: 5;
 }
 
-/* Чтобы iOS не прокидывал системный back/overscroll по горизонтали */
-.container, body, html {
-  overscroll-behavior-x: contain;
+/* небольшая тень во время свайпа */
+.screen.swiping {
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.25);
 }
-
