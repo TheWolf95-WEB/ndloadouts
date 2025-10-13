@@ -955,28 +955,28 @@ async function bfRenderBuilds(builds) {
            case 'new':
            case 'новинка':
            case 'новинки':
-             bg = 'linear-gradient(135deg, #1f4b99, #3a7bd5)'; // синий градиент
-             text = '#e9f1ff';
+             bg = 'linear-gradient(135deg, #4f46e5, #3b82f6)'; // 💜 фиолетово-синий, выразительный
+             text = '#ffffff';
              label = 'Новинка';
              break;
          
            case 'topmeta':
            case 'топ мета':
-             bg = 'linear-gradient(135deg, #3a7bd5, #00c6ff)'; // голубовато-синий
+             bg = 'linear-gradient(135deg, #00b4db, #0083b0)'; // 💠 яркий голубой
              text = '#ffffff';
              label = 'Топ мета';
              break;
          
            case 'meta':
            case 'мета':
-             bg = 'linear-gradient(135deg, #2e8b57, #00b894)'; // изумрудно-зелёный
+             bg = 'linear-gradient(135deg, #2e8b57, #00b894)'; // 🍃 зелёный
              text = '#eafff6';
              label = 'Мета';
              break;
          
            case 'popular':
            case 'популярное':
-             bg = 'linear-gradient(135deg, #485563, #2b5876)'; // серо-синий “популярное”
+             bg = 'linear-gradient(135deg, #485563, #2b5876)'; // ⚙️ серо-синий
              text = '#ffffff';
              label = 'Популярное';
              break;
@@ -986,6 +986,7 @@ async function bfRenderBuilds(builds) {
              text = '#ccc';
              label = cat;
          }
+
 
       
         return `
