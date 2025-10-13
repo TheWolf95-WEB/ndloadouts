@@ -976,21 +976,30 @@ function renderUserBuilds(buildsToRender) {
 
       const weaponTypeRu = weaponTypeLabels[build.weapon_type] || build.weapon_type;
 
+      // 🏆 Цвета топов в Warzone стиле (как в Battlefield)
       const pickTopBg = (text) => {
         const m = String(text).trim().match(/^#?(\d+)/);
         const n = m ? parseInt(m[1], 10) : 0;
-        if (n === 1) return '#b8a326';
-        if (n === 2) return '#B0B0B0';
-        if (n === 3) return '#FF8C00';
-        return '#2f3336';
+      
+        switch (n) {
+          case 1:
+            return 'linear-gradient(145deg, #FFD700, #E5C100)'; // золото
+          case 2:
+            return 'linear-gradient(145deg, #C0C0C0, #A9A9A9)'; // серебро
+          case 3:
+            return 'linear-gradient(145deg, #CD7F32, #B87333)'; // бронза
+          default:
+            return 'linear-gradient(145deg, #1b2324, #101617)'; // Warzone фон
+        }
       };
+
 
       const tops = [build.top1, build.top2, build.top3]
         .filter(Boolean)
         .map(mod => {
           const text = mod.trim();
           const bg = pickTopBg(text);
-          return `<span class="loadout__top" style="background:${bg}">${text}</span>`;
+          return `<span class="loadout__top" style="background:${bg}; color:#000;">${text}</span>`;
         })
         .join('');
 
