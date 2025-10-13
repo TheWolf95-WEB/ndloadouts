@@ -168,15 +168,17 @@ async function bfLoadModulesList(weaponType, label) {
       const group = document.createElement("div");
       group.className = "module-group";
       group.innerHTML = `
-        <div class="module-group-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="module-group-header" style="display:flex;align-items:center;justify-content:space-between; margin-bottom:10px;">
           <h4 style="margin:0;">${category}</h4>
           <button class="btn btn-sm delete-category" title="Удалить категорию" style="
             background:#2a2f36;
             border:1px solid rgba(255,255,255,0.1);
             color:#f66;
-            padding:4px 8px;
-            border-radius:6px;
+            padding:10px;
+            border-radius:10px;
+            min-height: 100%;
             font-size:0.8rem;
+            margin:0;
             transition:all 0.2s ease;
           ">Удалить категорию</button>
         </div>
