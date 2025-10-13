@@ -1034,22 +1034,37 @@ async function bfRenderBuilds(builds) {
       const tabContents = tabs.map((tab, i) => `
         <div class="bf-tab-content ${i === 0 ? 'is-active' : ''}" data-tab-content="bf-${groupIndex}-${buildIndex}-${i}">
           <div class="bf-modules">
-            ${(tab.items || []).map(itemKey => {
-               const modsWrap = bfModulesByType[build.weapon_type];
-               const modKey = String(itemKey).toLowerCase().trim();
-               const mod = modsWrap?.flat?.find(m => m.en.toLowerCase() === modKey);
-               const slot = mod?.category || "—";
-               const name = mod?.en || itemKey;
-              return `
-                <div class="bf-module">
-                  <span class="bf-module-slot">${slot}</span>
-                  <span class="bf-module-name">${name}</span>
-                </div>
-              `;
-            }).join('')}
+            ${[...(tab.items || []), ...(tab.universal || []).map(u => `${u.name}|${u.value}`)]
+              .map(entry => {
+                // === Обычные модули из справочника ===
+                if (typeof entry === "string" && !entry.includes("|")) {
+                  const modsWrap = bfModulesByType[build.weapon_type];
+                  const modKey = String(entry).toLowerCase().trim();
+                  const mod = modsWrap?.flat?.find(m => m.en.toLowerCase() === modKey);
+                  const slot = mod?.category || "—";
+                  const name = mod?.en || entry;
+                  return `
+                    <div class="bf-module">
+                      <span class="bf-module-slot">${slot}</span>
+                      <span class="bf-module-name">${name}</span>
+                    </div>
+                  `;
+                }
+      
+                // === Универсальные модули (Barrel | 16.5'' FLUTED) ===
+                const [slot, name] = entry.split("|");
+                return `
+                  <div class="bf-module">
+                    <span class="bf-module-slot">${slot}</span>
+                    <span class="bf-module-name">${name}</span>
+                  </div>
+                `;
+              })
+              .join('')}
           </div>
         </div>
       `).join('');
+
 
       
       wrapper.innerHTML = `
