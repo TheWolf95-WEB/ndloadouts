@@ -397,3 +397,14 @@ body {
   opacity: 0;
 }
 
+
+/* Разрешаем естественный вертикальный скролл, но горизонтальный под контролем JS */
+.screen {
+  touch-action: pan-y;
+}
+
+/* Чтобы iOS не прокидывал системный back/overscroll по горизонтали */
+.container, body, html {
+  overscroll-behavior-x: contain;
+}
+
