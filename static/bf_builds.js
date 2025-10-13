@@ -769,6 +769,23 @@ async function bfRenderBuilds(builds) {
 
     if (pa !== pb) return pa - pb;
 
+          // 🔢 Сортировка по числу из топа (например "#1", "#2", "#3")
+     function extractTopNum(build) {
+       const tops = [build.top1, build.top2, build.top3]
+         .map(t => {
+           const match = String(t || '').match(/#?(\d+)/);
+           return match ? parseInt(match[1], 10) : Infinity;
+         })
+         .filter(n => !isNaN(n));
+       return tops.length ? Math.min(...tops) : Infinity;
+     }
+   
+     const na = extractTopNum(a);
+     const nb = extractTopNum(b);
+   
+     if (na !== nb) return na - nb; // сортируем по возрастанию #1, #2, #3 и т.д.
+
+
     const getTime = (build) => {
       let t = build.created_at ? Date.parse(build.created_at) : NaN;
       if (Number.isNaN(t)) {
