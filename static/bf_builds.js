@@ -940,14 +940,20 @@ async function bfRenderBuilds(builds) {
         }
       };
 
-      const tops = [build.top1, build.top2, build.top3]
-        .filter(Boolean)
-        .map(mod => {
-          const text = mod.trim();
-          const bg = pickTopBg(text);
-          return `<span class="bf-top" style="background:${bg}">${text}</span>`;
-        })
-        .join('');
+         const tops = [build.top1, build.top2, build.top3]
+           .filter(Boolean)
+           .map(mod => {
+             const text = mod.trim();
+             const match = text.match(/^#?(\d+)/);
+             const n = match ? parseInt(match[1], 10) : 0;
+             let cls = "bf-top-default";
+             if (n === 1) cls = "bf-top-1";
+             else if (n === 2) cls = "bf-top-2";
+             else if (n === 3) cls = "bf-top-3";
+             return `<span class="bf-top ${cls}">${text}</span>`;
+           })
+           .join('');
+
 
       const cats = Array.isArray(build.categories) ? build.categories : [];
       
