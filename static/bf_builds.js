@@ -164,70 +164,60 @@ async function bfLoadModulesList(weaponType, label) {
     title.textContent = `Modules — ${label}`;
     list.innerHTML = "";
 
-    for (const category in data) {
-      const group = document.createElement("div");
-      group.className = "module-group";
-      group.innerHTML = `
-        <div class="module-group-header" style="display:flex;align-items:center;justify-content:space-between; margin-bottom:10px;">
-          <h4 style="margin:0;">${category}</h4>
-          <button class="btn btn-sm delete-category" title="Удалить категорию" style="
-            background:#2a2f36;
-            border:1px solid rgba(255,255,255,0.1);
-            color:#f66;
-            padding:10px;
-            border-radius:10px;
-            min-height: 100%;
-            font-size:0.8rem;
-            margin:0;
-            transition:all 0.2s ease;
-          ">Удалить категорию</button>
-        </div>
-      `;
-
-       // === Удаление всей категории ===
-      group.querySelector(".delete-category").addEventListener("click", async () => {
-        if (!confirm(`Удалить категорию "${category}" со всеми модулями?`)) return;
-      
-        try {
-          await Promise.all(
-            data[category].map(mod =>
-              fetch(`/api/bf/modules/${mod.id}`, {
-                method: "DELETE",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ initData: tg.initData }),
-              })
-            )
-          );
-          await bfLoadModulesList(weaponType, label);
-        } catch (err) {
-          console.error("Ошибка при удалении категории:", err);
-          alert("Не удалось удалить категорию");
-        }
-      });
-
-
-
-      data[category].forEach((mod) => {
-        const row = document.createElement("div");
-        row.className = "module-row";
-        row.innerHTML = `
-          <span>${mod.en}</span>
-          <button class="btn btn-sm" data-id="${mod.id}">🗑</button>
-        `;
-        row.querySelector("button").addEventListener("click", async () => {
-          if (!confirm(`Удалить модуль ${mod.en}?`)) return;
-          await fetch(`/api/bf/modules/${mod.id}`, {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ initData: tg.initData }),
-          });
-          await bfLoadModulesList(weaponType, label);
-        });
-        group.appendChild(row);
-      });
-
-      list.appendChild(group);
-    }
+   for (const category in data) {
+     const group = document.createElement("div");
+     group.className = "module-group";
+     group.innerHTML = `
+       <div class="module-group-header">
+         <h4 class="module-title">${category}</h4>
+         <button class="btn delete-category" title="Удалить категорию">🗑</button>
+       </div>
+       <div class="modules-grid"></div>
+     `;
+   
+     // === Удаление категории ===
+     group.querySelector(".delete-category").addEventListener("click", async () => {
+       if (!confirm(`Удалить категорию "${category}" со всеми модулями?`)) return;
+       try {
+         await Promise.all(
+           data[category].map(mod =>
+             fetch(`/api/bf/modules/${mod.id}`, {
+               method: "DELETE",
+               headers: { "Content-Type": "application/json" },
+               body: JSON.stringify({ initData: tg.initData }),
+             })
+           )
+         );
+         await bfLoadModulesList(weaponType, label);
+       } catch (err) {
+         console.error("Ошибка при удалении категории:", err);
+         alert("Не удалось удалить категорию");
+       }
+     });
+   
+     // === Добавляем модули в сетку ===
+     const grid = group.querySelector(".modules-grid");
+     data[category].forEach((mod) => {
+       const card = document.createElement("div");
+       card.className = "module-card";
+       card.innerHTML = `
+         <div class="mod-name">${mod.en}</div>
+         <button class="delete-mod" data-id="${mod.id}" title="Удалить модуль">🗑</button>
+       `;
+       card.querySelector(".delete-mod").addEventListener("click", async () => {
+         if (!confirm(`Удалить модуль ${mod.en}?`)) return;
+         await fetch(`/api/bf/modules/${mod.id}`, {
+           method: "DELETE",
+           headers: { "Content-Type": "application/json" },
+           body: JSON.stringify({ initData: tg.initData }),
+         });
+         await bfLoadModulesList(weaponType, label);
+       });
+       grid.appendChild(card);
+     });
+   
+     list.appendChild(group);
+   }
 
      // === Обновляем селект категорий ===
 // === Обновляем селект категорий ===
