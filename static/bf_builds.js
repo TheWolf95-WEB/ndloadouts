@@ -435,7 +435,7 @@ tabDiv.querySelector(".add-universal").addEventListener("click", () => {
   row.className = "universal-row";
   row.style = "display:flex; gap:8px; margin-top:6px;";
   row.innerHTML = `
-     <div style="flex:1; position:relative;">
+     <div style="flex:1; position:relative; display:flex; gap:15px;">
        <select class="form-input universal-name">
          <option value="">Выберите категорию...</option>
          ${Object.keys(bfModulesByType[type]?.byCategory || {})
@@ -443,7 +443,7 @@ tabDiv.querySelector(".add-universal").addEventListener("click", () => {
            .join("")}
        </select>
        <input type="text" class="form-input universal-name-input" placeholder="Или введите вручную..." 
-              style="margin-top:6px;width:100%;">
+              style="width:100%;">
      </div>
      <input type="text" class="form-input universal-value" placeholder="Название модуля (например: 16.5'' FLUTED)" style="flex:1;">
      <button type="button" class="btn btn-sm btn-remove-universal" style="flex:0;">🗑</button>
