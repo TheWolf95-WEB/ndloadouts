@@ -202,8 +202,8 @@ async function bfLoadModulesList(weaponType, label) {
        card.className = "module-card";
        card.innerHTML = `
          <div class="mod-name">${mod.en}</div>
-         <button class="delete-mod" data-id="${mod.id}" title="Удалить модуль">🗑</button>
-       `;
+         <button class="delete-mod" data-id="${mod.id}" title="Удалить модуль">Удалить</button>
+      `;
        card.querySelector(".delete-mod").addEventListener("click", async () => {
          if (!confirm(`Удалить модуль ${mod.en}?`)) return;
          await fetch(`/api/bf/modules/${mod.id}`, {
