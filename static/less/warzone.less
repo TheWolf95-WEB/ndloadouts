@@ -764,82 +764,80 @@
 }
 
 /* ===============================
-   ⚙️ NDHQ | WARZONE STYLES REWORK
+   🏆 Топы (#1, #2, #3)
    =============================== */
-
-/* 🏆 Топы (#1 #2 #3) */
 .loadout__top {
   display: inline-block;
   padding: 4px 10px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-weight: 700;
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.4px;
-  color: #000; /* чёрный текст */
+  color: #000;
   box-shadow: inset 0 -1px 3px rgba(0,0,0,0.25);
 }
 
-/* 🥇 Золото */
-.loadout__top:has(span:contains("#1")),
-.loadout__top:nth-child(1) {
+/* 🥇 1 место — золото */
+.loadout__top[data-rank="1"] {
   background: linear-gradient(145deg, #FFD700, #E5C100);
 }
 
-/* 🥈 Серебро */
-.loadout__top:has(span:contains("#2")),
-.loadout__top:nth-child(2) {
+/* 🥈 2 место — серебро */
+.loadout__top[data-rank="2"] {
   background: linear-gradient(145deg, #C0C0C0, #A9A9A9);
 }
 
-/* 🥉 Бронза */
-.loadout__top:has(span:contains("#3")),
-.loadout__top:nth-child(3) {
+/* 🥉 3 место — бронза */
+.loadout__top[data-rank="3"] {
   background: linear-gradient(145deg, #CD7F32, #B87333);
 }
 
-/* 🟩 Остальные */
-.loadout__top:not(:has(span:contains("#"))) {
-  background: linear-gradient(145deg, #1b2324, #101617);
+/* Остальные */
+.loadout__top[data-rank]:not([data-rank="1"]):not([data-rank="2"]):not([data-rank="3"]) {
+  background: linear-gradient(145deg, #1e2830, #151b20);
   color: #fff;
 }
 
-
-/* 🏷️ Категории (Новинка, Мета и т.д.) */
+/* ===============================
+   🏷️ Категории
+   =============================== */
 .badge-category {
-  background: linear-gradient(145deg, #1b2324, #101617);
-  color: #fff;
-  border-radius: 6px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  padding: 4px 10px;
-  letter-spacing: 0.3px;
   display: inline-block;
+  margin-right: 6px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: #fff;
+  letter-spacing: 0.4px;
 }
 
-/* Цвета категорий */
-.badge-category[data-cat*="Новинка"],
-.badge-category[data-cat*="NEW"] {
-  background: linear-gradient(145deg, #3ca61b, #297d12);
+/* Категории цветов (в стиле BF, но с Warzone акцентами) */
+.badge-category[data-cat*="новинка"],
+.badge-category[data-cat*="new"] {
+  background: linear-gradient(135deg, #4f46e5, #3b82f6);
 }
 
-.badge-category[data-cat*="МЕТА"],
-.badge-category[data-cat*="META"] {
-  background: linear-gradient(145deg, #0c7353, #0a5840);
+.badge-category[data-cat*="топ мета"],
+.badge-category[data-cat*="topmeta"] {
+  background: linear-gradient(135deg, #00b4db, #0083b0);
 }
 
-.badge-category[data-cat*="ТОП"],
-.badge-category[data-cat*="TOP"] {
-  background: linear-gradient(145deg, #b47400, #8b5800);
+.badge-category[data-cat*="мета"],
+.badge-category[data-cat*="meta"] {
+  background: linear-gradient(135deg, #1fa46b, #0e7c4a);
 }
 
-.badge-category[data-cat*="ПОПУЛЯРНОЕ"],
-.badge-category[data-cat*="POPULAR"] {
-  background: linear-gradient(145deg, #005a78, #00475e);
+.badge-category[data-cat*="популярное"],
+.badge-category[data-cat*="popular"] {
+  background: linear-gradient(135deg, #485563, #2b5876);
 }
 
-/* 💚 Тип оружия */
+/* ===============================
+   💚 Тип оружия (зелёный вариант)
+   =============================== */
 .loadout__type {
   background: rgba(36, 150, 70, 0.15);
   border: 1px solid rgba(36, 150, 70, 0.3);
@@ -849,6 +847,16 @@
   color: #6aff9c;
   text-transform: capitalize;
   font-weight: 600;
+  display: inline-block;
+  margin-top: 6px;
+}
+
+/* ===============================
+   🌟 Активная сборка (раскрыта)
+   =============================== */
+.loadout.is-open {
+  border-color: rgba(100,255,160,0.6);
+  box-shadow: 0 0 12px rgba(0,255,130,0.15);
 }
 
 
