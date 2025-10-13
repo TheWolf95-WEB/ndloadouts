@@ -149,16 +149,6 @@ async def api_modules_delete(module_id: int, payload: dict = Body(...)):
     module_delete(module_id)
     return {"status": "ok"}
 
-@app.post("/api/modules/delete-category")
-async def api_modules_delete_category(payload: dict = Body(...)):
-    """Удаляет целую категорию модулей из таблицы"""
-    ensure_admin_from_init(payload.get("initData", ""))
-
-    weapon_type = payload.get("weapon_type")
-    category = payload.get("category")
-
-    if not weapon_type or not category:
-        raise HTTPException(status_code=400, detail="weapon_type и category обязательны")
 
     # Открываем соединение с БД
     conn = sqlite3.connect("/opt/ndloadouts_storage/builds.db")
