@@ -220,17 +220,21 @@
 
 <!-- 📋 Список модулей выбранного типа -->
 <div id="screen-bf-modules-list" class="screen" style="display:none;">
+  <button class="btn" id="bf-back-from-mod-list">⬅ Назад</button>
   <h2 id="bf-modules-title">Справочник модулей</h2>
 
-  <div id="bf-modules-toolbar" class="flex" style="gap:8px;margin-bottom:10px;">
-    <input id="bf-mod-category" class="form-input" placeholder="Категория (например: Дуло)">
-    <input id="bf-mod-en" class="form-input" placeholder="Название EN (Compensator)">
+  <div id="bf-modules-toolbar" class="flex" style="gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+    <select id="bf-mod-category-select" class="form-input" style="min-width:180px;">
+      <option value="">Выберите категорию...</option>
+    </select>
+    
+    <input id="bf-mod-category" class="form-input" placeholder="Или введите новую категорию">
+    <input id="bf-mod-en" class="form-input" placeholder="Название EN (например: Compensator)">
     <button class="btn" id="bf-mod-add-btn">➕ Добавить</button>
   </div>
 
-  <div id="bf-modules-list"></div>
 
-  <button class="btn" id="bf-back-from-mod-list">⬅ Назад</button>
+  <div id="bf-modules-list"></div>
 </div>
 
 
