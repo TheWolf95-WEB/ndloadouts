@@ -977,32 +977,42 @@ function renderUserBuilds(buildsToRender) {
       const weaponTypeRu = weaponTypeLabels[build.weapon_type] || build.weapon_type;
 
       // 🏆 Цвета топов в Warzone стиле (как в Battlefield)
+      // 🏆 Цвета топов Warzone (точно по твоему стилю)
       const pickTopBg = (text) => {
         const m = String(text).trim().match(/^#?(\d+)/);
         const n = m ? parseInt(m[1], 10) : 0;
       
         switch (n) {
           case 1:
-            return { bg: 'linear-gradient(135deg, #ffcc00, #ffb300)', color: '#000' }; // золото
+            return { bg: 'linear-gradient(135deg, #d4af37, #f6e27a)', color: '#000', weight: 700 };
           case 2:
-            return { bg: 'linear-gradient(135deg, #d7d7d7, #bcbcbc)', color: '#000' }; // серебро
+            return { bg: 'linear-gradient(135deg, #9ea7b8, #d3d8e8)', color: '#000', weight: 700 };
           case 3:
-            return { bg: 'linear-gradient(135deg, #c47b32, #a15e1a)', color: '#000' }; // бронза
+            return { bg: 'linear-gradient(135deg, #b87333, #e0a96d)', color: '#000', weight: 700 };
           default:
-            return { bg: 'linear-gradient(145deg, #202a22, #141a15)', color: '#fff' }; // Warzone фон
+            return { bg: 'linear-gradient(135deg, #1e2835, #2a3546)', color: '#fff', weight: 600 };
         }
       };
-
-        
-        const tops = [build.top1, build.top2, build.top3]
-          .filter(Boolean)
-          .map(mod => {
-            const text = mod.trim();
-            const { bg, color } = pickTopBg(text);
-            return `<span class="loadout__top" style="background:${bg}; color:${color}; text-transform:uppercase;">${text}</span>`;
-          })
-          .join('');
-
+      
+      const tops = [build.top1, build.top2, build.top3]
+        .filter(Boolean)
+        .map(mod => {
+          const text = mod.trim();
+          const { bg, color, weight } = pickTopBg(text);
+          return `<span class="loadout__top" style="
+            background:${bg};
+            color:${color};
+            font-weight:${weight};
+            text-transform:uppercase;
+            border-radius:6px;
+            padding:3px 8px;
+            margin-right:4px;
+            font-size:0.8rem;
+            letter-spacing:0.5px;
+            display:inline-block;
+          ">${text}</span>`;
+        })
+        .join('');
 
       const cats = Array.isArray(build.categories) ? build.categories : [];
       const translatedCats = cats.map(cat => {
@@ -1017,12 +1027,28 @@ function renderUserBuilds(buildsToRender) {
       });
 
       const categoryColors = {
-        'Новинка': { bg: 'linear-gradient(135deg, #7f00ff, #e100ff)', color: '#fff' },
-        'Топ мета': { bg: 'linear-gradient(135deg, #00b4db, #0083b0)', color: '#fff' },
-        'Мета': { bg: 'linear-gradient(135deg, #2ed573, #1e9e52)', color: '#fff' },
-        'Популярное': { bg: 'linear-gradient(135deg, #ff7e5f, #feb47b)', color: '#000' },
-        'Все': { bg: 'linear-gradient(145deg, #1b2324, #101617)', color: '#ccc' },
+        'Новинка': { 
+          bg: 'linear-gradient(135deg, #4f46e5, #3b82f6)', // 💜 фиолетово-синий
+          color: '#ffffff' 
+        },
+        'Топ мета': { 
+          bg: 'linear-gradient(135deg, #00b4db, #0083b0)', // 💠 яркий голубой
+          color: '#ffffff' 
+        },
+        'Мета': { 
+          bg: 'linear-gradient(135deg, #2e8b57, #00b894)', // 🍃 зелёный
+          color: '#eafff6' 
+        },
+        'Популярное': { 
+          bg: 'linear-gradient(135deg, #485563, #2b5876)', // ⚙️ серо-синий
+          color: '#ffffff' 
+        },
+        'Все': { 
+          bg: 'linear-gradient(135deg, #232a33, #1b1f25)', // дефолт — тёмно-серый
+          color: '#ccc' 
+        },
       };
+
       
       const categoryBadges = translatedCats
         .map(name => {
