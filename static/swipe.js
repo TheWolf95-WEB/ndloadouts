@@ -13,7 +13,7 @@
   let allowSwipe = false;
   let startTime = 0;
 
-  const EDGE_ZONE = 25;          // зона активации (от левого края)
+  const EDGE_ZONE = 100;          // зона активации (от левого края)
   const SWIPE_DISTANCE = 80;     // минимум пикселей для возврата
   const MAX_VERTICAL_DRIFT = 60; // максимум вертикального отклонения
   const ELASTICITY = 0.35;       // коэффициент пружины
