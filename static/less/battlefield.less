@@ -922,26 +922,10 @@ body.warzone-theme .card-btn:hover {
   gap: 8px;
 }
 
-.bf-top {
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #fff;
-}
 
 .bf-categories {
   display: flex;
   gap: 6px;
-}
-
-.bf-badge {
-  padding: 4px 8px;
-  background: #3a7bd5;
-  color: white;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 600;
 }
 
 .bf-loadout__content {
@@ -1256,8 +1240,39 @@ body.warzone-theme .card-btn:hover {
   border-radius: 4px;
   font-size: 11px;
   font-weight: 600;
-  color: #fff;
+  color: #fff; /* по умолчанию */
+  display: inline-block;
+  margin-right: 6px;
 }
+
+/* 🥇 Золото */
+.bf-top-1 {
+  background: linear-gradient(135deg, #d4af37, #f6e27a);
+  color: #000;
+  font-weight: 700;
+}
+
+/* 🥈 Серебро */
+.bf-top-2 {
+  background: linear-gradient(135deg, #9ea7b8, #d3d8e8);
+  color: #000;
+  font-weight: 700;
+}
+
+/* 🥉 Бронза */
+.bf-top-3 {
+  background: linear-gradient(135deg, #b87333, #e0a96d);
+  color: #000;
+  font-weight: 700;
+}
+
+/* ⚙️ Остальные */
+.bf-top-default {
+  background: linear-gradient(135deg, #1e2835, #2a3546);
+  color: #fff;
+  font-weight: 600;
+}
+
 
 
 .bf-badge {
