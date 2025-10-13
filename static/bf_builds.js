@@ -332,18 +332,45 @@ document.getElementById("bf-add-tab")?.addEventListener("click", () => {
     return;
   }
 
-  const tabDiv = document.createElement("div");
-  tabDiv.className = "tab-block";
-  tabDiv.innerHTML = `
-    <input type="text" class="tab-label form-input" placeholder="Название вкладки (например: Основные модули)">
-    <div class="mod-selects"></div>
-    <div class="tab-actions">
-      <button type="button" class="btn add-mod">+ Модуль</button>
-      <button type="button" class="btn delete-tab">🗑 Удалить вкладку</button>
-    </div>
-  `;
+   const tabDiv = document.createElement("div");
+   tabDiv.className = "tab-block";
+   tabDiv.innerHTML = `
+     <input type="text" class="tab-label form-input" placeholder="Название вкладки (например: Основные модули)">
+     
+     <!-- Основные модули -->
+     <div class="mod-selects"></div>
+     
+     <!-- Универсальные модули -->
+     <div class="universal-section">
+       <label class="form-label">Универсальные модули:</label>
+       <div class="universal-fields"></div>
+     </div>
+   
+     <!-- Кнопки управления -->
+     <div class="tab-actions">
+       <button type="button" class="btn add-universal">+ Поле</button>
+       <button type="button" class="btn add-mod">+ Модуль</button>
+       <button type="button" class="btn delete-tab">🗑 Удалить вкладку</button>
+     </div>
+   `;
+   document.getElementById("bf-tabs-container").appendChild(tabDiv);
 
-  document.getElementById("bf-tabs-container").appendChild(tabDiv);
+   // === Добавление универсального поля внутри вкладки ===
+tabDiv.querySelector(".add-universal").addEventListener("click", () => {
+  const container = tabDiv.querySelector(".universal-fields");
+  const row = document.createElement("div");
+  row.className = "universal-row";
+  row.style = "display:flex; gap:8px; margin-top:6px;";
+  row.innerHTML = `
+    <input type="text" class="form-input universal-name" placeholder="Категория (например: Barrel)" style="flex:1;">
+    <input type="text" class="form-input universal-value" placeholder="Название модуля (например: 16.5'' FLUTED)" style="flex:1;">
+    <button type="button" class="btn btn-sm btn-remove-universal" style="flex:0;">🗑</button>
+  `;
+  row.querySelector(".btn-remove-universal").addEventListener("click", () => row.remove());
+  container.appendChild(row);
+});
+
+
 
   // Добавляем первый модуль автоматически
   setTimeout(() => {
@@ -544,11 +571,19 @@ async function bfHandleSubmitBuild() {
     (cb) => cb.value
   );
 
-  const tabs = Array.from(document.querySelectorAll("#bf-tabs-container .tab-block")).map((tab) => {
-    const label = tab.querySelector(".tab-label").value.trim();
-    const items = Array.from(tab.querySelectorAll(".module-select")).map((s) => s.value);
-    return { label, items };
-  });
+   const tabs = Array.from(document.querySelectorAll("#bf-tabs-container .tab-block")).map((tab) => {
+     const label = tab.querySelector(".tab-label").value.trim();
+     const items = Array.from(tab.querySelectorAll(".module-select")).map((s) => s.value);
+   
+     // 🔹 Собираем универсальные поля этой вкладки
+     const universal = Array.from(tab.querySelectorAll(".universal-row")).map(row => ({
+       name: row.querySelector(".universal-name").value.trim(),
+       value: row.querySelector(".universal-value").value.trim(),
+     })).filter(u => u.name && u.value);
+   
+     return { label, items, universal };
+   });
+
 
   const data = {
     initData: tg.initData,
@@ -631,13 +666,40 @@ async function bfEditBuild(build) {
       const tabDiv = document.createElement("div");
       tabDiv.className = "tab-block";
       tabDiv.innerHTML = `
-        <input type="text" class="tab-label" value="${tab.label}" style="margin-bottom: 10px;">
+        <input type="text" class="tab-label form-input" value="${tab.label}" placeholder="Название вкладки (5 модулей)">
+        
+        <!-- Основные модули -->
         <div class="mod-selects"></div>
+      
+        <!-- Универсальные модули -->
+        <div class="universal-section">
+          <label class="form-label">Универсальные модули:</label>
+          <div class="universal-fields"></div>
+        </div>
+      
+        <!-- Кнопки управления -->
         <div class="tab-actions">
+          <button type="button" class="btn add-universal">+ Поле</button>
           <button type="button" class="btn add-mod">+ Модуль</button>
-          <button type="button" class="btn delete-tab">🗑 Удалить</button>
+          <button type="button" class="btn delete-tab">🗑 Удалить вкладку</button>
         </div>
       `;
+
+       tabDiv.querySelector(".add-universal").addEventListener("click", () => {
+        const container = tabDiv.querySelector(".universal-fields");
+        const row = document.createElement("div");
+        row.className = "universal-row";
+        row.style = "display:flex; gap:8px; margin-top:6px;";
+        row.innerHTML = `
+          <input type="text" class="form-input universal-name" placeholder="Категория (например: Barrel)" style="flex:1;">
+          <input type="text" class="form-input universal-value" placeholder="Название модуля (например: 16.5'' FLUTED)" style="flex:1;">
+          <button type="button" class="btn btn-sm btn-remove-universal" style="flex:0;">🗑</button>
+        `;
+        row.querySelector(".btn-remove-universal").addEventListener("click", () => row.remove());
+        container.appendChild(row);
+      });
+
+
       container.appendChild(tabDiv);
 
       tabDiv.querySelector(".add-mod").addEventListener("click", () =>
@@ -680,6 +742,25 @@ async function bfEditBuild(build) {
           tabDiv.querySelector(".mod-selects").appendChild(row);
         }
       });
+
+       // === Восстановление универсальных модулей ===
+         const univContainer = tabDiv.querySelector(".universal-fields");
+         if (Array.isArray(tab.universal)) {
+           tab.universal.forEach(u => {
+             const row = document.createElement("div");
+             row.className = "universal-row";
+             row.style = "display:flex; gap:8px; margin-top:6px;";
+             row.innerHTML = `
+               <input type="text" class="form-input universal-name" value="${u.name}" placeholder="Категория">
+               <input type="text" class="form-input universal-value" value="${u.value}" placeholder="Название модуля">
+               <button type="button" class="btn btn-sm btn-remove-universal">🗑</button>
+             `;
+             row.querySelector(".btn-remove-universal").addEventListener("click", () => row.remove());
+             univContainer.appendChild(row);
+           });
+         }
+
+       
     });
   }
 }
