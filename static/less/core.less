@@ -380,8 +380,12 @@ body {
 }
 
 /* === SWIPE TRANSITION BASE === */
-/* === Swipe transition base === */
-.screen {
-  touch-action: pan-y; /* позволяет вертикальный скролл */
+/* Делаем тень у активного экрана более кинематографичной */
+.screen.swipe-active {
+  box-shadow: 0 6px 18px rgba(0,0,0,0.28);
+  will-change: transform, box-shadow;
 }
+
+/* Если хочешь убрать «стрелку-подсказку» полностью: */
+#swipe-arrow { display: none !important; }
 
