@@ -763,28 +763,71 @@
   flex-wrap: wrap;
 }
 
+/* 🎯 Топовые модули (#1, #2, #3) — Warzone стиль */
 .loadout__top {
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #fff;
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.85rem;
   text-transform: uppercase;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  white-space: nowrap;
+  letter-spacing: 0.3px;
+  color: #000; /* чёрный текст по умолчанию */
+  box-shadow: inset 0 -1px 3px rgba(0,0,0,0.2);
 }
 
-.loadout__top--gold {
-  background: linear-gradient(135deg, #ffd700, #ffa500);
+/* 🥇 1 место — золотой */
+.loadout__top:nth-child(1) {
+  background: linear-gradient(145deg, #FFD700, #E5C100);
 }
 
-.loadout__top--orange {
-  background: linear-gradient(135deg, #ff8c00, #ff4500);
+/* 🥈 2 место — серебристый */
+.loadout__top:nth-child(2) {
+  background: linear-gradient(145deg, #C0C0C0, #A9A9A9);
 }
 
-.loadout__top--silver {
-  background: linear-gradient(135deg, #c0c0c0, #808080);
+/* 🥉 3 место — бронзовый */
+.loadout__top:nth-child(3) {
+  background: linear-gradient(145deg, #CD7F32, #B87333);
 }
+
+/* 🎮 Остальные бейджи */
+.badge-category {
+  background: linear-gradient(145deg, #1b2324, #101617);
+  color: #fff;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  text-transform: none;
+}
+
+/* 💚 Категории Warzone (New, Meta, Popular, Top Meta) */
+.badge-category[data-cat*="Новинка"],
+.badge-category[data-cat*="New"] {
+  background: linear-gradient(145deg, #0A7D36, #065826);
+}
+
+.badge-category[data-cat*="Мета"],
+.badge-category[data-cat*="Meta"] {
+  background: linear-gradient(145deg, #12805C, #0A5D42);
+}
+
+.badge-category[data-cat*="Топ мета"],
+.badge-category[data-cat*="Top"] {
+  background: linear-gradient(145deg, #D68C00, #A86B00);
+}
+
+.badge-category[data-cat*="Популярное"],
+.badge-category[data-cat*="Popular"] {
+  background: linear-gradient(145deg, #007A9C, #005B74);
+}
+
+.badge-category[data-cat*="Все"],
+.badge-category[data-cat*="All"] {
+  background: linear-gradient(145deg, #2C2C2C, #1A1A1A);
+}
+
 
 .loadout__type {
   padding: 5px 10px;
@@ -863,41 +906,6 @@
   .loadout__module-count {
     font-size: 0.75rem;
   }
-}
-
-
-/* === Стили бейджей категорий === */
-.badge-category {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #fff;
-    text-transform: none;
-    opacity: 0.95;
-}
-
-/* === Цвета категорий === */
-.badge-category[data-cat="Новинка"] {
-  background: linear-gradient(145deg, #2c4e73, #1d3249); /* синеватый */
-}
-
-.badge-category[data-cat="Популярное"] {
-  background: linear-gradient(145deg, #8c1d1d, #601212); /* красноватый */
-}
-
-.badge-category[data-cat="Топ мета"] {
-  background: linear-gradient(145deg, #d8891b, #9e5c0f); /* оранжево-золотой */
-}
-
-.badge-category[data-cat="Мета"] {
-  background: linear-gradient(145deg, #2e8b47, #1d5f30); /* зелёный */
-}
-
-.badge-category[data-cat="Все"] {
-  background: #2f3336; /* серый нейтральный */
-  color: #ccc;
 }
 
 
