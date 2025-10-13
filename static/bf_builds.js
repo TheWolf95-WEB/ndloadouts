@@ -178,7 +178,7 @@ async function bfLoadModulesList(weaponType, label) {
             border-radius:6px;
             font-size:0.8rem;
             transition:all 0.2s ease;
-          ">🗑</button>
+          ">Удалить категорию</button>
         </div>
       `;
 
