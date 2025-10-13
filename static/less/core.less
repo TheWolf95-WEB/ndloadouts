@@ -382,16 +382,6 @@ body {
 /* === SWIPE TRANSITION BASE === */
 /* === Swipe transition base === */
 .screen {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  min-height: 100vh;
-  will-change: transform, opacity;
-  transition: transform 0.25s ease-out, opacity 0.25s ease-out;
-  touch-action: pan-y;
-}
-.screen.active {
-  z-index: 10;
+  touch-action: pan-y; /* позволяет вертикальный скролл */
 }
 
