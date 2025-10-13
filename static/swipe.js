@@ -1,50 +1,55 @@
 // ===========================================
-// 📱 NDHQ Global Swipe System v5.0
+// 📱 NDHQ Global Swipe System v5.1 — smooth + reliable
 // ===========================================
 
 (function () {
   if (window.__NDHQSwipeInstalled) return;
   window.__NDHQSwipeInstalled = true;
 
-  let startX = 0;
-  let startY = 0;
-  let deltaX = 0;
-  let deltaY = 0;
-  let active = false;
-  let currentScreen = null;
-  let isVertical = false;
+  let startX = 0, startY = 0;
+  let deltaX = 0, deltaY = 0;
+  let active = false, isVertical = false;
+  let currentScreen = null, prevScreen = null;
 
-  const EDGE_ZONE = 40;     // отступ от левого края
-  const TRIGGER = 35;       // длина свайпа для goBack()
-  const MAX_OPACITY = 0.3;  // тень при перетаскивании
+  const EDGE_ZONE = 40;   // активная зона от левого края
+  const TRIGGER = 50;     // порог для возврата (px)
+  const MAX_OPACITY = 0.3;
 
   document.addEventListener('touchstart', (e) => {
     if (e.touches.length !== 1) return;
-    const touch = e.touches[0];
-    if (touch.clientX > EDGE_ZONE) return; // только от левого края
+    const t = e.touches[0];
+    if (t.clientX > EDGE_ZONE) return;
 
     currentScreen = document.querySelector('.screen.active');
     if (!currentScreen) return;
 
-    // Не свайпаем на домашнем экране
+    // блокируем home/главные экраны
     const id = currentScreen.id || '';
     if (id === 'screen-home' || id === 'screen-warzone-main' || id === 'screen-battlefield-main') return;
 
-    startX = touch.clientX;
-    startY = touch.clientY;
-    deltaX = 0;
-    deltaY = 0;
+    const prevId = window.screenHistory?.[window.screenHistory.length - 1];
+    prevScreen = prevId ? document.getElementById(prevId) : null;
+    if (prevScreen) {
+      prevScreen.style.display = 'block';
+      prevScreen.style.transform = 'translateX(-25px)';
+      prevScreen.style.opacity = '0.5';
+      prevScreen.style.zIndex = '5';
+    }
+
+    startX = t.clientX;
+    startY = t.clientY;
+    deltaX = deltaY = 0;
     active = true;
     isVertical = false;
   }, { passive: true });
 
   document.addEventListener('touchmove', (e) => {
     if (!active || e.touches.length !== 1) return;
-    const touch = e.touches[0];
-    deltaX = touch.clientX - startX;
-    deltaY = touch.clientY - startY;
+    const t = e.touches[0];
+    deltaX = t.clientX - startX;
+    deltaY = t.clientY - startY;
 
-    // определяем, вертикальный ли свайп
+    // вертикальное движение
     if (Math.abs(deltaY) > Math.abs(deltaX)) {
       isVertical = true;
       return;
@@ -52,58 +57,72 @@
 
     if (isVertical || deltaX <= 0) return;
 
-    e.preventDefault(); // блокируем горизонтальный скролл
-    const progress = Math.min(deltaX / window.innerWidth, 1);
+    e.preventDefault();
 
-    // плавный сдвиг экрана и затемнение фона
+    const progress = Math.min(deltaX / window.innerWidth, 1);
     currentScreen.style.transform = `translateX(${deltaX}px)`;
     currentScreen.style.transition = 'none';
-    currentScreen.style.boxShadow = `rgba(0,0,0,${MAX_OPACITY * (1 - progress)}) 0px 0px 20px`;
+    currentScreen.classList.add('swiping');
+
+    if (prevScreen) {
+      prevScreen.style.transform = `translateX(${(-25 + progress * 25)}px)`;
+      prevScreen.style.opacity = `${0.5 + progress * 0.5}`;
+    }
   }, { passive: false });
 
   document.addEventListener('touchend', () => {
     if (!active || !currentScreen || isVertical) return;
     active = false;
 
-    // если свайп длинный — возвращаемся назад
-    if (deltaX > TRIGGER) {
-      // длинный свайп — возврат
+    const finalShift = deltaX; // сохраняем последнее смещение
+
+    if (finalShift > TRIGGER) {
+      // === Свайп успешен — уходим назад ===
       currentScreen.style.transition = 'transform 0.25s ease-out, opacity 0.25s ease-out';
-      currentScreen.style.transform = `translateX(100%)`;
+      currentScreen.style.transform = 'translateX(100%)';
       currentScreen.style.opacity = '0';
-    
+      currentScreen.classList.remove('swiping');
+
+      if (prevScreen) {
+        prevScreen.style.transition = 'transform 0.25s ease-out, opacity 0.25s ease-out';
+        prevScreen.style.transform = 'translateX(0)';
+        prevScreen.style.opacity = '1';
+      }
+
       setTimeout(() => {
-        currentScreen.style.transform = '';
-        currentScreen.style.opacity = '';
-        currentScreen.style.boxShadow = '';
-        currentScreen.style.transition = '';
-        currentScreen = null;
-    
-        try {
-          if (window.Telegram?.WebApp?.HapticFeedback) {
-            Telegram.WebApp.HapticFeedback.impactOccurred('light');
-          } else if (navigator.vibrate) {
-            navigator.vibrate(10);
-          }
-        } catch {}
-    
+        currentScreen.style.display = 'none';
+        currentScreen.classList.remove('active');
         if (typeof window.goBack === 'function') {
+          try {
+            if (window.Telegram?.WebApp?.HapticFeedback) {
+              Telegram.WebApp.HapticFeedback.impactOccurred('light');
+            } else if (navigator.vibrate) {
+              navigator.vibrate(10);
+            }
+          } catch {}
           window.goBack();
         }
-      }, 120);
-    } else if (deltaX > 0 && deltaX <= TRIGGER) {
-      // короткий свайп — вернуть с эффектом "отката"
-      currentScreen.style.transition = 'transform 0.2s ease-out';
-      currentScreen.style.transform = 'translateX(0)';
-      currentScreen.style.opacity = '1';
-      setTimeout(() => {
-        currentScreen.style.transition = '';
-        currentScreen.style.boxShadow = 'none';
         currentScreen = null;
+        prevScreen = null;
       }, 200);
+    } else {
+      // === Свайп короткий — возвращаем экран ===
+      currentScreen.style.transition = 'transform 0.25s ease-out';
+      currentScreen.style.transform = 'translateX(0)';
+      currentScreen.classList.remove('swiping');
+      if (prevScreen) {
+        prevScreen.style.transition = 'transform 0.25s ease-out';
+        prevScreen.style.transform = 'translateX(-25px)';
+        prevScreen.style.opacity = '0.5';
+      }
+      setTimeout(() => {
+        if (prevScreen) prevScreen.style.display = 'none';
+        currentScreen.style.transition = '';
+        currentScreen = null;
+        prevScreen = null;
+      }, 250);
     }
-
   }, { passive: true });
 
-  console.log('✅ NDHQ Swipe System v5.0 activated');
+  console.log('✅ NDHQ Swipe System v5.1 activated');
 })();
