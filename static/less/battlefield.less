@@ -1572,19 +1572,17 @@ body.warzone-theme .card-btn:hover {
 
 /* Список модулей */
 .module-group {
-  background: linear-gradient(145deg, #15202c, #1a2838);
-  border: 1px solid #2a3a4a;
+  background: var(--bf-card);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 16px;
+  padding: 14px;
+  margin-bottom: 18px;
 }
 
 .module-group h4 {
-  color: #9cc9ff;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 600;
-  border-bottom: 1px solid #2a3a4a;
-  text-transform: uppercase;
+  color: #6cb2ff;
   letter-spacing: 0.5px;
 }
 
@@ -1629,20 +1627,6 @@ body.warzone-theme .card-btn:hover {
   color: #f1aeb5;
 }
 
-#screen-bf-modules-list .btn {
-    background: rgba(58, 123, 213, 0.15);
-    padding: 12px;
-    font-size: 14px;
-    transition: all 0.2s ease;
-}
-
-#screen-bf-modules-list .btn:hover {
-  background: rgba(58, 123, 213, 0.25);
-  border-color: rgba(58, 123, 213, 0.5);
-  color: #e0e6ee;
-}
-
-
 /* Пустые состояния */
 .builds-grid:empty::before,
 #bf-modules-types-grid:empty::before,
@@ -1674,6 +1658,28 @@ body.warzone-theme .card-btn:hover {
   animation: fadeIn 0.3s ease;
 }
 
+/* === сетка карточек модулей === */
+.module-group .module-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 8px;
+  padding: 8px 10px;
+  transition: 0.2s ease;
+}
+
+.module-group .module-row:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+/* === Сетка === */
+.module-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(48%, 1fr));
+  gap: 10px;
+}
 
 
 /* ===============================
