@@ -149,6 +149,43 @@ async def api_modules_delete(module_id: int, payload: dict = Body(...)):
     module_delete(module_id)
     return {"status": "ok"}
 
+@app.post("/api/modules/delete-category")
+async def api_modules_delete_category(payload: dict = Body(...)):
+    """Удаляет целую категорию модулей из таблицы"""
+    ensure_admin_from_init(payload.get("initData", ""))
+
+    weapon_type = payload.get("weapon_type")
+    category = payload.get("category")
+
+    if not weapon_type or not category:
+        raise HTTPException(status_code=400, detail="weapon_type и category обязательны")
+
+    # Открываем соединение с БД
+    conn = sqlite3.connect("/opt/ndloadouts_storage/builds.db")
+    cur = conn.cursor()
+
+    # Проверяем, есть ли такая категория
+    cur.execute("""
+        SELECT id FROM modules 
+        WHERE weapon_type = ? AND category = ?
+    """, (weapon_type, category))
+    rows = cur.fetchall()
+
+    if not rows:
+        conn.close()
+        raise HTTPException(status_code=404, detail=f"Категория '{category}' не найдена для типа {weapon_type}")
+
+    # Удаляем все модули этой категории
+    cur.execute("""
+        DELETE FROM modules 
+        WHERE weapon_type = ? AND category = ?
+    """, (weapon_type, category))
+    conn.commit()
+    conn.close()
+
+    return {"status": "ok", "message": f"Категория '{category}' удалена"}
+
+
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
