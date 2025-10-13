@@ -951,37 +951,42 @@ async function bfRenderBuilds(builds) {
         let text = '#fff';    // цвет текста
         let label = '';
       
-        switch (categoryName) {
-          case 'new':
-          case 'новинка':
-          case 'новинки':
-            bg = 'linear-gradient(135deg, #ff4e50, #f9d423)'; // красно-жёлтый
-            text = '#fff';
-            label = 'Новинка';
-            break;
-          case 'topmeta':
-          case 'топ мета':
-            bg = 'linear-gradient(135deg, #ffb347, #ffcc33)'; // золотистый
-            text = '#222';
-            label = 'Топ мета';
-            break;
-          case 'meta':
-          case 'мета':
-            bg = 'linear-gradient(135deg, #56ab2f, #a8e063)'; // зелёный
-            text = '#fff';
-            label = 'Мета';
-            break;
-          case 'popular':
-          case 'популярное':
-            bg = 'linear-gradient(135deg, #36d1dc, #5b86e5)'; // голубой
-            text = '#fff';
-            label = 'Популярное';
-            break;
-          default:
-            bg = 'linear-gradient(135deg, #232a33, #1b1f25)'; // серый по умолчанию
-            text = '#ccc';
-            label = cat;
-        }
+         switch (categoryName) {
+           case 'new':
+           case 'новинка':
+           case 'новинки':
+             bg = 'linear-gradient(135deg, #1f4b99, #3a7bd5)'; // синий градиент
+             text = '#e9f1ff';
+             label = 'Новинка';
+             break;
+         
+           case 'topmeta':
+           case 'топ мета':
+             bg = 'linear-gradient(135deg, #3a7bd5, #00c6ff)'; // голубовато-синий
+             text = '#ffffff';
+             label = 'Топ мета';
+             break;
+         
+           case 'meta':
+           case 'мета':
+             bg = 'linear-gradient(135deg, #2e8b57, #00b894)'; // изумрудно-зелёный
+             text = '#eafff6';
+             label = 'Мета';
+             break;
+         
+           case 'popular':
+           case 'популярное':
+             bg = 'linear-gradient(135deg, #485563, #2b5876)'; // серо-синий “популярное”
+             text = '#ffffff';
+             label = 'Популярное';
+             break;
+         
+           default:
+             bg = 'linear-gradient(135deg, #232a33, #1b1f25)'; // дефолт — тёмно-серый
+             text = '#ccc';
+             label = cat;
+         }
+
       
         return `
           <span class="bf-badge" style="
