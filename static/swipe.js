@@ -1,6 +1,6 @@
 // ===========================================
-// 📱 NDHQ Swipe System v6.3
-// — совместим с window.goBack из app.js
+// 📱 NDHQ Swipe System v6.4
+// — фикс пружинящей анимации
 // ===========================================
 
 (function () {
@@ -13,16 +13,15 @@
   let active = false;
   let currentScreen = null;
 
-  const EDGE_ZONE = 40;     // зона активации от левого края
-  const DIST_TRIGGER = 70;  // минимальная дистанция свайпа
-  const SPEED_TRIGGER = 0.35; // px/ms — порог скорости
-  const TRANSITION = 250;   // совпадает с goBack
+  const EDGE_ZONE = 40;
+  const DIST_TRIGGER = 70;
+  const SPEED_TRIGGER = 0.35;
+  const TRANSITION = 250;
 
   document.addEventListener("touchstart", (e) => {
     if (e.touches.length !== 1) return;
     const t = e.touches[0];
     
-    // Свайп только от левого края
     if (t.clientX > EDGE_ZONE) return;
 
     currentScreen = document.querySelector(".screen.active");
@@ -34,7 +33,6 @@
     deltaX = deltaY = 0;
     active = true;
 
-    // Подготавливаем экран к анимации
     currentScreen.style.transition = "none";
     currentScreen.style.willChange = "transform";
   }, { passive: true });
@@ -45,14 +43,12 @@
     deltaX = t.clientX - startX;
     deltaY = Math.abs(t.clientY - startY);
 
-    // Отменяем если вертикальный скролл
     if (deltaY > 50 && deltaY > Math.abs(deltaX)) {
       active = false;
       resetScreen();
       return;
     }
 
-    // Только свайп вправо
     if (deltaX < 0) {
       resetScreen();
       return;
@@ -60,15 +56,19 @@
 
     e.preventDefault();
     
-    // Плавное движение с резиновым эффектом
+    // Более мягкий резиновый эффект
     let translateX = deltaX;
-    if (deltaX > 100) {
-      translateX = 100 + (deltaX - 100) * 0.5;
+    if (deltaX > 80) {
+      translateX = 80 + (deltaX - 80) * 0.7;
     }
     
     currentScreen.style.transform = `translateX(${translateX}px)`;
-    currentScreen.style.opacity = `${1 - Math.min(deltaX / 400, 0.3)}`;
-    currentScreen.style.boxShadow = "-5px 0 20px rgba(0,0,0,0.15)";
+    currentScreen.style.opacity = `${1 - Math.min(deltaX / 350, 0.25)}`;
+    
+    // Тень только при значительном движении
+    if (deltaX > 20) {
+      currentScreen.style.boxShadow = "-4px 0 15px rgba(0,0,0,0.1)";
+    }
   }, { passive: false });
 
   document.addEventListener("touchend", () => {
@@ -80,14 +80,24 @@
     const fastSwipe = speed > SPEED_TRIGGER;
     const farSwipe = deltaX > DIST_TRIGGER;
 
-    currentScreen.style.transition = `transform ${TRANSITION}ms ease-out, opacity ${TRANSITION}ms ease-out`;
-    currentScreen.style.willChange = "auto";
+    // Убираем transition для мгновенного ответа
+    currentScreen.style.transition = "none";
 
     if ((fastSwipe && deltaX > 30) || farSwipe) {
-      // Запускаем возврат через window.goBack
-      triggerGoBack();
+      // НЕ анимируем здесь - пусть goBack сам управляет анимацией
+      currentScreen.style.transform = "";
+      currentScreen.style.opacity = "";
+      currentScreen.style.boxShadow = "";
+      currentScreen.style.willChange = "";
+      
+      // Немедленно вызываем goBack
+      if (typeof window.goBack === "function") {
+        window.goBack();
+      }
+      
+      currentScreen = null;
     } else {
-      // Возвращаем экран на место
+      // Плавно возвращаем на место
       resetScreen();
     }
   }, { passive: true });
@@ -107,39 +117,5 @@
     }, TRANSITION);
   }
 
-  function triggerGoBack() {
-    if (!currentScreen) return;
-
-    // Используем ту же анимацию что и в goBack
-    currentScreen.style.transform = "translateX(100%)";
-    currentScreen.style.opacity = "0";
-    currentScreen.style.boxShadow = "none";
-
-    setTimeout(() => {
-      // Вызываем вашу функцию из app.js
-      if (typeof window.goBack === "function") {
-        window.goBack();
-      }
-      
-      // Сбрасываем стили
-      currentScreen.style.transform = "";
-      currentScreen.style.opacity = "";
-      currentScreen.style.transition = "";
-      currentScreen.style.willChange = "";
-      currentScreen.style.boxShadow = "";
-      
-      currentScreen = null;
-    }, 200);
-
-    // Виброотклик (дублируется в goBack, но для надежности оставляем)
-    try {
-      if (window.Telegram?.WebApp?.HapticFeedback) {
-        Telegram.WebApp.HapticFeedback.impactOccurred("light");
-      } else if (navigator.vibrate) {
-        navigator.vibrate(10);
-      }
-    } catch {}
-  }
-
-  console.log("✅ NDHQ Swipe System v6.3 — integrated with window.goBack");
+  console.log("✅ NDHQ Swipe System v6.4 — fixed spring animation");
 })();
