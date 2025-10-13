@@ -585,8 +585,13 @@ async function loadModulesForType(weaponType, label) {
     const res = await fetch(`/api/modules/${weaponType}`);
     const data = await res.json();
 
-    document.getElementById('modules-title').textContent = `Справочник модулей — ${label}`;
     const listEl = document.getElementById('modules-list');
+    if (!listEl) {
+      console.error("❌ Не найден #modules-list");
+      return;
+    }
+
+    document.getElementById('modules-title').textContent = `Справочник модулей — ${label}`;
     listEl.innerHTML = '';
 
     for (const category in data) {
@@ -611,8 +616,8 @@ async function loadModulesForType(weaponType, label) {
         `;
     
         card.querySelector('button').addEventListener('click', async () => {
-          if (!confirm(\`Удалить модуль "${mod.en}"?\`)) return;
-          await fetch(\`/api/modules/${mod.id}\`, {
+          if (!confirm(`Удалить модуль "${mod.en}"?`)) return;
+          await fetch(`/api/modules/${mod.id}`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ initData: tg.initData })
@@ -626,23 +631,28 @@ async function loadModulesForType(weaponType, label) {
       listEl.appendChild(groupDiv);
     }
 
-        row.querySelector('button').addEventListener('click', async () => {
-          if (!confirm(`Удалить модуль ${mod.en}?`)) return;
-          await fetch(`/api/modules/${mod.id}`, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ initData: tg.initData })
-          });
-          await loadModulesForType(weaponType, label); // перезагрузка
+    // === Обработчики удаления категорий ===
+    listEl.querySelectorAll('.delete-category-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const category = btn.dataset.category;
+        if (!confirm(`Удалить категорию "${category}"?`)) return;
+
+        const res = await fetch(`/api/modules/delete-category`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ weapon_type: weaponType, category, initData: tg.initData })
         });
 
-        groupDiv.appendChild(row);
+        if (res.ok) {
+          alert(`Категория "${category}" удалена`);
+          await loadModulesForType(weaponType, label);
+        } else {
+          alert('Ошибка при удалении категории');
+        }
       });
+    });
 
-      listEl.appendChild(groupDiv);
-    }
-
-    // 👉 Сохраним текущий тип оружия, чтобы добавлять модули
+    // сохраняем текущий тип
     window.currentModuleWeaponType = weaponType;
     showScreen('screen-modules-list');
 
@@ -650,6 +660,7 @@ async function loadModulesForType(weaponType, label) {
     console.error("Ошибка загрузки модулей:", e);
   }
 }
+
 
 async function loadModulesList(typeKey, typeLabel) {
   await loadModulesForType(typeKey, typeLabel);
