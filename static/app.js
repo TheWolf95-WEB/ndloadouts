@@ -592,16 +592,39 @@ async function loadModulesForType(weaponType, label) {
     for (const category in data) {
       const groupDiv = document.createElement('div');
       groupDiv.className = 'module-group';
-      groupDiv.innerHTML = `<h4>${category}</h4>`;
-
+      groupDiv.innerHTML = `
+        <div class="module-group-header">
+          <h4>${category}</h4>
+          <button class="btn btn-danger delete-category-btn" data-category="${category}">Удалить категорию</button>
+        </div>
+        <div class="modules-grid"></div>
+      `;
+    
+      const grid = groupDiv.querySelector('.modules-grid');
+    
       data[category].forEach(mod => {
-        const row = document.createElement('div');
-        row.className = 'module-row';
-
-        row.innerHTML = `
-          <span>${mod.en} — ${mod.ru}</span>
-          <button class="btn btn-sm" data-id="${mod.id}">🗑</button>
+        const card = document.createElement('div');
+        card.className = 'module-card';
+        card.innerHTML = `
+          <span class="mod-name">${mod.en} — ${mod.ru}</span>
+          <button class="btn btn-delete" data-id="${mod.id}">🗑</button>
         `;
+    
+        card.querySelector('button').addEventListener('click', async () => {
+          if (!confirm(\`Удалить модуль "${mod.en}"?\`)) return;
+          await fetch(\`/api/modules/${mod.id}\`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ initData: tg.initData })
+          });
+          await loadModulesForType(weaponType, label);
+        });
+    
+        grid.appendChild(card);
+      });
+    
+      listEl.appendChild(groupDiv);
+    }
 
         row.querySelector('button').addEventListener('click', async () => {
           if (!confirm(`Удалить модуль ${mod.en}?`)) return;
@@ -640,7 +663,6 @@ document.getElementById('mod-add-btn')?.addEventListener('click', async () => {
     category: document.getElementById('mod-category').value.trim(),
     en: document.getElementById('mod-en').value.trim(),
     ru: document.getElementById('mod-ru').value.trim(),
-    pos: parseInt(document.getElementById('mod-pos').value) || 0
   };
 
   if (!payload.category || !payload.en || !payload.ru) {
@@ -656,7 +678,7 @@ document.getElementById('mod-add-btn')?.addEventListener('click', async () => {
     });
 
     // Очищаем поля
-    ['mod-category', 'mod-en', 'mod-ru', 'mod-pos'].forEach(id => document.getElementById(id).value = '');
+    ['mod-category', 'mod-en', 'mod-ru'].forEach(id => document.getElementById(id).value = '');
     await loadModules(payload.weapon_type); // обновим modulesByType
     await loadModulesForType(payload.weapon_type, weaponTypeLabels[payload.weapon_type] || payload.weapon_type); // перерисуем визуально
     rebuildModuleSelects(); // обновим выпадашки
