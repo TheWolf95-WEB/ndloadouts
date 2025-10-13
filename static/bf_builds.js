@@ -415,7 +415,6 @@ document.getElementById("bf-add-tab")?.addEventListener("click", () => {
      
      <!-- Универсальные модули -->
      <div class="universal-section">
-       <label class="form-label">Универсальные модули:</label>
        <div class="universal-fields"></div>
      </div>
    
@@ -774,8 +773,6 @@ async function bfEditBuild(build) {
         <div class="mod-selects"></div>
       
         <!-- Универсальные модули -->
-        <div class="universal-section">
-          <label class="form-label">Универсальные модули:</label>
           <div class="universal-fields"></div>
         </div>
       
