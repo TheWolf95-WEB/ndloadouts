@@ -763,7 +763,11 @@
   flex-wrap: wrap;
 }
 
-/* 🎯 Топовые модули (#1, #2, #3) — Warzone стиль */
+/* ===============================
+   ⚙️ NDHQ | WARZONE STYLES REWORK
+   =============================== */
+
+/* 🏆 Топы (#1 #2 #3) */
 .loadout__top {
   display: inline-block;
   padding: 4px 10px;
@@ -771,74 +775,82 @@
   font-weight: 700;
   font-size: 0.85rem;
   text-transform: uppercase;
-  letter-spacing: 0.3px;
-  color: #000; /* чёрный текст по умолчанию */
-  box-shadow: inset 0 -1px 3px rgba(0,0,0,0.2);
+  letter-spacing: 0.4px;
+  color: #000; /* чёрный текст */
+  box-shadow: inset 0 -1px 3px rgba(0,0,0,0.25);
 }
 
-/* 🥇 1 место — золотой */
+/* 🥇 Золото */
+.loadout__top:has(span:contains("#1")),
 .loadout__top:nth-child(1) {
   background: linear-gradient(145deg, #FFD700, #E5C100);
 }
 
-/* 🥈 2 место — серебристый */
+/* 🥈 Серебро */
+.loadout__top:has(span:contains("#2")),
 .loadout__top:nth-child(2) {
   background: linear-gradient(145deg, #C0C0C0, #A9A9A9);
 }
 
-/* 🥉 3 место — бронзовый */
+/* 🥉 Бронза */
+.loadout__top:has(span:contains("#3")),
 .loadout__top:nth-child(3) {
   background: linear-gradient(145deg, #CD7F32, #B87333);
 }
 
-/* 🎮 Остальные бейджи */
+/* 🟩 Остальные */
+.loadout__top:not(:has(span:contains("#"))) {
+  background: linear-gradient(145deg, #1b2324, #101617);
+  color: #fff;
+}
+
+
+/* 🏷️ Категории (Новинка, Мета и т.д.) */
 .badge-category {
   background: linear-gradient(145deg, #1b2324, #101617);
   color: #fff;
   border-radius: 6px;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 700;
+  text-transform: uppercase;
   padding: 4px 10px;
-  text-transform: none;
+  letter-spacing: 0.3px;
+  display: inline-block;
 }
 
-/* 💚 Категории Warzone (New, Meta, Popular, Top Meta) */
+/* Цвета категорий */
 .badge-category[data-cat*="Новинка"],
-.badge-category[data-cat*="New"] {
-  background: linear-gradient(145deg, #0A7D36, #065826);
+.badge-category[data-cat*="NEW"] {
+  background: linear-gradient(145deg, #3ca61b, #297d12);
 }
 
-.badge-category[data-cat*="Мета"],
-.badge-category[data-cat*="Meta"] {
-  background: linear-gradient(145deg, #12805C, #0A5D42);
+.badge-category[data-cat*="МЕТА"],
+.badge-category[data-cat*="META"] {
+  background: linear-gradient(145deg, #0c7353, #0a5840);
 }
 
-.badge-category[data-cat*="Топ мета"],
-.badge-category[data-cat*="Top"] {
-  background: linear-gradient(145deg, #D68C00, #A86B00);
+.badge-category[data-cat*="ТОП"],
+.badge-category[data-cat*="TOP"] {
+  background: linear-gradient(145deg, #b47400, #8b5800);
 }
 
-.badge-category[data-cat*="Популярное"],
-.badge-category[data-cat*="Popular"] {
-  background: linear-gradient(145deg, #007A9C, #005B74);
+.badge-category[data-cat*="ПОПУЛЯРНОЕ"],
+.badge-category[data-cat*="POPULAR"] {
+  background: linear-gradient(145deg, #005a78, #00475e);
 }
 
-.badge-category[data-cat*="Все"],
-.badge-category[data-cat*="All"] {
-  background: linear-gradient(145deg, #2C2C2C, #1A1A1A);
-}
-
-
+/* 💚 Тип оружия */
 .loadout__type {
-  padding: 5px 10px;
-  background: linear-gradient(145deg, #2d9c44, #1e6b32);
-  border-radius: 4px;
-  color: #fff;
-  font-size: 0.8rem;
-  font-weight: 500;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-  white-space: nowrap;
+  background: rgba(36, 150, 70, 0.15);
+  border: 1px solid rgba(36, 150, 70, 0.3);
+  padding: 3px 10px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #6aff9c;
+  text-transform: capitalize;
+  font-weight: 600;
 }
+
 
 .loadout__date {
   font-size: 0.8rem;
