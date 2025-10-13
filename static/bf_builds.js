@@ -927,10 +927,17 @@ async function bfRenderBuilds(builds) {
       const pickTopBg = (text) => {
         const m = String(text).trim().match(/^#?(\d+)/);
         const n = m ? parseInt(m[1], 10) : 0;
-        if (n === 1) return '#b8a326'; // золотой
-        if (n === 2) return '#B0B0B0'; // серебряный
-        if (n === 3) return '#FF8C00'; // бронзовый
-        return '#2f3336'; // серый по умолчанию
+      
+        switch (n) {
+          case 1:
+            return 'linear-gradient(135deg, #d4af37, #f6e27a)'; // золото
+          case 2:
+            return 'linear-gradient(135deg, #9ea7b8, #d3d8e8)'; // серебро с холодным оттенком
+          case 3:
+            return 'linear-gradient(135deg, #b87333, #e0a96d)'; // бронза мягкая
+          default:
+            return 'linear-gradient(135deg, #1e2835, #2a3546)'; // серо-синий фон по умолчанию
+        }
       };
 
       const tops = [build.top1, build.top2, build.top3]
