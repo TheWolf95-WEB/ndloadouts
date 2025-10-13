@@ -635,22 +635,33 @@ async function loadModulesForType(weaponType, label) {
     listEl.querySelectorAll('.delete-category-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const category = btn.dataset.category;
-        if (!confirm(`Удалить категорию "${category}"?`)) return;
-
-        const res = await fetch(`/api/modules/delete-category`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ weapon_type: weaponType, category, initData: tg.initData })
-        });
-
-        if (res.ok) {
-          alert(`Категория "${category}" удалена`);
+        if (!confirm(`Удалить категорию "${category}" вместе со всеми её модулями?`)) return;
+    
+        try {
+          const res = await fetch(`/api/modules/delete-category`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              initData: tg.initData,
+              weapon_type: weaponType,
+              category: category
+            })
+          });
+    
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.detail || 'Ошибка удаления категории');
+          }
+    
+          alert(`Категория "${category}" успешно удалена ✅`);
           await loadModulesForType(weaponType, label);
-        } else {
-          alert('Ошибка при удалении категории');
+        } catch (err) {
+          console.error(err);
+          alert(`❌ Не удалось удалить категорию: ${err.message}`);
         }
       });
     });
+
 
     // сохраняем текущий тип
     window.currentModuleWeaponType = weaponType;
