@@ -1194,6 +1194,7 @@ def api_delete_setting(setting_id: int):
     return {"status": "ok"}
 
 
+app.include_router(router_bf_settings)
 
 
 
