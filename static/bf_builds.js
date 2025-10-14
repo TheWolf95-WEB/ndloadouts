@@ -27,29 +27,6 @@
   });
 
 
-const bfUser = tg.initDataUnsafe?.user || {};
-let bfUserInfo = null;
-
-const bfModulesByType = {};
-const bfWeaponTypeLabels = {};
-let bfCachedBuilds = [];
-let bfCurrentEditId = null;
-let bfScreenHistory = [];
-let bfHasUnsavedChanges = false;
-
-// === Инициализация ===
-// === Инициализация ===
-document.addEventListener("DOMContentLoaded", async () => {
-  try {
-    // Загружаем типы, но не открываем экран
-    await bfLoadWeaponTypes();
-    console.log("✅ BF module ready (not auto-opened)");
-  } catch (e) {
-    console.error("BF init error:", e);
-  }
-});
-
-
 /* ==============
    🔹 Навигация
    ============== */
@@ -62,6 +39,9 @@ function bfShowScreen(id) {
     }
     bfHasUnsavedChanges = false;
   }
+
+
+  window.bfShowScreen = bfShowScreen;
 
   const current = document.querySelector(".screen.active")?.id;
   if (current && current !== id) bfScreenHistory.push(current);
