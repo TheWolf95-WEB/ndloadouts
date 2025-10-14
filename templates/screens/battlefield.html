@@ -836,7 +836,7 @@ async function renderUserSettings() {
     renderCategoriesNav();
     currentCategoryKey = currentCategoryKey || 'accessibility';
     const cat = categoryByKey(currentCategoryKey);
-    currentTitle.innerHTML = `${cat.en} <span class="cat-ru">— ${cat.ru}</span>`;
+    currentTitle.innerHTML = `${cat.en} <span class="cat-ru">${cat.ru}</span>`;
     renderUserSettings();
     if (typeof showScreen === 'function') showScreen('screen-bf-settings');
   });
