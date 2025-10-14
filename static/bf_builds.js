@@ -1,7 +1,7 @@
 /* ===========================
    ⚔️ BATTLEFIELD BUILDS SCRIPT
    =========================== */
-const tg = window.Telegram?.WebApp || tg;
+const tg = window.Telegram?.WebApp || window.tg || {};
 tg.expand();
 
 
@@ -43,7 +43,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 /* ==============
    🔹 Навигация
    ============== */
-let bfHasUnsavedChanges = false;
 
 function bfShowScreen(id) {
   // Проверяем есть ли несохраненные изменения
