@@ -358,43 +358,51 @@
 
 
 <!-- 🎛 Пользовательский экран настроек -->
-<div class="screen-header settings-header">
-  <div class="settings-top-row">
-    <button class="btn btn-back" id="bf-settings-back">
-      <i class="fas fa-arrow-left"></i> Назад
-    </button>
-  </div>
+<div id="screen-bf-settings" class="screen" style="display:none;">
 
-  <div class="settings-info">
-    <h2 class="settings-title">Настройки игры Battlefield</h2>
-    <p class="settings-subtitle">
-      Мы начали переводить все параметры на русский, чтобы вам было проще ориентироваться
-      и подстроить игру под себя. Всё максимально близко к оригинальному меню Battlefield.
-    </p>
-  </div>
+  <!-- Верхняя панель -->
+  <div class="screen-header settings-header">
+    <div class="settings-top-row">
+      <button class="btn btn-back" id="bf-settings-back">
+        <i class="fas fa-arrow-left"></i> Назад
+      </button>
+    </div>
 
-  <div class="settings-category-bar">
-    <button class="btn btn-burger" id="bf-settings-burger">
-      <i class="fas fa-bars"></i>
-    </button>
-    <h3 id="bf-settings-current-title" class="settings-category-title">Общие</h3>
-  </div>
-</div>
+    <div class="settings-info">
+      <h2 class="settings-title">НАСТРОЙКИ ИГРЫ BATTLEFIELD</h2>
+      <p class="settings-subtitle">
+        Мы перевели все игровые параметры на русский язык, чтобы вам было проще ориентироваться 
+        и настраивать игру под себя. Интерфейс максимально приближен к оригинальному меню Battlefield.
+      </p>
+    </div>
 
+    <div class="settings-category-bar">
+      <button class="btn btn-burger" id="bf-settings-burger" title="Открыть категории">
+        <i class="fas fa-bars"></i>
+      </button>
+      <h3 id="bf-settings-current-title" class="settings-category-title">Общие</h3>
+    </div>
+  </div>
 
   <!-- Выезжающее меню категорий -->
-  <aside id="bf-settings-drawer" aria-hidden="true" style="position:fixed;left:-280px;top:0;height:100vh;width:260px;max-width:80vw;background:#111;box-shadow:2px 0 16px rgba(0,0,0,.4);transition:left .25s ease;z-index:20;padding:12px;">
+  <aside id="bf-settings-drawer" aria-hidden="true"
+         style="position:fixed;left:-280px;top:0;height:100vh;width:260px;
+         max-width:80vw;background:#111;box-shadow:2px 0 16px rgba(0,0,0,.4);
+         transition:left .25s ease;z-index:20;padding:12px;">
     <h3 style="margin:8px 8px 12px;">Категории</h3>
     <nav id="bf-settings-categories" style="display:flex;flex-direction:column;gap:8px;"></nav>
   </aside>
 
-  <div id="bf-settings-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10;"></div>
+  <div id="bf-settings-overlay"
+       style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10;"></div>
 
   <!-- Контент настроек -->
   <div id="bf-settings-content" style="margin-top:12px;">
     <div class="loading-spinner">Загрузка настроек...</div>
   </div>
+
 </div>
+
 
 <!-- 🛠 Экран редактора настроек (только админ) -->
 <div id="screen-bf-settings-editor" class="screen" style="display:none;">
