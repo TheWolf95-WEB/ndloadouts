@@ -2,7 +2,8 @@
    ⚔️ BATTLEFIELD BUILDS SCRIPT
    =========================== */
 const tg = window.Telegram?.WebApp || window.tg || {};
-tg.expand();
+tg.expand?.();
+
 
 
 // === Ensure global showScreen exists ===
