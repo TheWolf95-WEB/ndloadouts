@@ -1624,33 +1624,41 @@ tg.onEvent('web_app_close', () => {
 
 
 // === Swipe Navigation like Telegram ===
+// === Telegram-like swipe navigation ===
 let startX = 0;
 let currentX = 0;
 let isSwiping = false;
-const threshold = 60; // сколько пикселей нужно смахнуть для перехода
+let hasMoved = false;
+
+const SWIPE_THRESHOLD = 40;   // минимальное расстояние для перехода назад
+const MAX_TRANSLATE = 120;    // ограничение отклонения
+const screenStack = () => document.querySelectorAll('.screen.active, .screen[data-prev]');
 const activeScreen = () => document.querySelector('.screen.active');
 
 document.addEventListener('touchstart', (e) => {
   if (e.touches.length !== 1) return;
-  startX = e.touches[0].clientX;
+  const touch = e.touches[0];
+  startX = touch.clientX;
   currentX = startX;
-  isSwiping = true;
+  hasMoved = false;
+  isSwiping = startX < 60; // свайп активируется только с левого края
 });
 
 document.addEventListener('touchmove', (e) => {
   if (!isSwiping) return;
-  currentX = e.touches[0].clientX;
-  const deltaX = currentX - startX;
+  const touch = e.touches[0];
+  currentX = touch.clientX;
+  const deltaX = Math.min(currentX - startX, MAX_TRANSLATE);
 
-  const screen = activeScreen();
-  if (!screen) return;
+  if (deltaX > 0) {
+    hasMoved = true;
+    e.preventDefault();
+    const screen = activeScreen();
+    if (!screen) return;
 
-  // свайп влево/вправо, но только если движение достаточно широкое
-  if (Math.abs(deltaX) > 10) {
-    e.preventDefault(); // предотвращаем прокрутку
     screen.style.transition = 'none';
     screen.style.transform = `translateX(${deltaX}px)`;
-    screen.style.opacity = 1 - Math.min(Math.abs(deltaX) / 200, 0.4);
+    screen.style.opacity = 1 - deltaX / 300;
   }
 });
 
@@ -1665,19 +1673,22 @@ document.addEventListener('touchend', () => {
   screen.style.transition = 'transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.25s ease';
 
   // свайп вправо → назад
-  if (deltaX > threshold && screenHistory.length > 0) {
+  if (deltaX > SWIPE_THRESHOLD && screenHistory.length > 0) {
     const prev = screenHistory.pop();
     isGoingBack = true;
     screen.style.transform = 'translateX(100%)';
     screen.style.opacity = '0';
     setTimeout(() => {
       showScreen(prev);
-    }, 150);
-  }
-  // свайп влево — просто вернуть на место
-  else {
+      screen.style.transform = 'translateX(0)';
+      screen.style.opacity = '1';
+    }, 200);
+  } else if (hasMoved) {
+    // если не дотянули — вернуть обратно
     screen.style.transform = 'translateX(0)';
     screen.style.opacity = '1';
   }
+});
+
 });
 
