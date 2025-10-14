@@ -1621,3 +1621,70 @@ tg.onEvent('web_app_close', () => {
 });
 
 
+
+// === Telegram-like swipe navigation ===
+let startX = 0;
+let currentX = 0;
+let isSwiping = false;
+let hasMoved = false;
+
+const SWIPE_THRESHOLD = 40;   // минимальное расстояние для перехода назад
+const MAX_TRANSLATE = 120;    // ограничение отклонения
+const screenStack = () => document.querySelectorAll('.screen.active, .screen[data-prev]');
+const activeScreen = () => document.querySelector('.screen.active');
+
+document.addEventListener('touchstart', (e) => {
+  if (e.touches.length !== 1) return;
+  const touch = e.touches[0];
+  startX = touch.clientX;
+  currentX = startX;
+  hasMoved = false;
+  isSwiping = startX < 60; // свайп активируется только с левого края
+});
+
+document.addEventListener('touchmove', (e) => {
+  if (!isSwiping) return;
+  const touch = e.touches[0];
+  currentX = touch.clientX;
+  const deltaX = Math.min(currentX - startX, MAX_TRANSLATE);
+
+  if (deltaX > 0) {
+    hasMoved = true;
+    e.preventDefault();
+    const screen = activeScreen();
+    if (!screen) return;
+
+    screen.style.transition = 'none';
+    screen.style.transform = `translateX(${deltaX}px)`;
+    screen.style.opacity = 1 - deltaX / 300;
+  }
+});
+
+document.addEventListener('touchend', () => {
+  if (!isSwiping) return;
+  isSwiping = false;
+
+  const deltaX = currentX - startX;
+  const screen = activeScreen();
+  if (!screen) return;
+
+  screen.style.transition = 'transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.25s ease';
+
+  // свайп вправо → назад
+  if (deltaX > SWIPE_THRESHOLD && screenHistory.length > 0) {
+    const prev = screenHistory.pop();
+    isGoingBack = true;
+    screen.style.transform = 'translateX(100%)';
+    screen.style.opacity = '0';
+    setTimeout(() => {
+      showScreen(prev);
+      screen.style.transform = 'translateX(0)';
+      screen.style.opacity = '1';
+    }, 200);
+  } else if (hasMoved) {
+    // если не дотянули — вернуть обратно
+    screen.style.transform = 'translateX(0)';
+    screen.style.opacity = '1';
+  }
+});
+
