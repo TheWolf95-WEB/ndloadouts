@@ -1897,12 +1897,6 @@ body.warzone-theme .card-btn:hover {
     transition: all 0.2s ease;
 }
 
-#bf-settings-categories button.active {
-  background: #4aa3ff;
-  color: #fff;
-  border-color: #4aa3ff;
-}
-
 
 /* ===========================
    🎨 Battlefield Settings Header
@@ -1924,20 +1918,6 @@ body.warzone-theme .card-btn:hover {
   display: flex;
   justify-content: flex-start;
   margin-bottom: 10px;
-}
-
-.btn-back {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 6px;
-  color: #cfd9e3;
-  padding: 6px 12px;
-  font-size: 13px;
-  transition: 0.2s;
-}
-.btn-back:hover {
-  background: rgba(255,255,255,0.08);
-  border-color: rgba(0,170,255,0.4);
 }
 
 /* — Заголовок блока */
@@ -1968,11 +1948,12 @@ body.warzone-theme .card-btn:hover {
 
 /* — Панель категории */
 .settings-category-bar.clean {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255,255,255,0.04);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    justify-content: center;
 }
 
 .btn-burger {
@@ -1990,10 +1971,13 @@ body.warzone-theme .card-btn:hover {
 }
 
 .settings-category-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #e3edf7;
-  letter-spacing: 0.5px;
+    font-size: 14px;
+    display: flex;
+    font-weight: 500;
+    color: #e3edf7;
+    letter-spacing: 0.5px;
+    flex-direction: column;
+    align-items: center;
 }
 
 .settings-category-title .cat-en {
