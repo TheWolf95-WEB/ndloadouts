@@ -2,11 +2,10 @@ import sqlite3
 import json
 from pathlib import Path
 from contextlib import contextmanager
-from datetime import datetime
 
-# Путь к основной БД Battlefield
 BF_DB_PATH = Path("/opt/ndloadouts/builds_bf.db")
 BF_DB_PATH.parent.mkdir(exist_ok=True)
+
 
 # --------------------------------------------------
 # 🔌 Контекстный менеджер
@@ -34,14 +33,22 @@ def init_bf_settings_table():
             CREATE TABLE IF NOT EXISTS bf_settings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 category TEXT NOT NULL,
+                section TEXT DEFAULT '',
                 title_en TEXT NOT NULL,
                 title_ru TEXT,
-                type TEXT CHECK(type IN ('toggle','slider','number','select')) NOT NULL DEFAULT 'toggle',
+                type TEXT CHECK(type IN ('toggle','slider','number','select','button')) NOT NULL DEFAULT 'toggle',
                 default_value TEXT,
                 options_json TEXT,
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
         """)
+
+
+def ensure_section_column():
+    with get_bf_conn() as conn:
+        cols = [r[1] for r in conn.execute("PRAGMA table_info(bf_settings)")]
+        if "section" not in cols:
+            conn.execute("ALTER TABLE bf_settings ADD COLUMN section TEXT DEFAULT ''")
 
 
 # --------------------------------------------------
@@ -50,10 +57,11 @@ def init_bf_settings_table():
 def add_bf_setting(data: dict):
     with get_bf_conn() as conn:
         conn.execute("""
-            INSERT INTO bf_settings (category, title_en, title_ru, type, default_value, options_json)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO bf_settings (category, section, title_en, title_ru, type, default_value, options_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         """, (
             data.get("category"),
+            data.get("section", "").strip(),
             data.get("title_en", "").strip(),
             data.get("title_ru", "").strip(),
             data.get("type", "toggle"),
@@ -66,11 +74,11 @@ def get_bf_settings(category: str | None = None):
     with get_bf_conn(row_mode=True) as conn:
         if category:
             rows = conn.execute(
-                "SELECT * FROM bf_settings WHERE category = ? ORDER BY id DESC",
+                "SELECT * FROM bf_settings WHERE category = ? ORDER BY id ASC",
                 (category,)
             ).fetchall()
         else:
-            rows = conn.execute("SELECT * FROM bf_settings ORDER BY id DESC").fetchall()
+            rows = conn.execute("SELECT * FROM bf_settings ORDER BY id ASC").fetchall()
     data = []
     for r in rows:
         item = dict(r)
@@ -87,10 +95,11 @@ def update_bf_setting(setting_id: int, data: dict):
     with get_bf_conn() as conn:
         conn.execute("""
             UPDATE bf_settings
-            SET category=?, title_en=?, title_ru=?, type=?, default_value=?, options_json=?
+            SET category=?, section=?, title_en=?, title_ru=?, type=?, default_value=?, options_json=?
             WHERE id=?
         """, (
             data.get("category"),
+            data.get("section", "").strip(),
             data.get("title_en", "").strip(),
             data.get("title_ru", "").strip(),
             data.get("type", "toggle"),
@@ -109,7 +118,6 @@ def delete_bf_setting(setting_id: int):
 # 🧩 Утилиты
 # --------------------------------------------------
 def get_bf_settings_summary():
-    """Количество настроек по категориям"""
     with get_bf_conn(row_mode=True) as conn:
         rows = conn.execute("""
             SELECT category, COUNT(*) AS count
@@ -124,11 +132,13 @@ def get_bf_settings_summary():
 # --------------------------------------------------
 if __name__ == "__main__":
     init_bf_settings_table()
-    print("✅ Таблица bf_settings готова.")
+    ensure_section_column()
+    print("✅ Таблица bf_settings готова (section проверен).")
 
     # Пример добавления
     add_bf_setting({
         "category": "graphics",
+        "section": "GRAPHICS QUALITY SETTINGS",
         "title_en": "Field of View",
         "title_ru": "Поле зрения",
         "type": "slider",
