@@ -1,7 +1,7 @@
 /* ===========================
    ⚔️ BATTLEFIELD BUILDS SCRIPT
    =========================== */
-tg = window.Telegram.WebApp;
+const tg = window.Telegram?.WebApp || tg;
 tg.expand();
 
 
@@ -43,6 +43,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 /* ==============
    🔹 Навигация
    ============== */
+let bfHasUnsavedChanges = false;
+
 function bfShowScreen(id) {
   // Проверяем есть ли несохраненные изменения
   if (bfHasUnsavedChanges && !id.includes("bf-form") && !id.includes("bf-edit-builds")) {
