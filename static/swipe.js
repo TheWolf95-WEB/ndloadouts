@@ -1,35 +1,49 @@
 /* ==========================================================
-   swipe-back.js — Edge Swipe Back v9.1
-   Универсальный: iOS / Android / Desktop
-   Плавный, стабильный, как в Telegram
+   swipe-back.js — Edge Swipe Back v10
+   Псевдо-нативный интерактивный back, как в Telegram
    ========================================================== */
 (function () {
   'use strict';
 
   // === Настройки ===
-  const EDGE_START_PX = 35;          // зона старта
-  const COMPLETE_DISTANCE_PX = 90;   // нужно для "назад"
-  const VELOCITY_THRESHOLD = 0.25;   // px/ms для быстрого свайпа
-  const ACTIVATE_MOVE_THRESHOLD = 10;// когда начинаем двигать
-  const ANIM_MS = 340;               // плавный, не резкий
-  const EASE = 'cubic-bezier(0.22, 0.61, 0.36, 1)'; // iOS-like easing
+  const EDGE_START_PX = 30;           // зона старта свайпа
+  const COMPLETE_DISTANCE_RATIO = 0.28; // доля ширины (≈ iOS-поведение)
+  const VELOCITY_THRESHOLD = 0.28;    // px/ms
+  const ACTIVATE_MOVE_THRESHOLD = 10; // когда решаем, что жест — горизонтальный
+  const EASE_OUT = 'cubic-bezier(0.22, 0.61, 0.36, 1)';
+  const PARALLAX_RATIO = 0.32;        // как двигается предыдущий экран
+  const MAX_SCRIM_OPACITY = 0.4;      // затемнение фона
+  const MIN_ANIM = 160, MAX_ANIM = 380; // авто-длительность докрутки
 
-  let dragging = false, decided = false, horizontal = false;
-  let startX = 0, startY = 0, lastX = 0, startTime = 0, lastTime = 0, instVX = 0;
-  let inputKind = null;
-  let activeEl = null, scrimEl = null, rafId = 0;
+  let dragging = false, decided = false;
+  let startX = 0, startY = 0, lastX = 0, startT = 0, lastT = 0;
+  let instVX = 0;
+
+  // Текущее/предыдущее DOM-узлы
+  let activeEl = null, prevEl = null, scrimEl = null;
+  let rafId = 0;
+
+  // velocity: сглаживаем скользящим окном последних замеров
+  const velSamples = [];
+  const VEL_WINDOW = 4; // последних N измерений
+
+  function hapticLight() {
+    try { Telegram?.WebApp?.HapticFeedback?.impactOccurred('light'); } catch {}
+    if (navigator.vibrate) { try { navigator.vibrate(12); } catch {} }
+  }
 
   function getHistoryArray() {
     if (Array.isArray(window.screenHistory)) return window.screenHistory;
     try { return Array.isArray(screenHistory) ? screenHistory : null; } catch { return null; }
   }
+
   function getPrevId() {
     const h = getHistoryArray();
     return h && h[h.length - 1];
   }
+
   function setGoingBackTrue() {
-    window.isGoingBack = true;
-    try { isGoingBack = true; } catch {}
+    window.isGoingBack = true; try { isGoingBack = true; } catch {}
   }
 
   function getActiveScreen() {
@@ -41,234 +55,261 @@
     return el;
   }
 
-  function haptic() {
-    try { Telegram?.WebApp?.HapticFeedback?.impactOccurred('light'); } catch {}
-    if (navigator.vibrate) try { navigator.vibrate(12); } catch {}
+  function getScreenById(id) {
+    if (!id) return null;
+    return document.getElementById(id);
   }
 
-  function createScrim() {
+  function ensureScrim() {
     if (!scrimEl) {
       scrimEl = document.createElement('div');
       Object.assign(scrimEl.style, {
         position: 'fixed',
         inset: '0',
-        background: 'rgba(0,0,0,0.2)',
-        pointerEvents: 'none',
+        background: 'rgba(0,0,0,1)',
         opacity: '0',
-        transition: 'opacity 150ms ease',
-        zIndex: '2147483646'
+        pointerEvents: 'none',
+        zIndex: '2147483646',
+        transition: 'opacity 120ms linear'
       });
       document.body.appendChild(scrimEl);
-    } else scrimEl.style.opacity = '0';
+    }
+    scrimEl.style.opacity = '0';
   }
 
-  function setTranslate(x) {
+  function isInFormControl(t) {
+    const tag = (t?.tagName || '').toLowerCase();
+    if (['input','textarea','select','button','label'].includes(tag)) return true;
+    if (t?.isContentEditable) return true;
+    return false;
+  }
+
+  function hasHorizontalScrollableAncestor(el) {
+    // Игнорим жест, если в зоне есть горизонтальные скроллящиеся контейнеры (карусели)
+    let n = el;
+    while (n && n !== document.body) {
+      const cs = getComputedStyle(n);
+      if (/(auto|scroll)/.test(cs.overflowX) && n.scrollWidth > n.clientWidth + 8) return true;
+      n = n.parentElement;
+    }
+    return false;
+  }
+
+  function setProgress(p) {
+    // p: [0..1]
     if (!activeEl) return;
+    const w = window.innerWidth || activeEl.clientWidth || 1;
+    const x = p * w;
+    const prevX = (-1 + p) * (PARALLAX_RATIO * w); // старт чуть левее, плавно к 0
+
     if (rafId) cancelAnimationFrame(rafId);
     rafId = requestAnimationFrame(() => {
       activeEl.style.transform = `translate3d(${x}px,0,0)`;
-      activeEl.style.boxShadow = '0 0 20px rgba(0,0,0,0.25)';
-      if (scrimEl) scrimEl.style.opacity = String(Math.min(0.4, x / 160));
+      activeEl.style.boxShadow = '0 0 18px rgba(0,0,0,0.25)';
+      if (prevEl) prevEl.style.transform = `translate3d(${prevX}px,0,0)`;
+      if (scrimEl) scrimEl.style.opacity = String(Math.min(MAX_SCRIM_OPACITY, p * 0.9));
     });
   }
 
-  function cleanupStyles() {
+  function resetStyles() {
     if (activeEl) {
       activeEl.style.transition = '';
       activeEl.style.transform = '';
       activeEl.style.boxShadow = '';
       activeEl.style.willChange = '';
     }
+    if (prevEl) {
+      prevEl.style.transition = '';
+      prevEl.style.transform = '';
+      prevEl.style.willChange = '';
+    }
     if (scrimEl) scrimEl.style.opacity = '0';
   }
 
-  function removeMoveEnd() {
-    document.removeEventListener('touchmove', onMove, capFalse);
-    document.removeEventListener('touchend', onEnd, capFalse);
-    document.removeEventListener('touchcancel', onEnd, capFalse);
-    document.removeEventListener('pointermove', onMove, capFalse);
-    document.removeEventListener('pointerup', onEnd, capTrue);
-    document.removeEventListener('pointercancel', onEnd, capTrue);
-    document.removeEventListener('mousemove', onMove, capFalse);
-    document.removeEventListener('mouseup', onEnd, capTrue);
-  }
+  function finish(toComplete) {
+    if (!activeEl) { cleanup(); return; }
+    const w = window.innerWidth || activeEl.clientWidth || 1;
 
-  function cancelGesture() {
-    dragging = decided = horizontal = false;
-    inputKind = null;
-    cleanupStyles();
-    removeMoveEnd();
-    activeEl = null;
-  }
+    const pNow = Math.max(0, Math.min(1, (lastX - startX) / w));
+    const rem = toComplete ? (1 - pNow) : pNow;
+    const base = MIN_ANIM + (MAX_ANIM - MIN_ANIM) * rem; // чем ближе — тем быстрее
+    const vel = Math.abs(instVX);
+    const velBoost = Math.max(0.92, Math.min(1.12, 1.0 - 0.22 * Math.min(1, vel / 1.2)));
+    const dur = Math.round(base * velBoost);
 
-  function finishGesture(complete) {
-    if (!activeEl) { cancelGesture(); return; }
-    const el = activeEl;
-    el.style.transition = `transform ${ANIM_MS}ms ${EASE}`;
-
-    if (complete) {
-      const width = window.innerWidth;
-      let done = false;
-      el.addEventListener('transitionend', function onTe() {
-        if (done) return;
-        done = true;
-        el.removeEventListener('transitionend', onTe);
-        cleanupStyles();
+    if (toComplete) {
+      // Уходим вправо, предыдущий — к 0
+      if (activeEl) activeEl.style.transition = `transform ${dur}ms ${EASE_OUT}`;
+      if (prevEl) prevEl.style.transition = `transform ${dur}ms ${EASE_OUT}`;
+      const onTe = () => {
+        activeEl.removeEventListener('transitionend', onTe);
+        resetStyles();
         const prevId = getPrevId();
         if (prevId) {
           setGoingBackTrue();
-          haptic();
+          hapticLight();
           (window.showScreen || function(){}) (prevId);
         }
-        activeEl = null;
-      });
+        cleanup();
+      };
+      activeEl.addEventListener('transitionend', onTe);
       requestAnimationFrame(() => {
-        el.style.transform = `translate3d(${width}px,0,0)`;
+        activeEl.style.transform = `translate3d(${w}px,0,0)`;
+        if (prevEl) prevEl.style.transform = `translate3d(0,0,0)`;
         if (scrimEl) scrimEl.style.opacity = '0';
       });
     } else {
-      const onTe = () => { el.removeEventListener('transitionend', onTe); cleanupStyles(); };
-      el.addEventListener('transitionend', onTe);
-      requestAnimationFrame(() => { el.style.transform = 'translate3d(0,0,0)'; });
+      // Возврат
+      if (activeEl) activeEl.style.transition = `transform ${dur}ms ${EASE_OUT}`;
+      if (prevEl) prevEl.style.transition = `transform ${dur}ms ${EASE_OUT}`;
+      const onTe = () => {
+        activeEl.removeEventListener('transitionend', onTe);
+        resetStyles();
+        cleanup();
+      };
+      activeEl.addEventListener('transitionend', onTe);
+      requestAnimationFrame(() => {
+        activeEl.style.transform = 'translate3d(0,0,0)';
+        if (prevEl) prevEl.style.transform = `translate3d(${-PARALLAX_RATIO * w}px,0,0)`;
+        if (scrimEl) scrimEl.style.opacity = '0';
+      });
     }
-
-    dragging = decided = horizontal = false;
-    inputKind = null;
-    removeMoveEnd();
   }
 
-  // --- Основная логика ---
-  function onStartBase(clientX, clientY, srcEvent) {
-    if (dragging || clientX > EDGE_START_PX) return;
+  function cleanup() {
+    dragging = decided = false;
+    startX = startY = lastX = 0;
+    startT = lastT = 0;
+    instVX = 0;
+    velSamples.length = 0;
+    activeEl = prevEl = null;
+  }
 
-    const t = srcEvent.target;
-    const tag = (t?.tagName || '').toLowerCase();
-    if (['input','textarea','select','button','label'].includes(tag)) return;
-    if (t?.isContentEditable) return;
+  // --- Жест (Pointer Events) ---
+  const capDown = { capture: true, passive: true };
+  const capMove = { capture: true, passive: false }; // важно: можем preventDefault
+  const capUp   = { capture: true, passive: true };
+
+  function onPointerDown(e) {
+    if (dragging) return;
+    if (e.button !== 0 && e.pointerType === 'mouse') return;  // только ЛКМ
+    if (e.clientX > EDGE_START_PX) return;                     // только с края
+    if (isInFormControl(e.target)) return;                     // не дергаем инпуты
+    if (hasHorizontalScrollableAncestor(e.target)) return;     // карусели и т.п.
 
     activeEl = getActiveScreen();
     if (!activeEl) return;
-    const id = activeEl.id || '';
-    if (id === 'screen-home') return;  // не свайпаем с главного
 
-    // если Warzone/BF экраны — возвращаем только на home
+    const id = activeEl.id || '';
+    if (id === 'screen-home') return;
     if ((id.startsWith('screen-bf') || id.startsWith('screen-warzone')) && getPrevId() !== 'screen-home')
       return;
 
-    dragging = true; decided = false; horizontal = false;
-    startX = lastX = clientX;
-    startY = clientY;
-    startTime = lastTime = srcEvent.timeStamp || Date.now();
-    instVX = 0;
+    const prevId = getPrevId();
+    prevEl = getScreenById(prevId);
+    ensureScrim();
 
+    // Подготовка слоёв
+    if (prevEl) {
+      prevEl.style.willChange = 'transform';
+      prevEl.style.transform = `translate3d(${-PARALLAX_RATIO * (window.innerWidth || 320)}px,0,0)`;
+      prevEl.style.zIndex = '1';
+    }
     activeEl.style.willChange = 'transform';
     activeEl.style.transition = 'none';
-    createScrim();
+    activeEl.style.zIndex = '2';
+
+    dragging = true; decided = false;
+    startX = lastX = e.clientX;
+    startY = e.clientY;
+    startT = lastT = e.timeStamp || Date.now();
+    instVX = 0;
+    velSamples.length = 0;
+
+    // Важно: разрешаем вертикальный скролл, но как только решим — блокируем
+    try { e.target.setPointerCapture?.(e.pointerId); } catch {}
+    document.addEventListener('pointermove', onPointerMove, capMove);
+    document.addEventListener('pointerup', onPointerUp, capUp);
+    document.addEventListener('pointercancel', onPointerUp, capUp);
   }
 
-  function onMoveBase(clientX, clientY, timeStamp, preventDefaultCb) {
+  function onPointerMove(e) {
     if (!dragging) return;
-    const dx = clientX - startX;
-    const dy = clientY - startY;
+
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
 
     if (!decided) {
+      // Пока не решили — не блокируем вертикальный скролл
       if (Math.abs(dx) + Math.abs(dy) < ACTIVATE_MOVE_THRESHOLD) return;
-      if (Math.abs(dy) > Math.abs(dx)) { cancelGesture(); return; }
-      if (dx <= 0) { cancelGesture(); return; }
-
-      decided = true; horizontal = true;
-      if (scrimEl) scrimEl.style.opacity = '1';
+      if (Math.abs(dy) > Math.abs(dx)) { // вертикаль победила
+        return onPointerUp(e, /*cancel*/true);
+      }
+      if (dx <= 0) { // не тянем влево
+        return onPointerUp(e, /*cancel*/true);
+      }
+      decided = true;
+      // Заблокируем дефолты (чтобы не прокручивался документ)
+      e.preventDefault();
+    } else {
+      e.preventDefault();
     }
 
-    if (!horizontal) return;
-    preventDefaultCb?.();
-    const deltaX = Math.max(0, dx);
-    setTranslate(deltaX);
+    lastX = e.clientX;
+    const w = window.innerWidth || activeEl.clientWidth || 1;
+    const p = Math.max(0, Math.min(1, (lastX - startX) / w));
+    setProgress(p);
 
-    const now = timeStamp || Date.now();
-    const dt = Math.max(1, now - lastTime);
-    instVX = (clientX - lastX) / dt;
-    lastX = clientX; lastTime = now;
+    // velocity
+    const now = e.timeStamp || Date.now();
+    const dt = Math.max(1, now - lastT);
+    const vx = (e.clientX - (startX + (w * p - w * (p - (e.clientX - lastX) / w)))) / dt; // упрощённо
+    instVX = (e.clientX - lastX) / dt;
+    velSamples.push(instVX);
+    if (velSamples.length > VEL_WINDOW) velSamples.shift();
+    // сглаженная:
+    instVX = velSamples.reduce((a,b)=>a+b,0) / velSamples.length;
+
+    lastT = now;
   }
 
-  function onEndBase(timeStamp) {
+  function onPointerUp(e, cancelOnly) {
     if (!dragging) return;
-    const now = timeStamp || Date.now();
+
+    document.removeEventListener('pointermove', onPointerMove, capMove);
+    document.removeEventListener('pointerup', onPointerUp, capUp);
+    document.removeEventListener('pointercancel', onPointerUp, capUp);
+
+    if (cancelOnly) {
+      resetStyles(); cleanup(); return;
+    }
+
+    const w = window.innerWidth || activeEl.clientWidth || 1;
     const totalDx = Math.max(0, lastX - startX);
-    const totalDt = Math.max(1, now - startTime);
-    const avgVX = totalDx / totalDt;
+    const p = totalDx / w;
 
-    const complete = (totalDx >= COMPLETE_DISTANCE_PX) ||
-                     (avgVX > VELOCITY_THRESHOLD) ||
-                     (instVX > VELOCITY_THRESHOLD);
+    const completeByDist = p >= COMPLETE_DISTANCE_RATIO;
+    const completeByVel  = instVX > VELOCITY_THRESHOLD;
 
-    finishGesture(complete);
+    // Хаптик, если «защёлкнули» по дистанции
+    if (completeByDist) hapticLight();
+
+    finish(completeByDist || completeByVel);
   }
 
-  // --- Слушатели ---
-  const capTrue  = { capture: true, passive: true };
-  const capFalse = { capture: true, passive: false };
+  // Инициализация
+  document.addEventListener('pointerdown', onPointerDown, capDown);
 
-  function onTouchStart(e) {
-    const t = e.touches?.[0]; if (!t || dragging) return;
-    inputKind = 'touch';
-    onStartBase(t.clientX, t.clientY, e);
-    if (dragging) {
-      document.addEventListener('touchmove', onMove, capFalse);
-      document.addEventListener('touchend', onEnd, capFalse);
-      document.addEventListener('touchcancel', onEnd, capFalse);
-    }
-  }
-  function onTouchMove(e) { const t = e.touches?.[0]; if (t) onMoveBase(t.clientX, t.clientY, e.timeStamp, () => e.preventDefault()); }
-  function onTouchEnd(e) { onEndBase(e.timeStamp); }
-
-  function onPointerStart(e) {
-    if (dragging || (e.pointerType === 'mouse' && e.button !== 0)) return;
-    inputKind = e.pointerType === 'mouse' ? 'mouse' : 'pointer';
-    onStartBase(e.clientX, e.clientY, e);
-    if (dragging) {
-      document.addEventListener('pointermove', onMove, capFalse);
-      document.addEventListener('pointerup', onEnd, capTrue);
-      document.addEventListener('pointercancel', onEnd, capTrue);
-    }
-  }
-  function onPointerMove(e) { onMoveBase(e.clientX, e.clientY, e.timeStamp, () => e.preventDefault()); }
-  function onPointerEnd(e) { onEndBase(e.timeStamp); }
-
-  function onMouseDown(e) {
-    if (dragging || e.button !== 0) return;
-    inputKind = 'mouse';
-    onStartBase(e.clientX, e.clientY, e);
-    if (dragging) {
-      document.addEventListener('mousemove', onMove, capFalse);
-      document.addEventListener('mouseup', onEnd, capTrue);
-    }
-  }
-  function onMouseMove(e) { onMoveBase(e.clientX, e.clientY, e.timeStamp, () => e.preventDefault()); }
-  function onMouseUp(e) { onEndBase(e.timeStamp); }
-
-  function onMove(e) {
-    if (!dragging) return;
-    if (inputKind === 'touch' && e.type === 'touchmove') return onTouchMove(e);
-    if (inputKind === 'pointer' && e.type === 'pointermove') return onPointerMove(e);
-    if (inputKind === 'mouse' && e.type === 'mousemove') return onMouseMove(e);
-  }
-  function onEnd(e) {
-    if (!dragging) return;
-    if (inputKind === 'touch') return onTouchEnd(e);
-    if (inputKind === 'pointer') return onPointerEnd(e);
-    if (inputKind === 'mouse') return onMouseUp(e);
-  }
-
-  // --- Инициализация ---
-  document.addEventListener('touchstart',  onTouchStart,  capTrue);
-  document.addEventListener('pointerdown', onPointerStart, capTrue);
-  document.addEventListener('mousedown',   onMouseDown,   capTrue);
-
+  // Экспорт отключалки
   window.DisableSwipeBack = function () {
-    document.removeEventListener('touchstart',  onTouchStart,  capTrue);
-    document.removeEventListener('pointerdown', onPointerStart, capTrue);
-    document.removeEventListener('mousedown',   onMouseDown,   capTrue);
-    removeMoveEnd(); cancelGesture();
+    document.removeEventListener('pointerdown', onPointerDown, capDown);
+    document.removeEventListener('pointermove', onPointerMove, capMove);
+    document.removeEventListener('pointerup', onPointerUp, capUp);
+    document.removeEventListener('pointercancel', onPointerUp, capUp);
+    resetStyles(); cleanup();
   };
+
+  // Рекомендуется: ограничить горизонтальные жесты по умолчанию и разрешить вертикаль
+  // Поставь это правило у корневой ноды (например, на body) в CSS:
+  // body { touch-action: pan-y; }
 })();
