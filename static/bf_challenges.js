@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const BF_API_BASE = "/api/bf";
-  const tg = window.Telegram?.WebApp;
-  if (tg) tg.expand();
+  const tg = window.Telegram.WebApp;
+  tg.expand();
 
   // --- State ---
   let bfCategories = [];
