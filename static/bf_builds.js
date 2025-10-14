@@ -41,7 +41,6 @@ function bfShowScreen(id) {
   }
 
 
-  window.bfShowScreen = bfShowScreen;
 
   const current = document.querySelector(".screen.active")?.id;
   if (current && current !== id) bfScreenHistory.push(current);
@@ -71,6 +70,9 @@ function bfShowScreen(id) {
 
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
+
+window.bfShowScreen = bfShowScreen;
+   
 
 document.addEventListener("click", (e) => {
   const btn = e.target.closest(".btn");
