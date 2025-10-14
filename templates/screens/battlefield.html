@@ -681,7 +681,13 @@ async function renderUserSettings() {
 
         const sec = document.createElement('div');
         sec.className = 'bf-section-title';
-        sec.innerHTML = `<span>${item.section}</span>`;
+        const [en, ru] = item.section.split(" — ");
+        sec.innerHTML = `
+          <div class="section-header">
+            <span class="section-en">${en || ''}</span>
+            ${ru ? `<span class="section-ru">— ${ru}</span>` : ''}
+          </div>
+        `;
         content.appendChild(sec);
       }
 
