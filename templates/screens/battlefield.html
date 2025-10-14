@@ -356,4 +356,452 @@
   </div>
 </div>
 
+
+<!-- 🎛 Пользовательский экран настроек -->
+<div id="screen-bf-settings" class="screen" style="display:none;">
+  <div class="screen-header" style="display:flex;align-items:center;gap:12px;">
+    <button class="btn btn-back" id="bf-settings-back">⬅ Назад</button>
+    <button class="btn" id="bf-settings-burger">☰</button>
+    <h2 id="bf-settings-current-title" style="margin-left:auto;">Accessibility</h2>
+  </div>
+
+  <!-- Выезжающее меню категорий -->
+  <aside id="bf-settings-drawer" aria-hidden="true" style="position:fixed;left:-280px;top:0;height:100vh;width:260px;max-width:80vw;background:#111;box-shadow:2px 0 16px rgba(0,0,0,.4);transition:left .25s ease;z-index:20;padding:12px;">
+    <h3 style="margin:8px 8px 12px;">Категории</h3>
+    <nav id="bf-settings-categories" style="display:flex;flex-direction:column;gap:8px;"></nav>
+  </aside>
+
+  <div id="bf-settings-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10;"></div>
+
+  <!-- Контент настроек -->
+  <div id="bf-settings-content" style="margin-top:12px;">
+    <div class="loading-spinner">Загрузка настроек...</div>
+  </div>
+</div>
+
+<!-- 🛠 Экран редактора настроек (только админ) -->
+<div id="screen-bf-settings-editor" class="screen" style="display:none;">
+  <div class="screen-header" style="display:flex;align-items:center;gap:12px;">
+    <button class="btn btn-back" id="bf-settings-editor-back">⬅ Назад</button>
+    <h2>Редактор настроек</h2>
+  </div>
+
+  <!-- Форма -->
+  <div class="form-section" id="bf-settings-form">
+    <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div>
+        <label>Категория</label>
+        <select id="bf-settings-category" class="form-input"></select>
+      </div>
+      <div>
+        <label>Тип</label>
+        <select id="bf-settings-type" class="form-input">
+          <option value="toggle">Toggle</option>
+          <option value="slider">Slider</option>
+          <option value="number">Number</option>
+          <option value="select">Select</option>
+        </select>
+      </div>
+      <div>
+        <label>Название (EN)</label>
+        <input id="bf-settings-title-en" class="form-input" placeholder="Field of View">
+      </div>
+      <div>
+        <label>Название (RU)</label>
+        <input id="bf-settings-title-ru" class="form-input" placeholder="Поле зрения">
+      </div>
+      <div id="bf-settings-default-wrap">
+        <label>Значение по умолчанию</label>
+        <input id="bf-settings-default" class="form-input" placeholder="Напр., 90 / true / Low">
+      </div>
+      <div id="bf-settings-options-wrap" style="display:none;">
+        <label>Опции (для select, через запятую)</label>
+        <input id="bf-settings-options" class="form-input" placeholder="Low, Medium, High, Ultra">
+      </div>
+    </div>
+
+    <div class="btn-group" style="margin-top:12px;">
+      <button class="btn btn-primary" id="bf-settings-submit">✅ Сохранить</button>
+      <button class="btn" id="bf-settings-reset-form" type="button">Сброс</button>
+    </div>
+  </div>
+
+  <!-- Список существующих -->
+  <div class="form-section">
+    <h3>Список настроек</h3>
+    <div id="bf-settings-list"></div>
+  </div>
+</div>
+
+
+
+
   <script src="/static/bf.js?v={{ version }}"></script>
+
+
+<script>
+/* ===============================
+   BF SETTINGS — VIEW & EDITOR
+   =============================== */
+
+(function() {
+  // ——— Константы категорий (ключ, EN, RU) — редактируй список тут
+  const BF_SETTINGS_CATEGORIES = [
+    { key: 'accessibility', en: 'Accessibility',    ru: 'Доступность' },
+    { key: 'gameplay',      en: 'Gameplay',         ru: 'Игровой процесс' },
+    { key: 'campaign',      en: 'Campaign',         ru: 'Кампания' },
+    { key: 'controller',    en: 'Controller',       ru: 'Контроллер' },
+    { key: 'mousekeyboard', en: 'Mouse & Keyboard', ru: 'Мышь и клавиатура' },
+    { key: 'graphics',      en: 'Graphics',         ru: 'Графика' },
+    { key: 'audio',         en: 'Audio',            ru: 'Звук' },
+    { key: 'system',        en: 'System',           ru: 'Система' },
+  ];
+
+  // ——— Селекторы экрана просмотра
+  const scrView = document.getElementById('screen-bf-settings');
+  const btnViewBack = document.getElementById('bf-settings-back');
+  const btnBurger = document.getElementById('bf-settings-burger');
+  const drawer = document.getElementById('bf-settings-drawer');
+  const overlay = document.getElementById('bf-settings-overlay');
+  const catsNav = document.getElementById('bf-settings-categories');
+  const content = document.getElementById('bf-settings-content');
+  const currentTitle = document.getElementById('bf-settings-current-title');
+
+  // ——— Селекторы экрана редактора
+  const scrEdit = document.getElementById('screen-bf-settings-editor');
+  const btnEditBack = document.getElementById('bf-settings-editor-back');
+  const selCat = document.getElementById('bf-settings-category');
+  const selType = document.getElementById('bf-settings-type');
+  const inputEn = document.getElementById('bf-settings-title-en');
+  const inputRu = document.getElementById('bf-settings-title-ru');
+  const defWrap = document.getElementById('bf-settings-default-wrap');
+  const inputDefault = document.getElementById('bf-settings-default');
+  const optWrap = document.getElementById('bf-settings-options-wrap');
+  const inputOptions = document.getElementById('bf-settings-options');
+  const btnSubmit = document.getElementById('bf-settings-submit');
+  const btnReset = document.getElementById('bf-settings-reset-form');
+  const list = document.getElementById('bf-settings-list');
+
+  // ——— Кнопки входа на экраны с главного
+  const btnOpenUser = document.getElementById('bf-settings-btn');       // Пользователь
+  const btnOpenEditor = document.getElementById('bf-game-settings-btn'); // Админ
+
+  // ——— Состояние
+  let currentCategoryKey = 'accessibility';
+  let editingId = null;
+
+  // ——— API (поставь свои маршруты, если другие)
+  async function apiGetSettings(categoryKey = '') {
+    const url = categoryKey ? `/api/bf/settings?category=${encodeURIComponent(categoryKey)}` : '/api/bf/settings';
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('Failed to load settings');
+    return r.json();
+  }
+  async function apiCreateSetting(payload) {
+    const r = await fetch('/api/bf/settings', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload),
+    });
+    if (!r.ok) throw new Error('Failed to create');
+    return r.json();
+  }
+  async function apiUpdateSetting(id, payload) {
+    const r = await fetch(`/api/bf/settings/${id}`, {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload),
+    });
+    if (!r.ok) throw new Error('Failed to update');
+    return r.json();
+  }
+  async function apiDeleteSetting(id) {
+    const r = await fetch(`/api/bf/settings/${id}`, { method: 'DELETE' });
+    if (!r.ok) throw new Error('Failed to delete');
+    return r.json();
+  }
+
+  // ——— Утилиты
+  function categoryByKey(key) {
+    return BF_SETTINGS_CATEGORIES.find(c => c.key === key) || BF_SETTINGS_CATEGORIES[0];
+  }
+  function openDrawer() {
+    drawer.style.left = '0';
+    overlay.style.display = 'block';
+    drawer.setAttribute('aria-hidden', 'false');
+  }
+  function closeDrawer() {
+    drawer.style.left = '-280px';
+    overlay.style.display = 'none';
+    drawer.setAttribute('aria-hidden', 'true');
+  }
+  function clearForm() {
+    editingId = null;
+    selCat.value = currentCategoryKey || 'accessibility';
+    selType.value = 'toggle';
+    inputEn.value = '';
+    inputRu.value = '';
+    inputDefault.value = '';
+    inputOptions.value = '';
+    optWrap.style.display = 'none';
+  }
+
+  // ——— Рендер категорий в бургер-меню
+  function renderCategoriesNav() {
+    catsNav.innerHTML = '';
+    BF_SETTINGS_CATEGORIES.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn';
+      btn.style.textAlign = 'left';
+      btn.textContent = `${cat.en} — ${cat.ru}`;
+      btn.dataset.key = cat.key;
+      btn.onclick = () => {
+        currentCategoryKey = cat.key;
+        currentTitle.textContent = cat.en;
+        closeDrawer();
+        renderUserSettings(); // перерисовать список
+      };
+      catsNav.appendChild(btn);
+    });
+  }
+
+  // ——— Рендер одной настройки (для пользователя, read-only)
+  function renderUserSettingRow(item) {
+    const wrap = document.createElement('div');
+    wrap.className = 'setting-row';
+    wrap.style.cssText = 'padding:12px;border-bottom:1px solid rgba(255,255,255,.08)';
+    const title = document.createElement('div');
+    title.style.fontWeight = '600';
+    title.textContent = item.title_en || 'Setting';
+    const sub = document.createElement('div');
+    sub.style.cssText = 'font-size:12px;opacity:.7;margin-top:2px';
+    sub.textContent = item.title_ru || '';
+    const val = document.createElement('div');
+    val.style.cssText = 'margin-top:6px;opacity:.85';
+
+    // Показываем контрол, но делаем его неактивным
+    switch (item.type) {
+      case 'toggle': {
+        const chk = document.createElement('input');
+        chk.type = 'checkbox';
+        chk.disabled = true;
+        chk.checked = !!item.default;
+        val.appendChild(chk);
+        break;
+      }
+      case 'slider': {
+        const rng = document.createElement('input');
+        rng.type = 'range';
+        rng.disabled = true;
+        rng.value = Number(item.default) || 0;
+        val.appendChild(rng);
+        break;
+      }
+      case 'number': {
+        const num = document.createElement('input');
+        num.type = 'number';
+        num.disabled = true;
+        num.value = item.default ?? '';
+        val.appendChild(num);
+        break;
+      }
+      case 'select': {
+        const sel = document.createElement('select');
+        sel.disabled = true;
+        (item.options || []).forEach(opt => {
+          const o = document.createElement('option');
+          o.value = opt;
+          o.textContent = opt;
+          if (item.default === opt) o.selected = true;
+          sel.appendChild(o);
+        });
+        val.appendChild(sel);
+        break;
+      }
+      default:
+        val.textContent = String(item.default ?? '');
+    }
+
+    wrap.appendChild(title);
+    wrap.appendChild(sub);
+    wrap.appendChild(val);
+    return wrap;
+  }
+
+  // ——— Загрузка и вывод настроек пользователю
+  async function renderUserSettings() {
+    content.innerHTML = '<div class="loading-spinner">Загрузка настроек...</div>';
+    try {
+      const data = await apiGetSettings(currentCategoryKey);
+      content.innerHTML = '';
+      if (!data || !data.length) {
+        const p = document.createElement('p');
+        p.style.opacity = '.7';
+        p.textContent = 'Пока нет настроек в этой категории.';
+        content.appendChild(p);
+        return;
+      }
+      data.forEach(item => content.appendChild(renderUserSettingRow(item)));
+    } catch (e) {
+      content.innerHTML = '<p style="color:#f55">Ошибка загрузки настроек</p>';
+      console.error(e);
+    }
+  }
+
+  // ——— Рендер списка в редакторе
+  async function renderEditorList() {
+    list.innerHTML = '<div class="loading-spinner">Загрузка...</div>';
+    try {
+      const data = await apiGetSettings(); // все
+      // Группировка по категориям
+      const byCat = {};
+      data.forEach(s => {
+        byCat[s.category] ||= [];
+        byCat[s.category].push(s);
+      });
+
+      list.innerHTML = '';
+      BF_SETTINGS_CATEGORIES.forEach(cat => {
+        const items = byCat[cat.key] || [];
+        const section = document.createElement('div');
+        section.style.marginBottom = '16px';
+        const h = document.createElement('h4');
+        h.textContent = `${cat.en} — ${cat.ru} (${items.length})`;
+        section.appendChild(h);
+
+        if (!items.length) {
+          const empty = document.createElement('div');
+          empty.style.opacity = '.6';
+          empty.textContent = '— нет элементов —';
+          section.appendChild(empty);
+        } else {
+          items.forEach(it => {
+            const row = document.createElement('div');
+            row.style.cssText = 'display:flex;align-items:center;gap:8px;justify-content:space-between;border:1px solid rgba(255,255,255,.08);padding:8px;border-radius:8px;margin-top:8px;';
+            const left = document.createElement('div');
+            left.innerHTML = `<strong>${it.title_en}</strong><div style="font-size:12px;opacity:.7">${it.title_ru || ''}</div><div style="font-size:12px;opacity:.6">type: ${it.type} • default: ${it.default ?? ''}</div>`;
+            const right = document.createElement('div');
+            const btnE = document.createElement('button');
+            btnE.className = 'btn';
+            btnE.textContent = '✏️';
+            btnE.title = 'Редактировать';
+            btnE.onclick = () => {
+              editingId = it.id;
+              selCat.value = it.category;
+              selType.value = it.type;
+              inputEn.value = it.title_en || '';
+              inputRu.value = it.title_ru || '';
+              inputDefault.value = it.default ?? '';
+              if (it.type === 'select') {
+                optWrap.style.display = 'block';
+                inputOptions.value = (it.options || []).join(', ');
+              } else {
+                optWrap.style.display = 'none';
+                inputOptions.value = '';
+              }
+              // Прокрутить к форме
+              document.getElementById('bf-settings-form').scrollIntoView({behavior:'smooth'});
+            };
+            const btnD = document.createElement('button');
+            btnD.className = 'btn';
+            btnD.textContent = '🗑';
+            btnD.title = 'Удалить';
+            btnD.onclick = async () => {
+              if (!confirm('Удалить настройку?')) return;
+              try {
+                await apiDeleteSetting(it.id);
+                await renderEditorList();
+              } catch (e) {
+                alert('Ошибка удаления');
+                console.error(e);
+              }
+            };
+            right.appendChild(btnE);
+            right.appendChild(btnD);
+            row.appendChild(left);
+            row.appendChild(right);
+            section.appendChild(row);
+          });
+        }
+
+        list.appendChild(section);
+      });
+    } catch (e) {
+      list.innerHTML = '<p style="color:#f55">Ошибка загрузки</p>';
+      console.error(e);
+    }
+  }
+
+  // ——— Изменение типа (показывать поле опций для select)
+  selType?.addEventListener('change', () => {
+    const isSelect = selType.value === 'select';
+    optWrap.style.display = isSelect ? 'block' : 'none';
+  });
+
+  // ——— Сабмит формы
+  btnSubmit?.addEventListener('click', async () => {
+    const payload = {
+      category: selCat.value,
+      title_en: (inputEn.value || '').trim(),
+      title_ru: (inputRu.value || '').trim(),
+      type: selType.value,
+      default: inputDefault.value,
+      options: selType.value === 'select'
+        ? (inputOptions.value || '').split(',').map(s => s.trim()).filter(Boolean)
+        : [],
+    };
+    if (!payload.category || !payload.title_en) {
+      alert('Категория и название EN обязательны');
+      return;
+    }
+    try {
+      if (editingId) {
+        await apiUpdateSetting(editingId, payload);
+      } else {
+        await apiCreateSetting(payload);
+      }
+      clearForm();
+      await renderEditorList();
+    } catch (e) {
+      alert('Ошибка сохранения');
+      console.error(e);
+    }
+  });
+
+  btnReset?.addEventListener('click', clearForm);
+
+  // ——— Открытие экранов с главной
+  btnOpenUser?.addEventListener('click', () => {
+    // Инициализация экрана просмотра
+    renderCategoriesNav();
+    currentCategoryKey = currentCategoryKey || 'accessibility';
+    currentTitle.textContent = categoryByKey(currentCategoryKey).en;
+    renderUserSettings();
+    if (typeof showScreen === 'function') showScreen('screen-bf-settings');
+  });
+
+  btnOpenEditor?.addEventListener('click', () => {
+    // Инициализация экрана редактора
+    selCat.innerHTML = BF_SETTINGS_CATEGORIES.map(c => `<option value="${c.key}">${c.en} — ${c.ru}</option>`).join('');
+    selCat.value = currentCategoryKey || 'accessibility';
+    clearForm();
+    renderEditorList();
+    if (typeof showScreen === 'function') showScreen('screen-bf-settings-editor');
+  });
+
+  // ——— Навигация внутри экранов
+  btnViewBack?.addEventListener('click', () => {
+    if (typeof showScreen === 'function') showScreen('screen-battlefield-main');
+  });
+  btnEditBack?.addEventListener('click', () => {
+    if (typeof showScreen === 'function') showScreen('screen-battlefield-main');
+  });
+
+  // ——— Бургер
+  btnBurger?.addEventListener('click', openDrawer);
+  overlay?.addEventListener('click', closeDrawer);
+
+})(); 
+</script>
+
