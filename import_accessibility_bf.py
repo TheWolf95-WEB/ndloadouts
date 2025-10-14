@@ -1,11 +1,11 @@
 import json
 from pathlib import Path
-from database_bf_settings import init_bf_settings_table, add_bf_setting
+from database_bf_settings import init_bf_settings_table, ensure_section_column, add_bf_setting
 
 JSON_PATH = Path("data/accessibility_settings.json")
 
 def normalize_type(t):
-    allowed = {"toggle", "slider", "number", "select"}
+    allowed = {"toggle", "slider", "number", "select", "button"}
     return t if t in allowed else "toggle"
 
 def import_accessibility_settings():
@@ -16,12 +16,14 @@ def import_accessibility_settings():
         data = json.load(f)
 
     init_bf_settings_table()
+    ensure_section_column()  # важно: добавит колонку, если её ещё нет
 
     imported = 0
     for item in data:
         try:
             add_bf_setting({
                 "category": item.get("category", "accessibility"),
+                "section": item.get("section", ""),  # ← вот это добавлено
                 "title_en": item.get("title_en"),
                 "title_ru": item.get("title_ru"),
                 "type": normalize_type(item.get("type", "toggle")),
