@@ -142,10 +142,8 @@ async function checkAdminStatus() {
 
     // === Если супер-админ ===
     if (data.is_super_admin) {
-      assignBtn?.classList.add('is-visible');
-      addBtn?.classList.add('full-width');
-    } else {
-      addBtn?.classList.remove('full-width');
+        assignBtn?.classList.add('is-visible');
+        addBtn?.classList.remove('full-width'); // 🔧 теперь точно не применится
     }
 
   } catch (e) {
