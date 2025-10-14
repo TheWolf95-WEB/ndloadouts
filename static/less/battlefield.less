@@ -1857,6 +1857,59 @@ body.warzone-theme .card-btn:hover {
 }
 
 
+#bf-settings-drawer {
+  position: fixed;
+  left: -260px;
+  top: 0;
+  height: 100vh;
+  width: 240px;
+  background: #0f1112;
+  box-shadow: 2px 0 12px rgba(0,0,0,.5);
+  transition: left .25s ease;
+  z-index: 20;
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+#bf-settings-drawer h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #9ab;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  padding-bottom: 6px;
+}
+
+#bf-settings-categories button {
+  background: #1a1c1e;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #ccc;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: 2px;
+  margin-bottom: 6px;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+#bf-settings-categories button:hover {
+  background: #2b2f33;
+  border-color: #4aa3ff;
+  color: #fff;
+}
+
+#bf-settings-categories button.active {
+  background: #4aa3ff;
+  color: #fff;
+  border-color: #4aa3ff;
+}
+
+
+
 /* =============================
    🧭 SETTINGS SCREEN STYLING
    ============================= */
@@ -1903,16 +1956,19 @@ body.warzone-theme .card-btn:hover {
 }
 
 .settings-section {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   color: #4aa3ff;
   margin-top: 24px;
-  margin-bottom: 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  padding-bottom: 4px;
-  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 6px;
   text-transform: uppercase;
+  letter-spacing: 0.6px;
+  background: linear-gradient(90deg, rgba(80,120,200,0.15), transparent);
+  padding-left: 4px;
 }
+
 
 
 .settings-category-bar {
