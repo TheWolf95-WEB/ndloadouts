@@ -133,6 +133,10 @@ async function checkAdminStatus() {
       addBtn?.classList.add('is-visible');
       modulesBtn?.classList.add('is-visible'); // 👈 теперь будет показываться только админам
       userInfoEl.innerHTML += `<p>Вы вошли как админ ✅</p>`;
+      // ✅ Безопасная вставка
+      if (window.userInfoEl) {
+        window.userInfoEl.innerHTML += `<p>Вы вошли как админ ✅</p>`;
+      }
     }
 
     // === Если супер-админ ===
