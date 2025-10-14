@@ -1,21 +1,30 @@
 /* ===========================
-   ⚔️ BATTLEFIELD BUILDS SCRIPT
+   ⚔️ BATTLEFIELD BUILDS SCRIPT (исправленный)
    =========================== */
-const tg = window.Telegram?.WebApp || window.tg || {};
-tg.expand?.();
+(() => {
+  // локальный контекст — не конфликтует с app.js
+  const bfTg = window.Telegram?.WebApp;
+  bfTg?.expand?.();
 
+  const bfUser = bfTg?.initDataUnsafe?.user || {};
+  let bfUserInfo = null;
 
+  const bfModulesByType = {};
+  const bfWeaponTypeLabels = {};
+  let bfCachedBuilds = [];
+  let bfCurrentEditId = null;
+  let bfScreenHistory = [];
+  let bfHasUnsavedChanges = false;
 
-// === Ensure global showScreen exists ===
-if (typeof window.showScreen === "undefined") {
-  window.showScreen = function (id) {
-    document.querySelectorAll(".screen").forEach((s) => {
-      s.style.display = s.id === id ? "block" : "none";
-      s.classList.toggle("active", s.id === id);
-    });
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-}
+  // === Инициализация ===
+  document.addEventListener("DOMContentLoaded", async () => {
+    try {
+      await bfLoadWeaponTypes();
+      console.log("✅ BF module ready (not auto-opened)");
+    } catch (e) {
+      console.error("BF init error:", e);
+    }
+  });
 
 
 const bfUser = tg.initDataUnsafe?.user || {};
@@ -1499,3 +1508,5 @@ document.addEventListener("DOMContentLoaded", () => {
    ✅ ГОТОВО
    =============================== */
 console.log("✅ Battlefield builds module initialized");
+
+})();
