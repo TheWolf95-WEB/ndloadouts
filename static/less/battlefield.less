@@ -1909,45 +1909,51 @@ body.warzone-theme .card-btn:hover {
    🧭 SETTINGS SCREEN STYLING
    ============================= */
 .settings-header {
+  background: linear-gradient(180deg, #10161a 0%, #0c1013 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-bottom: 20px;
 }
-.settings-top-row {
-  display: flex;
-  justify-content: flex-start;
-}
-.settings-info {
-  margin-top: 4px;
-}
+
 .settings-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #fff;
+  font-size: 20px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #00aaff;
+  margin-bottom: 6px;
 }
+
 .settings-subtitle {
-  font-size: 14px;
-  color: #aaa;
-  line-height: 1.4;
+  color: #b4bec9;
+  font-size: 13px;
+  line-height: 1.5;
   max-width: 600px;
 }
+
 .settings-category-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  background: rgba(255,255,255,0.05);
-  border-radius: 4px;
-  padding: 8px 12px;
-  margin-top: 12px;
+  gap: 12px;
+  margin-top: 14px;
 }
 
 .btn-burger {
-  background: none;
-  border: none;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  padding: 8px 12px;
   color: #fff;
-  font-size: 20px;
-  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-burger:hover {
+  background: rgba(0,170,255,0.15);
+  border-color: rgba(0,170,255,0.5);
 }
 
 .settings-section {
@@ -1992,17 +1998,35 @@ body.warzone-theme .card-btn:hover {
 
 
 /* 🎖️ Battlefield Settings Sections */
+// .bf-section-title {
+//   margin-top: 28px;
+//   margin-bottom: 10px;
+//   padding-bottom: 6px;
+//   border-bottom: 2px dashed rgba(255,255,255,0.15);
+//   text-transform: uppercase;
+//   font-weight: 700;
+//   font-size: 14px;
+//   color: #d0d4da;
+//   letter-spacing: 0.7px;
+// }
+
 .bf-section-title {
-  margin-top: 28px;
-  margin-bottom: 10px;
-  padding-bottom: 6px;
-  border-bottom: 2px dashed rgba(255,255,255,0.15);
-  text-transform: uppercase;
   font-weight: 700;
-  font-size: 14px;
-  color: #d0d4da;
-  letter-spacing: 0.7px;
+  letter-spacing: 0.8px;
+  color: #9ebad1;
+  font-size: 13px;
+  margin: 24px 0 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed rgba(255,255,255,0.1);
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
+
+.bf-section-title .section-ru {
+  font-weight: 400;
+  opacity: 0.6;
+
 
 
 .setting-info {
