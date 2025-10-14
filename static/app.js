@@ -1620,3 +1620,64 @@ tg.onEvent('web_app_close', () => {
   });
 });
 
+
+
+
+// === Swipe Navigation like Telegram ===
+let startX = 0;
+let currentX = 0;
+let isSwiping = false;
+const threshold = 60; // сколько пикселей нужно смахнуть для перехода
+const activeScreen = () => document.querySelector('.screen.active');
+
+document.addEventListener('touchstart', (e) => {
+  if (e.touches.length !== 1) return;
+  startX = e.touches[0].clientX;
+  currentX = startX;
+  isSwiping = true;
+});
+
+document.addEventListener('touchmove', (e) => {
+  if (!isSwiping) return;
+  currentX = e.touches[0].clientX;
+  const deltaX = currentX - startX;
+
+  const screen = activeScreen();
+  if (!screen) return;
+
+  // свайп влево/вправо, но только если движение достаточно широкое
+  if (Math.abs(deltaX) > 10) {
+    e.preventDefault(); // предотвращаем прокрутку
+    screen.style.transition = 'none';
+    screen.style.transform = `translateX(${deltaX}px)`;
+    screen.style.opacity = 1 - Math.min(Math.abs(deltaX) / 200, 0.4);
+  }
+});
+
+document.addEventListener('touchend', () => {
+  if (!isSwiping) return;
+  isSwiping = false;
+
+  const deltaX = currentX - startX;
+  const screen = activeScreen();
+  if (!screen) return;
+
+  screen.style.transition = 'transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.25s ease';
+
+  // свайп вправо → назад
+  if (deltaX > threshold && screenHistory.length > 0) {
+    const prev = screenHistory.pop();
+    isGoingBack = true;
+    screen.style.transform = 'translateX(100%)';
+    screen.style.opacity = '0';
+    setTimeout(() => {
+      showScreen(prev);
+    }, 150);
+  }
+  // свайп влево — просто вернуть на место
+  else {
+    screen.style.transform = 'translateX(0)';
+    screen.style.opacity = '1';
+  }
+});
+
