@@ -1859,11 +1859,11 @@ body.warzone-theme .card-btn:hover {
 
 #bf-settings-drawer {
     position: fixed;
-    left: 0px;
+    left: -260px; 
     top: 0px;
     height: 100%;
-    width: 260px;
-    max-width: 100vw;
+    width: 300px;
+    max-width: 100%;
     background: #0f111a;
     box-shadow: rgba(0, 0, 0, 0.4) 2px 0px 16px;
     transition: left 0.25s;
@@ -1873,6 +1873,9 @@ body.warzone-theme .card-btn:hover {
     flex-direction: column;
 }
 
+#bf-settings-drawer[aria-hidden="false"] {
+  left: 0; /* 👈 выезжает при открытии */
+}
 
 #bf-settings-drawer h3 {
   font-size: 15px;
