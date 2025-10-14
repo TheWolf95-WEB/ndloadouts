@@ -358,12 +358,29 @@
 
 
 <!-- 🎛 Пользовательский экран настроек -->
-<div id="screen-bf-settings" class="screen" style="display:none;">
-  <div class="screen-header" style="display:flex;align-items:center;gap:12px;">
-    <button class="btn btn-back" id="bf-settings-back">⬅ Назад</button>
-    <button class="btn" id="bf-settings-burger">☰</button>
-    <h2 id="bf-settings-current-title" style="margin-left:auto;">Accessibility</h2>
+<div class="screen-header settings-header">
+  <div class="settings-top-row">
+    <button class="btn btn-back" id="bf-settings-back">
+      <i class="fas fa-arrow-left"></i> Назад
+    </button>
   </div>
+
+  <div class="settings-info">
+    <h2 class="settings-title">Настройки игры Battlefield</h2>
+    <p class="settings-subtitle">
+      Мы начали переводить все параметры на русский, чтобы вам было проще ориентироваться
+      и подстроить игру под себя. Всё максимально близко к оригинальному меню Battlefield.
+    </p>
+  </div>
+
+  <div class="settings-category-bar">
+    <button class="btn btn-burger" id="bf-settings-burger">
+      <i class="fas fa-bars"></i>
+    </button>
+    <h3 id="bf-settings-current-title" class="settings-category-title">Общие</h3>
+  </div>
+</div>
+
 
   <!-- Выезжающее меню категорий -->
   <aside id="bf-settings-drawer" aria-hidden="true" style="position:fixed;left:-280px;top:0;height:100vh;width:260px;max-width:80vw;background:#111;box-shadow:2px 0 16px rgba(0,0,0,.4);transition:left .25s ease;z-index:20;padding:12px;">
@@ -645,7 +662,18 @@
         content.appendChild(p);
         return;
       }
-      data.forEach(item => content.appendChild(renderUserSettingRow(item)));
+      let currentSection = '';
+      data.forEach(item => {
+        if (item.section && item.section !== currentSection) {
+          currentSection = item.section;
+          const sec = document.createElement('h3');
+          sec.className = 'settings-section';
+          sec.textContent = item.section;
+          content.appendChild(sec);
+        }
+        content.appendChild(renderUserSettingRow(item));
+      });
+
     } catch (e) {
       content.innerHTML = '<p style="color:#f55">Ошибка загрузки настроек</p>';
       console.error(e);
