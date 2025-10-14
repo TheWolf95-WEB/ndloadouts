@@ -570,32 +570,36 @@
   function renderUserSettingRow(item) {
     const wrap = document.createElement('div');
     wrap.className = 'setting-row';
-    wrap.style.cssText = 'padding:12px;border-bottom:1px solid rgba(255,255,255,.08)';
-    const title = document.createElement('div');
-    title.style.fontWeight = '600';
-    title.textContent = item.title_en || 'Setting';
-    const sub = document.createElement('div');
-    sub.style.cssText = 'font-size:12px;opacity:.7;margin-top:2px';
-    sub.textContent = item.title_ru || '';
-    const val = document.createElement('div');
-    val.style.cssText = 'margin-top:6px;opacity:.85';
-
-    // Показываем контрол, но делаем его неактивным
+  
+    const info = document.createElement('div');
+    info.className = 'setting-info';
+    info.innerHTML = `
+      <div class="title-en">${item.title_en || ''}</div>
+      <div class="title-ru">${item.title_ru || ''}</div>
+    `;
+  
+    const control = document.createElement('div');
+    control.className = 'setting-control';
+  
+    // Рендерим контрол
     switch (item.type) {
       case 'toggle': {
         const chk = document.createElement('input');
         chk.type = 'checkbox';
         chk.disabled = true;
-        chk.checked = !!item.default;
-        val.appendChild(chk);
+        chk.checked = item.default === 'true' || item.default === true;
+        control.appendChild(chk);
         break;
       }
       case 'slider': {
+        const valLabel = document.createElement('span');
+        valLabel.textContent = item.default || '0';
         const rng = document.createElement('input');
         rng.type = 'range';
         rng.disabled = true;
-        rng.value = Number(item.default) || 0;
-        val.appendChild(rng);
+        rng.value = item.default || 0;
+        control.appendChild(valLabel);
+        control.appendChild(rng);
         break;
       }
       case 'number': {
@@ -603,7 +607,7 @@
         num.type = 'number';
         num.disabled = true;
         num.value = item.default ?? '';
-        val.appendChild(num);
+        control.appendChild(num);
         break;
       }
       case 'select': {
@@ -611,23 +615,22 @@
         sel.disabled = true;
         (item.options || []).forEach(opt => {
           const o = document.createElement('option');
-          o.value = opt;
           o.textContent = opt;
           if (item.default === opt) o.selected = true;
           sel.appendChild(o);
         });
-        val.appendChild(sel);
+        control.appendChild(sel);
         break;
       }
       default:
-        val.textContent = String(item.default ?? '');
+        control.textContent = item.default ?? '';
     }
-
-    wrap.appendChild(title);
-    wrap.appendChild(sub);
-    wrap.appendChild(val);
+  
+    wrap.appendChild(info);
+    wrap.appendChild(control);
     return wrap;
   }
+
 
   // ——— Загрузка и вывод настроек пользователю
   async function renderUserSettings() {
