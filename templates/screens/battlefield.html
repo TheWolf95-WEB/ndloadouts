@@ -16,11 +16,7 @@
         <span>Все сборки</span>
       </div>
       <div class="card-btn is-visible" id="bf-challenges-btn">
-        <i class="fas fa-flag"></i>
-        <span>Испытания</span>
-      </div>
-      <div class="card-btn is-visible" id="bf-settings-btn">
-        <i class="fas fa-cog"></i>
+        <i class="fas fa-flag"></i>selType?.addEventListener
         <span>Настройки игры</span>
       </div>
     </div>
@@ -805,6 +801,77 @@ async function renderUserSettings() {
     const isSelect = selType.value === 'select';
     optWrap.style.display = isSelect ? 'block' : 'none';
   });
+
+    // ——— Live preview настройки
+  const previewContainer = document.getElementById('bf-preview-container');
+  
+  function renderPreview() {
+    const type = selType.value;
+    const def = inputDefault.value.trim();
+    previewContainer.innerHTML = '';
+  
+    const wrap = document.createElement('div');
+    wrap.className = 'setting-row';
+    wrap.innerHTML = `
+      <div class="title">${inputEn.value || 'Example Setting'}</div>
+      <div class="control"></div>
+    `;
+  
+    const ctrl = wrap.querySelector('.control');
+    switch (type) {
+      case 'toggle': {
+        const chk = document.createElement('input');
+        chk.type = 'checkbox';
+        chk.checked = def === 'true' || def === 'on' || def === '1';
+        ctrl.appendChild(chk);
+        break;
+      }
+      case 'slider': {
+        const val = document.createElement('span');
+        val.textContent = def || '50';
+        const rng = document.createElement('input');
+        rng.type = 'range';
+        rng.value = def || 50;
+        ctrl.appendChild(val);
+        ctrl.appendChild(rng);
+        break;
+      }
+      case 'number': {
+        const num = document.createElement('input');
+        num.type = 'number';
+        num.value = def || 0;
+        ctrl.appendChild(num);
+        break;
+      }
+      case 'select': {
+        const sel = document.createElement('select');
+        const opts = (inputOptions.value || '').split(',').map(s => s.trim()).filter(Boolean);
+        opts.forEach(o => {
+          const op = document.createElement('option');
+          op.textContent = o;
+          if (def === o) op.selected = true;
+          sel.appendChild(op);
+        });
+        ctrl.appendChild(sel);
+        break;
+      }
+      case 'text': {
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        inp.value = def || '';
+        ctrl.appendChild(inp);
+        break;
+      }
+    }
+  
+    previewContainer.appendChild(wrap);
+  }
+  
+  // ——— Отслеживаем изменения для обновления превью
+  [selType, inputDefault, inputOptions, inputEn].forEach(el => {
+    el.addEventListener('input', renderPreview);
+  });
+
 
   // ——— Сабмит формы
   btnSubmit?.addEventListener('click', async () => {
