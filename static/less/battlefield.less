@@ -1775,33 +1775,7 @@ body.warzone-theme .card-btn:hover {
 }
 
 /* --- Кнопки --- */
-#screen-bf-settings-editor .btn,
-#screen-bf-settings .btn {
-  background: var(--surface);
-  color: var(--text);
-  border: 1px solid var(--border);
-  padding: 10px 14px;
-  border-radius: var(--radius);
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
 
-#screen-bf-settings-editor .btn:hover,
-#screen-bf-settings .btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: #18212b;
-}
-
-#screen-bf-settings-editor .btn-primary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-}
-#screen-bf-settings-editor .btn-primary:hover {
-  background: #56b0ff;
-}
 
 /* --- Контейнер списка --- */
 #bf-settings-list h4 {
@@ -1816,45 +1790,6 @@ body.warzone-theme .card-btn:hover {
   color: var(--text-muted);
   padding-left: 6px;
 }
-
-/* --- Ряд элемента --- */
-#bf-settings-list .btn {
-  padding: 6px 10px;
-  font-size: 0.85rem;
-}
-
-/* --- Мобильная оптимизация --- */
-@media (max-width: 640px) {
-  #screen-bf-settings-editor {
-    padding: 12px;
-    font-size: 0.9rem;
-  }
-
-  #screen-bf-settings-editor .screen-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
-
-  #screen-bf-settings-editor .form-row {
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
-  #bf-settings-list h4 {
-    font-size: 0.95rem;
-  }
-
-  #screen-bf-settings-editor .btn-group {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  #screen-bf-settings-editor .btn {
-    width: 100%;
-  }
-}
-
 
 /* =============================
    🎛 BF SETTINGS VISUAL STYLE
@@ -1983,5 +1918,38 @@ body.warzone-theme .card-btn:hover {
   padding-bottom: 4px;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+}
+
+
+.settings-category-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-top: 10px;
+}
+.settings-category-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #4aa3ff;
+  text-align: center;
+}
+.settings-category-title .cat-ru {
+  color: #aaa;
+  font-weight: 400;
+  font-size: 14px;
+  margin-left: 6px;
+}
+.btn-burger {
+  position: absolute;
+  left: 18px;
+  font-size: 20px;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
 }
 
