@@ -8,6 +8,10 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
 </head>
 <body>
   <div class="container">
@@ -25,8 +29,20 @@
   <script src="/static/analytics.js?v={{ version }}"></script>
   <script src="/static/app.js?v={{ version }}"></script>
   <script src="/static/bf.js?v={{ version }}"></script>
-  <script src="https://cdn.jsdelivr.net/gh/twa-dev/tgwebapp-swipe@main/dist/tgwebapp-swipe.min.js"></script>
-  <script src="/static/swipe.js?v={{ version }}"></script>
+  <!-- <script src="/static/swipe.js?v={{ version }}"></script> -->
+  <script>
+    const swiper = new Swiper('.swiper', {
+      direction: 'horizontal',
+      allowTouchMove: true,
+      threshold: 20,
+      on: {
+        reachBeginning() {
+          const prev = window.screenHistory?.at(-1);
+          if (prev) showScreen(prev);
+        }
+      }
+    });
+</script>
 
 
 </body>
