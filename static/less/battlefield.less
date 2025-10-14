@@ -1714,3 +1714,145 @@ body.warzone-theme .card-btn:hover {
 }
 
 
+
+/* ================================
+   NDHQ | Battlefield Settings UI
+   ================================ */
+#screen-bf-settings-editor {
+  --bg: #0c0f13;
+  --surface: #14191f;
+  --text: #e6ecf2;
+  --text-muted: #8b9ca8;
+  --accent: #3ca0ff;
+  --border: #1f2a36;
+  --radius: 10px;
+
+  background: var(--bg);
+  color: var(--text);
+  padding: 16px;
+  border-radius: var(--radius);
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+  font-family: "Inter Tight", sans-serif;
+}
+
+#screen-bf-settings-editor .screen-header h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.5px;
+}
+
+#screen-bf-settings-editor label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+#screen-bf-settings-editor .form-input,
+#screen-bf-settings-editor select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.9rem;
+  transition: border 0.2s ease, background 0.2s ease;
+}
+
+#screen-bf-settings-editor .form-input:focus,
+#screen-bf-settings-editor select:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: #19232d;
+}
+
+#screen-bf-settings-editor .form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+/* --- Кнопки --- */
+#screen-bf-settings-editor .btn,
+#screen-bf-settings .btn {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+#screen-bf-settings-editor .btn:hover,
+#screen-bf-settings .btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: #18212b;
+}
+
+#screen-bf-settings-editor .btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+#screen-bf-settings-editor .btn-primary:hover {
+  background: #56b0ff;
+}
+
+/* --- Контейнер списка --- */
+#bf-settings-list h4 {
+  font-size: 1rem;
+  margin-top: 16px;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+#bf-settings-list div[style*="нет элементов"] {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  padding-left: 6px;
+}
+
+/* --- Ряд элемента --- */
+#bf-settings-list .btn {
+  padding: 6px 10px;
+  font-size: 0.85rem;
+}
+
+/* --- Мобильная оптимизация --- */
+@media (max-width: 640px) {
+  #screen-bf-settings-editor {
+    padding: 12px;
+    font-size: 0.9rem;
+  }
+
+  #screen-bf-settings-editor .screen-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  #screen-bf-settings-editor .form-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  #bf-settings-list h4 {
+    font-size: 0.95rem;
+  }
+
+  #screen-bf-settings-editor .btn-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  #screen-bf-settings-editor .btn {
+    width: 100%;
+  }
+}
+
+
