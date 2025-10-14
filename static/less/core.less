@@ -380,28 +380,5 @@ body {
 }
 
 
-/* Экраны должны быть слоены друг над другом */
-.screen {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;          /* скроллы внутри .screen__content */
-  backface-visibility: hidden;
-  transform: translate3d(0,0,0);
-}
 
-.screen.active {
-  z-index: 2;
-}
-
-.screen__content {
-  height: 100%;
-  overflow: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Рекомендуется: чтобы жест назад не конфликтовал с системным «pull-to-refresh» */
-html, body { overscroll-behavior: contain; }
-
-/* Ускоряет перф */
-* { -webkit-tap-highlight-color: transparent; }
 
