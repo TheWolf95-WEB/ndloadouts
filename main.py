@@ -1159,6 +1159,42 @@ def bf_update_progress(challenge_id: int, data: dict = Body(...)):
     return {"id": challenge_id, "current": row[0], "goal": goal}
 
 
+# НАСТРОЙКИ ИГРЫ
+
+from fastapi import APIRouter, HTTPException
+from database_bf_settings import (
+    init_bf_settings_table,
+    get_bf_settings,
+    add_bf_setting,
+    update_bf_setting,
+    delete_bf_setting,
+)
+
+router_bf_settings = APIRouter(prefix="/api/bf/settings", tags=["BF Settings"])
+
+init_bf_settings_table()
+
+@router_bf_settings.get("")
+def api_get_settings(category: str | None = None):
+    return get_bf_settings(category)
+
+@router_bf_settings.post("")
+def api_create_setting(payload: dict):
+    add_bf_setting(payload)
+    return {"status": "ok"}
+
+@router_bf_settings.put("/{setting_id}")
+def api_update_setting(setting_id: int, payload: dict):
+    update_bf_setting(setting_id, payload)
+    return {"status": "ok"}
+
+@router_bf_settings.delete("/{setting_id}")
+def api_delete_setting(setting_id: int):
+    delete_bf_setting(setting_id)
+    return {"status": "ok"}
+
+
+
 
 
 if __name__ == "__main__":
