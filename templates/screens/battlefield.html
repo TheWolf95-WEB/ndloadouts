@@ -656,8 +656,7 @@
   }
 
 
-  // ——— Загрузка и вывод настроек пользователю
-// ——— Загрузка и вывод настроек пользователю
+// ——— Загрузка и вывод настроек пользователю (с Battlefield-секциями)
 async function renderUserSettings() {
   content.innerHTML = '<div class="loading-spinner">Загрузка настроек...</div>';
 
@@ -676,17 +675,17 @@ async function renderUserSettings() {
     let currentSection = '';
 
     data.forEach(item => {
-      // — если началась новая секция, выводим заголовок
+      // Если новая секция — создаём визуальный блок раздела
       if (item.section && item.section !== currentSection) {
         currentSection = item.section;
 
         const sec = document.createElement('div');
-        sec.className = 'settings-section';
+        sec.className = 'bf-section-title';
         sec.innerHTML = `<span>${item.section}</span>`;
         content.appendChild(sec);
       }
 
-      // — строка настройки
+      // Строка настройки
       content.appendChild(renderUserSettingRow(item));
     });
 
@@ -695,6 +694,7 @@ async function renderUserSettings() {
     console.error(e);
   }
 }
+
 
 
   // ——— Рендер списка в редакторе
