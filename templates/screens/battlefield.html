@@ -583,7 +583,7 @@
       btn.dataset.key = cat.key;
       btn.onclick = () => {
         currentCategoryKey = cat.key;
-        currentTitle.textContent = cat.en;
+        currentTitle.innerHTML = `${cat.en} <span class="cat-ru">— ${cat.ru}</span>`;
         closeDrawer();
         renderUserSettings(); // перерисовать список
       };
@@ -658,35 +658,45 @@
 
 
   // ——— Загрузка и вывод настроек пользователю
-  async function renderUserSettings() {
-    content.innerHTML = '<div class="loading-spinner">Загрузка настроек...</div>';
-    try {
-      const data = await apiGetSettings(currentCategoryKey);
-      content.innerHTML = '';
-      if (!data || !data.length) {
-        const p = document.createElement('p');
-        p.style.opacity = '.7';
-        p.textContent = 'Пока нет настроек в этой категории.';
-        content.appendChild(p);
-        return;
-      }
-      let currentSection = '';
-      data.forEach(item => {
-        if (item.section && item.section !== currentSection) {
-          currentSection = item.section;
-          const sec = document.createElement('h3');
-          sec.className = 'settings-section';
-          sec.textContent = item.section;
-          content.appendChild(sec);
-        }
-        content.appendChild(renderUserSettingRow(item));
-      });
+// ——— Загрузка и вывод настроек пользователю
+async function renderUserSettings() {
+  content.innerHTML = '<div class="loading-spinner">Загрузка настроек...</div>';
 
-    } catch (e) {
-      content.innerHTML = '<p style="color:#f55">Ошибка загрузки настроек</p>';
-      console.error(e);
+  try {
+    const data = await apiGetSettings(currentCategoryKey);
+    content.innerHTML = '';
+
+    if (!data || !data.length) {
+      const p = document.createElement('p');
+      p.style.opacity = '.7';
+      p.textContent = 'Пока нет настроек в этой категории.';
+      content.appendChild(p);
+      return;
     }
+
+    let currentSection = '';
+
+    data.forEach(item => {
+      // — если началась новая секция, выводим заголовок
+      if (item.section && item.section !== currentSection) {
+        currentSection = item.section;
+
+        const sec = document.createElement('div');
+        sec.className = 'settings-section';
+        sec.innerHTML = `<span>${item.section}</span>`;
+        content.appendChild(sec);
+      }
+
+      // — строка настройки
+      content.appendChild(renderUserSettingRow(item));
+    });
+
+  } catch (e) {
+    content.innerHTML = '<p style="color:#f55">Ошибка загрузки настроек</p>';
+    console.error(e);
   }
+}
+
 
   // ——— Рендер списка в редакторе
   async function renderEditorList() {
