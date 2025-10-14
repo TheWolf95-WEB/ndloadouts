@@ -115,6 +115,7 @@ async function checkAdminStatus() {
     const data = await res.json();
     window.userInfo = data;
 
+    const userInfoEl = document.getElementById('user-info'); // ✅ локальная ссылка
     const editBtn = document.getElementById('edit-builds-btn');
     const assignBtn = document.getElementById('assign-admin-btn');
     const updateBtn = document.getElementById('update-version-btn');
@@ -131,11 +132,11 @@ async function checkAdminStatus() {
       editBtn?.classList.add('is-visible');
       updateBtn?.classList.add('is-visible');
       addBtn?.classList.add('is-visible');
-      modulesBtn?.classList.add('is-visible'); // 👈 теперь будет показываться только админам
-      userInfoEl.innerHTML += `<p>Вы вошли как админ ✅</p>`;
-      // ✅ Безопасная вставка
-      if (window.userInfoEl) {
-        window.userInfoEl.innerHTML += `<p>Вы вошли как админ ✅</p>`;
+      modulesBtn?.classList.add('is-visible'); 
+
+      // ✅ Проверяем наличие userInfoEl
+      if (userInfoEl) {
+        userInfoEl.innerHTML += `<p>Вы вошли как админ ✅</p>`;
       }
     }
 
