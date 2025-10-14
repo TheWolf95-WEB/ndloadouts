@@ -1904,98 +1904,96 @@ body.warzone-theme .card-btn:hover {
 }
 
 
-
-/* =============================
-   🧭 SETTINGS SCREEN STYLING
-   ============================= */
-
 /* ===========================
    🎨 Battlefield Settings Header
    =========================== */
 
-.settings-header {
-  position: relative;
-  background: linear-gradient(180deg, #0d1015 0%, #0b0e12 100%);
-  padding: 22px 20px 26px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
-  border-radius: 0 0 14px 14px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+/* ================================
+   🎛 Battlefield Header — clean style
+   ================================ */
+
+.settings-header.clean-style {
+  background: #0b0e12;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  border-radius: 0 0 8px 8px;
+  padding: 18px 20px 20px;
+  box-shadow: inset 0 -1px 0 rgba(255,255,255,0.03);
 }
 
-.settings-top-row {
+.settings-top {
   display: flex;
   justify-content: flex-start;
   margin-bottom: 10px;
 }
 
-
-/* — Hero-блок */
-.settings-hero {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  margin-top: 4px;
-  margin-bottom: 14px;
+.btn-back {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  color: #cfd9e3;
+  padding: 6px 12px;
+  font-size: 13px;
+  transition: 0.2s;
+}
+.btn-back:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(0,170,255,0.4);
 }
 
-.settings-hero-accent {
-  width: 4px;
-  height: 100%;
-  background: linear-gradient(180deg, #00aaff 0%, #0066cc 100%);
-  border-radius: 4px;
-  box-shadow: 0 0 14px rgba(0,170,255,0.4);
+/* — Заголовок блока */
+.settings-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 10px;
 }
 
 .settings-title {
-  font-size: 22px;
-  letter-spacing: 1.3px;
+  font-size: 15px;
+  letter-spacing: 1px;
+  font-weight: 600;
+  color: #9ebad1;
   text-transform: uppercase;
-  font-weight: 700;
-  color: #e9f2ff;
-  margin-bottom: 6px;
-}
-
-.settings-title .bf-glow {
-  color: #00aaff;
-  text-shadow: 0 0 6px rgba(0,170,255,0.7), 0 0 20px rgba(0,170,255,0.4);
+  margin-bottom: 4px;
 }
 
 .settings-subtitle {
-  color: #a7b6c8;
-  font-size: 13px;
-  line-height: 1.6;
-  max-width: 620px;
+  font-size: 12.5px;
+  color: #a3afbf;
+  opacity: 0.8;
+  line-height: 1.4;
+  max-width: 480px;
 }
 
-/* — Категории */
-.settings-category-bar {
+/* — Панель категории */
+.settings-category-bar.clean {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 10px;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.04);
 }
 
 .btn-burger {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 8px;
-  padding: 8px 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  padding: 7px 10px;
   color: #cfd9e3;
+  font-size: 14px;
   transition: 0.2s;
 }
-
 .btn-burger:hover {
-  background: rgba(0,170,255,0.15);
+  background: rgba(255,255,255,0.08);
   border-color: rgba(0,170,255,0.4);
-  color: #fff;
 }
 
 .settings-category-title {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
   color: #e3edf7;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.5px;
 }
 
 .settings-category-title .cat-en {
@@ -2003,9 +2001,9 @@ body.warzone-theme .card-btn:hover {
 }
 
 .settings-category-title .cat-ru {
-  opacity: 0.7;
-  font-weight: 400;
+  opacity: 0.6;
   margin-left: 4px;
+  font-weight: 400;
 }
 
 
