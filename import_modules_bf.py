@@ -1,48 +1,38 @@
 import json
-import sqlite3
 from pathlib import Path
+from database_bf_settings import init_bf_settings_table, add_bf_setting
 
-# === Пути ===
-BASE_DIR = Path("/opt/ndloadouts")
-DB_PATH = BASE_DIR / "builds_bf.db"              # твоя база Battlefield
-JSON_PATH = BASE_DIR / "data/modules-shv.json"   # путь к JSON-файлу
+# Путь к JSON-файлу
+JSON_PATH = Path("data/accessibility_settings.json")
 
-# === Подключаемся к БД ===
-conn = sqlite3.connect(DB_PATH)
-cur = conn.cursor()
+def import_accessibility_settings():
+    if not JSON_PATH.exists():
+        raise FileNotFoundError(f"❌ Не найден файл: {JSON_PATH}")
 
-# === Создаём таблицу, если её ещё нет ===
-cur.execute("""
-CREATE TABLE IF NOT EXISTS bf_modules (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    weapon_type TEXT NOT NULL,
-    category TEXT NOT NULL,
-    en TEXT NOT NULL,
-    pos INTEGER DEFAULT 0
-);
-""")
+    # Загружаем JSON
+    with open(JSON_PATH, "r", encoding="utf-8") as f:
+        data = json.load(f)
 
-# === Удаляем старые записи для weapon_type='shv' ===
-weapon_type = "shv"
-cur.execute("DELETE FROM bf_modules WHERE weapon_type = ?", (weapon_type,))
-print(f"🧹 Старые записи для типа '{weapon_type}' удалены.")
+    # Инициализируем таблицу
+    init_bf_settings_table()
 
-# === Загружаем JSON ===
-with open(JSON_PATH, "r", encoding="utf-8") as f:
-    data = json.load(f)
+    imported = 0
+    for item in data:
+        try:
+            add_bf_setting({
+                "category": item.get("category", "accessibility"),
+                "title_en": item.get("title_en"),
+                "title_ru": item.get("title_ru"),
+                "type": item.get("type", "toggle"),
+                "default": item.get("default", ""),
+                "options": item.get("options", []),
+            })
+            imported += 1
+        except Exception as e:
+            print(f"⚠️ Ошибка при добавлении {item.get('title_en')}: {e}")
 
-# === Импортируем данные ===
-count = 0
-for category, items in data.items():
-    for i, name in enumerate(items, start=1):
-        cur.execute("""
-        INSERT INTO bf_modules (weapon_type, category, en, pos)
-        VALUES (?, ?, ?, ?)
-        """, (weapon_type, category, name.strip(), i))
-        count += 1
+    print(f"✅ Импортировано {imported} записей из {JSON_PATH.name}.")
 
-# === Сохраняем изменения и закрываем ===
-conn.commit()
-conn.close()
 
-print(f"✅ Импорт завершён! Добавлено {count} модулей в таблицу bf_modules ({DB_PATH.name}).")
+if __name__ == "__main__":
+    import_accessibility_settings()
