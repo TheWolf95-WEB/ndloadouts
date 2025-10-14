@@ -582,10 +582,12 @@
       btn.textContent = `${cat.en} — ${cat.ru}`;
       btn.dataset.key = cat.key;
       btn.onclick = () => {
+        document.querySelectorAll('#bf-settings-categories button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
         currentCategoryKey = cat.key;
         currentTitle.innerHTML = `${cat.en} <span class="cat-ru">— ${cat.ru}</span>`;
         closeDrawer();
-        renderUserSettings(); // перерисовать список
+        renderUserSettings();
       };
       catsNav.appendChild(btn);
     });
@@ -825,7 +827,8 @@ async function renderUserSettings() {
     // Инициализация экрана просмотра
     renderCategoriesNav();
     currentCategoryKey = currentCategoryKey || 'accessibility';
-    currentTitle.textContent = categoryByKey(currentCategoryKey).en;
+    const cat = categoryByKey(currentCategoryKey);
+    currentTitle.innerHTML = `${cat.en} <span class="cat-ru">— ${cat.ru}</span>`;
     renderUserSettings();
     if (typeof showScreen === 'function') showScreen('screen-bf-settings');
   });
