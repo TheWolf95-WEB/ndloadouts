@@ -19,9 +19,9 @@
         <i class="fas fa-flag"></i>
         <span>Испытания</span>
       </div>
-      <div class="card-btn is-visible" id="bf-search-btn">
-        <i class="fas fa-search"></i>
-        <span>Быстрый поиск</span>
+      <div class="card-btn is-visible" id="bf-settings-btn">
+        <i class="fas fa-cog"></i>
+        <span>Настройки игры</span>
       </div>
     </div>
 
@@ -44,16 +44,23 @@
       </div>
 
       <!-- Третья строка -->
-      <div class="button-grid two-column">
-        <div class="card-btn is-visible" id="bf-add-build-btn">
-          <i class="fas fa-plus"></i>
-          <span>Добавить сборку</span>
+        <div class="button-grid three-column">
+          <div class="card-btn is-visible" id="bf-add-build-btn">
+            <i class="fas fa-plus"></i>
+            <span>Добавить сборку</span>
+          </div>
+        
+          <div class="card-btn is-visible" id="bf-add-challenge-btn">
+            <i class="fas fa-trophy"></i>
+            <span>Добавить испытание</span>
+          </div>
+        
+          <div class="card-btn is-visible" id="bf-game-settings-btn">
+            <i class="fas fa-cog"></i>
+            <span>Редактор игры</span>
+          </div>
         </div>
-        <div class="card-btn is-visible" id="bf-add-challenge-btn">
-          <i class="fas fa-trophy"></i>
-          <span>Добавить испытание</span>
-        </div>
-      </div>
+
 
       <!-- 🏠 Главное меню -->
       <div class="global-home-button" style="display:block;">
@@ -91,10 +98,6 @@
   <div class="search-section">
     <input type="text" id="bf-builds-search" class="form-input" placeholder="Поиск по названию , модулям....">
   </div>
-
-  <!-- <div class="stats-bar">
-    <span id="bf-user-builds-count">Всего сборок: 0</span>
-  </div> -->
 
   <div class="form-section" style="display:flex;justify-content:space-between;align-items:center;">
     <h2>📦 Все сборки</h2>
