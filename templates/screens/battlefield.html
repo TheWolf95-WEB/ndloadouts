@@ -587,7 +587,7 @@
         document.querySelectorAll('#bf-settings-categories button').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentCategoryKey = cat.key;
-        currentTitle.innerHTML = `${cat.en} <span class="cat-ru">— ${cat.ru}</span>`;
+        currentTitle.innerHTML = `${cat.en} <span class="cat-ru">${cat.ru}</span>`;
         closeDrawer();
         renderUserSettings();
       };
