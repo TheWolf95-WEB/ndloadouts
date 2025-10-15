@@ -477,7 +477,7 @@
   <script src="/static/bf.js?v={{ version }}"></script>
 
 
-<script>
+<!-- <script>
 /* ===============================
    BF SETTINGS — VIEW & EDITOR
    =============================== */
@@ -945,4 +945,212 @@ async function renderUserSettings() {
   overlay?.addEventListener('click', closeDrawer);
 
 })(); 
-</script>\
+</script>\ -->
+
+<script>
+/* ===============================
+   BF SETTINGS — VIEW ONLY
+   =============================== */
+
+(function() {
+  // ——— Категории настроек
+  const BF_SETTINGS_CATEGORIES = [
+    { key: 'accessibility', en: 'Accessibility',    ru: 'Основные' },
+    { key: 'gameplay',      en: 'Gameplay',         ru: 'Игровой процесс' },
+    { key: 'campaign',      en: 'Campaign',         ru: 'Кампания' },
+    { key: 'controller',    en: 'Controller',       ru: 'Контроллер' },
+    { key: 'mousekeyboard', en: 'Mouse & Keyboard', ru: 'Мышь и клавиатура' },
+    { key: 'graphics',      en: 'Graphics',         ru: 'Графика' },
+    { key: 'audio',         en: 'Audio',            ru: 'Звук' },
+    { key: 'system',        en: 'System',           ru: 'Система' },
+  ];
+
+  // ——— Элементы пользовательского экрана
+  const scrView = document.getElementById('screen-bf-settings');
+  const btnViewBack = document.getElementById('bf-settings-back');
+  const btnBurger = document.getElementById('bf-settings-burger');
+  const drawer = document.getElementById('bf-settings-drawer');
+  const overlay = document.getElementById('bf-settings-overlay');
+  const catsNav = document.getElementById('bf-settings-categories');
+  const content = document.getElementById('bf-settings-content');
+  const currentTitle = document.getElementById('bf-settings-current-title');
+
+  // ——— Кнопка открытия из главного экрана
+  const btnOpenUser = document.getElementById('bf-settings-btn');
+
+  // ——— Состояние
+  let currentCategoryKey = 'accessibility';
+
+  // ——— API
+  async function apiGetSettings(categoryKey = '') {
+    const url = categoryKey
+      ? `/api/bf/settings?category=${encodeURIComponent(categoryKey)}`
+      : '/api/bf/settings';
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('Failed to load settings');
+    return r.json();
+  }
+
+  // ——— Утилиты
+  function categoryByKey(key) {
+    return BF_SETTINGS_CATEGORIES.find(c => c.key === key) || BF_SETTINGS_CATEGORIES[0];
+  }
+
+  function openDrawer() {
+    drawer.style.left = '0';
+    overlay.style.display = 'block';
+    drawer.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeDrawer() {
+    drawer.style.left = '-320px';
+    overlay.style.display = 'none';
+    drawer.setAttribute('aria-hidden', 'true');
+  }
+
+  // ——— Рендер категорий в бургер-меню
+  function renderCategoriesNav() {
+    catsNav.innerHTML = '';
+    BF_SETTINGS_CATEGORIES.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn';
+      btn.style.textAlign = 'left';
+      btn.textContent = `${cat.en} — ${cat.ru}`;
+      btn.dataset.key = cat.key;
+      btn.onclick = () => {
+        document.querySelectorAll('#bf-settings-categories button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentCategoryKey = cat.key;
+        currentTitle.innerHTML = `${cat.en} <span class="cat-ru">${cat.ru}</span>`;
+        closeDrawer();
+        renderUserSettings();
+      };
+      catsNav.appendChild(btn);
+    });
+  }
+
+  // ——— Рендер строки одной настройки
+  function renderUserSettingRow(item) {
+    const wrap = document.createElement('div');
+    wrap.className = 'setting-row';
+
+    const info = document.createElement('div');
+    info.className = 'setting-info';
+    info.innerHTML = `
+      <div class="title-en">${item.title_en || ''}</div>
+      <div class="title-ru">${item.title_ru || ''}</div>
+    `;
+
+    const control = document.createElement('div');
+    control.className = 'setting-control';
+
+    switch (item.type) {
+      case 'toggle': {
+        const chk = document.createElement('input');
+        chk.type = 'checkbox';
+        chk.disabled = true;
+        chk.checked = item.default === 'true' || item.default === true;
+        control.appendChild(chk);
+        break;
+      }
+      case 'slider': {
+        const valLabel = document.createElement('span');
+        valLabel.textContent = item.default || '0';
+        const rng = document.createElement('input');
+        rng.type = 'range';
+        rng.disabled = true;
+        rng.value = item.default || 0;
+        control.appendChild(valLabel);
+        control.appendChild(rng);
+        break;
+      }
+      case 'number': {
+        const num = document.createElement('input');
+        num.type = 'number';
+        num.disabled = true;
+        num.value = item.default ?? '';
+        control.appendChild(num);
+        break;
+      }
+      case 'select': {
+        const sel = document.createElement('select');
+        sel.disabled = true;
+        (item.options || []).forEach(opt => {
+          const o = document.createElement('option');
+          o.textContent = opt;
+          if (item.default === opt) o.selected = true;
+          sel.appendChild(o);
+        });
+        control.appendChild(sel);
+        break;
+      }
+      default:
+        control.textContent = item.default ?? '';
+    }
+
+    wrap.appendChild(info);
+    wrap.appendChild(control);
+    return wrap;
+  }
+
+  // ——— Загрузка и вывод настроек
+  async function renderUserSettings() {
+    content.innerHTML = '<div class="loading-spinner">Загрузка настроек...</div>';
+
+    try {
+      const data = await apiGetSettings(currentCategoryKey);
+      content.innerHTML = '';
+
+      if (!data || !data.length) {
+        const p = document.createElement('p');
+        p.style.opacity = '.7';
+        p.textContent = 'Пока нет настроек в этой категории.';
+        content.appendChild(p);
+        return;
+      }
+
+      let currentSection = '';
+
+      data.forEach(item => {
+        if (item.section && item.section !== currentSection) {
+          currentSection = item.section;
+          const sec = document.createElement('div');
+          sec.className = 'bf-section-title';
+          const [en, ru] = item.section.split(" — ");
+          sec.innerHTML = `
+            <div class="section-header">
+              <span class="section-en">${en || ''}</span>
+              ${ru ? `<span class="section-ru">— ${ru}</span>` : ''}
+            </div>
+          `;
+          content.appendChild(sec);
+        }
+
+        content.appendChild(renderUserSettingRow(item));
+      });
+    } catch (e) {
+      content.innerHTML = '<p style="color:#f55">Ошибка загрузки настроек</p>';
+      console.error(e);
+    }
+  }
+
+  // ——— Навигация
+  btnViewBack?.addEventListener('click', () => {
+    if (typeof showScreen === 'function') showScreen('screen-battlefield-main');
+  });
+
+  btnBurger?.addEventListener('click', openDrawer);
+  overlay?.addEventListener('click', closeDrawer);
+
+  // ——— Открытие экрана "Настройки"
+  btnOpenUser?.addEventListener('click', () => {
+    renderCategoriesNav();
+    const cat = categoryByKey(currentCategoryKey);
+    currentTitle.innerHTML = `${cat.en} <span class="cat-ru">${cat.ru}</span>`;
+    renderUserSettings();
+    if (typeof showScreen === 'function') showScreen('screen-bf-settings');
+  });
+
+})();
+</script>
