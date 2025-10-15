@@ -1,13 +1,18 @@
-<!-- ⚔️ Главный экран Battlefield -->
+я понял что мне не нужен редактор настроек игр , только показ с переводами итд <!-- ⚔️ Главный экран Battlefield -->
 <div id="screen-battlefield-main" class="screen">
   <p class="subtext">
     Добро пожаловать в мир Battlefield.<br><br>
     Настраивай оружие, проходи испытания и следи за новыми мета-сборками.
   </p>
 
-  <div id="bf-user-info" class="user-info-block">
+  <div id="bf-user-info" class="user-info-block"></div>
   <h1>Battlefield</h1>
-      <div id="screen-bf-settings-editor" class="screen" style="display:none;">
+
+  <div id="bf-role-buttons" class="form-section">
+    <!-- 👤 Пользователь -->
+    <div id="bf-user-buttons" class="button-grid three-column">
+      <div class="card-btn is-visible" id="bf-show-builds-btn">
+        <i class="fas fa-eye"></i>
         <span>Все сборки</span>
       </div>
       <div class="card-btn is-visible" id="bf-challenges-btn">
@@ -44,7 +49,7 @@
       </div>
 
       <!-- Третья строка -->
-      <div class="button-grid two-column">
+      <div class="button-grid three-column">
         <div class="card-btn is-visible" id="bf-add-build-btn">
           <i class="fas fa-plus"></i>
           <span>Добавить сборку</span>
@@ -53,6 +58,16 @@
           <i class="fas fa-trophy"></i>
           <span>Добавить испытание</span>
         </div>
+        <!-- <div class="card-btn is-visible" id="bf-game-settings-btn">
+          <i class="fas fa-cog"></i>
+          <span>Редактор настроек</span>
+        </div> -->
+        <div class="card-btn is-visible" id="bf-game-settings-btn"
+             onclick="event.stopImmediatePropagation(); alert('🚧 Раздел «Редактор настроек» пока в разработке.\n\nМы готовим улучшенный редактор Battlefield Settings и переводим интерфейс.\n\n🛠 NDHQ | Dev Team')">
+          <i class="fas fa-cog"></i>
+          <span>Редактор настроек</span>
+        </div>
+
       </div>
 
       <!-- 🏠 Главное меню -->
@@ -396,9 +411,76 @@
 
 </div>
 
+<!-- 🛠 Редактор настроек Battlefield -->
+<div id="screen-bf-settings-editor" class="screen" style="display:none;">
+  <div class="screen-header" style="display:flex;align-items:center;gap:12px;">
+    <button class="btn btn-back" id="bf-settings-editor-back">⬅ Назад</button>
+    <h2>Редактор настроек Battlefield</h2>
+  </div>
+
+  <!-- 🧩 Форма -->
+  <div class="form-section" id="bf-settings-form">
+    <div class="form-grid">
+      <div>
+        <label>Категория</label>
+        <select id="bf-settings-category" class="form-input"></select>
+      </div>
+
+      <div>
+        <label>Тип настройки</label>
+        <select id="bf-settings-type" class="form-input">
+          <option value="toggle">Переключатель (On / Off)</option>
+          <option value="slider">Ползунок (с числом)</option>
+          <option value="number">Число (ручной ввод)</option>
+          <option value="select">Список (Select)</option>
+          <option value="text">Текстовое поле</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Название EN</label>
+        <input id="bf-settings-title-en" class="form-input" placeholder="Field of View">
+      </div>
+
+      <div>
+        <label>Название RU</label>
+        <input id="bf-settings-title-ru" class="form-input" placeholder="Поле зрения">
+      </div>
+
+      <div>
+        <label>Значение по умолчанию</label>
+        <input id="bf-settings-default" class="form-input" placeholder="Например: 90 / true / Low">
+      </div>
+
+      <div id="bf-settings-options-wrap" style="display:none;">
+        <label>Опции (для select, через запятую)</label>
+        <input id="bf-settings-options" class="form-input" placeholder="Low, Medium, High, Ultra">
+      </div>
+    </div>
+
+    <!-- 🔍 Превью -->
+    <div class="preview-section">
+      <p class="preview-title">Предпросмотр</p>
+      <div id="bf-preview-container" class="bf-preview"></div>
+    </div>
+
+    <div class="btn-group" style="margin-top:16px;">
+      <button class="btn btn-primary" id="bf-settings-submit">💾 Сохранить</button>
+      <button class="btn" id="bf-settings-reset-form" type="button">Сброс</button>
+    </div>
+  </div>
+
+  <!-- 🗂 Список существующих -->
+  <div class="form-section">
+    <h3>Все настройки</h3>
+    <div id="bf-settings-list"></div>
+  </div>
+</div>
+
+
+
 
   <script src="/static/bf.js?v={{ version }}"></script>
-
 
 <script>
 /* ===============================
