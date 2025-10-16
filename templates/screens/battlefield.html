@@ -410,6 +410,25 @@
     <div class="loading-spinner">Загрузка настроек...</div>
   </div>
 
+
+    <div id="bf-subsettings-overlay" class="hidden" 
+     style="position:fixed;inset:0;z-index:50;background:rgba(0,0,0,0.9);overflow-y:auto;">
+  <div style="max-width:600px;margin:40px auto;padding:20px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div>
+        <h2 id="bf-subsettings-title-en" style="color:#00aaff;font-size:16px;text-transform:uppercase;"></h2>
+        <p id="bf-subsettings-title-ru" style="color:#ccc;font-size:13px;margin-top:2px;"></p>
+      </div>
+      <button id="bf-close-subsettings" class="btn" 
+              style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);">
+        ✖
+      </button>
+    </div>
+    <div id="bf-subsettings-list"></div>
+  </div>
+</div>
+
+
 </div>
 
 
@@ -445,11 +464,20 @@
   const content = document.getElementById('bf-settings-content');
   const currentTitle = document.getElementById('bf-settings-current-title');
 
+
+  // === Глобальные переменные для оверлея ===
+  const subOverlay = document.getElementById('bf-subsettings-overlay');
+  const subOverlayTitleEn = document.getElementById('bf-subsettings-title-en');
+  const subOverlayTitleRu = document.getElementById('bf-subsettings-title-ru');
+  const subOverlayList = document.getElementById('bf-subsettings-list');
+  const subOverlayClose = document.getElementById('bf-close-subsettings');
+
   // ——— Кнопка открытия из главного экрана
   const btnOpenUser = document.getElementById('bf-settings-btn');
 
   // ——— Состояние
   let currentCategoryKey = 'accessibility';
+  let currentSubSettings = [];
 
   // ——— API
   async function apiGetSettings(categoryKey = '') {
@@ -555,6 +583,25 @@
         control.appendChild(sel);
         break;
       }
+
+        // 🟦 вот сюда вставляется новый case
+        case 'button': {
+          const btn = document.createElement('button');
+          btn.className = 'edit-btn';
+          btn.textContent = 'EDIT';
+          btn.onclick = () => {
+            if (item.subsettings && item.subsettings.length) {
+              openSubsettings(item.title_en, item.title_ru, item.subsettings);
+            } else {
+              alert('Вложенных настроек нет');
+            }
+          };
+          control.appendChild(btn);
+          break;
+        }
+
+
+        
       default:
         control.textContent = item.default ?? '';
     }
@@ -604,6 +651,85 @@
       console.error(e);
     }
   }
+
+
+  // === Функция рендера одной вложенной настройки ===
+    function renderSubSetting(item) {
+      const wrap = document.createElement('div');
+      wrap.className = 'setting-row';
+    
+      const info = document.createElement('div');
+      info.className = 'setting-info';
+      info.innerHTML = `
+        <div class="title-en">${item.title_en}</div>
+        <div class="title-ru">${item.title_ru || ''}</div>
+      `;
+    
+      const control = document.createElement('div');
+      control.className = 'setting-control';
+    
+      switch (item.type) {
+        case 'toggle': {
+          const chk = document.createElement('input');
+          chk.type = 'checkbox';
+          chk.disabled = true;
+          chk.checked = item.default === 'true' || item.default === true;
+          control.appendChild(chk);
+          break;
+        }
+        case 'slider': {
+          const val = document.createElement('span');
+          val.textContent = item.default || '0';
+          const rng = document.createElement('input');
+          rng.type = 'range';
+          rng.disabled = true;
+          rng.value = item.default || 0;
+          control.appendChild(val);
+          control.appendChild(rng);
+          break;
+        }
+        case 'select': {
+          const sel = document.createElement('select');
+          sel.disabled = true;
+          (item.options || []).forEach(opt => {
+            const o = document.createElement('option');
+            o.textContent = opt;
+            if (opt === item.default) o.selected = true;
+            sel.appendChild(o);
+          });
+          control.appendChild(sel);
+          break;
+        }
+        default:
+          control.textContent = item.default ?? '';
+      }
+    
+      wrap.appendChild(info);
+      wrap.appendChild(control);
+      return wrap;
+    }
+    
+    // === Рендер списка вложенных настроек ===
+    function renderSubsettings(subsettings) {
+      subOverlayList.innerHTML = '';
+      subsettings.forEach(sub => {
+        subOverlayList.appendChild(renderSubSetting(sub));
+      });
+    }
+    
+    // === Открытие оверлея ===
+    function openSubsettings(title_en, title_ru, subsettings) {
+      currentSubSettings = subsettings;
+      subOverlayTitleEn.textContent = title_en;
+      subOverlayTitleRu.textContent = title_ru;
+      renderSubsettings(subsettings);
+      subOverlay.classList.remove('hidden');
+    }
+    
+    // === Закрытие оверлея ===
+    subOverlayClose.addEventListener('click', () => {
+      subOverlay.classList.add('hidden');
+    });
 
   // ——— Навигация
   btnViewBack?.addEventListener('click', () => {
