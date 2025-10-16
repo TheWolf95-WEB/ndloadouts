@@ -584,11 +584,32 @@
         case 'button': {
           const btn = document.createElement('button');
           btn.className = 'edit-btn';
-          btn.textContent = (item.title_en || '').toLowerCase().includes('reset') ? 'RESET' : 'EDIT';
-          btn.disabled = true; // делает кнопку неактивной
+        
+          const title = (item.title_en || '').toLowerCase();
+          const isReset = title.includes('reset');
+        
+          btn.textContent = isReset ? 'RESET' : 'EDIT';
+        
+          // если это reset — делаем кнопку неактивной
+          if (isReset) {
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            btn.style.cursor = 'default';
+          } else {
+            // иначе оставляем кликабельной
+            btn.onclick = () => {
+              if (Array.isArray(item.subsettings) && item.subsettings.length) {
+                openSubsettings(item.title_en, item.title_ru, item.subsettings);
+              } else {
+                alert('Вложенных настроек нет');
+              }
+            };
+          }
+        
           control.appendChild(btn);
           break;
         }
+
 
 
 
