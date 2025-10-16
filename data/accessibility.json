@@ -1,0 +1,590 @@
+[
+  {
+    "category": "accessibility",
+    "section": "AUDIO",
+    "title_en": "Menu Narration",
+    "title_ru": "Озвучивание меню",
+    "type": "toggle",
+    "default": "false",
+    "options": []
+  },
+  {
+    "category": "accessibility",
+    "section": "AUDIO",
+    "title_en": "Subtitles",
+    "title_ru": "Субтитры",
+    "type": "toggle",
+    "default": "true",
+    "options": []
+  },
+  {
+    "category": "accessibility",
+    "section": "AUDIO",
+    "title_en": "Subtitles Settings",
+    "title_ru": "Настройки субтитров",
+    "type": "button",
+    "default": "",
+    "options": [],
+    "subsettings": [
+      {
+        "title_en": "Subtitle Text Size",
+        "title_ru": "Размер текста субтитров",
+        "type": "select",
+        "default": "Small",
+        "options": ["Small", "Medium", "Large"]
+      },
+      {
+        "title_en": "Subtitle Outline",
+        "title_ru": "Контур текста субтитров",
+        "type": "toggle",
+        "default": "true",
+        "options": []
+      },
+      {
+        "title_en": "Subtitles Background Opacity",
+        "title_ru": "Прозрачность фона субтитров",
+        "type": "slider",
+        "default": "0",
+        "options": []
+      },
+      {
+        "title_en": "Subtitles Text Opacity",
+        "title_ru": "Прозрачность текста субтитров",
+        "type": "slider",
+        "default": "80",
+        "options": []
+      },
+      {
+        "title_en": "Instructor Subtitles",
+        "title_ru": "Субтитры инструктора",
+        "type": "toggle",
+        "default": "true",
+        "options": []
+      },
+      {
+        "title_en": "Squad Subtitles",
+        "title_ru": "Субтитры отряда",
+        "type": "toggle",
+        "default": "true",
+        "options": []
+      },
+      {
+        "title_en": "Friendly Subtitles",
+        "title_ru": "Субтитры союзников",
+        "type": "toggle",
+        "default": "true",
+        "options": []
+      },
+      {
+        "title_en": "Show Speaker Name in Subtitles",
+        "title_ru": "Показывать имя говорящего",
+        "type": "toggle",
+        "default": "true",
+        "options": []
+      }
+    ]
+  },
+  {
+    "category": "accessibility",
+    "section": "AUDIO",
+    "title_en": "Master Volume",
+    "title_ru": "Основная громкость",
+    "type": "slider",
+    "default": "80",
+    "options": []
+  },
+  {
+    "category": "accessibility",
+    "section": "AUDIO",
+    "title_en": "Sound Effects Volume",
+    "title_ru": "Громкость эффектов",
+    "type": "slider",
+    "default": "100",
+    "options": []
+  },
+  {
+    "category": "accessibility",
+    "section": "AUDIO",
+    "title_en": "Music Volume",
+    "title_ru": "Громкость музыки",
+    "type": "slider",
+    "default": "60",
+    "options": []
+  },
+  {
+    "category": "accessibility",
+    "section": "AUDIO",
+    "title_en": "Voice Chat Volume",
+    "title_ru": "Громкость голосового чата",
+    "type": "slider",
+    "default": "90",
+    "options": []
+  },
+  {
+    "category": "accessibility",
+    "section": "AUDIO",
+    "title_en": "Tinnitus SFX Volume",
+    "title_ru": "Громкость эффекта звона в ушах",
+    "type": "slider",
+    "default": "100",
+    "options": []
+  },
+  {
+    "category": "accessibility",
+    "section": "AUDIO",
+    "title_en": "Tinnitus Relief Frequency",
+    "title_ru": "Частота подавления звона в ушах",
+    "type": "slider",
+    "default": "20000",
+    "options": []
+  },
+
+   {
+    "category": "accessibility",
+    "section": "GRAPHICS QUALITY SETTINGS",
+    "title_en": "Color Profiles",
+    "title_ru": "Цветовые профили",
+    "type": "button",
+    "default": "",
+    "options": [],
+    "subsettings": [
+      {
+        "title_en": "Color Presets",
+        "title_ru": "Цветовые пресеты",
+        "type": "select",
+        "default": "Default",
+        "options": ["Default", "Custom", "High Contrast"]
+      },
+      {
+        "title_en": "Primary Color",
+        "title_ru": "Основной цвет",
+        "type": "color",
+        "default": "#9AA0A3",
+        "options": []
+      },
+      {
+        "title_en": "Player Color",
+        "title_ru": "Цвет игрока",
+        "type": "color",
+        "default": "#6DAF68",
+        "options": []
+      },
+      {
+        "title_en": "Friendly Color",
+        "title_ru": "Цвет союзников",
+        "type": "color",
+        "default": "#4B8ED4",
+        "options": []
+      },
+      {
+        "title_en": "Squad Color",
+        "title_ru": "Цвет отряда",
+        "type": "color",
+        "default": "#5CB85C",
+        "options": []
+      },
+      {
+        "title_en": "Enemy Color",
+        "title_ru": "Цвет врагов",
+        "type": "color",
+        "default": "#D9534F",
+        "options": []
+      },
+      {
+        "title_en": "Neutral Color",
+        "title_ru": "Нейтральный цвет",
+        "type": "color",
+        "default": "#A0A0A0",
+        "options": []
+      },
+      {
+        "title_en": "Accent Color",
+        "title_ru": "Акцентный цвет",
+        "type": "color",
+        "default": "#CBA048",
+        "options": []
+      },
+      {
+        "title_en": "Soft Armor Color",
+        "title_ru": "Цвет лёгкой брони",
+        "type": "color",
+        "default": "#4F8DD6",
+        "options": []
+      },
+      {
+        "title_en": "Hard Armor Color",
+        "title_ru": "Цвет тяжёлой брони",
+        "type": "color",
+        "default": "#7856C6",
+        "options": []
+      },
+      {
+        "title_en": "Warning Color",
+        "title_ru": "Цвет предупреждения",
+        "type": "color",
+        "default": "#D9534F",
+        "options": []
+      }
+    ]
+  },
+  {
+    "category": "accessibility",
+    "section": "GRAPHICS QUALITY SETTINGS",
+    "title_en": "World Brightness",
+    "title_ru": "Яркость мира",
+    "type": "slider",
+    "default": "50",
+    "options": []
+  },
+  {
+    "category": "accessibility",
+    "section": "GRAPHICS QUALITY SETTINGS",
+    "title_en": "Camera Effects",
+    "title_ru": "Эффекты камеры",
+    "type": "button",
+    "default": "",
+    "options": [],
+    "subsettings": [
+      {
+        "title_en": "World Motion Blur",
+        "title_ru": "Размытие движения мира",
+        "type": "slider",
+        "default": "50",
+        "options": []
+      },
+      {
+        "title_en": "Weapon Motion Blur",
+        "title_ru": "Размытие оружия при движении",
+        "type": "slider",
+        "default": "50",
+        "options": []
+      },
+      {
+        "title_en": "Infantry HUD Motion",
+        "title_ru": "Движение интерфейса пехоты",
+        "type": "toggle",
+        "default": "true",
+        "options": []
+      },
+      {
+        "title_en": "Camera Shake Amount",
+        "title_ru": "Сила тряски камеры",
+        "type": "slider",
+        "default": "100",
+        "options": []
+      },
+      {
+        "title_en": "Reduce Sprint Camera Bobbing",
+        "title_ru": "Уменьшить колебания камеры при беге",
+        "type": "toggle",
+        "default": "false",
+        "options": []
+      },
+      {
+        "title_en": "Chromatic Aberration",
+        "title_ru": "Хроматическая аберрация",
+        "type": "toggle",
+        "default": "true",
+        "options": []
+      },
+      {
+        "title_en": "Infantry Crosshair Projection",
+        "title_ru": "Проекция прицела пехоты",
+        "type": "toggle",
+        "default": "true",
+        "options": []
+      }
+    ]
+  },
+
+    {
+    "category": "accessibility",
+    "section": "CONTROLS",
+    "title_en": "Hold/Toggle",
+    "title_ru": "Удержание / Переключение",
+    "type": "button",
+    "default": "",
+    "options": [],
+    "subsettings": [
+      {
+        "title_en": "Infantry Sprint",
+        "title_ru": "Бег пехоты",
+        "type": "select",
+        "default": "Toggle",
+        "options": ["Hold", "Toggle"]
+      },
+      {
+        "title_en": "Double Tap Forward To Sprint",
+        "title_ru": "Двойное нажатие вперёд для бега",
+        "type": "select",
+        "default": "Off",
+        "options": ["On", "Off"]
+      },
+      {
+        "title_en": "Crouch Toggle Sprint",
+        "title_ru": "Присесть для включения спринта",
+        "type": "select",
+        "default": "Stand",
+        "options": ["Stand", "Hold"]
+      },
+      {
+        "title_en": "Vehicle Boost",
+        "title_ru": "Ускорение транспорта",
+        "type": "select",
+        "default": "Toggle",
+        "options": ["Hold", "Toggle"]
+      },
+      {
+        "title_en": "Crouch Slide",
+        "title_ru": "Скольжение при приседании",
+        "type": "select",
+        "default": "All",
+        "options": ["Off", "Partial", "All"]
+      },
+      {
+        "title_en": "Double Tap Crouch For Sprint Slide",
+        "title_ru": "Двойное приседание для скольжения",
+        "type": "select",
+        "default": "On",
+        "options": ["On", "Off"]
+      },
+      {
+        "title_en": "Infantry Weapon Zoom",
+        "title_ru": "Приближение оружия пехоты",
+        "type": "select",
+        "default": "Hold",
+        "options": ["Hold", "Toggle"]
+      },
+      {
+        "title_en": "Vehicle Weapon Zoom",
+        "title_ru": "Приближение оружия транспорта",
+        "type": "select",
+        "default": "Hold",
+        "options": ["Hold", "Toggle"]
+      },
+      {
+        "title_en": "Steady Scope",
+        "title_ru": "Удержание дыхания при прицеливании",
+        "type": "select",
+        "default": "Hold",
+        "options": ["Hold", "Toggle"]
+      },
+      {
+        "title_en": "Interact & Reload",
+        "title_ru": "Взаимодействие и перезарядка",
+        "type": "select",
+        "default": "Prioritize Interact",
+        "options": ["Prioritize Interact", "Prioritize Reload"]
+      },
+      {
+        "title_en": "Interacts",
+        "title_ru": "Взаимодействие",
+        "type": "select",
+        "default": "Toggle",
+        "options": ["Hold", "Toggle"]
+      },
+      {
+        "title_en": "Skip Revive",
+        "title_ru": "Пропустить возрождение",
+        "type": "select",
+        "default": "Hold",
+        "options": ["Hold", "Toggle"]
+      },
+      {
+        "title_en": "Request Revive",
+        "title_ru": "Запрос на возрождение",
+        "type": "select",
+        "default": "Toggle",
+        "options": ["Hold", "Toggle"]
+      },
+      {
+        "title_en": "Mount Breakout",
+        "title_ru": "Отрыв при укрытии",
+        "type": "select",
+        "default": "Instant",
+        "options": ["Instant", "Hold"]
+      },
+      {
+        "title_en": "CommoRose",
+        "title_ru": "Командное колесо",
+        "type": "select",
+        "default": "Hold",
+        "options": ["Hold", "Toggle"]
+      },
+      {
+        "title_en": "Scoreboard",
+        "title_ru": "Таблица счёта",
+        "type": "select",
+        "default": "Hold",
+        "options": ["Hold", "Toggle"]
+      }
+    ]
+  },
+
+
+    {
+    "category": "accessibility",
+    "section": "CONTROLLER",
+    "title_en": "Controller Vibration",
+    "title_ru": "Вибрация контроллера",
+    "type": "toggle",
+    "default": "true",
+    "options": []
+  },
+  {
+    "category": "accessibility",
+    "section": "CONTROLLER",
+    "title_en": "Vibration Intensity",
+    "title_ru": "Интенсивность вибрации",
+    "type": "slider",
+    "default": "100",
+    "options": []
+  },
+  {
+    "category": "accessibility",
+    "section": "CONTROLLER",
+    "title_en": "Vibration Mix",
+    "title_ru": "Микширование вибрации",
+    "type": "button",
+    "default": "",
+    "options": [],
+    "subsettings": [
+      {
+        "title_en": "Vibration Mix Preset",
+        "title_ru": "Пресет вибрации",
+        "type": "select",
+        "default": "Custom",
+        "options": ["Default", "Custom", "Low", "High"]
+      },
+      {
+        "title_en": "Destruction",
+        "title_ru": "Разрушения",
+        "type": "toggle",
+        "default": "false",
+        "options": []
+      },
+      {
+        "title_en": "Explosions",
+        "title_ru": "Взрывы",
+        "type": "toggle",
+        "default": "false",
+        "options": []
+      },
+      {
+        "title_en": "Incoming Damage",
+        "title_ru": "Получаемый урон",
+        "type": "toggle",
+        "default": "true",
+        "options": []
+      },
+      {
+        "title_en": "Weapon Fire",
+        "title_ru": "Выстрел оружия",
+        "type": "toggle",
+        "default": "true",
+        "options": []
+      }
+    ]
+  },
+
+
+   {
+    "category": "accessibility",
+    "section": "CHAT",
+    "title_en": "Play Incoming Text Chat as Speech",
+    "title_ru": "Проигрывать входящие текстовые сообщения как речь",
+    "type": "toggle",
+    "default": "false",
+    "options": []
+  },
+  {
+    "category": "accessibility",
+    "section": "CHAT",
+    "title_en": "Convert Incoming Voice to Text Chat",
+    "title_ru": "Преобразовывать входящий голос в текстовый чат",
+    "type": "toggle",
+    "default": "false",
+    "options": []
+  },
+  {
+    "category": "accessibility",
+    "section": "TUTORIALS",
+    "title_en": "Menu Tutorials",
+    "title_ru": "Обучение в меню",
+    "type": "toggle",
+    "default": "true",
+    "options": []
+  },
+  {
+    "category": "accessibility",
+    "section": "TUTORIALS",
+    "title_en": "In-Game Tutorials",
+    "title_ru": "Обучение в игре",
+    "type": "toggle",
+    "default": "true",
+    "options": []
+  },
+  {
+    "category": "accessibility",
+    "section": "TUTORIALS",
+    "title_en": "Reset Tutorials",
+    "title_ru": "Сброс обучения",
+    "type": "button",
+    "default": "",
+    "options": []
+  },
+  {
+    "category": "accessibility",
+    "section": "HINTS",
+    "title_en": "Vehicle Control Hints",
+    "title_ru": "Подсказки управления транспортом",
+    "type": "toggle",
+    "default": "true",
+    "options": []
+  },
+  {
+    "category": "accessibility",
+    "section": "HINTS",
+    "title_en": "Action Prompts",
+    "title_ru": "Подсказки действий",
+    "type": "toggle",
+    "default": "true",
+    "options": []
+  },
+  {
+    "category": "accessibility",
+    "section": "HINTS",
+    "title_en": "Peek Hint",
+    "title_ru": "Подсказка выглядывания",
+    "type": "toggle",
+    "default": "true",
+    "options": []
+  },
+  {
+    "category": "accessibility",
+    "section": "HINTS",
+    "title_en": "Ping Hints",
+    "title_ru": "Подсказки пинга",
+    "type": "toggle",
+    "default": "true",
+    "options": []
+  },
+  {
+    "category": "accessibility",
+    "section": "HINTS",
+    "title_en": "Vault Hint",
+    "title_ru": "Подсказка перелезания",
+    "type": "toggle",
+    "default": "false",
+    "options": []
+  },
+  {
+    "category": "accessibility",
+    "section": "HINTS",
+    "title_en": "Mount Hint",
+    "title_ru": "Подсказка укрытия",
+    "type": "toggle",
+    "default": "true",
+    "options": []
+  }
+]
