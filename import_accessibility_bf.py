@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from database_bf_settings import init_bf_settings_table, ensure_section_column, add_bf_setting
 
-JSON_PATH = Path("data/accessibility_settings.json")
+JSON_PATH = Path("data/accessibility.json")
 
 
 def normalize_type(t):
