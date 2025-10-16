@@ -411,18 +411,14 @@
   </div>
 
 
-    <div id="bf-subsettings-overlay" class="hidden" 
-     style="position:fixed;inset:0;z-index:50;background:rgba(0,0,0,0.9);overflow-y:auto;">
-  <div style="max-width:600px;margin:40px auto;padding:20px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+<div id="bf-subsettings-overlay">
+  <div class="subsettings-container">
+    <div class="subsettings-header">
       <div>
-        <h2 id="bf-subsettings-title-en" style="color:#00aaff;font-size:16px;text-transform:uppercase;"></h2>
-        <p id="bf-subsettings-title-ru" style="color:#ccc;font-size:13px;margin-top:2px;"></p>
+        <h2 id="bf-subsettings-title-en"></h2>
+        <p id="bf-subsettings-title-ru"></p>
       </div>
-      <button id="bf-close-subsettings" class="btn" 
-              style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);">
-        ✖
-      </button>
+      <button id="bf-close-subsettings">✖</button>
     </div>
     <div id="bf-subsettings-list"></div>
   </div>
@@ -601,6 +597,32 @@
         }
 
 
+        case 'color': {
+          const colorWrap = document.createElement('div');
+          colorWrap.style.display = 'flex';
+          colorWrap.style.alignItems = 'center';
+          colorWrap.style.gap = '10px';
+        
+          const colorBox = document.createElement('div');
+          colorBox.className = 'color-preview';
+          colorBox.style.backgroundColor = item.default || '#000';
+          colorBox.title = item.default;
+          colorBox.style.width = '28px';
+          colorBox.style.height = '28px';
+          colorBox.style.borderRadius = '4px';
+          colorBox.style.border = '1px solid rgba(255,255,255,0.3)';
+        
+          const colorLabel = document.createElement('span');
+          colorLabel.textContent = item.default?.toUpperCase() || '#000000';
+          colorLabel.style.color = '#aaa';
+          colorLabel.style.fontSize = '13px';
+          colorLabel.style.letterSpacing = '0.5px';
+        
+          colorWrap.append(colorBox, colorLabel);
+          control.append(colorWrap);
+          break;
+        }
+
         
       default:
         control.textContent = item.default ?? '';
@@ -700,6 +722,36 @@
           control.appendChild(sel);
           break;
         }
+
+        case 'color': {
+          const colorWrap = document.createElement('div');
+          colorWrap.style.display = 'flex';
+          colorWrap.style.alignItems = 'center';
+          colorWrap.style.gap = '10px';
+        
+          const colorBox = document.createElement('div');
+          colorBox.className = 'color-preview';
+          colorBox.style.backgroundColor = item.default || '#000';
+          colorBox.title = item.default;
+          colorBox.style.width = '28px';
+          colorBox.style.height = '28px';
+          colorBox.style.borderRadius = '4px';
+          colorBox.style.border = '1px solid rgba(255,255,255,0.3)';
+        
+          const colorLabel = document.createElement('span');
+          colorLabel.textContent = item.default?.toUpperCase() || '#000000';
+          colorLabel.style.color = '#aaa';
+          colorLabel.style.fontSize = '13px';
+          colorLabel.style.letterSpacing = '0.5px';
+        
+          colorWrap.append(colorBox, colorLabel);
+          control.append(colorWrap);
+          break;
+        }
+
+
+
+          
         default:
           control.textContent = item.default ?? '';
       }
@@ -723,12 +775,15 @@
       subOverlayTitleEn.textContent = title_en;
       subOverlayTitleRu.textContent = title_ru;
       renderSubsettings(subsettings);
-      subOverlay.classList.remove('hidden');
+    
+      // плавное открытие
+      subOverlay.classList.add('active');
     }
+
     
     // === Закрытие оверлея ===
     subOverlayClose.addEventListener('click', () => {
-      subOverlay.classList.add('hidden');
+      subOverlay.classList.remove('active');
     });
 
   // ——— Навигация
