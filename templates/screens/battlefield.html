@@ -588,7 +588,10 @@
           const title = (item.title_en || '').toLowerCase();
           const isReset = title.includes('reset');
         
-          btn.textContent = isReset ? 'RESET' : 'EDIT';
+            // двуязычный текст кнопки
+            btn.innerHTML = isReset
+              ? 'RESET <span class="btn-ru">СБРОСИТЬ</span>'
+              : 'EDIT <span class="btn-ru">РЕДАКТ</span>';
         
           // если это reset — делаем кнопку неактивной
           if (isReset) {
@@ -709,11 +712,16 @@
     
       switch (item.type) {
         case 'toggle': {
-          const chk = document.createElement('input');
-          chk.type = 'checkbox';
-          chk.disabled = true;
-          chk.checked = item.default === 'true' || item.default === true;
-          control.appendChild(chk);
+          const toggle = document.createElement('div');
+          toggle.className = 'bf-toggle';
+          toggle.innerHTML = `
+            <div class="bf-toggle-track">
+              <div class="bf-toggle-knob"></div>
+            </div>
+            <span class="bf-toggle-label">${item.default === 'true' ? 'ON' : 'OFF'}</span>
+          `;
+          toggle.classList.toggle('on', item.default === 'true' || item.default === true);
+          control.appendChild(toggle);
           break;
         }
         case 'slider': {
