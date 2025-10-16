@@ -2055,7 +2055,7 @@ body.warzone-theme .card-btn:hover {
 
 .edit-btn .btn-ru {
   display: block;
-  font-size: 11px;
+  font-size: 8px;
   color: #7a8b9a;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -2068,47 +2068,60 @@ body.warzone-theme .card-btn:hover {
   align-items: center;
   gap: 10px;
   user-select: none;
+  opacity: 0.9;
 }
 
 .bf-toggle-track {
-  width: 48px;
-  height: 24px;
-  background: rgba(255,255,255,0.1);
+  width: 44px;
+  height: 20px;
+  background: rgba(255,255,255,0.08);
   border-radius: 20px;
   border: 1px solid rgba(255,255,255,0.15);
   position: relative;
-  transition: background 0.3s ease;
+  flex-shrink: 0;
 }
 
 .bf-toggle-knob {
-  width: 20px;
-  height: 20px;
-  background: #ccc;
+  width: 16px;
+  height: 16px;
+  background: #aaa;
   border-radius: 50%;
   position: absolute;
-  top: 1.5px;
-  left: 2px;
+  top: 2px;
+  left: 3px;
   transition: all 0.25s ease;
 }
 
 .bf-toggle.on .bf-toggle-track {
-  background: linear-gradient(145deg, #33a852, #1f8a3d);
+  background: linear-gradient(145deg, #35c759, #248f3d);
 }
 
 .bf-toggle.on .bf-toggle-knob {
-  left: 26px;
+  left: 24px;
   background: #fff;
 }
 
-.bf-toggle-label {
-  font-size: 13px;
-  letter-spacing: 0.5px;
-  color: #a9b4c0;
-  text-transform: uppercase;
+/* Подписи ON/OFF */
+.bf-toggle-labels {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
 }
 
-.bf-toggle.on .bf-toggle-label {
+.bf-toggle-labels span {
+  font-size: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #808b96;
+}
+
+.bf-toggle.on .on-label {
   color: #4df36b;
+}
+
+.bf-toggle:not(.on) .off-label {
+  color: #f36b6b;
 }
 
 
