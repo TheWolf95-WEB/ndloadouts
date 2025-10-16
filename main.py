@@ -1161,22 +1161,33 @@ def bf_update_progress(challenge_id: int, data: dict = Body(...)):
 
 # НАСТРОЙКИ ИГРЫ
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from database_bf_settings import (
     init_bf_settings_table,
+    ensure_section_column,
     get_bf_settings,
 )
 
+# === ROUTER: Battlefield Settings ===
 router_bf_settings = APIRouter(prefix="/api/bf/settings", tags=["BF Settings"])
 
+# Инициализация таблицы (на случай если нет)
 init_bf_settings_table()
+ensure_section_column()
 
 @router_bf_settings.get("")
-def api_get_settings(category: str | None = None):
-    return get_bf_settings(category)
+def api_get_settings(category: str | None = Query(None)):
+    """
+    Возвращает все настройки Battlefield или конкретной категории.
+    Каждая настройка содержит options[] и subsettings[].
+    """
+    try:
+        settings = get_bf_settings(category)
+        return settings
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка загрузки настроек: {e}")
 
 app.include_router(router_bf_settings)
-
 
 
 
