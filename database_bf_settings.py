@@ -3,12 +3,14 @@ import json
 from pathlib import Path
 from contextlib import contextmanager
 
+# === Путь к БД ===
 BF_DB_PATH = Path("/opt/ndloadouts/builds_bf.db")
 BF_DB_PATH.parent.mkdir(exist_ok=True)
 
 
 @contextmanager
 def get_bf_conn(row_mode: bool = False):
+    """Контекстный менеджер для соединения с БД Battlefield."""
     conn = sqlite3.connect(BF_DB_PATH)
     if row_mode:
         conn.row_factory = sqlite3.Row
@@ -22,6 +24,7 @@ def get_bf_conn(row_mode: bool = False):
 
 
 def init_bf_settings_table():
+    """Создание таблицы настроек Battlefield, если её нет."""
     with get_bf_conn() as conn:
         conn.execute("""
             CREATE TABLE IF NOT EXISTS bf_settings (
@@ -34,7 +37,7 @@ def init_bf_settings_table():
                     'toggle','slider','number','select','button','color','text'
                 )) NOT NULL DEFAULT 'toggle',
                 default_value TEXT,
-                options_json TEXT,
+                options_json TEXT DEFAULT '[]',
                 subsettings_json TEXT DEFAULT '[]',
                 created_at TEXT DEFAULT CURRENT_TIMESTAMP
             )
@@ -42,20 +45,24 @@ def init_bf_settings_table():
 
 
 def ensure_section_column():
+    """Проверяет, чтобы новые колонки section и subsettings_json существовали."""
     with get_bf_conn() as conn:
         cols = [r[1] for r in conn.execute("PRAGMA table_info(bf_settings)")]
         if "section" not in cols:
             conn.execute("ALTER TABLE bf_settings ADD COLUMN section TEXT DEFAULT ''")
         if "subsettings_json" not in cols:
             conn.execute("ALTER TABLE bf_settings ADD COLUMN subsettings_json TEXT DEFAULT '[]'")
+        if "options_json" not in cols:
+            conn.execute("ALTER TABLE bf_settings ADD COLUMN options_json TEXT DEFAULT '[]'")
 
 
 def get_bf_settings(category: str | None = None):
+    """Возвращает список всех настроек (с опциями и вложенными subsettings)."""
     with get_bf_conn(row_mode=True) as conn:
         if category:
             rows = conn.execute(
                 "SELECT * FROM bf_settings WHERE category = ? ORDER BY id ASC",
-                (category,)
+                (category,),
             ).fetchall()
         else:
             rows = conn.execute("SELECT * FROM bf_settings ORDER BY id ASC").fetchall()
@@ -63,25 +70,26 @@ def get_bf_settings(category: str | None = None):
     data = []
     for r in rows:
         item = dict(r)
+        # options
         try:
             item["options"] = json.loads(item.get("options_json") or "[]")
         except Exception:
             item["options"] = []
-
+        # subsettings
         try:
             item["subsettings"] = json.loads(item.get("subsettings_json") or "[]")
         except Exception:
             item["subsettings"] = []
-
+        # чистим служебные поля
         item.pop("options_json", None)
         item.pop("subsettings_json", None)
-
         data.append(item)
 
     return data
 
 
 def add_bf_setting(data: dict):
+    """Добавляет новую настройку Battlefield в таблицу."""
     with get_bf_conn() as conn:
         conn.execute("""
             INSERT INTO bf_settings (
@@ -96,8 +104,8 @@ def add_bf_setting(data: dict):
             data.get("title_ru", ""),
             data.get("type", "toggle"),
             str(data.get("default", "")),
-            json.dumps(data.get("options") or []),
-            json.dumps(data.get("subsettings") or []),
+            json.dumps(data.get("options") or [], ensure_ascii=False),
+            json.dumps(data.get("subsettings") or [], ensure_ascii=False),
         ))
 
 
