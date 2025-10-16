@@ -590,7 +590,7 @@
           btn.className = 'edit-btn';
           btn.textContent = 'EDIT';
           btn.onclick = () => {
-            if (item.subsettings && item.subsettings.length) {
+            if (Array.isArray(item.subsettings) && item.subsettings.length) {
               openSubsettings(item.title_en, item.title_ru, item.subsettings);
             } else {
               alert('Вложенных настроек нет');
