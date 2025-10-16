@@ -62,6 +62,26 @@ def get_bf_settings(category: str | None = None):
     return data
 
 
+
+# ИМПОРТ 
+
+def add_bf_setting(data: dict):
+    with get_bf_conn() as conn:
+        conn.execute("""
+            INSERT INTO bf_settings (category, section, title_en, title_ru, type, default_value, options_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (
+            data.get("category", "accessibility"),
+            data.get("section", ""),
+            data.get("title_en", ""),
+            data.get("title_ru", ""),
+            data.get("type", "toggle"),
+            str(data.get("default", "")),
+            json.dumps(data.get("options") or []),
+        ))
+
+
+
 if __name__ == "__main__":
     init_bf_settings_table()
     ensure_section_column()
