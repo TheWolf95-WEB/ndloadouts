@@ -4,9 +4,44 @@ from database_bf_settings import init_bf_settings_table, ensure_section_column, 
 
 JSON_PATH = Path("data/accessibility_settings.json")
 
+
 def normalize_type(t):
-    allowed = {"toggle", "slider", "number", "select", "button"}
+    allowed = {"toggle", "slider", "number", "select", "button", "color"}
     return t if t in allowed else "toggle"
+
+
+def flatten_settings(data, parent_section=None):
+    """Рекурсивно разворачивает настройки с subsettings."""
+    flat = []
+
+    for item in data:
+        section = item.get("section", parent_section)
+        base_item = {
+            "category": item.get("category", "accessibility"),
+            "section": section,
+            "title_en": item.get("title_en"),
+            "title_ru": item.get("title_ru"),
+            "type": normalize_type(item.get("type", "toggle")),
+            "default": item.get("default", ""),
+            "options": item.get("options", []),
+        }
+        flat.append(base_item)
+
+        # Если есть поднастройки — добавляем их как отдельные записи
+        if "subsettings" in item and isinstance(item["subsettings"], list):
+            for sub in item["subsettings"]:
+                flat.append({
+                    "category": item.get("category", "accessibility"),
+                    "section": section + " → " + item.get("title_en", ""),  # например: AUDIO → Subtitles Settings
+                    "title_en": sub.get("title_en"),
+                    "title_ru": sub.get("title_ru"),
+                    "type": normalize_type(sub.get("type", "toggle")),
+                    "default": sub.get("default", ""),
+                    "options": sub.get("options", []),
+                })
+
+    return flat
+
 
 def import_accessibility_settings():
     if not JSON_PATH.exists():
@@ -16,20 +51,14 @@ def import_accessibility_settings():
         data = json.load(f)
 
     init_bf_settings_table()
-    ensure_section_column()  # важно: добавит колонку, если её ещё нет
+    ensure_section_column()
 
+    all_items = flatten_settings(data)
     imported = 0
-    for item in data:
+
+    for item in all_items:
         try:
-            add_bf_setting({
-                "category": item.get("category", "accessibility"),
-                "section": item.get("section", ""),  # ← вот это добавлено
-                "title_en": item.get("title_en"),
-                "title_ru": item.get("title_ru"),
-                "type": normalize_type(item.get("type", "toggle")),
-                "default": item.get("default", ""),
-                "options": item.get("options", []),
-            })
+            add_bf_setting(item)
             imported += 1
         except Exception as e:
             print(f"⚠️ Ошибка при добавлении {item.get('title_en')}: {e}")
