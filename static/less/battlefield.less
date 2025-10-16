@@ -1965,15 +1965,17 @@ body.warzone-theme .card-btn:hover {
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(6px);
+  background: #0f111a;
+  box-shadow: rgba(0, 0, 0, 0.4) 2px 0px 16px;
   overflow-y: auto;
-  transform: translateX(100%);
+  transform: translateX(-100%);
   transition: transform 0.35s ease;
 }
 
 #bf-subsettings-overlay.active {
-  transform: translateX(0);
+  transform: translateX(0); /* плавно выезжает слева направо */
+  opacity: 1;
+  pointer-events: all;
 }
 
 /* Контейнер контента внутри оверлея */
