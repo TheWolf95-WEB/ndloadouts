@@ -581,20 +581,36 @@
       }
 
         // 🟦 вот сюда вставляется новый case
-        case 'button': {
-          const btn = document.createElement('button');
-          btn.className = 'edit-btn';
-          btn.textContent = 'EDIT';
-          btn.onclick = () => {
-            if (Array.isArray(item.subsettings) && item.subsettings.length) {
-              openSubsettings(item.title_en, item.title_ru, item.subsettings);
-            } else {
-              alert('Вложенных настроек нет');
-            }
-          };
-          control.appendChild(btn);
-          break;
-        }
+      case 'button': {
+        const btn = document.createElement('button');
+        btn.className = 'edit-btn';
+      
+        // если у настройки в названии есть слово Reset — делаем надпись RESET
+        const isReset = (item.title_en || '').toLowerCase().includes('reset');
+        btn.textContent = isReset ? 'RESET' : 'EDIT';
+      
+        btn.onclick = () => {
+          if (Array.isArray(item.subsettings) && item.subsettings.length) {
+            // открыть вложенные настройки
+            openSubsettings(item.title_en, item.title_ru, item.subsettings);
+          } else if (isReset) {
+            // действие сброса
+            btn.disabled = true;
+            btn.textContent = 'Reset...';
+            setTimeout(() => {
+              btn.disabled = false;
+              btn.textContent = 'RESET';
+              alert('✅ Обучение успешно сброшено!');
+            }, 800);
+          } else {
+            alert('Вложенных настроек нет');
+          }
+        };
+      
+        control.appendChild(btn);
+        break;
+      }
+
 
 
         case 'color': {
