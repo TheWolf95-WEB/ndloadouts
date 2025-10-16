@@ -2029,3 +2029,86 @@ body.warzone-theme .card-btn:hover {
   transform: scale(1.1);
 }
 
+
+.edit-btn {
+  position: relative;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: linear-gradient(145deg, #1a2328, #111a1f);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #e0e6ee;
+  transition: all 0.2s ease;
+}
+
+.edit-btn:hover:not(:disabled) {
+  background: linear-gradient(145deg, #263238, #1a2328);
+  transform: scale(1.03);
+}
+
+.edit-btn:disabled {
+  background: rgba(255,255,255,0.05);
+  color: #999;
+}
+
+.edit-btn .btn-ru {
+  display: block;
+  font-size: 11px;
+  color: #7a8b9a;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 1px;
+}
+
+
+.bf-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  user-select: none;
+}
+
+.bf-toggle-track {
+  width: 48px;
+  height: 24px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.15);
+  position: relative;
+  transition: background 0.3s ease;
+}
+
+.bf-toggle-knob {
+  width: 20px;
+  height: 20px;
+  background: #ccc;
+  border-radius: 50%;
+  position: absolute;
+  top: 1.5px;
+  left: 2px;
+  transition: all 0.25s ease;
+}
+
+.bf-toggle.on .bf-toggle-track {
+  background: linear-gradient(145deg, #33a852, #1f8a3d);
+}
+
+.bf-toggle.on .bf-toggle-knob {
+  left: 26px;
+  background: #fff;
+}
+
+.bf-toggle-label {
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  color: #a9b4c0;
+  text-transform: uppercase;
+}
+
+.bf-toggle.on .bf-toggle-label {
+  color: #4df36b;
+}
+
+
