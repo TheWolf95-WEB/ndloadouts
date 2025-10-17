@@ -584,18 +584,48 @@
         const selectWrap = document.createElement('div');
         selectWrap.className = 'bf-select-wrap';
       
+        // создаём активный селект
         const sel = document.createElement('select');
-        sel.disabled = true;
         sel.className = 'bf-select';
       
+        // словарь переводов для значений
+        const translationMap = {
+          "Small": "Маленький",
+          "Normal": "Нормальный",
+          "Large": "Большой",
+          "Default": "По умолчанию",
+          "Custom": "Пользовательский",
+          "High Contrast": "Высокий контраст",
+          "Hold": "Удерживать",
+          "Toggle": "Переключать",
+          "On": "Вкл",
+          "Off": "Выкл",
+          "Instant": "Мгновенно",
+          "Partial": "Частично",
+          "All": "Все",
+          "Low": "Низкий",
+          "High": "Высокий",
+          "Prioritize Interact": "В приоритете взаимодействие",
+          "Prioritize Reload": "В приоритете перезарядка",
+          "Stand": "Стоять"
+        };
+      
+        // добавляем опции с двойным языком
         (item.options || []).forEach(opt => {
           const o = document.createElement('option');
-          o.textContent = opt;
+          const ru = translationMap[opt] || opt;
+          o.textContent = `${opt} / ${ru}`;
           if (item.default === opt) o.selected = true;
           sel.appendChild(o);
         });
       
-        // Добавляем русский текст рядом
+        // просто визуальный выбор — можно кликать, но ничего не сохраняется
+        sel.addEventListener('change', () => {
+          // ничего не сохраняем — просто визуально выбираем
+          console.log(`Selected option for ${item.title_en}:`, sel.value);
+        });
+      
+        // подпись справа
         const ruLabel = document.createElement('span');
         ruLabel.className = 'bf-select-ru';
         ruLabel.textContent = item.title_ru || '';
@@ -604,6 +634,8 @@
         control.appendChild(selectWrap);
         break;
       }
+
+
 
 
         // 🟦 вот сюда вставляется новый case
