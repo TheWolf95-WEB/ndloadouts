@@ -1,6 +1,10 @@
 import json
 from pathlib import Path
-from database_bf_settings import init_bf_settings_table, ensure_section_column, add_bf_setting
+from database_bf_settings import (
+    init_bf_settings_table,
+    ensure_section_column,
+    add_bf_setting
+)
 
 JSON_PATH = Path("data/bf/gameplay.json")
 
@@ -23,10 +27,6 @@ def import_bf_settings():
     imported = 0
     for item in data:
         try:
-            # Преобразуем options и subsettings в строку JSON, если БД хранит текстом
-            options = json.dumps(item.get("options", []), ensure_ascii=False)
-            subsettings = json.dumps(item.get("subsettings", []), ensure_ascii=False)
-
             add_bf_setting({
                 "category": item.get("category", "accessibility"),
                 "section": item.get("section", ""),
@@ -34,8 +34,8 @@ def import_bf_settings():
                 "title_ru": item.get("title_ru", ""),
                 "type": normalize_type(item.get("type", "toggle")),
                 "default": str(item.get("default", "")),
-                "options": options,
-                "subsettings": subsettings,
+                "options": item.get("options", []),
+                "subsettings": item.get("subsettings", []),
             })
             imported += 1
         except Exception as e:
