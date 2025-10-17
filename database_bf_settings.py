@@ -70,19 +70,37 @@ def get_bf_settings(category: str | None = None):
     data = []
     for r in rows:
         item = dict(r)
-        # options
-        try:
-            item["options"] = json.loads(item.get("options_json") or "[]")
-        except Exception:
+
+        # 🟩 Безопасное приведение options_json
+        raw_options = item.get("options_json")
+        if isinstance(raw_options, str):
+            try:
+                parsed = json.loads(raw_options)
+                item["options"] = parsed if isinstance(parsed, list) else []
+            except Exception:
+                item["options"] = []
+        elif isinstance(raw_options, list):
+            item["options"] = raw_options
+        else:
             item["options"] = []
-        # subsettings
-        try:
-            item["subsettings"] = json.loads(item.get("subsettings_json") or "[]")
-        except Exception:
+
+        # 🟩 Безопасное приведение subsettings_json
+        raw_subs = item.get("subsettings_json")
+        if isinstance(raw_subs, str):
+            try:
+                parsed = json.loads(raw_subs)
+                item["subsettings"] = parsed if isinstance(parsed, list) else []
+            except Exception:
+                item["subsettings"] = []
+        elif isinstance(raw_subs, list):
+            item["subsettings"] = raw_subs
+        else:
             item["subsettings"] = []
-        # чистим служебные поля
+
+        # Убираем служебные поля
         item.pop("options_json", None)
         item.pop("subsettings_json", None)
+
         data.append(item)
 
     return data
