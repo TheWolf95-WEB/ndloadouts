@@ -507,20 +507,20 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     }
           
-  function openSubsettings(title_en, title_ru, subsettings) {
-    currentSubSettings = subsettings;
-    subOverlayTitleEn.textContent = title_en;
-    subOverlayTitleRu.textContent = title_ru;
-    renderSubsettings(subsettings);
-  
-    subOverlay.classList.add('active');
-    document.body.style.overflow = 'hidden';
-  }
-  
-  subOverlayClose.addEventListener('click', () => {
-    subOverlay.classList.remove('active');
-    document.body.style.overflow = '';
-  });
+function openSubsettings(title_en, title_ru, subsettings) {
+  currentSubSettings = subsettings;
+  subOverlayTitleEn.textContent = title_en;
+  subOverlayTitleRu.textContent = title_ru;
+  renderSubsettings(subsettings);
+
+  subOverlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+subOverlayClose.addEventListener('click', () => {
+  subOverlay.classList.remove('active');
+  document.body.style.overflow = '';
+});
 
   // ——— Навигация
   btnViewBack?.addEventListener('click', () => {
