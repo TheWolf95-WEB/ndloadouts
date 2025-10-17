@@ -25,6 +25,7 @@
     "default": "HUD Always On",
     "options": ["Auto Hide", "HUD Always On", "HUD Off"]
   },
+
   {
     "category": "campaign",
     "section": "TUTORIALS — Обучение",
@@ -49,13 +50,22 @@
     "type": "button",
     "default": "RESET"
   },
+
   {
     "category": "campaign",
     "section": "SUBTITLES — Субтитры",
     "title_en": "Subtitles",
     "title_ru": "Субтитры",
     "type": "toggle",
-    "default": true,
+    "default": true
+  },
+  {
+    "category": "campaign",
+    "section": "SUBTITLES — Субтитры",
+    "title_en": "Subtitles Settings",
+    "title_ru": "Настройки субтитров",
+    "type": "button",
+    "default": "",
     "subsettings": [
       {
         "title_en": "Subtitle Text Size",
