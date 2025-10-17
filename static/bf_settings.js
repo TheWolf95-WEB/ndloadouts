@@ -29,6 +29,27 @@ document.addEventListener("DOMContentLoaded", () => {
   const subOverlayList = document.getElementById('bf-subsettings-list');
   const subOverlayClose = document.getElementById('bf-close-subsettings');
 
+  // === УЛУЧШЕННЫЕ ФУНКЦИИ ОТКРЫТИЯ/ЗАКРЫТИЯ ===
+function openSubsettings(title_en, title_ru, subsettings) {
+  const overlay = document.getElementById('bf-subsettings-overlay');
+  const titleEn = document.getElementById('bf-subsettings-title-en');
+  const titleRu = document.getElementById('bf-subsettings-title-ru');
+  const list = document.getElementById('bf-subsettings-list');
+
+  titleEn.textContent = title_en || '';
+  titleRu.textContent = title_ru || '';
+  list.innerHTML = '';
+
+  if (!Array.isArray(subsettings) || !subsettings.length) {
+    list.innerHTML = `<p style="opacity:.6;text-align:center;padding:20px;">Нет дополнительных параметров</p>`;
+  } else {
+    renderSubsettings(subsettings);
+  }
+
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
   // ——— Кнопка открытия из главного экрана
   const btnOpenUser = document.getElementById('bf-settings-btn');
 
@@ -663,27 +684,6 @@ function createErrorRow(item, error) {
   return wrap;
 }
 
-
-// === УЛУЧШЕННЫЕ ФУНКЦИИ ОТКРЫТИЯ/ЗАКРЫТИЯ ===
-function openSubsettings(title_en, title_ru, subsettings) {
-  const overlay = document.getElementById('bf-subsettings-overlay');
-  const titleEn = document.getElementById('bf-subsettings-title-en');
-  const titleRu = document.getElementById('bf-subsettings-title-ru');
-  const list = document.getElementById('bf-subsettings-list');
-
-  titleEn.textContent = title_en || '';
-  titleRu.textContent = title_ru || '';
-  list.innerHTML = '';
-
-  if (!Array.isArray(subsettings) || !subsettings.length) {
-    list.innerHTML = `<p style="opacity:.6;text-align:center;padding:20px;">Нет дополнительных параметров</p>`;
-  } else {
-    renderSubsettings(subsettings);
-  }
-
-  overlay.classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
 
 // 🩵 Сброс скролла — чтобы при открытии начинало сверху
 requestAnimationFrame(() => {
