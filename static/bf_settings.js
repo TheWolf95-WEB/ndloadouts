@@ -622,65 +622,6 @@ subOverlay.addEventListener('click', (e) => {
 });
 
 
-// === Безопасный рендер одной настройки с обработкой ошибок ===
-function renderSubSetting(item) {
-  if (!item || typeof item !== 'object') {
-    console.warn('⚠️ Некорректные данные настройки:', item);
-    return createErrorRow();
-  }
-  
-  try {
-    const wrap = document.createElement('div');
-    wrap.className = 'setting-row';
-    
-    const info = document.createElement('div');
-    info.className = 'setting-info';
-    info.innerHTML = `
-      <div class="title-en">${escapeHtml(item.title_en || 'Untitled')}</div>
-      <div class="title-ru">${escapeHtml(item.title_ru || '')}</div>
-    `;
-    
-    const control = document.createElement('div');
-    control.className = 'setting-control';
-    
-    // Рендер контрола в зависимости от типа
-    renderControlBasedOnType(control, item);
-    
-    wrap.appendChild(info);
-    wrap.appendChild(control);
-    return wrap;
-    
-  } catch (error) {
-    console.error('❌ Ошибка рендера настройки:', error, item);
-    return createErrorRow();
-  }
-}
-
-// Вспомогательная функция для экранирования HTML
-function escapeHtml(unsafe) {
-  return unsafe
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-// Создание строки с ошибкой
-function createErrorRow() {
-  const wrap = document.createElement('div');
-  wrap.className = 'setting-row error';
-  wrap.innerHTML = `
-    <div class="setting-info">
-      <div class="title-en">Error Loading Setting</div>
-      <div class="title-ru">Ошибка загрузки настройки</div>
-    </div>
-    <div class="setting-control">
-      <span style="color: #ff6b6b;">⚠️</span>
-    </div>
-  `;
-  return wrap;
-}
   
   
 });
