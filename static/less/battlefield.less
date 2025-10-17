@@ -1967,10 +1967,12 @@ body.warzone-theme .card-btn:hover {
   z-index: 100;
   background: #0f111a;
   box-shadow: rgba(0, 0, 0, 0.4) 2px 0px 16px;
-  overflow-y: auto;
+  /* убери auto */
+  overflow-y: hidden;
   transform: translateX(-100%);
   transition: transform 0.35s ease;
 }
+
 
 #bf-subsettings-overlay.active {
   transform: translateX(0); /* плавно выезжает слева направо */
