@@ -528,6 +528,28 @@ function renderControlBasedOnType(container, item) {
   }
 }
 
+
+function renderSliderControl(container, value) {
+  const wrap = document.createElement('div');
+  wrap.className = 'slider-control';
+
+  const valLabel = document.createElement('span');
+  valLabel.textContent = value || '0';
+  valLabel.style.fontSize = '13px';
+  valLabel.style.color = '#a8b5c2';
+
+  const slider = document.createElement('input');
+  slider.type = 'range';
+  slider.disabled = true;
+  slider.value = value || 0;
+  slider.style.width = '100%';
+
+  wrap.appendChild(valLabel);
+  wrap.appendChild(slider);
+  container.appendChild(wrap);
+}
+  
+
 // КОНКРЕТНЫЕ РЕНДЕРЫ КОНТРОЛОВ
 function renderToggleControl(container, value) {
   const isOn = value === 'true' || value === true;
