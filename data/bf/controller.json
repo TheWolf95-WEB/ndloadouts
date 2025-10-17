@@ -248,6 +248,7 @@
     "title_en": "Infantry/Passenger Control Mapping",
     "title_ru": "Привязка управления пехоты и пассажира",
     "type": "group",
+    "default": "",
     "subsettings": [
 
       {
