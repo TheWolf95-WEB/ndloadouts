@@ -2124,38 +2124,50 @@ body.warzone-theme .card-btn:hover {
 }
 
 /* === Battlefield Select === */
+/* === Battlefield Select (clickable) === */
 .bf-select-wrap {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .bf-select {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 4px;
-  color: #e0e6ee;
-  padding: 6px 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 6px;
+  color: #e8eaf0;
+  padding: 6px 12px;
   font-size: 13px;
-  letter-spacing: 0.3px;
-  cursor: not-allowed;
+  min-width: 160px;
+  cursor: pointer;
   outline: none;
   appearance: none;
-  min-width: 120px;
+  position: relative;
   transition: all 0.25s ease;
-  background-image: linear-gradient(to bottom, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
 }
 
 .bf-select:hover {
-  border-color: rgba(255,255,255,0.25);
+  border-color: rgba(255,255,255,0.35);
   background: rgba(255,255,255,0.08);
+  box-shadow: 0 0 8px rgba(72, 139, 255, 0.25);
+}
+
+.bf-select:focus {
+  border-color: #4ca3ff;
+  box-shadow: 0 0 10px rgba(80,160,255,0.4);
+}
+
+.bf-select option {
+  background: #0f141a;
+  color: #e8eaf0;
+  font-size: 13px;
+  padding: 5px 8px;
 }
 
 .bf-select-ru {
   font-size: 11px;
   color: #7f8c9b;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.5px;
   opacity: 0.8;
 }
-
