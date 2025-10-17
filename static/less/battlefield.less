@@ -1963,43 +1963,59 @@ body.warzone-theme .card-btn:hover {
 #bf-subsettings-overlay {
   position: fixed;
   top: 0;
-  right: 0;
+  left: 0; /* теперь выезд слева */
   bottom: 0;
   width: 100%;
-  max-width: 100%;
   z-index: 100;
-  background: rgba(10, 12, 18, 0.9);
+  background: rgba(10, 12, 18, 0.95);
   backdrop-filter: blur(8px);
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   align-items: stretch;
-  transform: translateX(100%);
+  transform: translateX(-100%);
   opacity: 0;
   pointer-events: none;
-  transition: transform 0.35s ease, opacity 0.3s ease;
+  transition: transform 0.35s ease, opacity 0.25s ease;
 }
 
-/* Активное состояние — плавный выезд */
+/* Активное состояние */
 #bf-subsettings-overlay.active {
   transform: translateX(0);
   opacity: 1;
   pointer-events: auto;
 }
 
-/* === Контейнер поднастроек === */
+/* Контейнер контента */
 #bf-subsettings-overlay .subsettings-container {
   width: 420px;
   max-width: 90%;
   background: #0e1118;
   height: 100%;
-  padding: 24px;
   overflow-y: auto;
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: -6px 0 24px rgba(0, 0, 0, 0.5);
-  transition: transform 0.3s ease;
+  padding: 24px;
+  box-shadow: 6px 0 24px rgba(0, 0, 0, 0.5);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
   scrollbar-width: thin;
   scrollbar-color: #2d9c44 rgba(255, 255, 255, 0.08);
 }
+
+@media (max-width: 600px) {
+  #bf-subsettings-overlay .subsettings-container {
+    width: 100%;
+    padding: 20px 16px 60px;
+  }
+}
+
+#bf-subsettings-overlay.active .subsettings-container {
+  animation: slideIn 0.35s ease;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-30px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+
 
 /* === Заголовок === */
 #bf-subsettings-overlay .subsettings-header {
@@ -2026,66 +2042,6 @@ body.warzone-theme .card-btn:hover {
 #bf-close-subsettings:hover {
   color: #2d9c44;
 }
-
-
-
-/* Адаптив под телефоны */
-@media (max-width: 600px) {
-  #bf-subsettings-overlay .subsettings-container {
-    width: 100%;
-    padding: 20px 16px 60px;
-    border-left: none;
-    border-top: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 -6px 24px rgba(0,0,0,0.5);
-  }
-}
-
-/* Заголовок */
-#bf-subsettings-overlay .subsettings-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  position: sticky;
-  top: 0;
-  background: #0e1118;
-  padding-bottom: 10px;
-  z-index: 10;
-  margin-bottom: 20px;
-}
-
-/* Список */
-#bf-subsettings-overlay .setting-row {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 6px;
-  padding: 12px 16px;
-  margin-bottom: 8px;
-}
-#bf-subsettings-overlay .setting-row:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-/* Кнопка закрытия */
-#bf-close-subsettings {
-  border: none;
-  background: transparent;
-  color: #fff;
-  font-size: 22px;
-  cursor: pointer;
-  transition: color 0.2s ease;
-}
-#bf-close-subsettings:hover {
-  color: #2d9c44;
-}
-
-
-
-
-
-
-
-
-
 
 
 
