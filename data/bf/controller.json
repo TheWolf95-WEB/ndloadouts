@@ -225,6 +225,7 @@
   },
 
   {
+    "category": "controller",
     "section": "INFANTRY — Пехота",
     "title_en": "Buttons",
     "title_ru": "Кнопки управления",
@@ -233,6 +234,7 @@
     "options": ["Default", "Alternate", "Custom"]
   },
   {
+    "category": "controller",
     "section": "INFANTRY — Пехота",
     "title_en": "Controls",
     "title_ru": "Схема управления",
