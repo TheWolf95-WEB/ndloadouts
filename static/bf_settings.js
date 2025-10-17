@@ -162,108 +162,10 @@ function openSubsettings(title_en, title_ru, subsettings) {
         control.appendChild(num);
         break;
       }
-      case 'select': {
-        const selectWrap = document.createElement('div');
-        selectWrap.className = 'bf-select-wrap';
-      
-        const sel = document.createElement('select');
-        sel.className = 'bf-select';
-      
-        // 🗣️ Словарь переводов
-        const translationMap = {
-          "Tiny": "Крошечный", "Small": "Маленький", "Medium": "Средний", "Normal": "Обычный",
-          "Large": "Большой", "Huge": "Огромный", "Default": "По умолчанию", "Custom": "Пользовательский", "Auto": "Авто",
-          "High Contrast": "Высокий контраст", "Low Contrast": "Низкий контраст",
-          "Off": "Выкл", "On": "Вкл", "Enabled": "Включено", "Disabled": "Выключено",
-          "Hold": "Удерживать", "Toggle": "Переключать", "Press": "Нажатие", "Double Tap": "Двойное нажатие",
-          "Click": "Клик", "Release": "Отпустить", "Voice Chat": "Голосовой чат",
-          "Push to Talk": "Нажать для разговора", "Always On": "Всегда включено", "Mute": "Без звука", "Unmute": "Со звуком",
-          "Headphones": "Наушники", "Speakers": "Колонки", "Ultra": "Ультра", "High": "Высокий",
-          "Medium": "Средний", "Low": "Низкий", "Very Low": "Очень низкий", "Fullscreen": "Полноэкранный режим",
-          "Borderless": "Без рамки", "Windowed": "Оконный", "Instant": "Мгновенно", "Partial": "Частично",
-          "All": "Все", "Squad": "Отряд", "Team": "Команда", "Solo": "Один",
-          "Prioritize Interact": "Приоритет: взаимодействие", "Prioritize Reload": "Приоритет: перезарядка",
-          "Stand": "Стоять", "Crouch": "Присесть", "Prone": "Лечь", "Sprint": "Бег",
-          "Aim": "Прицеливание", "Fire": "Стрельба", "Mouse": "Мышь", "Keyboard": "Клавиатура",
-          "Controller": "Геймпад", "Sensitivity": "Чувствительность", "Invert Y-Axis": "Инвертировать ось Y",
-          "Horizontal": "Горизонтально", "Vertical": "Вертикально", "Reset": "Сбросить", "Apply": "Применить",
-          "Save": "Сохранить", "Back": "Назад", "Yes": "Да", "No": "Нет"
-        };
-      
-        let currentRu = '';
-      
-        // создаём опции без перевода
-        (item.options || []).forEach(opt => {
-          const o = document.createElement('option');
-          o.textContent = opt; // ❗ только EN текст
-          if (opt === item.default) {
-            o.selected = true;
-            currentRu = translationMap[opt] || opt;
-          }
-          sel.appendChild(o);
-        });
-      
-        // если default не совпал с options (редкий случай) — ищем вручную
-        if (!currentRu && item.default) {
-          currentRu = translationMap[item.default] || item.default;
-        }
-      
-        // подпись под селектом — видна сразу при загрузке
-        const ruBelow = document.createElement('div');
-        ruBelow.className = 'bf-select-ru';
-        ruBelow.textContent = currentRu || '';
-        ruBelow.style.fontSize = '12px';
-        ruBelow.style.opacity = '0.75';
-        ruBelow.style.marginTop = '4px';
-      
-        // обновляем подпись при выборе
-        sel.addEventListener('change', () => {
-          const selected = sel.value;
-          ruBelow.textContent = translationMap[selected] || selected;
-        });
-      
-        selectWrap.append(sel, ruBelow);
-        control.appendChild(selectWrap);
+      case 'select':
+        control.appendChild(createSelectElement(item));
         break;
-      }
-        // 🟦 вот сюда вставляется новый case
-        case 'button': {
-          const btn = document.createElement('button');
-          btn.className = 'edit-btn';
-        
-          const title = (item.title_en || '').toLowerCase();
-          const isReset = title.includes('reset');
-        
-            // двуязычный текст кнопки
-            btn.innerHTML = isReset
-              ? 'RESET <span class="btn-ru">СБРОСИТЬ</span>'
-              : 'EDIT <span class="btn-ru">РЕДАКТ</span>';
-        
-          // если это reset — делаем кнопку неактивной
-          if (isReset) {
-            btn.disabled = true;
-            btn.style.opacity = '0.6';
-            btn.style.cursor = 'default';
-          } else {
-            // иначе оставляем кликабельной
-            btn.onclick = () => {
-              if (Array.isArray(item.subsettings) && item.subsettings.length) {
-                openSubsettings(item.title_en, item.title_ru, item.subsettings);
-              } else {
-                alert('Вложенных настроек нет');
-              }
-            };
-          }
-        
-          control.appendChild(btn);
-          break;
-        }
-
-
-
-
-
-        case 'color': {
+      case 'color': {
           const colorWrap = document.createElement('div');
           colorWrap.style.display = 'flex';
           colorWrap.style.alignItems = 'center';
@@ -472,7 +374,7 @@ function renderControlBasedOnType(container, item) {
       renderToggleControl(container, value);
       break;
     case 'select':
-      renderSelectControl(container, item);
+      container.appendChild(createSelectElement(item));
       break;
     case 'color':
       renderColorControl(container, value);
@@ -511,6 +413,67 @@ function renderSliderControl(container, value) {
   wrap.appendChild(slider);
   container.appendChild(wrap);
 }
+
+
+function createSelectElement(item) {
+  const selectWrap = document.createElement('div');
+  selectWrap.className = 'bf-select-wrap';
+
+  const sel = document.createElement('select');
+  sel.className = 'bf-select';
+
+  const translationMap = {
+    "Tiny": "Крошечный", "Small": "Маленький", "Medium": "Средний", "Normal": "Обычный",
+    "Large": "Большой", "Huge": "Огромный", "Default": "По умолчанию", "Custom": "Пользовательский", "Auto": "Авто",
+    "High Contrast": "Высокий контраст", "Low Contrast": "Низкий контраст",
+    "Off": "Выкл", "On": "Вкл", "Enabled": "Включено", "Disabled": "Выключено",
+    "Hold": "Удерживать", "Toggle": "Переключать", "Press": "Нажатие", "Double Tap": "Двойное нажатие",
+    "Click": "Клик", "Release": "Отпустить", "Voice Chat": "Голосовой чат",
+    "Push to Talk": "Нажать для разговора", "Always On": "Всегда включено", "Mute": "Без звука", "Unmute": "Со звуком",
+    "Headphones": "Наушники", "Speakers": "Колонки", "Ultra": "Ультра", "High": "Высокий",
+    "Medium": "Средний", "Low": "Низкий", "Very Low": "Очень низкий", "Fullscreen": "Полноэкранный режим",
+    "Borderless": "Без рамки", "Windowed": "Оконный", "Instant": "Мгновенно", "Partial": "Частично",
+    "All": "Все", "Squad": "Отряд", "Team": "Команда", "Solo": "Один",
+    "Prioritize Interact": "Приоритет: взаимодействие", "Prioritize Reload": "Приоритет: перезарядка",
+    "Stand": "Стоять", "Crouch": "Присесть", "Prone": "Лечь", "Sprint": "Бег",
+    "Aim": "Прицеливание", "Fire": "Стрельба", "Mouse": "Мышь", "Keyboard": "Клавиатура",
+    "Controller": "Геймпад", "Sensitivity": "Чувствительность", "Invert Y-Axis": "Инвертировать ось Y",
+    "Horizontal": "Горизонтально", "Vertical": "Вертикально", "Reset": "Сбросить", "Apply": "Применить",
+    "Save": "Сохранить", "Back": "Назад", "Yes": "Да", "No": "Нет"
+  };
+
+  let currentRu = '';
+
+  (item.options || []).forEach(opt => {
+    const o = document.createElement('option');
+    o.textContent = opt; // ❗ только английский
+    if (opt === item.default) {
+      o.selected = true;
+      currentRu = translationMap[opt] || opt;
+    }
+    sel.appendChild(o);
+  });
+
+  // если default не найден в options — всё равно показать перевод
+  if (!currentRu && item.default)
+    currentRu = translationMap[item.default] || item.default;
+
+  const ruBelow = document.createElement('div');
+  ruBelow.className = 'bf-select-ru';
+  ruBelow.textContent = currentRu || '';
+  ruBelow.style.fontSize = '12px';
+  ruBelow.style.opacity = '0.75';
+  ruBelow.style.marginTop = '4px';
+
+  sel.addEventListener('change', () => {
+    const selected = sel.value;
+    ruBelow.textContent = translationMap[selected] || selected;
+  });
+
+  selectWrap.append(sel, ruBelow);
+  return selectWrap;
+}
+
   
 
 // КОНКРЕТНЫЕ РЕНДЕРЫ КОНТРОЛОВ
@@ -528,58 +491,6 @@ function renderToggleControl(container, value) {
     </div>
   `;
   container.appendChild(toggle);
-}
-
-function renderSelectControl(container, item) {
-  const wrap = document.createElement('div');
-  wrap.className = 'bf-select-wrap';
-  wrap.style.display = 'flex';
-  wrap.style.flexDirection = 'column';
-  wrap.style.gap = '4px';
-
-  const select = document.createElement('select');
-  select.className = 'bf-select';
-
-  // Добавляем опции и карту перевода
-  const translationMap = {
-    "Tiny": "Крошечный", "Small": "Маленький", "Medium": "Средний", "Normal": "Обычный",
-    "Large": "Большой", "Huge": "Огромный", "Default": "По умолчанию", "Custom": "Пользовательский",
-    "Auto": "Авто", "High Contrast": "Высокий контраст", "Low Contrast": "Низкий контраст",
-    "Off": "Выкл", "On": "Вкл", "Hold": "Удерживать", "Toggle": "Переключать",
-    "Instant": "Мгновенно", "Partial": "Частично", "All": "Все",
-    "Low": "Низкий", "Medium": "Средний", "High": "Высокий", "Ultra": "Ультра"
-  };
-
-  let currentRu = '';
-
-  (item.options || []).forEach(option => {
-    const opt = document.createElement('option');
-    opt.value = option;
-    opt.textContent = `${option} / ${translationMap[option] || option}`;
-    if (option === item.default) {
-      opt.selected = true;
-      currentRu = translationMap[option] || option;
-    }
-    select.appendChild(opt);
-  });
-
-  // RU-перевод под select
-  const ruLabel = document.createElement('div');
-  ruLabel.className = 'bf-select-ru';
-  ruLabel.textContent = currentRu;
-  ruLabel.style.fontSize = '13px';
-  ruLabel.style.opacity = '0.7';
-  ruLabel.style.paddingLeft = '4px';
-
-  // Обновлять перевод при смене значения
-  select.addEventListener('change', () => {
-    const selected = select.value;
-    ruLabel.textContent = translationMap[selected] || selected;
-  });
-
-  wrap.appendChild(select);
-  wrap.appendChild(ruLabel);
-  container.appendChild(wrap);
 }
 
 
