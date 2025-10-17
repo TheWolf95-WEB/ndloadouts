@@ -347,7 +347,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!data || !data.length) {
         const p = document.createElement('p');
         p.style.opacity = '.7';
-        p.textContent = 'Пока нет настроек в этой категории.';
+        p.textContent = 'Уже ведётся работа над переводом — настройки появятся в ближайшее время.';
         content.appendChild(p);
         return;
       }
