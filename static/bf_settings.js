@@ -382,125 +382,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  // === Функция рендера одной вложенной настройки ===
-    function renderSubSetting(item) {
-      const wrap = document.createElement('div');
-      wrap.className = 'setting-row';
-    
-      const info = document.createElement('div');
-      info.className = 'setting-info';
-      info.innerHTML = `
-        <div class="title-en">${item.title_en}</div>
-        <div class="title-ru">${item.title_ru || ''}</div>
-      `;
-    
-      const control = document.createElement('div');
-      control.className = 'setting-control';
-    
-      switch (item.type) {
-        case 'toggle': {
-          const toggle = document.createElement('div');
-          toggle.className = 'bf-toggle';
-        
-          // создаём декоративный тумблер без функционала
-          toggle.innerHTML = `
-            <div class="bf-toggle-track">
-              <div class="bf-toggle-knob"></div>
-            </div>
-            <div class="bf-toggle-labels">
-              <span class="on-label">ON / ВКЛ</span>
-              <span class="off-label">OFF / ВЫКЛ</span>
-            </div>
-          `;
-        
-          // определяем визуальное состояние
-          const isOn = item.default === 'true' || item.default === true;
-          if (isOn) toggle.classList.add('on');
-          control.appendChild(toggle);
-          break;
-        }
-        case 'slider': {
-          const val = document.createElement('span');
-          val.textContent = item.default || '0';
-          const rng = document.createElement('input');
-          rng.type = 'range';
-          rng.disabled = true;
-          rng.value = item.default || 0;
-          control.appendChild(val);
-          control.appendChild(rng);
-          break;
-        }
-          case 'select': {
-            const selectWrap = document.createElement('div');
-            selectWrap.className = 'bf-select-wrap';
-          
-            const sel = document.createElement('select');
-            sel.className = 'bf-select';
-          
-            // 🔠 Используем тот же словарь переводов
-            const translationMap = {
-              "Tiny": "Крошечный", "Small": "Маленький", "Medium": "Средний", "Normal": "Обычный",
-              "Large": "Большой", "Huge": "Огромный", "Default": "По умолчанию", "Custom": "Пользовательский",
-              "Auto": "Авто", "High Contrast": "Высокий контраст", "Low Contrast": "Низкий контраст",
-              "Off": "Выкл", "On": "Вкл", "Hold": "Удерживать", "Toggle": "Переключать",
-              "Instant": "Мгновенно", "Partial": "Частично", "All": "Все",
-              "Low": "Низкий", "Medium": "Средний", "High": "Высокий", "Ultra": "Ультра"
-            };
-          
-            (item.options || []).forEach(opt => {
-              const o = document.createElement('option');
-              const ru = translationMap[opt] || opt;
-              o.textContent = `${opt} / ${ru}`;
-              if (opt === item.default) o.selected = true;
-              sel.appendChild(o);
-            });
-          
-            const ruLabel = document.createElement('span');
-            ruLabel.className = 'bf-select-ru';
-            ruLabel.textContent = item.title_ru || '';
-          
-            selectWrap.append(sel, ruLabel);
-            control.appendChild(selectWrap);
-            break;
-          }
-
-
-        case 'color': {
-          const colorWrap = document.createElement('div');
-          colorWrap.style.display = 'flex';
-          colorWrap.style.alignItems = 'center';
-          colorWrap.style.gap = '10px';
-        
-          const colorBox = document.createElement('div');
-          colorBox.className = 'color-preview';
-          colorBox.style.backgroundColor = item.default || '#000';
-          colorBox.title = item.default;
-          colorBox.style.width = '28px';
-          colorBox.style.height = '28px';
-          colorBox.style.borderRadius = '4px';
-          colorBox.style.border = '1px solid rgba(255,255,255,0.3)';
-        
-          const colorLabel = document.createElement('span');
-          colorLabel.textContent = item.default?.toUpperCase() || '#000000';
-          colorLabel.style.color = '#aaa';
-          colorLabel.style.fontSize = '13px';
-          colorLabel.style.letterSpacing = '0.5px';
-        
-          colorWrap.append(colorBox, colorLabel);
-          control.append(colorWrap);
-          break;
-        }
-
-          
-        default:
-          control.textContent = item.default ?? '';
-      }
-    
-      wrap.appendChild(info);
-      wrap.appendChild(control);
-      return wrap;
-    }
-    
 
   // ——— Навигация
   btnViewBack?.addEventListener('click', () => {
@@ -667,28 +548,55 @@ function renderToggleControl(container, value) {
 function renderSelectControl(container, item) {
   const wrap = document.createElement('div');
   wrap.className = 'bf-select-wrap';
-  
+  wrap.style.display = 'flex';
+  wrap.style.flexDirection = 'column';
+  wrap.style.gap = '4px';
+
   const select = document.createElement('select');
   select.className = 'bf-select';
-  
-  // Добавляем опции
+
+  // Добавляем опции и карту перевода
+  const translationMap = {
+    "Tiny": "Крошечный", "Small": "Маленький", "Medium": "Средний", "Normal": "Обычный",
+    "Large": "Большой", "Huge": "Огромный", "Default": "По умолчанию", "Custom": "Пользовательский",
+    "Auto": "Авто", "High Contrast": "Высокий контраст", "Low Contrast": "Низкий контраст",
+    "Off": "Выкл", "On": "Вкл", "Hold": "Удерживать", "Toggle": "Переключать",
+    "Instant": "Мгновенно", "Partial": "Частично", "All": "Все",
+    "Low": "Низкий", "Medium": "Средний", "High": "Высокий", "Ultra": "Ультра"
+  };
+
+  let currentRu = '';
+
   (item.options || []).forEach(option => {
-    const optionEl = document.createElement('option');
-    optionEl.value = option;
-    optionEl.textContent = option;
+    const opt = document.createElement('option');
+    opt.value = option;
+    opt.textContent = option;
     if (option === item.default) {
-      optionEl.selected = true;
+      opt.selected = true;
+      currentRu = translationMap[option] || option;
     }
-    select.appendChild(optionEl);
+    select.appendChild(opt);
   });
-  
-  const ruLabel = document.createElement('span');
+
+  // RU-перевод под select
+  const ruLabel = document.createElement('div');
   ruLabel.className = 'bf-select-ru';
-  ruLabel.textContent = item.title_ru || '';
-  
+  ruLabel.textContent = currentRu;
+  ruLabel.style.fontSize = '13px';
+  ruLabel.style.opacity = '0.7';
+  ruLabel.style.paddingLeft = '4px';
+
+  // Обновлять перевод при смене значения
+  select.addEventListener('change', () => {
+    const selected = select.value;
+    ruLabel.textContent = translationMap[selected] || selected;
+  });
+
   wrap.appendChild(select);
+  wrap.appendChild(ruLabel);
   container.appendChild(wrap);
 }
+
 
 function renderColorControl(container, value) {
   const wrap = document.createElement('div');
@@ -748,9 +656,7 @@ function openSubsettings(title_en, title_ru, subsettings) {
   if (!Array.isArray(subsettings) || !subsettings.length) {
     list.innerHTML = `<p style="opacity:.6;text-align:center;padding:20px;">Нет дополнительных параметров</p>`;
   } else {
-    subsettings.forEach(item => {
-      list.appendChild(renderSubSetting(item));
-    });
+    renderSubsettings(subsettings);
   }
 
   overlay.classList.add('active');
