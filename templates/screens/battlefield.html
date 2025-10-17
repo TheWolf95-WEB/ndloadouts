@@ -584,7 +584,6 @@
         const selectWrap = document.createElement('div');
         selectWrap.className = 'bf-select-wrap';
       
-        // создаём активный селект
         const sel = document.createElement('select');
         sel.className = 'bf-select';
       
@@ -678,31 +677,28 @@
         };
 
       
-        // добавляем опции с двойным языком
-        (item.options || []).forEach(opt => {
-          const o = document.createElement('option');
-          const ru = translationMap[opt] || opt;
-          o.textContent = `${opt} / ${ru}`;
-          if (item.default === opt) o.selected = true;
-          sel.appendChild(o);
-        });
-      
-        // просто визуальный выбор — можно кликать, но ничего не сохраняется
-        sel.addEventListener('change', () => {
-          // ничего не сохраняем — просто визуально выбираем
-          console.log(`Selected option for ${item.title_en}:`, sel.value);
-        });
-      
-        // подпись справа
-        const ruLabel = document.createElement('span');
-        ruLabel.className = 'bf-select-ru';
-        ruLabel.textContent = item.title_ru || '';
-      
-        selectWrap.append(sel, ruLabel);
-        control.appendChild(selectWrap);
-        break;
-      }
 
+          (item.options || []).forEach(opt => {
+            const o = document.createElement('option');
+            const ru = translationMap[opt] || opt;
+            o.textContent = `${opt} / ${ru}`;
+            if (opt === item.default) o.selected = true;
+            sel.appendChild(o);
+          });
+        
+          sel.addEventListener('change', () => {
+            console.log(`Selected option for ${item.title_en}:`, sel.value);
+          });
+        
+          const ruLabel = document.createElement('span');
+          ruLabel.className = 'bf-select-ru';
+          ruLabel.textContent = item.title_ru || '';
+        
+          selectWrap.append(sel, ruLabel);
+          control.appendChild(selectWrap);
+          break;
+        }
+        
 
 
 
