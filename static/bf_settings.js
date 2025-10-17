@@ -687,7 +687,6 @@ function renderSelectControl(container, item) {
   ruLabel.textContent = item.title_ru || '';
   
   wrap.appendChild(select);
-  wrap.appendChild(ruLabel);
   container.appendChild(wrap);
 }
 
