@@ -2092,67 +2092,69 @@ body.warzone-theme .card-btn:hover {
 }
 
 
-/* === Overlay поднастроек - ИСПРАВЛЕННАЯ ВЕРСИЯ === */
-/* === Battlefield Subsettings — полноширинный режим === */
+/* === Battlefield Subsettings — бургер-оверлей слева === */
 #bf-subsettings-overlay {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   z-index: 100;
-  background: rgba(10, 12, 18, 0.94);
+  background: rgba(10, 12, 18, 0.9);
   backdrop-filter: blur(10px);
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  transform: translateY(100%);
+  justify-content: flex-start;
+  align-items: stretch;
+  transform: translateX(-100%);
   opacity: 0;
   pointer-events: none;
   transition: transform 0.35s ease, opacity 0.25s ease;
 }
 
 #bf-subsettings-overlay.active {
-  transform: translateY(0);
+  transform: translateX(0);
   opacity: 1;
   pointer-events: auto;
 }
 
-/* Контейнер контента — теперь центрированный и адаптивный */
+/* Контейнер — основная панель */
 #bf-subsettings-overlay .subsettings-container {
   width: 100%;
-  max-width: 680px;
+  max-width: 700px;
   height: 100%;
   background: #0f1117;
-  border-left: 1px solid rgba(255,255,255,0.05);
-  border-right: 1px solid rgba(255,255,255,0.05);
-  box-shadow: 0 0 40px rgba(0,0,0,0.5);
+  border-right: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 6px 0 24px rgba(0,0,0,0.5);
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
+/* Заголовок */
 #bf-subsettings-overlay .subsettings-header {
   position: sticky;
   top: 0;
-  z-index: 10;
   background: #0f1117;
   padding: 22px 24px 12px;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   border-bottom: 1px solid rgba(255,255,255,0.05);
+  z-index: 10;
 }
 
 #bf-subsettings-title-en {
   font-size: 22px;
   font-weight: 700;
-  margin: 0;
   color: #fff;
+  margin: 0;
 }
 
 #bf-subsettings-title-ru {
   font-size: 13px;
   color: #a8b5c2;
   opacity: .85;
-  margin: 4px 0 0;
+  margin-top: 4px;
 }
 
 /* Список настроек */
@@ -2162,7 +2164,7 @@ body.warzone-theme .card-btn:hover {
   padding: 20px 24px 60px;
 }
 
-/* Каждая настройка — аккуратная карточка */
+/* Карточки параметров */
 #bf-subsettings-overlay .setting-row {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -2180,7 +2182,7 @@ body.warzone-theme .card-btn:hover {
   background: rgba(255,255,255,0.06);
 }
 
-/* Текстовые блоки */
+/* Информация */
 #bf-subsettings-overlay .setting-info {
   overflow: hidden;
   word-wrap: break-word;
@@ -2211,6 +2213,7 @@ body.warzone-theme .card-btn:hover {
   min-width: 180px;
 }
 
+/* Цветовые превью */
 #bf-subsettings-overlay .color-preview {
   width: 34px;
   height: 34px;
@@ -2219,7 +2222,7 @@ body.warzone-theme .card-btn:hover {
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
-/* Селекты и подписи */
+/* Селекты */
 #bf-subsettings-overlay .bf-select-wrap {
   display: flex;
   flex-direction: column;
@@ -2245,9 +2248,9 @@ body.warzone-theme .card-btn:hover {
 }
 
 /* Мобильная адаптация */
-@media (max-width: 600px) {
+@media (max-width: 700px) {
   #bf-subsettings-overlay .subsettings-container {
     max-width: 100%;
-    border: none;
+    border-right: none;
   }
 }
