@@ -1737,15 +1737,6 @@ body.warzone-theme .card-btn:hover {
   flex-direction: column;
   gap: 4px;
 }
-.setting-info .title-en {
-  font-weight: 600;
-  font-size: 15px;
-  letter-spacing: 0.5px;
-}
-.setting-info .title-ru {
-  font-size: 12px;
-  opacity: 0.7;
-}
 .setting-control {
   display: flex;
   align-items: center;
@@ -1914,7 +1905,7 @@ body.warzone-theme .card-btn:hover {
 }
 
 .setting-info .title-ru {
-  font-size: 12px;
+  font-size: 11px;
   color: #8d9aa5;
   margin-top: 2px;
 }
@@ -2127,14 +2118,17 @@ body.warzone-theme .card-btn:hover {
 }
 
 /* фиксируем шапку */
-.subsettings-header {
-  flex-shrink: 0;
+#bf-subsettings-overlay .subsettings-header {
   position: sticky;
   top: 0;
-  background: #0f1117;
-  padding: 22px 24px 12px;
-  z-index: 10;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
+  z-index: 2; /* Увеличил z-index чтобы был выше контента */
+  background: #0e1118;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-shrink: 0; /* Запрещаем сжатие */
 }
 
 /* именно тут теперь скроллим */
