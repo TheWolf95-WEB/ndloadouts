@@ -247,7 +247,7 @@
     "section": "INFANTRY — Пехота",
     "title_en": "Infantry/Passenger Control Mapping",
     "title_ru": "Привязка управления пехоты и пассажира",
-    "type": "group",
+    "type": "button",
     "default": "",
     "subsettings": [
 
