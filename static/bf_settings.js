@@ -342,6 +342,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       const data = await apiGetSettings(currentCategoryKey);
+      console.log('📦 Загруженные настройки:', data);
+      data.forEach(i => {
+        if (i.subsettings) console.log(`🔹 ${i.title_en} — вложений:`, i.subsettings.length);
+      });
       content.innerHTML = '';
 
       if (!data || !data.length) {
@@ -487,8 +491,6 @@ document.addEventListener("DOMContentLoaded", () => {
           break;
         }
 
-
-
           
         default:
           control.textContent = item.default ?? '';
@@ -499,14 +501,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return wrap;
     }
     
-    // === Рендер списка вложенных настроек ===
-    function renderSubsettings(subsettings) {
-      subOverlayList.innerHTML = '';
-      subsettings.forEach(sub => {
-        subOverlayList.appendChild(renderSubSetting(sub));
-      });
-    }
-          
 
   // ——— Навигация
   btnViewBack?.addEventListener('click', () => {
@@ -539,13 +533,37 @@ document.addEventListener("DOMContentLoaded", () => {
   observer.observe(overlay, { attributes: true, attributeFilter: ['style'] });
 
 
+// === Рендер списка вложенных настроек ===
+function renderSubsettings(subsettings) {
+  const list = document.getElementById('bf-subsettings-list');
+  list.innerHTML = '';
+
+  if (!Array.isArray(subsettings) || subsettings.length === 0) {
+    const empty = document.createElement('p');
+    empty.textContent = 'Нет дополнительных параметров';
+    empty.style.opacity = '.6';
+    empty.style.textAlign = 'center';
+    empty.style.padding = '20px';
+    list.appendChild(empty);
+    return;
+  }
+
+  subsettings.forEach(sub => {
+    list.appendChild(renderSubSetting(sub));
+  });
+
+  // сбрасываем скролл
+  list.scrollTop = 0;
+}
+
 // === Глобальная инициализация поднастроек ===
 function openSubsettings(title_en, title_ru, subsettings) {
+  console.log('🔧 Открываю subsettings:', title_en, subsettings);
+
   currentSubSettings = subsettings || [];
   subOverlayTitleEn.textContent = title_en || '';
   subOverlayTitleRu.textContent = title_ru || '';
 
-  // если пусто — не открываем
   if (!Array.isArray(subsettings) || subsettings.length === 0) {
     alert('Вложенных настроек нет');
     return;
@@ -553,25 +571,18 @@ function openSubsettings(title_en, title_ru, subsettings) {
 
   renderSubsettings(subsettings);
 
-  // фиксируем позицию body и активируем overlay
+  // активируем overlay
   subOverlay.classList.add('active');
   document.body.style.overflow = 'hidden';
 
-  // 🔄 проверяем высоту контента
+  // прокрутка внутри контейнера
   const container = subOverlay.querySelector('.subsettings-container');
-  if (container.scrollHeight > container.clientHeight) {
-    container.style.overflowY = 'auto';
-  } else {
-    container.style.overflowY = 'visible';
-  }
-
-  // небольшая задержка для плавной анимации
-  subOverlay.style.transform = 'translateX(0)';
+  container.scrollTop = 0;
+  container.style.overflowY = 'auto';
 }
 
 subOverlayClose.addEventListener('click', () => {
   subOverlay.classList.remove('active');
-  subOverlay.style.transform = 'translateX(-100%)';
   document.body.style.overflow = '';
 });
 
