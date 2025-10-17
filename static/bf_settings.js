@@ -11,6 +11,9 @@ document.addEventListener("DOMContentLoaded", () => {
     { key: 'system',        en: 'System',           ru: 'Система' },
   ];
 
+
+  let currentSubsettings = [];
+
   // ——— Элементы пользовательского экрана
   const scrView = document.getElementById('screen-bf-settings');
   const btnViewBack = document.getElementById('bf-settings-back');
@@ -534,94 +537,205 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // === Рендер списка вложенных настроек ===
-// === Улучшенная функция рендера поднастроек ===
+// === УЛУЧШЕННЫЙ РЕНДЕР ПОДНАСТРОЕК ===
 function renderSubsettings(subsettings) {
   const list = document.getElementById('bf-subsettings-list');
+  
+  // Очищаем контейнер
   list.innerHTML = '';
-
+  
   const items = Array.isArray(subsettings) ? subsettings : [];
   
-  if (!items.length) {
-    const empty = document.createElement('div');
-    empty.className = 'empty-state';
-    empty.innerHTML = `
-      <div style="text-align: center; padding: 40px 20px; opacity: 0.6;">
-        <div style="font-size: 48px; margin-bottom: 16px;">⚙️</div>
-        <div>Нет дополнительных параметров</div>
+  if (items.length === 0) {
+    list.innerHTML = `
+      <div class="empty-state">
+        <div style="font-size: 48px; margin-bottom: 16px;">🔧</div>
+        <div style="font-size: 16px; margin-bottom: 8px;">Нет доступных настроек</div>
+        <div style="font-size: 14px; opacity: 0.7;">Дополнительные параметры отсутствуют</div>
       </div>
     `;
-    list.appendChild(empty);
     return;
   }
-
-  // Создаем фрагмент для эффективного рендеринга
-  const frag = document.createDocumentFragment();
   
-  items.forEach((sub, index) => {
-    const row = renderSubSetting(sub);
-    // Добавляем небольшую задержку для анимации появления
-    row.style.opacity = '0';
-    row.style.transform = 'translateX(-20px)';
-    frag.appendChild(row);
-    
-    // Анимация появления
-    setTimeout(() => {
-      row.style.transition = 'all 0.3s ease';
-      row.style.opacity = '1';
-      row.style.transform = 'translateX(0)';
-    }, index * 50);
+  // Создаем фрагмент для эффективного рендеринга
+  const fragment = document.createDocumentFragment();
+  
+  items.forEach((item, index) => {
+    try {
+      const row = createSubsettingRow(item, index);
+      if (row) {
+        fragment.appendChild(row);
+      }
+    } catch (error) {
+      console.error('❌ Ошибка создания строки настройки:', error, item);
+      fragment.appendChild(createErrorRow(item, error));
+    }
   });
   
-  list.appendChild(frag);
-
-  // Сбрасываем скролл и принудительно применяем стили
+  list.appendChild(fragment);
+  
+  // Гарантируем что скролл в начале
   requestAnimationFrame(() => {
     list.scrollTop = 0;
-    list.style.overflowY = 'auto';
   });
 }
 
-// === Улучшенная функция открытия поднастроек ===
-function openSubsettings(title_en, title_ru, subsettings) {
-  console.log('📖 Открываем поднастройки:', title_en, subsettings?.length);
-  
-  // Устанавливаем заголовки
-  subOverlayTitleEn.textContent = title_en || 'Settings';
-  subOverlayTitleRu.textContent = title_ru || 'Настройки';
-  
-  // Рендерим контент
-  renderSubsettings(subsettings);
-  
-  // Показываем оверлей
-  subOverlay.classList.add('active');
-  document.body.style.overflow = 'hidden';
-  
-  // Принудительный reflow для корректной анимации
-  subOverlay.offsetHeight;
-}
-
-// === Улучшенная функция закрытия ===
-function closeSubsettings() {
-  subOverlay.classList.remove('active');
-  document.body.style.overflow = '';
-  
-  // Очищаем контент после анимации
-  setTimeout(() => {
-    subOverlayList.innerHTML = '';
-  }, 300);
-}
-
-// Обновляем обработчик закрытия
-subOverlayClose.addEventListener('click', closeSubsettings);
-
-// Закрытие по клику на оверлей (опционально)
-subOverlay.addEventListener('click', (e) => {
-  if (e.target === subOverlay) {
-    closeSubsettings();
+// СОЗДАНИЕ ОДНОЙ СТРОКИ НАСТРОЙКИ
+function createSubsettingRow(item, index) {
+  if (!item || typeof item !== 'object') {
+    return createErrorRow(item, new Error('Invalid data'));
   }
-});
+  
+  const wrap = document.createElement('div');
+  wrap.className = 'setting-row';
+  wrap.setAttribute('data-setting-type', item.type || 'unknown');
+  
+  // Добавляем анимацию появления
+  wrap.style.opacity = '0';
+  wrap.style.transform = 'translateY(20px)';
+  
+  // Информационная часть
+  const info = document.createElement('div');
+  info.className = 'setting-info';
+  info.innerHTML = `
+    <div class="title-en">${escapeHtml(item.title_en || 'Setting')}</div>
+    <div class="title-ru">${escapeHtml(item.title_ru || '')}</div>
+  `;
+  
+  // Контролы
+  const control = document.createElement('div');
+  control.className = 'setting-control';
+  
+  renderControlBasedOnType(control, item);
+  
+  wrap.appendChild(info);
+  wrap.appendChild(control);
+  
+  // Анимация появления
+  setTimeout(() => {
+    wrap.style.transition = 'all 0.4s ease';
+    wrap.style.opacity = '1';
+    wrap.style.transform = 'translateY(0)';
+  }, index * 80);
+  
+  return wrap;
+}
 
+// РЕНДЕР КОНТРОЛОВ ПО ТИПУ
+function renderControlBasedOnType(container, item) {
+  const type = item.type || 'text';
+  const value = item.default || '';
+  
+  switch (type) {
+    case 'toggle':
+      renderToggleControl(container, value);
+      break;
+    case 'select':
+      renderSelectControl(container, item);
+      break;
+    case 'color':
+      renderColorControl(container, value);
+      break;
+    case 'slider':
+      renderSliderControl(container, value);
+      break;
+    case 'number':
+      renderNumberControl(container, value);
+      break;
+    case 'button':
+      renderButtonControl(container, item);
+      break;
+    default:
+      renderTextControl(container, value);
+  }
+}
 
+// КОНКРЕТНЫЕ РЕНДЕРЫ КОНТРОЛОВ
+function renderToggleControl(container, value) {
+  const isOn = value === 'true' || value === true;
+  const toggle = document.createElement('div');
+  toggle.className = `bf-toggle ${isOn ? 'on' : ''}`;
+  toggle.innerHTML = `
+    <div class="bf-toggle-track">
+      <div class="bf-toggle-knob"></div>
+    </div>
+    <div class="bf-toggle-labels">
+      <span class="on-label">ON</span>
+      <span class="off-label">OFF</span>
+    </div>
+  `;
+  container.appendChild(toggle);
+}
+
+function renderSelectControl(container, item) {
+  const wrap = document.createElement('div');
+  wrap.className = 'bf-select-wrap';
+  
+  const select = document.createElement('select');
+  select.className = 'bf-select';
+  
+  // Добавляем опции
+  (item.options || []).forEach(option => {
+    const optionEl = document.createElement('option');
+    optionEl.value = option;
+    optionEl.textContent = option;
+    if (option === item.default) {
+      optionEl.selected = true;
+    }
+    select.appendChild(optionEl);
+  });
+  
+  const ruLabel = document.createElement('span');
+  ruLabel.className = 'bf-select-ru';
+  ruLabel.textContent = item.title_ru || '';
+  
+  wrap.appendChild(select);
+  wrap.appendChild(ruLabel);
+  container.appendChild(wrap);
+}
+
+function renderColorControl(container, value) {
+  const wrap = document.createElement('div');
+  wrap.style.display = 'flex';
+  wrap.style.alignItems = 'center';
+  wrap.style.gap = '12px';
+  
+  const colorBox = document.createElement('div');
+  colorBox.className = 'color-preview';
+  colorBox.style.backgroundColor = value || '#000000';
+  
+  const colorLabel = document.createElement('span');
+  colorLabel.textContent = (value || '#000000').toUpperCase();
+  colorLabel.style.color = '#a8b5c2';
+  colorLabel.style.fontSize = '13px';
+  colorLabel.style.fontFamily = 'monospace';
+  
+  wrap.appendChild(colorBox);
+  wrap.appendChild(colorLabel);
+  container.appendChild(wrap);
+}
+
+// Вспомогательные функции
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function createErrorRow(item, error) {
+  const wrap = document.createElement('div');
+  wrap.className = 'setting-row error';
+  wrap.innerHTML = `
+    <div class="setting-info">
+      <div class="title-en">Error Loading Setting</div>
+      <div class="title-ru">Ошибка загрузки: ${escapeHtml(error?.message || 'Unknown error')}</div>
+    </div>
+    <div class="setting-control">
+      <span style="color: #ff6b6b;">⚠️</span>
+    </div>
+  `;
+  return wrap;
+}
   
   
 });
