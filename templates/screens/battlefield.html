@@ -946,7 +946,6 @@
       });
     }
     
-    // === Открытие оверлея ===
     function openSubsettings(title_en, title_ru, subsettings) {
       currentSubSettings = subsettings;
       subOverlayTitleEn.textContent = title_en;
@@ -955,7 +954,18 @@
     
       // плавное открытие
       subOverlay.classList.add('active');
+    
+      // 🧩 Проверяем, помещается ли контент
+      requestAnimationFrame(() => {
+        const container = subOverlay.querySelector('.subsettings-container');
+        if (container.scrollHeight <= window.innerHeight - 60) {
+          subOverlay.style.overflowY = 'hidden';
+        } else {
+          subOverlay.style.overflowY = 'auto';
+        }
+      });
     }
+
 
     
     // === Закрытие оверлея ===
