@@ -758,6 +758,12 @@ function openSubsettings(title_en, title_ru, subsettings) {
   document.body.style.overflow = 'hidden';
 }
 
+// 🩵 Сброс скролла — чтобы при открытии начинало сверху
+requestAnimationFrame(() => {
+  const list = document.getElementById('bf-subsettings-list');
+  list.scrollTop = 0;
+});  
+
 document.getElementById('bf-close-subsettings').addEventListener('click', () => {
   document.getElementById('bf-subsettings-overlay').classList.remove('active');
   document.body.style.overflow = '';
