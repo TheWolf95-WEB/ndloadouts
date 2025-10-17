@@ -544,12 +544,6 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       
 
-    
-    // === Закрытие оверлея ===
-    subOverlayClose.addEventListener('click', () => {
-      subOverlay.classList.remove('active');
-    });
-
   // ——— Навигация
   btnViewBack?.addEventListener('click', () => {
     if (typeof showScreen === 'function') showScreen('screen-battlefield-main');
