@@ -190,8 +190,34 @@ function openSubsettings(title_en, title_ru, subsettings) {
           control.append(colorWrap);
           break;
         }
-
+        case 'button': {
+          const btn = document.createElement('button');
+          btn.className = 'edit-btn';
         
+          const title = (item.title_en || '').toLowerCase();
+          const isReset = title.includes('reset');
+        
+          btn.innerHTML = isReset
+            ? 'RESET <span class="btn-ru">СБРОСИТЬ</span>'
+            : 'EDIT <span class="btn-ru">РЕДАКТ</span>';
+        
+          if (isReset) {
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            btn.style.cursor = 'default';
+          } else {
+            btn.onclick = () => {
+              if (Array.isArray(item.subsettings) && item.subsettings.length) {
+                openSubsettings(item.title_en, item.title_ru, item.subsettings);
+              } else {
+                alert('Вложенных настроек нет');
+              }
+            };
+          }
+        
+          control.appendChild(btn);
+          break;
+        }
       default:
         control.textContent = item.default ?? '';
     }
@@ -459,6 +485,12 @@ function createSelectElement(item) {
     currentRu = translationMap[item.default] || item.default;
 
   const ruBelow = document.createElement('div');
+  // если ничего не выбрано — показать первый элемент как дефолт
+  if (!currentRu && item.options?.length) {
+    const first = item.options[0];
+    currentRu = translationMap[first] || first;
+  }
+
   ruBelow.className = 'bf-select-ru';
   ruBelow.textContent = currentRu || '';
   ruBelow.style.fontSize = '12px';
