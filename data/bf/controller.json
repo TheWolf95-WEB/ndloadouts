@@ -1,0 +1,579 @@
+[
+  {
+    "category": "controller",
+    "section": "INFANTRY — Пехота",
+    "title_en": "Control Settings",
+    "title_ru": "Настройки управления",
+    "type": "button",
+    "default": "",
+    "subsettings": [
+      {
+        "section": "AIM — Прицеливание",
+        "title_en": "Infantry Aim Sensitivity",
+        "title_ru": "Чувствительность прицела пехоты",
+        "type": "slider",
+        "default": 40
+      },
+      {
+        "section": "AIM — Прицеливание",
+        "title_en": "Invert Vertical Look – Infantry",
+        "title_ru": "Инвертировать вертикальный обзор (пехота)",
+        "type": "toggle",
+        "default": false
+      },
+      {
+        "section": "AIM — Прицеливание",
+        "title_en": "Field of View",
+        "title_ru": "Поле зрения (FOV)",
+        "type": "slider",
+        "default": 110
+      },
+      {
+        "section": "AIM — Прицеливание",
+        "title_en": "Vertical Aim Ratio",
+        "title_ru": "Вертикальное соотношение прицела",
+        "type": "slider",
+        "default": 56
+      },
+      {
+        "section": "AIM — Прицеливание",
+        "title_en": "Uniform Infantry Aiming",
+        "title_ru": "Единое прицеливание пехоты",
+        "type": "toggle",
+        "default": true
+      },
+      {
+        "section": "AIM — Прицеливание",
+        "title_en": "Zoom Sensitivity Coefficient",
+        "title_ru": "Коэффициент чувствительности при увеличении",
+        "type": "slider",
+        "default": 178
+      },
+      {
+        "section": "AIM — Прицеливание",
+        "title_en": "Infantry Aim Assist",
+        "title_ru": "Помощь при прицеливании",
+        "type": "slider",
+        "default": 100
+      },
+      {
+        "section": "AIM — Прицеливание",
+        "title_en": "Infantry Aim Assist Slowdown",
+        "title_ru": "Замедление при помощи Aim Assist",
+        "type": "slider",
+        "default": 100
+      },
+      {
+        "section": "AIM — Прицеливание",
+        "title_en": "Infantry Aim Assist Zoom Snap",
+        "title_ru": "Помощь Aim Assist при зуме",
+        "type": "slider",
+        "default": 100
+      },
+      {
+        "section": "AIM — Прицеливание",
+        "title_en": "Infantry Aim Input Curve",
+        "title_ru": "Кривая ввода прицела",
+        "type": "select",
+        "default": "Standard",
+        "options": ["Standard", "BF2042 OLD", "BFV", "BF1 | BF4", "BF3" , "BFBC2", "BFBC2", "Linear" ]
+      },
+      {
+        "section": "AIM — Прицеливание",
+        "title_en": "Stick Input Acceleration Presets",
+        "title_ru": "Пресеты ускорения стиков",
+        "type": "select",
+        "default": "Standard",
+        "options": ["Standard", "BF2042 OLD | BFV", "BF1", "BF4 | BF3 | BFVC", "BFBC2"]
+      },
+      {
+        "section": "AIM — Прицеливание",
+        "title_en": "Aiming Left / Right Acceleration",
+        "title_ru": "Ускорение обзора влево / вправо",
+        "type": "slider",
+        "default": 70
+      },
+      {
+        "section": "MOVEMENT — Передвижение",
+        "title_en": "Infantry Sprint",
+        "title_ru": "Бег пехоты",
+        "type": "select",
+        "default": "Toggle",
+        "options": ["Hold", "Toggle"]
+      },
+      {
+        "section": "MOVEMENT — Передвижение",
+        "title_en": "Double Tap Forward To Sprint",
+        "title_ru": "Двойное нажатие вперёд для бега",
+        "type": "select",
+        "default": "Off",
+        "options": ["On", "Off"]
+      },
+      {
+        "section": "MOVEMENT — Передвижение",
+        "title_en": "Sprint",
+        "title_ru": "Кнопка бега",
+        "type": "button",
+        "default": "LT"
+      },
+      {
+        "section": "MOVEMENT — Передвижение",
+        "title_en": "Crouch Toggle Sprint",
+        "title_ru": "Бег в приседе",
+        "type": "select",
+        "default": "Stand",
+        "options": ["Hold", "Toggle", "Stand"]
+      },
+      {
+        "section": "MOVEMENT — Передвижение",
+        "title_en": "Vault Over Sprint",
+        "title_ru": "Прыжок через препятствие во время бега",
+        "type": "toggle",
+        "default": true
+      },
+      {
+        "section": "MOVEMENT — Передвижение",
+        "title_en": "Slide",
+        "title_ru": "Скольжение",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "MOVEMENT — Передвижение",
+        "title_en": "Crouch Slide",
+        "title_ru": "Скольжение из приседа",
+        "type": "select",
+        "default": "All",
+        "options": ["All", "Sprint Only", "Off"]
+      },
+      {
+        "section": "MOVEMENT — Передвижение",
+        "title_en": "Double Tap Crouch For Sprint Slide",
+        "title_ru": "Двойное приседание для скольжения",
+        "type": "toggle",
+        "default": true
+      },
+      {
+        "section": "ZOOM — Приближение",
+        "title_en": "Infantry Weapon Zoom",
+        "title_ru": "Приближение оружия (пехота)",
+        "type": "select",
+        "default": "Hold",
+        "options": ["Hold", "Toggle"]
+      },
+      {
+        "section": "ZOOM — Приближение",
+        "title_en": "Infantry Zoom Aim Sensitivity",
+        "title_ru": "Чувствительность при прицеле с зумом",
+        "type": "slider",
+        "default": 100
+      },
+      {
+        "section": "OTHER — Прочее",
+        "title_en": "Parachute Autodeploy",
+        "title_ru": "Автоматическое раскрытие парашюта",
+        "type": "select",
+        "default": "Skydive / Insertions",
+        "options": ["Always", "Skydive / Insertions", "Tethered only"]
+      },
+      {
+        "section": "OTHER — Прочее",
+        "title_en": "Interact & Reload",
+        "title_ru": "Взаимодействие и перезарядка",
+        "type": "select",
+        "default": "Prioritize Interact",
+        "options": ["Prioritize Interact", "Reload (TAP) | Prioritize (HOLD)"]
+      },
+      {
+        "section": "GYRO — Гироскоп",
+        "title_en": "Infantry Gyro Button",
+        "title_ru": "Кнопка гироскопа",
+        "type": "toggle",
+        "default": true
+      },
+      {
+        "section": "GYRO — Гироскоп",
+        "title_en": "Infantry Gyro Aiming Mode",
+        "title_ru": "Режим прицеливания гироскопом",
+        "type": "select",
+        "default": "Always",
+        "options": ["Always", "In zoom only", "In no zoom only", "Disabled" ]
+      },
+      {
+        "section": "FLICK LOOK — Быстрый обзор",
+        "title_en": "Infantry Flick Look Mode",
+        "title_ru": "Режим быстрого обзора (Flick Look)",
+        "type": "select",
+        "default": "Always",
+        "options": ["Always", "In zoom only", "In no zoom only", "Disabled" ]
+      },
+      {
+        "section": "FLICK LOOK — Быстрый обзор",
+        "title_en": "Infantry Flick Look Threshold",
+        "title_ru": "Порог срабатывания быстрого обзора",
+        "type": "slider",
+        "default": 90
+      },
+      {
+        "section": "FLICK LOOK — Быстрый обзор",
+        "title_en": "Infantry Flick Look Speed",
+        "title_ru": "Скорость быстрого обзора",
+        "type": "slider",
+        "default": 100
+      }
+    ]
+  },
+
+  {
+    "section": "INFANTRY — Пехота",
+    "title_en": "Buttons",
+    "title_ru": "Кнопки управления",
+    "type": "select",
+    "default": "Default",
+    "options": ["Default", "Alternate", "Custom"]
+  },
+  {
+    "section": "INFANTRY — Пехота",
+    "title_en": "Controls",
+    "title_ru": "Схема управления",
+    "type": "select",
+    "default": "Default",
+    "options": ["Default", "Custom"]
+  },
+  {
+    "category": "controller",
+    "section": "INFANTRY — Пехота",
+    "title_en": "Infantry/Passenger Control Mapping",
+    "title_ru": "Привязка управления пехоты и пассажира",
+    "type": "group",
+    "subsettings": [
+
+      {
+        "section": "GENERAL — Общее",
+        "title_en": "Interact",
+        "title_ru": "Взаимодействие",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "GENERAL — Общее",
+        "title_en": "Enter / Exit Vehicle",
+        "title_ru": "Войти / Выйти из транспорта",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "GENERAL — Общее",
+        "title_en": "Big Map",
+        "title_ru": "Большая карта",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "GENERAL — Общее",
+        "title_en": "Big Map / Quick Loadout Customization",
+        "title_ru": "Большая карта / Быстрая настройка снаряжения",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "GENERAL — Общее",
+        "title_en": "Quick Loadout Customization",
+        "title_ru": "Быстрая настройка снаряжения",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "GENERAL — Общее",
+        "title_en": "Toggle Inventory / Scoreboard (HOLD)",
+        "title_ru": "Инвентарь / Таблица счёта (УДЕРЖИВАТЬ)",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "GENERAL — Общее",
+        "title_en": "Scoreboard (HOLD)",
+        "title_ru": "Таблица счёта (УДЕРЖИВАТЬ)",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "GENERAL — Общее",
+        "title_en": "Toggle Inventory",
+        "title_ru": "Открыть инвентарь",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "GENERAL — Общее",
+        "title_en": "Change Seat in Vehicle",
+        "title_ru": "Сменить место в транспорте",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "GENERAL — Общее",
+        "title_en": "Vehicle Seat 1",
+        "title_ru": "Место в транспорте 1",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "GENERAL — Общее",
+        "title_en": "Vehicle Seat 2",
+        "title_ru": "Место в транспорте 2",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "GENERAL — Общее",
+        "title_en": "Vehicle Seat 3",
+        "title_ru": "Место в транспорте 3",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "GENERAL — Общее",
+        "title_en": "Vehicle Seat 4",
+        "title_ru": "Место в транспорте 4",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "GENERAL — Общее",
+        "title_en": "Vehicle Seat 5",
+        "title_ru": "Место в транспорте 5",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "GENERAL — Общее",
+        "title_en": "Vehicle Seat 6",
+        "title_ru": "Место в транспорте 6",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "GENERAL — Общее",
+        "title_en": "Skip to Deploy",
+        "title_ru": "Пропустить до высадки",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "GENERAL — Общее",
+        "title_en": "Commo Rose (HOLD) / Call-In Gadget Half Combo",
+        "title_ru": "Командное колесо (УДЕРЖИВАТЬ) / Половинный вызов гаджета",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "GENERAL — Общее",
+        "title_en": "Clear Pings",
+        "title_ru": "Очистить метки",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "GENERAL — Общее",
+        "title_en": "Grenade / Call-In Gadget Half Combo",
+        "title_ru": "Граната / Половинный вызов гаджета",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "GENERAL — Общее",
+        "title_en": "Gyro Button",
+        "title_ru": "Кнопка гироскопа",
+        "type": "button",
+        "default": ""
+      },
+
+
+      {
+        "section": "MOVEMENT & AIMING — Передвижение и прицеливание",
+        "title_en": "Walk Forward",
+        "title_ru": "Движение вперёд",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "MOVEMENT & AIMING — Передвижение и прицеливание",
+        "title_en": "Walk Backward",
+        "title_ru": "Движение назад",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "MOVEMENT & AIMING — Передвижение и прицеливание",
+        "title_en": "Strafe Right",
+        "title_ru": "Движение вправо",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "MOVEMENT & AIMING — Передвижение и прицеливание",
+        "title_en": "Strafe Left",
+        "title_ru": "Движение влево",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "MOVEMENT & AIMING — Передвижение и прицеливание",
+        "title_en": "Look Up",
+        "title_ru": "Смотреть вверх",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "MOVEMENT & AIMING — Передвижение и прицеливание",
+        "title_en": "Look Down",
+        "title_ru": "Смотреть вниз",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "MOVEMENT & AIMING — Передвижение и прицеливание",
+        "title_en": "Look Right",
+        "title_ru": "Смотреть вправо",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "MOVEMENT & AIMING — Передвижение и прицеливание",
+        "title_en": "Look Left",
+        "title_ru": "Смотреть влево",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "MOVEMENT & AIMING — Передвижение и прицеливание",
+        "title_en": "Jump (PRESS) / Quick Upgrade (HOLD)",
+        "title_ru": "Прыжок (Нажать) / Быстрое улучшение (Удерживать)",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "MOVEMENT & AIMING — Передвижение и прицеливание",
+        "title_en": "Sprint",
+        "title_ru": "Бег",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "MOVEMENT & AIMING — Передвижение и прицеливание",
+        "title_en": "Slide",
+        "title_ru": "Скольжение",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "MOVEMENT & AIMING — Передвижение и прицеливание",
+        "title_en": "Crouch (TOGGLE) / Prone (HOLD)",
+        "title_ru": "Присесть (ПЕРЕКЛЮЧЕНИЕ) / Лечь (УДЕРЖИВАТЬ)",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "MOVEMENT & AIMING — Передвижение и прицеливание",
+        "title_en": "Lean / Peek",
+        "title_ru": "Наклон / Подсмотр",
+        "type": "button",
+        "default": ""
+      },
+
+      {
+        "section": "WEAPONS & EQUIPMENT — Оружие и снаряжение",
+        "title_en": "Fire",
+        "title_ru": "Огонь",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "WEAPONS & EQUIPMENT — Оружие и снаряжение",
+        "title_en": "Zoom",
+        "title_ru": "Приближение (Прицеливание)",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "WEAPONS & EQUIPMENT — Оружие и снаряжение",
+        "title_en": "Reload (TOGGLE) / Interact (HOLD)",
+        "title_ru": "Перезарядка (НАЖАТИЕ) / Взаимодействие (УДЕРЖИВАНИЕ)",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "WEAPONS & EQUIPMENT — Оружие и снаряжение",
+        "title_en": "Melee / Melee Takedown",
+        "title_ru": "Ближний бой / Добивание",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "WEAPONS & EQUIPMENT — Оружие и снаряжение",
+        "title_en": "Primary Weapon",
+        "title_ru": "Основное оружие",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "WEAPONS & EQUIPMENT — Оружие и снаряжение",
+        "title_en": "Secondary Weapon",
+        "title_ru": "Вторичное оружие",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "WEAPONS & EQUIPMENT — Оружие и снаряжение",
+        "title_en": "Gadget One",
+        "title_ru": "Гаджет 1",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "WEAPONS & EQUIPMENT — Оружие и снаряжение",
+        "title_en": "Gadget Two / Weapon Inspect (HOLD)",
+        "title_ru": "Гаджет 2 / Осмотр оружия (УДЕРЖИВАТЬ)",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "WEAPONS & EQUIPMENT — Оружие и снаряжение",
+        "title_en": "Grenade",
+        "title_ru": "Граната",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "WEAPONS & EQUIPMENT — Оружие и снаряжение",
+        "title_en": "Toggle Laser and/or Flashlight",
+        "title_ru": "Переключить лазер и/или фонарик",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "WEAPONS & EQUIPMENT — Оружие и снаряжение",
+        "title_en": "Fire Mode / Scope Zeroing",
+        "title_ru": "Режим огня / Настройка прицела (Zeroing)",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "WEAPONS & EQUIPMENT — Оружие и снаряжение",
+        "title_en": "Steady Scope",
+        "title_ru": "Удерживать прицел устойчивым",
+        "type": "button",
+        "default": ""
+      },
+      {
+        "section": "WEAPONS & EQUIPMENT — Оружие и снаряжение",
+        "title_en": "Deploy Bipod / Mount",
+        "title_ru": "Развернуть сошки / Установить оружие",
+        "type": "button",
+        "default": ""
+      }
+    ]
+  }
+  
+]
