@@ -534,57 +534,56 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // === Рендер списка вложенных настроек ===
+// === Список поднастроек: безопасный рендер ===
 function renderSubsettings(subsettings) {
   const list = document.getElementById('bf-subsettings-list');
   list.innerHTML = '';
 
-  if (!Array.isArray(subsettings) || subsettings.length === 0) {
+  const items = Array.isArray(subsettings) ? subsettings : [];
+  if (!items.length) {
     const empty = document.createElement('p');
     empty.textContent = 'Нет дополнительных параметров';
     empty.style.opacity = '.6';
     empty.style.textAlign = 'center';
-    empty.style.padding = '20px';
+    empty.style.padding = '20px 0';
     list.appendChild(empty);
     return;
   }
 
-  subsettings.forEach(sub => {
-    list.appendChild(renderSubSetting(sub));
-  });
+  const frag = document.createDocumentFragment();
+  items.forEach(sub => frag.appendChild(renderSubSetting(sub)));
+  list.appendChild(frag);
 
-  // сбрасываем скролл
+  // начинаем сверху
   list.scrollTop = 0;
 }
 
-// === Глобальная инициализация поднастроек ===
+// === Открыть/закрыть поднастройки ===
 function openSubsettings(title_en, title_ru, subsettings) {
-  console.log('🔧 Открываю subsettings:', title_en, subsettings);
+  const listEl = document.getElementById('bf-subsettings-list');
 
-  currentSubSettings = subsettings || [];
-  subOverlayTitleEn.textContent = title_en || '';
-  subOverlayTitleRu.textContent = title_ru || '';
+  // заголовки
+  document.getElementById('bf-subsettings-title-en').textContent = title_en || '';
+  document.getElementById('bf-subsettings-title-ru').textContent = title_ru || '';
 
-  if (!Array.isArray(subsettings) || subsettings.length === 0) {
-    alert('Вложенных настроек нет');
-    return;
-  }
-
+  // рендер
   renderSubsettings(subsettings);
 
-  // активируем overlay
+  // показать
   subOverlay.classList.add('active');
   document.body.style.overflow = 'hidden';
 
-  // прокрутка внутри контейнера
-  const list = subOverlay.querySelector('#bf-subsettings-list');
-  list.scrollTop = 0;
-
+  // защитный хак от «куда-то уехало»: принудительно измеряем, скролл включён
+  requestAnimationFrame(() => {
+    listEl.style.overflowY = 'auto';
+  });
 }
 
 subOverlayClose.addEventListener('click', () => {
   subOverlay.classList.remove('active');
   document.body.style.overflow = '';
 });
+
 
 
   
