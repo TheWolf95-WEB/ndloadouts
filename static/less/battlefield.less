@@ -1961,40 +1961,45 @@ body.warzone-theme .card-btn:hover {
 
 
 /* === Оверлей с субнастройками === */
-/* === Оверлей поднастроек === */
+✅ CSS (вставь в самый конец)
+/* === Полноэкранное окно поднастроек Battlefield === */
 #bf-subsettings-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(5, 8, 12, 0.98);
+  background: rgba(6, 8, 12, 0.98);
+  backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  overflow: hidden;
+  padding-top: 70px; /* чтобы не липло к верхней панели */
+  overflow: hidden; /* скролл только у контейнера */
   z-index: 999;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.25s ease;
 }
 
+/* Активное состояние — появляется плавно */
 #bf-subsettings-overlay.active {
   opacity: 1;
   pointer-events: auto;
 }
 
-/* === Контейнер содержимого === */
+/* === Контейнер настроек === */
 #bf-subsettings-overlay .subsettings-container {
-  width: 90%;
-  max-width: 600px;
+  width: 95%;
+  max-width: 580px;
   background: #0e1118;
   border-radius: 10px;
-  padding: 20px;
-  margin-top: 70px;
+  box-shadow: 0 0 40px rgba(0,0,0,0.5);
   overflow-y: auto;
-  max-height: calc(100vh - 120px);
-  box-shadow: 0 0 25px rgba(0,0,0,0.5);
+  max-height: calc(100vh - 100px);
+  padding: 20px;
+  scrollbar-width: thin;
+  scrollbar-color: #2d9c44 rgba(255,255,255,0.08);
 }
 
-/* === Заголовок внутри окна === */
+/* === Заголовок и кнопка закрытия === */
 #bf-subsettings-overlay .subsettings-header {
   display: flex;
   justify-content: space-between;
@@ -2003,36 +2008,22 @@ body.warzone-theme .card-btn:hover {
   position: sticky;
   top: 0;
   background: #0e1118;
-  z-index: 2;
+  z-index: 10;
+  padding-bottom: 10px;
 }
 
-#bf-subsettings-overlay .subsettings-header h2 {
-  color: #00aaff;
-  font-size: 16px;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-
-#bf-subsettings-overlay .subsettings-header p {
-  color: #bbb;
-  font-size: 13px;
-}
-
-/* Кнопка закрытия */
 #bf-close-subsettings {
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 4px;
-  padding: 8px 12px;
-  font-size: 14px;
+  border: none;
+  background: transparent;
   color: #fff;
-  transition: background 0.2s;
+  font-size: 22px;
+  cursor: pointer;
+  transition: color 0.2s ease;
 }
 
 #bf-close-subsettings:hover {
-  background: rgba(255,255,255,0.2);
+  color: #2d9c44;
 }
-
 
 .color-preview {
   box-shadow: 0 0 4px rgba(0,0,0,0.3);
