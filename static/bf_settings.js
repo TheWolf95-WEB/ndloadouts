@@ -515,15 +515,24 @@ document.addEventListener("DOMContentLoaded", () => {
       
         // плавное открытие
         subOverlay.classList.add('active');
-        document.body.style.overflow = 'hidden'; // 🚫 блокируем скролл страницы
+        document.body.style.overflow = 'hidden'; // блокируем скролл основного документа
       
-        // 🧩 Проверяем, помещается ли контент
         requestAnimationFrame(() => {
           const container = subOverlay.querySelector('.subsettings-container');
-          if (container.scrollHeight <= window.innerHeight - 60) {
-            subOverlay.style.overflowY = 'hidden';
-          } else {
+          const header = subOverlay.querySelector('.subsettings-header');
+          const headerOffset = header ? header.offsetHeight + 60 : 60;
+      
+          // Отступ сверху, чтобы первая карточка не прилипала
+          container.style.marginTop = `${headerOffset}px`;
+      
+          // Проверяем, помещается ли контент
+          const availableHeight = window.innerHeight - 40;
+          if (container.scrollHeight > availableHeight) {
+            // если контента больше чем окно — разрешаем прокрутку
             subOverlay.style.overflowY = 'auto';
+          } else {
+            // иначе фиксируем без скролла
+            subOverlay.style.overflowY = 'hidden';
           }
         });
       }
@@ -531,10 +540,9 @@ document.addEventListener("DOMContentLoaded", () => {
       // === Закрытие оверлея ===
       subOverlayClose.addEventListener('click', () => {
         subOverlay.classList.remove('active');
-        document.body.style.overflow = ''; // ✅ возвращаем скролл страницы
+        document.body.style.overflow = ''; // возвращаем прокрутку страницы
       });
-
-
+      
 
     
     // === Закрытие оверлея ===
