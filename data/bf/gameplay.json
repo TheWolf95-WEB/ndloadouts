@@ -1,0 +1,512 @@
+[
+  {
+    "category": "gameplay",
+    "section": "GLOBAL",
+    "title_en": "Invert All Vertical Look",
+    "title_ru": "Инвертировать все вертикальные оси обзора",
+    "type": "select",
+    "default": "Custom",
+    "options": ["Off", "On", "Custom"]
+  },
+  {
+    "category": "gameplay",
+    "section": "GLOBAL",
+    "title_en": "Vertical Look Settings",
+    "title_ru": "Настройки вертикального обзора",
+    "type": "button",
+    "default": "",
+    "options": [],
+    "subsettings": [
+      {
+        "title_en": "Invert All Vertical Look",
+        "title_ru": "Инвертировать все вертикальные оси обзора",
+        "type": "select",
+        "default": "Custom",
+        "options": ["Off", "On", "Custom"]
+      },
+      {
+        "title_en": "Invert Vertical Look – Infantry",
+        "title_ru": "Инвертировать вертикальный обзор — Пехота",
+        "type": "toggle",
+        "default": "true",
+        "options": []
+      },
+      {
+        "title_en": "Invert Vertical Look – Vehicle Driver",
+        "title_ru": "Инвертировать вертикальный обзор — Водитель транспорта",
+        "type": "toggle",
+        "default": "true",
+        "options": []
+      },
+      {
+        "title_en": "Invert Vertical Look – Transport Driver",
+        "title_ru": "Инвертировать вертикальный обзор — Водитель перевозочного транспорта",
+        "type": "toggle",
+        "default": "true",
+        "options": []
+      },
+      {
+        "title_en": "Invert Vertical Look – Aircraft",
+        "title_ru": "Инвертировать вертикальный обзор — Авиация",
+        "type": "toggle",
+        "default": "true",
+        "options": []
+      },
+      {
+        "title_en": "Invert Vertical Flight – Aircraft",
+        "title_ru": "Инвертировать управление полётом — Авиация",
+        "type": "toggle",
+        "default": "true",
+        "options": []
+      },
+      {
+        "title_en": "Invert Vertical Look – Gunner",
+        "title_ru": "Инвертировать вертикальный обзор — Стрелок",
+        "type": "toggle",
+        "default": "true",
+        "options": []
+      }
+    ]
+  },
+  {
+    "category": "gameplay",
+    "section": "GLOBAL",
+    "title_en": "Hold/Toggle",
+    "title_ru": "Удержание / Переключение",
+    "type": "button",
+    "default": "",
+    "options": [],
+    "subsettings": [
+      {
+        "title_en": "Infantry Sprint",
+        "title_ru": "Бег пехоты",
+        "type": "select",
+        "default": "Toggle",
+        "options": ["Hold", "Toggle"]
+      },
+      {
+        "title_en": "Double Tap Forward To Sprint",
+        "title_ru": "Двойное нажатие вперёд для бега",
+        "type": "select",
+        "default": "Off",
+        "options": ["On", "Off"]
+      },
+      {
+        "title_en": "Crouch Toggle Sprint",
+        "title_ru": "Присесть для включения спринта",
+        "type": "select",
+        "default": "Stand",
+        "options": ["Stand", "Hold"]
+      },
+      {
+        "title_en": "Crouch Slide",
+        "title_ru": "Скольжение при приседании",
+        "type": "select",
+        "default": "All",
+        "options": ["Off", "Partial", "All"]
+      },
+      {
+        "title_en": "Double Tap Crouch For Sprint Slide",
+        "title_ru": "Двойное приседание для скольжения",
+        "type": "select",
+        "default": "On",
+        "options": ["On", "Off"]
+      },
+      {
+        "title_en": "Vehicle Boost",
+        "title_ru": "Ускорение транспорта",
+        "type": "select",
+        "default": "Toggle",
+        "options": ["Hold", "Toggle"]
+      },
+      {
+        "title_en": "Infantry Weapon Zoom",
+        "title_ru": "Приближение оружия пехоты",
+        "type": "select",
+        "default": "Hold",
+        "options": ["Hold", "Toggle"]
+      },
+      {
+        "title_en": "Vehicle Weapon Zoom",
+        "title_ru": "Приближение оружия транспорта",
+        "type": "select",
+        "default": "Hold",
+        "options": ["Hold", "Toggle"]
+      },
+      {
+        "title_en": "Steady Scope",
+        "title_ru": "Удержание дыхания при прицеливании",
+        "type": "select",
+        "default": "Hold",
+        "options": ["Hold", "Toggle"]
+      },
+      {
+        "title_en": "Interact & Reload",
+        "title_ru": "Взаимодействие и перезарядка",
+        "type": "select",
+        "default": "Prioritize Interact",
+        "options": ["Prioritize Interact", "Prioritize Reload"]
+      },
+      {
+        "title_en": "Interacts",
+        "title_ru": "Взаимодействие",
+        "type": "select",
+        "default": "Toggle",
+        "options": ["Hold", "Toggle"]
+      },
+      {
+        "title_en": "Skip Revive",
+        "title_ru": "Пропустить возрождение",
+        "type": "select",
+        "default": "Hold",
+        "options": ["Hold", "Toggle"]
+      },
+      {
+        "title_en": "Request Revive",
+        "title_ru": "Запрос на возрождение",
+        "type": "select",
+        "default": "Toggle",
+        "options": ["Hold", "Toggle"]
+      },
+      {
+        "title_en": "Mount Breakout",
+        "title_ru": "Отрыв при укрытии",
+        "type": "select",
+        "default": "Instant",
+        "options": ["Instant", "Hold"]
+      },
+      {
+        "title_en": "CommoRose",
+        "title_ru": "Командное колесо",
+        "type": "select",
+        "default": "Hold",
+        "options": ["Hold", "Toggle"]
+      },
+      {
+        "title_en": "Scoreboard",
+        "title_ru": "Таблица счёта",
+        "type": "select",
+        "default": "Hold",
+        "options": ["Hold", "Toggle"]
+      }
+    ]
+  },
+  {
+    "category": "gameplay",
+    "section": "GLOBAL",
+    "title_en": "Capture Area Outline",
+    "title_ru": "Контур зоны захвата",
+    "type": "toggle",
+    "default": "true",
+    "options": []
+  },
+
+  {
+    "category": "gameplay",
+    "section": "INFANTRY",
+    "title_en": "Infantry Aim Sensitivity",
+    "title_ru": "Чувствительность прицела пехоты",
+    "type": "slider",
+    "default": "40",
+    "options": []
+  },
+  {
+    "category": "gameplay",
+    "section": "INFANTRY",
+    "title_en": "Infantry Mouse Aim Sensitivity",
+    "title_ru": "Чувствительность прицела мышью (пехота)",
+    "type": "slider",
+    "default": "20",
+    "options": []
+  },
+  {
+    "category": "gameplay",
+    "section": "INFANTRY",
+    "title_en": "Double Tap Forward To Sprint",
+    "title_ru": "Двойное нажатие вперёд для бега",
+    "type": "select",
+    "default": "Off",
+    "options": ["On", "Off"]
+  },
+  {
+    "category": "gameplay",
+    "section": "INFANTRY",
+    "title_en": "Crouch Toggle Sprint",
+    "title_ru": "Присесть для включения спринта",
+    "type": "select",
+    "default": "Stand",
+    "options": ["Stand", "Hold"]
+  },
+  {
+    "category": "gameplay",
+    "section": "INFANTRY",
+    "title_en": "Vault Over Sprint",
+    "title_ru": "Перелезание во время спринта",
+    "type": "toggle",
+    "default": "true",
+    "options": []
+  },
+  {
+    "category": "gameplay",
+    "section": "INFANTRY",
+    "title_en": "Sprint Door Barge",
+    "title_ru": "Выбивание двери во время спринта",
+    "type": "toggle",
+    "default": "true",
+    "options": []
+  },
+  {
+    "category": "gameplay",
+    "section": "INFANTRY",
+    "title_en": "Double Tap Crouch For Sprint Slide",
+    "title_ru": "Двойное приседание для скольжения",
+    "type": "select",
+    "default": "On",
+    "options": ["On", "Off"]
+  },
+  {
+    "category": "gameplay",
+    "section": "INFANTRY",
+    "title_en": "Parachute Autodeploy",
+    "title_ru": "Автоматическое раскрытие парашюта",
+    "type": "select",
+    "default": "Skydive / Insertion Only",
+    "options": ["Off", "Always", "Skydive / Insertion Only"]
+  },
+  {
+    "category": "gameplay",
+    "section": "INFANTRY",
+    "title_en": "Roll Camera In Landing Roll",
+    "title_ru": "Поворот камеры при приземлении",
+    "type": "toggle",
+    "default": "true",
+    "options": []
+  },
+  {
+    "category": "gameplay",
+    "section": "INFANTRY",
+    "title_en": "Mount Type",
+    "title_ru": "Тип укрытия",
+    "type": "select",
+    "default": "Side and Up",
+    "options": ["Side and Up", "Side Only", "Up Only"]
+  },
+  {
+    "category": "gameplay",
+    "section": "INFANTRY",
+    "title_en": "Mount Breakout",
+    "title_ru": "Отрыв при укрытии",
+    "type": "select",
+    "default": "Instant",
+    "options": ["Instant", "Hold"]
+  },
+  {
+    "category": "gameplay",
+    "section": "INFANTRY",
+    "title_en": "Mount Presets",
+    "title_ru": "Пресеты укрытия",
+    "type": "select",
+    "default": "Combo",
+    "options": ["Combo", "Side", "Up"]
+  },
+  {
+    "category": "gameplay",
+    "section": "INFANTRY",
+    "title_en": "Peek Type",
+    "title_ru": "Тип выглядывания",
+    "type": "select",
+    "default": "Side and Up",
+    "options": ["Side and Up", "Side Only", "Up Only"]
+  },
+  {
+    "category": "gameplay",
+    "section": "INFANTRY",
+    "title_en": "Interact & Reload",
+    "title_ru": "Взаимодействие и перезарядка",
+    "type": "select",
+    "default": "Prioritize Interact",
+    "options": ["Prioritize Interact", "Prioritize Reload"]
+  },
+  {
+    "category": "gameplay",
+    "section": "INFANTRY",
+    "title_en": "Invert Demolition Charge",
+    "title_ru": "Инвертировать заряд подрыва",
+    "type": "toggle",
+    "default": "false",
+    "options": []
+  }
+  ,
+
+[
+  {
+    "category": "gameplay",
+    "section": "VEHICLES",
+    "title_en": "Vehicle Aim Sensitivity",
+    "title_ru": "Чувствительность прицела транспорта",
+    "type": "slider",
+    "default": "20",
+    "options": []
+  },
+  {
+    "category": "gameplay",
+    "section": "VEHICLES",
+    "title_en": "Vehicle Mouse Aim Sensitivity",
+    "title_ru": "Чувствительность прицела мышью (транспорт)",
+    "type": "slider",
+    "default": "30",
+    "options": []
+  },
+  {
+    "category": "gameplay",
+    "section": "VEHICLES",
+    "title_en": "Aircraft Control Sensitivity",
+    "title_ru": "Чувствительность управления авиацией",
+    "type": "slider",
+    "default": "100",
+    "options": []
+  },
+  {
+    "category": "gameplay",
+    "section": "VEHICLES",
+    "title_en": "Helicopter Control Sensitivity",
+    "title_ru": "Чувствительность управления вертолётом",
+    "type": "slider",
+    "default": "100",
+    "options": []
+  },
+  {
+    "category": "gameplay",
+    "section": "VEHICLES",
+    "title_en": "Helicopter Control Assists",
+    "title_ru": "Помощь при управлении вертолётом",
+    "type": "toggle",
+    "default": "false",
+    "options": []
+  },
+  {
+    "category": "gameplay",
+    "section": "VEHICLES",
+    "title_en": "Vehicle Aim-Relative Controls",
+    "title_ru": "Относительное управление прицелом транспорта",
+    "type": "toggle",
+    "default": "false",
+    "options": []
+  },
+  {
+    "category": "gameplay",
+    "section": "VEHICLES",
+    "title_en": "Decouple Tank Turret Aiming from Turning",
+    "title_ru": "Разъединить прицел башни танка и поворот корпуса",
+    "type": "toggle",
+    "default": "false",
+    "options": []
+  },
+  {
+    "category": "gameplay",
+    "section": "VEHICLES",
+    "title_en": "Vehicle Boost",
+    "title_ru": "Ускорение транспорта",
+    "type": "select",
+    "default": "Toggle",
+    "options": ["Hold", "Toggle"]
+  },
+
+
+
+
+  {
+    "category": "gameplay",
+    "section": "AIM ASSIST",
+    "title_en": "Infantry Aim Input Curve",
+    "title_ru": "Кривая ввода прицела (пехота)",
+    "type": "select",
+    "default": "Standard",
+    "options": ["Standard", "Linear", "Exponential"]
+  },
+  {
+    "category": "gameplay",
+    "section": "AIM ASSIST",
+    "title_en": "Vehicle Aim Assist Zoom Snap",
+    "title_ru": "Помощь при прицеле транспорта (зум-снэп)",
+    "type": "slider",
+    "default": "100",
+    "options": []
+  },
+  {
+    "category": "gameplay",
+    "section": "AIM ASSIST",
+    "title_en": "Infantry Aim Assist",
+    "title_ru": "Помощь при прицеле (пехота)",
+    "type": "slider",
+    "default": "100",
+    "options": []
+  },
+  {
+    "category": "gameplay",
+    "section": "AIM ASSIST",
+    "title_en": "Infantry Aim Assist Slowdown",
+    "title_ru": "Замедление при прицеле (пехота)",
+    "type": "slider",
+    "default": "100",
+    "options": []
+  },
+  {
+    "category": "gameplay",
+    "section": "AIM ASSIST",
+    "title_en": "Infantry Zoom Aim Input Curve",
+    "title_ru": "Кривая ввода прицела при увеличении (пехота)",
+    "type": "select",
+    "default": "Standard",
+    "options": ["Standard", "Linear", "Exponential"]
+  },
+  {
+    "category": "gameplay",
+    "section": "AIM ASSIST",
+    "title_en": "Infantry Aim Assist Zoom Snap",
+    "title_ru": "Помощь при прицеле при увеличении (пехота)",
+    "type": "slider",
+    "default": "100",
+    "options": []
+  },
+  {
+    "category": "gameplay",
+    "section": "AIM ASSIST",
+    "title_en": "Vehicle Aim Input Curve",
+    "title_ru": "Кривая ввода прицела (транспорт)",
+    "type": "select",
+    "default": "Standard",
+    "options": ["Standard", "Linear", "Exponential"]
+  },
+  {
+    "category": "gameplay",
+    "section": "AIM ASSIST",
+    "title_en": "Vehicle Aim Assist",
+    "title_ru": "Помощь при прицеле (транспорт)",
+    "type": "slider",
+    "default": "100",
+    "options": []
+  },
+  {
+    "category": "gameplay",
+    "section": "AIM ASSIST",
+    "title_en": "Vehicle Zoom Aim Input Curve",
+    "title_ru": "Кривая прицела при увеличении (транспорт)",
+    "type": "select",
+    "default": "Standard",
+    "options": ["Standard", "Linear", "Exponential"]
+  },
+  {
+    "category": "gameplay",
+    "section": "AIM ASSIST",
+    "title_en": "Vehicle Aim Assist Slowdown",
+    "title_ru": "Замедление при прицеле (транспорт)",
+    "type": "slider",
+    "default": "100",
+    "options": []
+  }
+]
+
+
+
+]
