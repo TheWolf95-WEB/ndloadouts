@@ -894,5 +894,17 @@
     if (typeof showScreen === 'function') showScreen('screen-bf-settings');
   });
 
+
+    // --- Исправляем залипание overlay, чтобы селекты были кликабельны
+  const observer = new MutationObserver(() => {
+    if (overlay.style.display === 'none') {
+      overlay.style.pointerEvents = 'none';
+    } else {
+      overlay.style.pointerEvents = 'auto';
+    }
+  });
+  observer.observe(overlay, { attributes: true, attributeFilter: ['style'] });
+  
+
 })();
 </script>
