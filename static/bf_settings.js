@@ -1,10 +1,4 @@
-(function() {
-
-/* ===============================
-   BF SETTINGS — VIEW ONLY
-   =============================== */
-
-(function() {
+document.addEventListener("DOMContentLoaded", () => {
   // ——— Категории настроек
   const BF_SETTINGS_CATEGORIES = [
     { key: 'accessibility', en: 'Accessibility',    ru: 'Основные' },
@@ -568,8 +562,4 @@
   });
   observer.observe(overlay, { attributes: true, attributeFilter: ['style'] });
   
-
-})();
-
-})();
 });
