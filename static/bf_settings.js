@@ -551,5 +551,45 @@ subOverlayClose.addEventListener('click', () => {
     }
   });
   observer.observe(overlay, { attributes: true, attributeFilter: ['style'] });
+
+
+// === Глобальная инициализация поднастроек ===
+function openSubsettings(title_en, title_ru, subsettings) {
+  currentSubSettings = subsettings || [];
+  subOverlayTitleEn.textContent = title_en || '';
+  subOverlayTitleRu.textContent = title_ru || '';
+
+  // если пусто — не открываем
+  if (!Array.isArray(subsettings) || subsettings.length === 0) {
+    alert('Вложенных настроек нет');
+    return;
+  }
+
+  renderSubsettings(subsettings);
+
+  // фиксируем позицию body и активируем overlay
+  subOverlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+
+  // 🔄 проверяем высоту контента
+  const container = subOverlay.querySelector('.subsettings-container');
+  if (container.scrollHeight > container.clientHeight) {
+    container.style.overflowY = 'auto';
+  } else {
+    container.style.overflowY = 'visible';
+  }
+
+  // небольшая задержка для плавной анимации
+  subOverlay.style.transform = 'translateX(0)';
+}
+
+subOverlayClose.addEventListener('click', () => {
+  subOverlay.classList.remove('active');
+  subOverlay.style.transform = 'translateX(-100%)';
+  document.body.style.overflow = '';
+});
+
+
+  
   
 });
