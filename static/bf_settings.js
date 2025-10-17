@@ -534,58 +534,153 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // === Рендер списка вложенных настроек ===
-// === Список поднастроек: безопасный рендер ===
+// === Улучшенная функция рендера поднастроек ===
 function renderSubsettings(subsettings) {
   const list = document.getElementById('bf-subsettings-list');
   list.innerHTML = '';
 
   const items = Array.isArray(subsettings) ? subsettings : [];
+  
   if (!items.length) {
-    const empty = document.createElement('p');
-    empty.textContent = 'Нет дополнительных параметров';
-    empty.style.opacity = '.6';
-    empty.style.textAlign = 'center';
-    empty.style.padding = '20px 0';
+    const empty = document.createElement('div');
+    empty.className = 'empty-state';
+    empty.innerHTML = `
+      <div style="text-align: center; padding: 40px 20px; opacity: 0.6;">
+        <div style="font-size: 48px; margin-bottom: 16px;">⚙️</div>
+        <div>Нет дополнительных параметров</div>
+      </div>
+    `;
     list.appendChild(empty);
     return;
   }
 
+  // Создаем фрагмент для эффективного рендеринга
   const frag = document.createDocumentFragment();
-  items.forEach(sub => frag.appendChild(renderSubSetting(sub)));
+  
+  items.forEach((sub, index) => {
+    const row = renderSubSetting(sub);
+    // Добавляем небольшую задержку для анимации появления
+    row.style.opacity = '0';
+    row.style.transform = 'translateX(-20px)';
+    frag.appendChild(row);
+    
+    // Анимация появления
+    setTimeout(() => {
+      row.style.transition = 'all 0.3s ease';
+      row.style.opacity = '1';
+      row.style.transform = 'translateX(0)';
+    }, index * 50);
+  });
+  
   list.appendChild(frag);
 
-  // начинаем сверху
-  list.scrollTop = 0;
-}
-
-// === Открыть/закрыть поднастройки ===
-function openSubsettings(title_en, title_ru, subsettings) {
-  const listEl = document.getElementById('bf-subsettings-list');
-
-  // заголовки
-  document.getElementById('bf-subsettings-title-en').textContent = title_en || '';
-  document.getElementById('bf-subsettings-title-ru').textContent = title_ru || '';
-
-  // рендер
-  renderSubsettings(subsettings);
-
-  // показать
-  subOverlay.classList.add('active');
-  document.body.style.overflow = 'hidden';
-
-  // защитный хак от «куда-то уехало»: принудительно измеряем, скролл включён
+  // Сбрасываем скролл и принудительно применяем стили
   requestAnimationFrame(() => {
-    listEl.style.overflowY = 'auto';
+    list.scrollTop = 0;
+    list.style.overflowY = 'auto';
   });
 }
 
-subOverlayClose.addEventListener('click', () => {
+// === Улучшенная функция открытия поднастроек ===
+function openSubsettings(title_en, title_ru, subsettings) {
+  console.log('📖 Открываем поднастройки:', title_en, subsettings?.length);
+  
+  // Устанавливаем заголовки
+  subOverlayTitleEn.textContent = title_en || 'Settings';
+  subOverlayTitleRu.textContent = title_ru || 'Настройки';
+  
+  // Рендерим контент
+  renderSubsettings(subsettings);
+  
+  // Показываем оверлей
+  subOverlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  
+  // Принудительный reflow для корректной анимации
+  subOverlay.offsetHeight;
+}
+
+// === Улучшенная функция закрытия ===
+function closeSubsettings() {
   subOverlay.classList.remove('active');
   document.body.style.overflow = '';
+  
+  // Очищаем контент после анимации
+  setTimeout(() => {
+    subOverlayList.innerHTML = '';
+  }, 300);
+}
+
+// Обновляем обработчик закрытия
+subOverlayClose.addEventListener('click', closeSubsettings);
+
+// Закрытие по клику на оверлей (опционально)
+subOverlay.addEventListener('click', (e) => {
+  if (e.target === subOverlay) {
+    closeSubsettings();
+  }
 });
 
 
+// === Безопасный рендер одной настройки с обработкой ошибок ===
+function renderSubSetting(item) {
+  if (!item || typeof item !== 'object') {
+    console.warn('⚠️ Некорректные данные настройки:', item);
+    return createErrorRow();
+  }
+  
+  try {
+    const wrap = document.createElement('div');
+    wrap.className = 'setting-row';
+    
+    const info = document.createElement('div');
+    info.className = 'setting-info';
+    info.innerHTML = `
+      <div class="title-en">${escapeHtml(item.title_en || 'Untitled')}</div>
+      <div class="title-ru">${escapeHtml(item.title_ru || '')}</div>
+    `;
+    
+    const control = document.createElement('div');
+    control.className = 'setting-control';
+    
+    // Рендер контрола в зависимости от типа
+    renderControlBasedOnType(control, item);
+    
+    wrap.appendChild(info);
+    wrap.appendChild(control);
+    return wrap;
+    
+  } catch (error) {
+    console.error('❌ Ошибка рендера настройки:', error, item);
+    return createErrorRow();
+  }
+}
 
+// Вспомогательная функция для экранирования HTML
+function escapeHtml(unsafe) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+// Создание строки с ошибкой
+function createErrorRow() {
+  const wrap = document.createElement('div');
+  wrap.className = 'setting-row error';
+  wrap.innerHTML = `
+    <div class="setting-info">
+      <div class="title-en">Error Loading Setting</div>
+      <div class="title-ru">Ошибка загрузки настройки</div>
+    </div>
+    <div class="setting-control">
+      <span style="color: #ff6b6b;">⚠️</span>
+    </div>
+  `;
+  return wrap;
+}
   
   
 });
