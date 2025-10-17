@@ -737,128 +737,31 @@ function createErrorRow(item, error) {
 
 // === УЛУЧШЕННЫЕ ФУНКЦИИ ОТКРЫТИЯ/ЗАКРЫТИЯ ===
 function openSubsettings(title_en, title_ru, subsettings) {
-  console.log('🎯 Открываем поднастройки:', title_en, 'Количество:', subsettings?.length);
-  
-  if (!Array.isArray(subsettings) || subsettings.length === 0) {
-    console.warn('⚠️ Нет поднастроек для отображения');
-    showNotification('Нет дополнительных параметров для настройки', 'info');
-    return;
-  }
-  
-  currentSubsettings = subsettings;
-  
-  // Устанавливаем заголовки
-  subOverlayTitleEn.textContent = title_en || 'Advanced Settings';
-  subOverlayTitleRu.textContent = title_ru || 'Расширенные настройки';
-  
-  // Рендерим контент
-  renderSubsettings(currentSubsettings);
-  
-  // Показываем оверлей
-  showSubsettingsOverlay();
-}
+  const overlay = document.getElementById('bf-subsettings-overlay');
+  const titleEn = document.getElementById('bf-subsettings-title-en');
+  const titleRu = document.getElementById('bf-subsettings-title-ru');
+  const list = document.getElementById('bf-subsettings-list');
 
-function showSubsettingsOverlay() {
-  subOverlay.classList.add('active');
+  titleEn.textContent = title_en || '';
+  titleRu.textContent = title_ru || '';
+  list.innerHTML = '';
+
+  if (!Array.isArray(subsettings) || !subsettings.length) {
+    list.innerHTML = `<p style="opacity:.6;text-align:center;padding:20px;">Нет дополнительных параметров</p>`;
+  } else {
+    subsettings.forEach(item => {
+      list.appendChild(renderSubSetting(item));
+    });
+  }
+
+  overlay.classList.add('active');
   document.body.style.overflow = 'hidden';
-  
-  // Принудительный reflow для анимации
-  requestAnimationFrame(() => {
-    subOverlay.style.display = 'flex';
-  });
 }
 
-function hideSubsettingsOverlay() {
-  subOverlay.classList.remove('active');
-  
-  setTimeout(() => {
-    subOverlay.style.display = 'none';
-    document.body.style.overflow = '';
-    currentSubsettings = [];
-  }, 350);
-}
-
-// ОБНОВЛЯЕМ ОБРАБОТЧИКИ
-subOverlayClose.addEventListener('click', hideSubsettingsOverlay);
-
-subOverlay.addEventListener('click', (e) => {
-  if (e.target === subOverlay) {
-    hideSubsettingsOverlay();
-  }
+document.getElementById('bf-close-subsettings').addEventListener('click', () => {
+  document.getElementById('bf-subsettings-overlay').classList.remove('active');
+  document.body.style.overflow = '';
 });
 
-// Закрытие по ESC
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && subOverlay.classList.contains('active')) {
-    hideSubsettingsOverlay();
-  }
-});
-
-function showNotification(message, type = 'info') {
-  // Простая реализация уведомления
-  const notification = document.createElement('div');
-  notification.style.cssText = `
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: ${type === 'error' ? '#d9534f' : '#5bc0de'};
-    color: white;
-    padding: 12px 20px;
-    border-radius: 6px;
-    z-index: 10000;
-  `;
-  notification.textContent = message;
-  document.body.appendChild(notification);
-  
-  setTimeout(() => {
-    notification.remove();
-  }, 3000);
-}
-
-// Добавь недостающие функции для других типов контролов
-function renderSliderControl(container, value) {
-  const val = document.createElement('span');
-  val.textContent = value || '0';
-  const rng = document.createElement('input');
-  rng.type = 'range';
-  rng.disabled = true;
-  rng.value = value || 0;
-  container.appendChild(val);
-  container.appendChild(rng);
-}
-
-function renderNumberControl(container, value) {
-  const num = document.createElement('input');
-  num.type = 'number';
-  num.disabled = true;
-  num.value = value ?? '';
-  container.appendChild(num);
-}
-
-function renderButtonControl(container, item) {
-  const btn = document.createElement('button');
-  btn.className = 'edit-btn';
-  
-  const title = (item.title_en || '').toLowerCase();
-  const isReset = title.includes('reset');
-  
-  btn.innerHTML = isReset
-    ? 'RESET <span class="btn-ru">СБРОСИТЬ</span>'
-    : 'EDIT <span class="btn-ru">РЕДАКТ</span>';
-  
-  if (isReset) {
-    btn.disabled = true;
-    btn.style.opacity = '0.6';
-    btn.style.cursor = 'default';
-  }
-  
-  container.appendChild(btn);
-}
-
-function renderTextControl(container, value) {
-  container.textContent = value ?? '';
-}
-  
-  
   
 });
