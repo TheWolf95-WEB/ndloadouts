@@ -2220,3 +2220,64 @@ body.warzone-theme .card-btn:hover {
     border-right: none;
   }
 }
+
+
+
+
+/* === Battlefield Main Settings Rows (общий экран) === */
+.setting-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* инфо и контрол по половине */
+  gap: 16px;
+  align-items: center;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 10px;
+  transition: background 0.25s ease;
+}
+
+.setting-row:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+.setting-control {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+}
+
+/* селект в основной сетке */
+.bf-select-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.bf-select {
+  width: 100%;
+  background: linear-gradient(180deg, #161a24, #10141b);
+  color: #e8eaf0;
+  font-size: 13px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 8px 10px;
+  appearance: none;
+}
+
+.bf-select:focus {
+  outline: none;
+  border-color: #0099ff;
+  box-shadow: 0 0 0 2px rgba(0,153,255,0.2);
+}
+
+.bf-select-ru {
+  font-size: 12px;
+  color: #7fa1b8;
+  opacity: 0.8;
+  margin-top: 4px;
+}
