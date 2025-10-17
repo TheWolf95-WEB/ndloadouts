@@ -1983,8 +1983,11 @@ body.warzone-theme .card-btn:hover {
 /* Контейнер контента внутри оверлея */
 #bf-subsettings-overlay .subsettings-container {
   max-width: 600px;
-  margin: 160px auto 40px; /* верх 80px, низ 40px */
+  width: 100%;
+  margin: 80px 0 40px; /* отступ сверху */
   padding: 20px;
+  overflow-y: auto; /* ✅ скролл теперь только внутри */
+  max-height: calc(100vh - 120px); /* не выходит за экран */
 }
 
 /* Заголовок блока */
