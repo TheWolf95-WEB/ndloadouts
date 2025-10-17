@@ -506,26 +506,34 @@ document.addEventListener("DOMContentLoaded", () => {
         subOverlayList.appendChild(renderSubSetting(sub));
       });
     }
-    
-    function openSubsettings(title_en, title_ru, subsettings) {
-      currentSubSettings = subsettings;
-      subOverlayTitleEn.textContent = title_en;
-      subOverlayTitleRu.textContent = title_ru;
-      renderSubsettings(subsettings);
-    
-      // плавное открытие
-      subOverlay.classList.add('active');
-    
-      // 🧩 Проверяем, помещается ли контент
-      requestAnimationFrame(() => {
-        const container = subOverlay.querySelector('.subsettings-container');
-        if (container.scrollHeight <= window.innerHeight - 60) {
-          subOverlay.style.overflowY = 'hidden';
-        } else {
-          subOverlay.style.overflowY = 'auto';
-        }
+          
+      function openSubsettings(title_en, title_ru, subsettings) {
+        currentSubSettings = subsettings;
+        subOverlayTitleEn.textContent = title_en;
+        subOverlayTitleRu.textContent = title_ru;
+        renderSubsettings(subsettings);
+      
+        // плавное открытие
+        subOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden'; // 🚫 блокируем скролл страницы
+      
+        // 🧩 Проверяем, помещается ли контент
+        requestAnimationFrame(() => {
+          const container = subOverlay.querySelector('.subsettings-container');
+          if (container.scrollHeight <= window.innerHeight - 60) {
+            subOverlay.style.overflowY = 'hidden';
+          } else {
+            subOverlay.style.overflowY = 'auto';
+          }
+        });
+      }
+      
+      // === Закрытие оверлея ===
+      subOverlayClose.addEventListener('click', () => {
+        subOverlay.classList.remove('active');
+        document.body.style.overflow = ''; // ✅ возвращаем скролл страницы
       });
-    }
+
 
 
     
@@ -542,6 +550,8 @@ document.addEventListener("DOMContentLoaded", () => {
   btnBurger?.addEventListener('click', openDrawer);
   overlay?.addEventListener('click', closeDrawer);
 
+  document.body.style.overflow = '';
+  
   // ——— Открытие экрана "Настройки"
   btnOpenUser?.addEventListener('click', () => {
     renderCategoriesNav();
