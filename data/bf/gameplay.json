@@ -335,10 +335,8 @@
     "type": "toggle",
     "default": "false",
     "options": []
-  }
-  ,
-
-[
+  },
+  
   {
     "category": "gameplay",
     "section": "VEHICLES",
@@ -505,6 +503,6 @@
     "default": "100",
     "options": []
   }
-
 ]
+
 
