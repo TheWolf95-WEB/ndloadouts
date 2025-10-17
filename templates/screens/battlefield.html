@@ -581,17 +581,30 @@
         break;
       }
       case 'select': {
+        const selectWrap = document.createElement('div');
+        selectWrap.className = 'bf-select-wrap';
+      
         const sel = document.createElement('select');
         sel.disabled = true;
+        sel.className = 'bf-select';
+      
         (item.options || []).forEach(opt => {
           const o = document.createElement('option');
           o.textContent = opt;
           if (item.default === opt) o.selected = true;
           sel.appendChild(o);
         });
-        control.appendChild(sel);
+      
+        // Добавляем русский текст рядом
+        const ruLabel = document.createElement('span');
+        ruLabel.className = 'bf-select-ru';
+        ruLabel.textContent = item.title_ru || '';
+      
+        selectWrap.append(sel, ruLabel);
+        control.appendChild(selectWrap);
         break;
       }
+
 
         // 🟦 вот сюда вставляется новый case
         case 'button': {
