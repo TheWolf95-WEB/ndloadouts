@@ -609,7 +609,7 @@ function renderSelectControl(container, item) {
   (item.options || []).forEach(option => {
     const opt = document.createElement('option');
     opt.value = option;
-    opt.textContent = option;
+    opt.textContent = `${option} / ${translationMap[option] || option}`;
     if (option === item.default) {
       opt.selected = true;
       currentRu = translationMap[option] || option;
