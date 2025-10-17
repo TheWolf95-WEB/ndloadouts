@@ -2124,55 +2124,13 @@ body.warzone-theme .card-btn:hover {
 }
 
 /* === Battlefield Select === */
-/* === Battlefield Select (clickable) === */
+/* === Battlefield Select — NDHQ Style === */
 .bf-select-wrap {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.bf-select {
-  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 6px;
-  color: #e8eaf0;
-  padding: 6px 12px;
-  font-size: 13px;
-  min-width: 160px;
-  cursor: pointer;
-  outline: none;
-  appearance: none;
-  position: relative;
-  transition: all 0.25s ease;
-}
-
-.bf-select:hover {
-  border-color: rgba(255,255,255,0.35);
-  background: rgba(255,255,255,0.08);
-  box-shadow: 0 0 8px rgba(72, 139, 255, 0.25);
-}
-
-.bf-select:focus {
-  border-color: #4ca3ff;
-  box-shadow: 0 0 10px rgba(80,160,255,0.4);
-}
-
-.bf-select option {
-  background: #0f141a;
-  color: #e8eaf0;
-  font-size: 13px;
-  padding: 5px 8px;
-}
-
-.bf-select-ru {
-  font-size: 11px;
-  color: #7f8c9b;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  opacity: 0.8;
-}
-
-/* === Battlefield Select — оформление в стиле NDHQ === */
 .bf-select {
   background: linear-gradient(180deg, #151923, #10141b);
   border: 1px solid rgba(255,255,255,0.12);
@@ -2198,7 +2156,7 @@ body.warzone-theme .card-btn:hover {
   box-shadow: 0 0 12px rgba(0,170,255,0.35);
 }
 
-/* Меню раскрытия */
+/* Выпадающий список */
 .bf-select option {
   background: #0f111a;
   color: #e8eaf0;
@@ -2206,7 +2164,7 @@ body.warzone-theme .card-btn:hover {
   padding: 5px 8px;
 }
 
-/* Подпись русской локализации */
+/* Подпись под селектом */
 .bf-select-ru {
   font-size: 11px;
   color: #7fa1b8;
@@ -2214,4 +2172,3 @@ body.warzone-theme .card-btn:hover {
   letter-spacing: 0.5px;
   opacity: 0.8;
 }
-
