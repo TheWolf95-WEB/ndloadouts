@@ -803,7 +803,6 @@
         }
         case 'select': {
           const sel = document.createElement('select');
-          sel.disabled = true;
           (item.options || []).forEach(opt => {
             const o = document.createElement('option');
             o.textContent = opt;
