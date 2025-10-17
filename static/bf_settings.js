@@ -518,23 +518,8 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.style.overflow = 'hidden'; // блокируем скролл основного документа
       
         requestAnimationFrame(() => {
-          const container = subOverlay.querySelector('.subsettings-container');
-          const header = subOverlay.querySelector('.subsettings-header');
-          const headerOffset = header ? header.offsetHeight + 60 : 60;
-      
-          // Отступ сверху, чтобы первая карточка не прилипала
-          container.style.marginTop = `${headerOffset}px`;
-      
-          // Проверяем, помещается ли контент
-          const availableHeight = window.innerHeight - 40;
-          if (container.scrollHeight > availableHeight) {
-            // если контента больше чем окно — разрешаем прокрутку
-            subOverlay.style.overflowY = 'auto';
-          } else {
-            // иначе фиксируем без скролла
-            subOverlay.style.overflowY = 'hidden';
-          }
-        });
+          document.body.style.overflow = 'hidden';
+        })
       }
       
       // === Закрытие оверлея ===
