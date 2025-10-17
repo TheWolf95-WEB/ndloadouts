@@ -1969,12 +1969,17 @@ body.warzone-theme .card-btn:hover {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  overflow: hidden; /* скролл внутри контейнера */
+  overflow-y: auto; /* ✅ разрешаем прокрутку */
+  overflow-x: hidden;
+  padding: 60px 0 40px; /* чтобы контент не прилипал к краям */
   opacity: 0;
   pointer-events: none;
   transform: translateY(20px);
   transition: opacity 0.25s ease, transform 0.25s ease;
+  scrollbar-width: thin;
+  scrollbar-color: #2d9c44 rgba(255, 255, 255, 0.08);
 }
+
 
 /* при активации — плавное появление */
 #bf-subsettings-overlay.active {
@@ -1985,17 +1990,15 @@ body.warzone-theme .card-btn:hover {
 
 /* === Контейнер содержимого === */
 #bf-subsettings-overlay .subsettings-container {
-    width: 100%; 
-    margin-top: 60px;
-    margin-bottom: 40px;
-    padding: 20px;
-    border-radius: 10px;
-    background: #0e1118;
-    box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
-    height: 100%;
-    scrollbar-width: thin;
-    scrollbar-color: #2d9c44 rgba(255, 255, 255, 0.08);
+  width: 90%;
+  max-width: 600px;
+  background: #0e1118;
+  border-radius: 10px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+  padding: 20px;
+  margin: 0 auto;
 }
+
 
 /* === Заголовок === */
 #bf-subsettings-overlay .subsettings-header {
