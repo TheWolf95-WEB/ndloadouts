@@ -190,8 +190,9 @@ function openSubsettings(title_en, title_ru, subsettings) {
           "Save": "Сохранить", "Back": "Назад", "Yes": "Да", "No": "Нет"
         };
       
-        // создаём опции без перевода
         let currentRu = '';
+      
+        // создаём опции без перевода
         (item.options || []).forEach(opt => {
           const o = document.createElement('option');
           o.textContent = opt; // ❗ только EN текст
@@ -202,10 +203,15 @@ function openSubsettings(title_en, title_ru, subsettings) {
           sel.appendChild(o);
         });
       
-        // подпись под селектом
+        // если default не совпал с options (редкий случай) — ищем вручную
+        if (!currentRu && item.default) {
+          currentRu = translationMap[item.default] || item.default;
+        }
+      
+        // подпись под селектом — видна сразу при загрузке
         const ruBelow = document.createElement('div');
         ruBelow.className = 'bf-select-ru';
-        ruBelow.textContent = currentRu || translationMap[item.default] || item.default || '';
+        ruBelow.textContent = currentRu || '';
         ruBelow.style.fontSize = '12px';
         ruBelow.style.opacity = '0.75';
         ruBelow.style.marginTop = '4px';
@@ -220,7 +226,6 @@ function openSubsettings(title_en, title_ru, subsettings) {
         control.appendChild(selectWrap);
         break;
       }
-
         // 🟦 вот сюда вставляется новый case
         case 'button': {
           const btn = document.createElement('button');
