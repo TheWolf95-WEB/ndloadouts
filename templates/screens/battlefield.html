@@ -543,13 +543,21 @@
       case 'toggle': {
         const toggle = document.createElement('div');
         toggle.className = 'bf-toggle';
-        toggle.classList.toggle('on', item.default === 'true' || item.default === true);
+      
+        // создаём декоративный тумблер без функционала
         toggle.innerHTML = `
           <div class="bf-toggle-track">
             <div class="bf-toggle-knob"></div>
           </div>
-          <span class="bf-toggle-label">${item.default === 'true' || item.default === true ? 'ON' : 'OFF'}</span>
+          <div class="bf-toggle-labels">
+            <span class="on-label">ON / ВКЛ</span>
+            <span class="off-label">OFF / ВЫКЛ</span>
+          </div>
         `;
+      
+        // определяем визуальное состояние
+        const isOn = item.default === 'true' || item.default === true;
+        if (isOn) toggle.classList.add('on');
         control.appendChild(toggle);
         break;
       }
@@ -719,13 +727,21 @@
         case 'toggle': {
           const toggle = document.createElement('div');
           toggle.className = 'bf-toggle';
+        
+          // создаём декоративный тумблер без функционала
           toggle.innerHTML = `
             <div class="bf-toggle-track">
               <div class="bf-toggle-knob"></div>
             </div>
-            <span class="bf-toggle-label">${item.default === 'true' ? 'ON' : 'OFF'}</span>
+            <div class="bf-toggle-labels">
+              <span class="on-label">ON / ВКЛ</span>
+              <span class="off-label">OFF / ВЫКЛ</span>
+            </div>
           `;
-          toggle.classList.toggle('on', item.default === 'true' || item.default === true);
+        
+          // определяем визуальное состояние
+          const isOn = item.default === 'true' || item.default === true;
+          if (isOn) toggle.classList.add('on');
           control.appendChild(toggle);
           break;
         }
