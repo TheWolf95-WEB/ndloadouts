@@ -576,9 +576,9 @@ function openSubsettings(title_en, title_ru, subsettings) {
   document.body.style.overflow = 'hidden';
 
   // прокрутка внутри контейнера
-  const container = subOverlay.querySelector('.subsettings-container');
-  container.scrollTop = 0;
-  container.style.overflowY = 'auto';
+  const list = subOverlay.querySelector('#bf-subsettings-list');
+  list.scrollTop = 0;
+
 }
 
 subOverlayClose.addEventListener('click', () => {
