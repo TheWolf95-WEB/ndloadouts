@@ -272,11 +272,7 @@ function openSubsettings(title_en, title_ru, subsettings) {
             console.log(`Selected option for ${item.title_en}:`, sel.value);
           });
         
-          const ruLabel = document.createElement('span');
-          ruLabel.className = 'bf-select-ru';
-          ruLabel.textContent = item.title_ru || '';
-        
-          selectWrap.append(sel, ruLabel);
+          selectWrap.appendChild(sel);
           control.appendChild(selectWrap);
           break;
         }
