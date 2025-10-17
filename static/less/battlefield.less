@@ -1964,39 +1964,52 @@ body.warzone-theme .card-btn:hover {
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: #0f111a;
+  background: rgba(10, 12, 18, 0.98);
+  backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
-  overflow: hidden; /* 🚫 здесь больше нет прокрутки */
+  align-items: flex-start;
+  overflow: hidden; /* скролл внутри контейнера */
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(20px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
+/* при активации — плавное появление */
 #bf-subsettings-overlay.active {
-  transform: translateX(0);
   opacity: 1;
-  pointer-events: all;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
+/* === Контейнер содержимого === */
 #bf-subsettings-overlay .subsettings-container {
+  width: 92%;
   max-width: 600px;
-  width: 100%;
-  margin: 80px 0 40px; /* отступ сверху */
+  margin-top: 60px;
+  margin-bottom: 40px;
   padding: 20px;
-  overflow-y: auto; /* ✅ скролл теперь только внутри */
-  max-height: calc(100vh - 120px); /* не выходит за экран */
+  border-radius: 10px;
+  background: #0e1118;
+  box-shadow: 0 0 30px rgba(0,0,0,0.4);
+  overflow-y: auto;
+  max-height: calc(100vh - 100px);
+  scrollbar-width: thin;
+  scrollbar-color: #2d9c44 rgba(255,255,255,0.08);
 }
 
-
-/* === Заголовок и кнопка закрытия === */
+/* === Заголовок === */
 #bf-subsettings-overlay .subsettings-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 20px;
   position: sticky;
   top: 0;
   background: #0e1118;
-  z-index: 10;
   padding-bottom: 10px;
+  z-index: 10;
+  margin-bottom: 20px;
 }
 
 #bf-close-subsettings {
