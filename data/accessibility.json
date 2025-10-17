@@ -31,7 +31,7 @@
         "title_ru": "Размер текста субтитров",
         "type": "select",
         "default": "Small",
-        "options": ["Small", "Medium", "Large"]
+        "options": ["Small", "Normal", "Large"]
       },
       {
         "title_en": "Subtitle Outline",
