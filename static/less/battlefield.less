@@ -2171,3 +2171,26 @@ body.warzone-theme .card-btn:hover {
   letter-spacing: 0.5px;
   opacity: 0.8;
 }
+
+
+
+/* --- Исправление перекрытия кликов селекта --- */
+
+/* Основной overlay (бургер-меню категорий) */
+#bf-settings-overlay {
+  pointer-events: none; /* не блокирует клики по селектам */
+}
+
+/* Когда меню реально открыто, тогда разрешаем клики */
+#bf-settings-drawer[aria-hidden="false"] + #bf-settings-overlay {
+  pointer-events: auto;
+}
+
+/* Оверлей вложенных поднастроек */
+#bf-subsettings-overlay {
+  pointer-events: none;
+}
+
+#bf-subsettings-overlay.active {
+  pointer-events: auto;
+}
