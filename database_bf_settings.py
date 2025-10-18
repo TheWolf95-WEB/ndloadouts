@@ -71,6 +71,14 @@ def get_bf_settings(category: str | None = None):
     for r in rows:
         item = dict(r)
 
+        # 🟩 Приведение default_value из JSON
+        raw_default = item.get("default_value")
+        try:
+            item["default"] = json.loads(raw_default)
+        except Exception:
+            item["default"] = raw_default  # fallback
+        item.pop("default_value", None)
+
         # 🟩 Безопасное приведение options_json
         raw_options = item.get("options_json")
         if isinstance(raw_options, str):
@@ -79,8 +87,6 @@ def get_bf_settings(category: str | None = None):
                 item["options"] = parsed if isinstance(parsed, list) else []
             except Exception:
                 item["options"] = []
-        elif isinstance(raw_options, list):
-            item["options"] = raw_options
         else:
             item["options"] = []
 
@@ -92,18 +98,17 @@ def get_bf_settings(category: str | None = None):
                 item["subsettings"] = parsed if isinstance(parsed, list) else []
             except Exception:
                 item["subsettings"] = []
-        elif isinstance(raw_subs, list):
-            item["subsettings"] = raw_subs
         else:
             item["subsettings"] = []
 
-        # Убираем служебные поля
+        # 🧹 Убираем служебные поля
         item.pop("options_json", None)
         item.pop("subsettings_json", None)
 
         data.append(item)
 
     return data
+
 
 
 def add_bf_setting(data: dict):
