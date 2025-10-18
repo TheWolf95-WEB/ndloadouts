@@ -156,8 +156,8 @@
     "section": "VOICE CHAT — Голосовой чат",
     "title_en": "Push To Talk Binding",
     "title_ru": "Клавиша Push To Talk",
-    "type": "button",
-    "default": "",
+    "type": "toggle",
+    "default": false,
     "options": []
   },
   {
