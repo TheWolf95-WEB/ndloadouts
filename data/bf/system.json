@@ -1,0 +1,279 @@
+[
+  {
+    "category": "system",
+    "section": "SETUP",
+    "title_en": "Install / Uninstall",
+    "title_ru": "Установка / Удаление",
+    "type": "button",
+    "default": "",
+    "options": [],
+    "subsettings": [
+      {
+        "title_en": "Multiplayer",
+        "title_ru": "Мультиплеер",
+        "type": "toggle",
+        "default": false,
+        "options": []
+      },
+      {
+        "title_en": "Campaign",
+        "title_ru": "Кампания",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      },
+      {
+        "title_en": "Multiplayer Highres Textures",
+        "title_ru": "Текстуры мультиплеера высокого разрешения",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      },
+      {
+        "title_en": "Campaign Highres Textures",
+        "title_ru": "Текстуры кампании высокого разрешения",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      }
+    ]
+  },
+  {
+    "category": "system",
+    "section": "SETUP",
+    "title_en": "Show Player Created Content",
+    "title_ru": "Показывать пользовательский контент",
+    "type": "toggle",
+    "default": true,
+    "options": []
+  },
+  {
+    "category": "system",
+    "section": "SETUP",
+    "title_en": "Command Console",
+    "title_ru": "Командная консоль",
+    "type": "select",
+    "default": "DISABLED",
+    "options": ["ENABLED", "DISABLED"]
+  },
+
+  {
+    "category": "system",
+    "section": "CREATOR",
+    "title_en": "Streamer Mode",
+    "title_ru": "Стример режим",
+    "type": "toggle",
+    "default": false,
+    "options": []
+  },
+  {
+    "category": "system",
+    "section": "CREATOR",
+    "title_en": "Anonymous Mode",
+    "title_ru": "Анонимный режим",
+    "type": "toggle",
+    "default": false,
+    "options": []
+  },
+  {
+    "category": "system",
+    "section": "CREATOR",
+    "title_en": "Enable Radio Music",
+    "title_ru": "Включить радио музыку",
+    "type": "toggle",
+    "default": false,
+    "options": []
+  },
+  {
+    "category": "system",
+    "section": "CREATOR",
+    "title_en": "Minimap",
+    "title_ru": "Миникарта",
+    "type": "button",
+    "default": "",
+    "options": [],
+    "subsettings": [
+      {
+        "title_en": "Minimap Size",
+        "title_ru": "Размер миникарты",
+        "type": "select",
+        "default": "SMALL",
+        "options": ["SMALL", "MEDIUM", "LARGE"]
+      },
+      {
+        "title_en": "Minimap Background Opacity",
+        "title_ru": "Прозрачность фона миникарты",
+        "type": "slider",
+        "default": 90,
+        "options": []
+      },
+      {
+        "title_en": "Cone Opacity",
+        "title_ru": "Прозрачность конуса обзора",
+        "type": "slider",
+        "default": 15,
+        "options": []
+      },
+      {
+        "title_en": "Cone Edge Opacity",
+        "title_ru": "Прозрачность края конуса",
+        "type": "slider",
+        "default": 40,
+        "options": []
+      },
+      {
+        "title_en": "View Rotation",
+        "title_ru": "Поворот обзора",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      },
+      {
+        "title_en": "View Distance On Foot",
+        "title_ru": "Дальность обзора пешком",
+        "type": "slider",
+        "default": 160,
+        "options": []
+      },
+      {
+        "title_en": "View Distance In Ground Vehicle",
+        "title_ru": "Дальность обзора в наземном транспорте",
+        "type": "slider",
+        "default": 250,
+        "options": []
+      },
+      {
+        "title_en": "View Distance In Air",
+        "title_ru": "Дальность обзора в воздухе",
+        "type": "slider",
+        "default": 300,
+        "options": []
+      }
+    ]
+  },
+
+  {
+    "category": "system",
+    "section": "NETWORK",
+    "title_en": "Gameplay Data Sharing",
+    "title_ru": "Обмен игровыми данными",
+    "type": "toggle",
+    "default": "true",
+    "options": []
+  },
+  {
+    "category": "system",
+    "section": "NETWORK",
+    "title_en": "Scoreboard Ping",
+    "title_ru": "Пинг в таблице счёта",
+    "type": "toggle",
+    "default": "true",
+    "options": []
+  },
+  {
+    "category": "system",
+    "section": "NETWORK",
+    "title_en": "VOIP Stats",
+    "title_ru": "Статистика VOIP",
+    "type": "button",
+    "default": "",
+    "options": [],
+    "subsettings": [
+      {
+        "title_en": "Enable VOIP Stats",
+        "title_ru": "Включить VOIP статистику",
+        "type": "toggle",
+        "default": "false",
+        "options": []
+      },
+      {
+        "title_en": "Background Opacity",
+        "title_ru": "Прозрачность фона",
+        "type": "slider",
+        "default": "80",
+        "options": []
+      },
+      {
+        "title_en": "Horizontal Position X",
+        "title_ru": "Горизонтальная позиция X",
+        "type": "slider",
+        "default": "0",
+        "options": []
+      },
+      {
+        "title_en": "Vertical Position Y",
+        "title_ru": "Вертикальная позиция Y",
+        "type": "slider",
+        "default": "0",
+        "options": []
+      }
+    ]
+  },
+  {
+    "category": "system",
+    "section": "NETWORK",
+    "title_en": "Network Graph",
+    "title_ru": "Сетевой график",
+    "type": "button",
+    "default": "",
+    "options": [],
+    "subsettings": [
+      {
+        "title_en": "Network Widgets",
+        "title_ru": "Сетевые виджеты",
+        "type": "toggle",
+        "default": "false",
+        "options": []
+      },
+      {
+        "title_en": "Background Opacity",
+        "title_ru": "Прозрачность фона",
+        "type": "slider",
+        "default": "80",
+        "options": []
+      },
+      {
+        "title_en": "Horizontal Position",
+        "title_ru": "Горизонтальная позиция",
+        "type": "slider",
+        "default": "2",
+        "options": []
+      },
+      {
+        "title_en": "Vertical Position",
+        "title_ru": "Вертикальная позиция",
+        "type": "slider",
+        "default": "59",
+        "options": []
+      },
+      {
+        "title_en": "Show Network Performance Bar",
+        "title_ru": "Панель сетевой производительности",
+        "type": "select",
+        "default": "HIDE",
+        "options": ["HIDE", "ALWAYS" , "ON PROBLEMS"]
+      },
+      {
+        "title_en": "Show Network Performance Graphs",
+        "title_ru": "Графики сетевой производительности",
+        "type": "select",
+        "default": "HIDE",
+        "options": ["HIDE", "ALWAYS" , "ON PROBLEMS"]
+      },
+      {
+        "title_en": "Show Damage Log",
+        "title_ru": "Журнал урона",
+        "type": "toggle",
+        "default": "false",
+        "options": []
+      },
+      {
+        "title_en": "Show Event Graph",
+        "title_ru": "График событий",
+        "type": "toggle",
+        "default": "false",
+        "options": []
+      }
+    ]
+  }
+]
