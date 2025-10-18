@@ -1,0 +1,354 @@
+[
+  {
+    "category": "audio",
+    "section": "VOLUME — Громкость",
+    "title_en": "Master Volume",
+    "title_ru": "Общая громкость",
+    "type": "slider",
+    "default": 21,
+    "options": []
+  },
+  {
+    "category": "audio",
+    "section": "VOLUME — Громкость",
+    "title_en": "Sound Effects Volume",
+    "title_ru": "Громкость звуковых эффектов",
+    "type": "slider",
+    "default": 100,
+    "options": []
+  },
+  {
+    "category": "audio",
+    "section": "VOLUME — Громкость",
+    "title_en": "Music Volume",
+    "title_ru": "Громкость музыки",
+    "type": "slider",
+    "default": 89,
+    "options": []
+  },
+  {
+    "category": "audio",
+    "section": "VOLUME — Громкость",
+    "title_en": "Commander VO Volume",
+    "title_ru": "Громкость командира",
+    "type": "slider",
+    "default": 100,
+    "options": []
+  },
+  {
+    "category": "audio",
+    "section": "VOLUME — Громкость",
+    "title_en": "Soldier and Campaign VO",
+    "title_ru": "Громкость солдатов и кампании",
+    "type": "slider",
+    "default": 100,
+    "options": []
+  },
+  {
+    "category": "audio",
+    "section": "VOLUME — Громкость",
+    "title_en": "UI SFX Volume",
+    "title_ru": "Громкость интерфейсных эффектов",
+    "type": "slider",
+    "default": 100,
+    "options": []
+  },
+  {
+    "category": "audio",
+    "section": "VOLUME — Громкость",
+    "title_en": "Hit Indicator",
+    "title_ru": "Индикатор попадания",
+    "type": "select",
+    "default": "ON",
+    "options": ["ON", "OFF"]
+  },
+
+  {
+    "category": "audio",
+    "section": "CONFIGURATION — Конфигурация",
+    "title_en": "Sound System",
+    "title_ru": "Звуковая система",
+    "type": "select",
+    "default": "HEADPHONES",
+    "options": ["AUTO", "MONO", "STEREO", "HEADPHONES", "3D HEADPHONES", "2.1 STEREO", "QUAD", "5.0 SURROUND", "5.1 SURROUND", "7 SURROUND", "7.1 SURROUND", "SPATIAL 3D"]
+  },
+  {
+    "category": "audio",
+    "section": "CONFIGURATION — Конфигурация",
+    "title_en": "Audio Mix",
+    "title_ru": "Аудио микс",
+    "type": "select",
+    "default": "DEFAULT MIX",
+    "options": ["DEFAULT MIX", "HIGH DYNAMICS", "NIGHT MODE", "WAR TAPES", "WAR TAPES V.A.L."]
+  },
+  {
+    "category": "audio",
+    "section": "CONFIGURATION — Конфигурация",
+    "title_en": "Audio in Background",
+    "title_ru": "Аудио в фоне",
+    "type": "toggle",
+    "default": true,
+    "options": []
+  },
+
+  {
+    "category": "audio",
+    "section": "VOICE CHAT — Голосовой чат",
+    "title_en": "Enable Voice Chat",
+    "title_ru": "Включить голосовой чат",
+    "type": "toggle",
+    "default": true,
+    "options": []
+  },
+  {
+    "category": "audio",
+    "section": "VOICE CHAT — Голосовой чат",
+    "title_en": "Voice Chat Volume",
+    "title_ru": "Громкость голосового чата",
+    "type": "slider",
+    "default": 100,
+    "options": []
+  },
+  {
+    "category": "audio",
+    "section": "VOICE CHAT — Голосовой чат",
+    "title_en": "Voice Chat Ducking",
+    "title_ru": "Понижение громкости при голосовом чате",
+    "type": "slider",
+    "default": 25,
+    "options": []
+  },
+  {
+    "category": "audio",
+    "section": "VOICE CHAT — Голосовой чат",
+    "title_en": "Microphone Mode",
+    "title_ru": "Режим микрофона",
+    "type": "select",
+    "default": "PUSH TO TALK",
+    "options": ["OFF", "PUSH TO TALK", "OPEN MIC"]
+  },
+  {
+    "category": "audio",
+    "section": "VOICE CHAT — Голосовой чат",
+    "title_en": "Push To Talk Binding",
+    "title_ru": "Клавиша Push To Talk",
+    "type": "button",
+    "default": "",
+    "options": []
+  },
+  {
+    "category": "audio",
+    "section": "VOICE CHAT — Голосовой чат",
+    "title_en": "Input Device",
+    "title_ru": "Устройство ввода",
+    "type": "select",
+    "default": "DEFAULT",
+    "options": ["DEFAULT"]
+  },
+  {
+    "category": "audio",
+    "section": "VOICE CHAT — Голосовой чат",
+    "title_en": "Use External Output",
+    "title_ru": "Использовать внешний выход",
+    "type": "toggle",
+    "default": false,
+    "options": []
+  },
+  {
+    "category": "audio",
+    "section": "VOICE CHAT — Голосовой чат",
+    "title_en": "Voice Chat Position Mode",
+    "title_ru": "Режим позиционирования чата",
+    "type": "select",
+    "default": "FLAT",
+    "options": ["FLAT", "DIRECTIONAL"]
+  },
+  {
+    "category": "audio",
+    "section": "VOICE CHAT — Голосовой чат",
+    "title_en": "Enable Gain Compensation",
+    "title_ru": "Компенсация усиления",
+    "type": "toggle",
+    "default": false,
+    "options": []
+  },
+  {
+    "category": "audio",
+    "section": "VOICE CHAT — Голосовой чат",
+    "title_en": "VOIP Stats",
+    "title_ru": "VOIP статистика",
+    "type": "button",
+    "default": "",
+    "options": [],
+    "subsettings": [
+      {
+        "title_en": "Enable VOIP Stats",
+        "title_ru": "Включить VOIP статистику",
+        "type": "toggle",
+        "default": false,
+        "options": []
+      },
+      {
+        "title_en": "Background Opacity",
+        "title_ru": "Прозрачность фона",
+        "type": "slider",
+        "default": 80,
+        "options": []
+      },
+      {
+        "title_en": "Horizontal Position X",
+        "title_ru": "Горизонтальная позиция X",
+        "type": "slider",
+        "default": 0,
+        "options": []
+      },
+      {
+        "title_en": "Vertical Position Y",
+        "title_ru": "Вертикальная позиция Y",
+        "type": "slider",
+        "default": 0,
+        "options": []
+      }
+    ]
+  },
+
+  {
+    "category": "audio",
+    "section": "ACCESSIBILITY — Доступность",
+    "title_en": "Stereo Balance",
+    "title_ru": "Стерео баланс",
+    "type": "slider",
+    "default": 0,
+    "options": []
+  },
+  {
+    "category": "audio",
+    "section": "ACCESSIBILITY — Доступность",
+    "title_en": "Tinnitus SFX Volume",
+    "title_ru": "Громкость тиннитуса (шум в ушах)",
+    "type": "slider",
+    "default": 100,
+    "options": []
+  },
+  {
+    "category": "audio",
+    "section": "ACCESSIBILITY — Доступность",
+    "title_en": "Tinnitus Relief Frequency",
+    "title_ru": "Частота подавления тиннитуса",
+    "type": "slider",
+    "default": 20000,
+    "options": []
+  },
+
+  {
+    "category": "audio",
+    "section": "SUBTITLES — Субтитры",
+    "title_en": "Subtitles Settings",
+    "title_ru": "Настройки субтитров",
+    "type": "button",
+    "default": "",
+    "options": [],
+    "subsettings": [
+      {
+        "title_en": "Subtitles",
+        "title_ru": "Субтитры",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      },
+      {
+        "title_en": "Subtitle Text Size",
+        "title_ru": "Размер текста субтитров",
+        "type": "select",
+        "default": "LARGE",
+        "options": ["SMALL", "NORMAL", "LARGE"]
+      },
+      {
+        "title_en": "Subtitle Outline",
+        "title_ru": "Контур текста субтитров",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      },
+      {
+        "title_en": "Subtitles Background Opacity",
+        "title_ru": "Прозрачность фона субтитров",
+        "type": "slider",
+        "default": 0,
+        "options": []
+      },
+      {
+        "title_en": "Subtitles Text Opacity",
+        "title_ru": "Прозрачность текста субтитров",
+        "type": "slider",
+        "default": 80,
+        "options": []
+      },
+      {
+        "title_en": "Instructor Subtitles",
+        "title_ru": "Субтитры инструктора",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      },
+      {
+        "title_en": "Squad Subtitles",
+        "title_ru": "Субтитры отряда",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      },
+      {
+        "title_en": "Friendly Subtitles",
+        "title_ru": "Субтитры союзников",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      },
+      {
+        "title_en": "Show Speaker Name in Subtitles",
+        "title_ru": "Показывать имя говорящего в субтитрах",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      }
+    ]
+  },
+
+  {
+    "category": "audio",
+    "section": "MUSIC RADIOS — Музыкальное радио",
+    "title_en": "Enable Radio Music",
+    "title_ru": "Включить радио музыку",
+    "type": "toggle",
+    "default": true,
+    "options": []
+  },
+  {
+    "category": "audio",
+    "section": "MUSIC RADIOS — Музыкальное радио",
+    "title_en": "In-World Radio Volume",
+    "title_ru": "Громкость радио в мире",
+    "type": "slider",
+    "default": 100,
+    "options": []
+  },
+  {
+    "category": "audio",
+    "section": "MUSIC RADIOS — Музыкальное радио",
+    "title_en": "Driver Radio Volume",
+    "title_ru": "Громкость радио водителя",
+    "type": "slider",
+    "default": 100,
+    "options": []
+  },
+  {
+    "category": "audio",
+    "section": "MUSIC RADIOS — Музыкальное радио",
+    "title_en": "Passenger Radio Volume",
+    "title_ru": "Громкость радио пассажира",
+    "type": "slider",
+    "default": 100,
+    "options": []
+  }
+]
