@@ -33,7 +33,7 @@ def import_bf_settings():
                 "title_en": item.get("title_en", ""),
                 "title_ru": item.get("title_ru", ""),
                 "type": normalize_type(item.get("type", "toggle")),
-                "default": str(item.get("default", "")),
+                "default": item.get("default", ""),
                 "options": item.get("options", []),
                 "subsettings": item.get("subsettings", []),
             })
