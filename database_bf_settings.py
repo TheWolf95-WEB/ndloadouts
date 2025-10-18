@@ -126,7 +126,7 @@ def add_bf_setting(data: dict):
             data.get("title_en", ""),
             data.get("title_ru", ""),
             data.get("type", "toggle"),
-            json.dumps(data.get("default", "")),
+            str(data.get("default", "")),
             json.dumps(data.get("options") or [], ensure_ascii=False),
             json.dumps(data.get("subsettings") or [], ensure_ascii=False),
         ))
