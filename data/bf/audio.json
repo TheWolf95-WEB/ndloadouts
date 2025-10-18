@@ -60,9 +60,11 @@
     "title_ru": "Индикатор попадания",
     "type": "select",
     "default": "ON",
-    "options": ["ON", "OFF"]
+    "options": [
+      "ON",
+      "OFF"
+    ]
   },
-
   {
     "category": "audio",
     "section": "CONFIGURATION — Конфигурация",
@@ -70,7 +72,20 @@
     "title_ru": "Звуковая система",
     "type": "select",
     "default": "HEADPHONES",
-    "options": ["AUTO", "MONO", "STEREO", "HEADPHONES", "3D HEADPHONES", "2.1 STEREO", "QUAD", "5.0 SURROUND", "5.1 SURROUND", "7 SURROUND", "7.1 SURROUND", "SPATIAL 3D"]
+    "options": [
+      "AUTO",
+      "MONO",
+      "STEREO",
+      "HEADPHONES",
+      "3D HEADPHONES",
+      "2.1 STEREO",
+      "QUAD",
+      "5.0 SURROUND",
+      "5.1 SURROUND",
+      "7 SURROUND",
+      "7.1 SURROUND",
+      "SPATIAL 3D"
+    ]
   },
   {
     "category": "audio",
@@ -79,7 +94,13 @@
     "title_ru": "Аудио микс",
     "type": "select",
     "default": "DEFAULT MIX",
-    "options": ["DEFAULT MIX", "HIGH DYNAMICS", "NIGHT MODE", "WAR TAPES", "WAR TAPES V.A.L."]
+    "options": [
+      "DEFAULT MIX",
+      "HIGH DYNAMICS",
+      "NIGHT MODE",
+      "WAR TAPES",
+      "WAR TAPES V.A.L."
+    ]
   },
   {
     "category": "audio",
@@ -90,7 +111,6 @@
     "default": true,
     "options": []
   },
-
   {
     "category": "audio",
     "section": "VOICE CHAT — Голосовой чат",
@@ -125,7 +145,11 @@
     "title_ru": "Режим микрофона",
     "type": "select",
     "default": "PUSH TO TALK",
-    "options": ["OFF", "PUSH TO TALK", "OPEN MIC"]
+    "options": [
+      "OFF",
+      "PUSH TO TALK",
+      "OPEN MIC"
+    ]
   },
   {
     "category": "audio",
@@ -143,7 +167,9 @@
     "title_ru": "Устройство ввода",
     "type": "select",
     "default": "DEFAULT",
-    "options": ["DEFAULT"]
+    "options": [
+      "DEFAULT"
+    ]
   },
   {
     "category": "audio",
@@ -161,7 +187,10 @@
     "title_ru": "Режим позиционирования чата",
     "type": "select",
     "default": "FLAT",
-    "options": ["FLAT", "DIRECTIONAL"]
+    "options": [
+      "FLAT",
+      "DIRECTIONAL"
+    ]
   },
   {
     "category": "audio",
@@ -211,7 +240,6 @@
       }
     ]
   },
-
   {
     "category": "audio",
     "section": "ACCESSIBILITY — Доступность",
@@ -239,7 +267,6 @@
     "default": 20000,
     "options": []
   },
-
   {
     "category": "audio",
     "section": "SUBTITLES — Субтитры",
@@ -261,7 +288,11 @@
         "title_ru": "Размер текста субтитров",
         "type": "select",
         "default": "LARGE",
-        "options": ["SMALL", "NORMAL", "LARGE"]
+        "options": [
+          "SMALL",
+          "NORMAL",
+          "LARGE"
+        ]
       },
       {
         "title_en": "Subtitle Outline",
@@ -314,12 +345,11 @@
       }
     ]
   },
-
   {
     "category": "audio",
     "section": "MUSIC RADIOS — Музыкальное радио",
     "title_en": "Enable Radio Music",
-    "title_ru": "Включить радио музыку",
+    "title_ru": "Включить музыку радио",
     "type": "toggle",
     "default": true,
     "options": []
