@@ -1,1 +1,241 @@
-
+[
+  {
+    "category": "graphics",
+    "section": "GRAPHICS",
+    "title_en": "Performance Preset",
+    "title_ru": "Пресет производительности",
+    "type": "select",
+    "default": "CUSTOM",
+    "options": ["LOW", "MEDIUM", "HIGH", "ULTRA", "CUSTOM"]
+  },
+  {
+    "category": "graphics",
+    "section": "GRAPHICS",
+    "title_en": "Graphics Quality",
+    "title_ru": "Качество графики",
+    "type": "select",
+    "default": "AUTO",
+    "options": ["LOW", "MEDIUM", "HIGH", "ULTRA", "AUTO"]
+  },
+  {
+    "category": "graphics",
+    "section": "GRAPHICS",
+    "title_en": "Graphics Quality Settings",
+    "title_ru": "Настройки качества графики",
+    "type": "button",
+    "default": "",
+    "subsettings": [
+      {
+        "title_en": "Graphics Quality",
+        "title_ru": "Качество графики",
+        "type": "select",
+        "default": "AUTO",
+        "options": ["LOW", "MEDIUM", "HIGH", "ULTRA", "AUTO"]
+      },
+      {
+        "title_en": "Texture Quality",
+        "title_ru": "Качество текстур",
+        "type": "select",
+        "default": "HIGH",
+        "options": ["LOW", "MEDIUM", "HIGH"]
+      },
+      {
+        "title_en": "Texture Filtering",
+        "title_ru": "Фильтрация текстур",
+        "type": "select",
+        "default": "HIGH",
+        "options": ["LOW", "MEDIUM", "HIGH"]
+      },
+      {
+        "title_en": "Mesh Quality",
+        "title_ru": "Качество моделей",
+        "type": "select",
+        "default": "MEDIUM",
+        "options": ["LOW", "MEDIUM", "HIGH"]
+      },
+      {
+        "title_en": "Terrain Quality",
+        "title_ru": "Качество ландшафта",
+        "type": "select",
+        "default": "MEDIUM",
+        "options": ["LOW", "MEDIUM", "HIGH"]
+      },
+      {
+        "title_en": "Undergrowth Quality",
+        "title_ru": "Качество растительности",
+        "type": "select",
+        "default": "MEDIUM",
+        "options": ["LOW", "MEDIUM", "HIGH"]
+      },
+      {
+        "title_en": "Effects Quality",
+        "title_ru": "Качество эффектов",
+        "type": "select",
+        "default": "LOW",
+        "options": ["LOW", "MEDIUM", "HIGH"]
+      },
+      {
+        "title_en": "Volumetric Quality",
+        "title_ru": "Качество объемных эффектов",
+        "type": "select",
+        "default": "LOW",
+        "options": ["LOW", "MEDIUM", "HIGH"]
+      },
+      {
+        "title_en": "Lighting Quality",
+        "title_ru": "Качество освещения",
+        "type": "select",
+        "default": "HIGH",
+        "options": ["LOW", "MEDIUM", "HIGH"]
+      },
+      {
+        "title_en": "Local Light & Shadow Quality",
+        "title_ru": "Качество локального света и теней",
+        "type": "select",
+        "default": "HIGH",
+        "options": ["LOW", "MEDIUM", "HIGH"]
+      },
+      {
+        "title_en": "Sun Shadow Quality",
+        "title_ru": "Качество теней от солнца",
+        "type": "select",
+        "default": "MEDIUM",
+        "options": ["LOW", "MEDIUM", "HIGH"]
+      },
+      {
+        "title_en": "Shadow Filtering",
+        "title_ru": "Фильтрация теней",
+        "type": "select",
+        "default": "PCF",
+        "options": ["PCF", "VSM", "ESM"]
+      },
+      {
+        "title_en": "Reflection Quality",
+        "title_ru": "Качество отражений",
+        "type": "select",
+        "default": "MEDIUM",
+        "options": ["LOW", "MEDIUM", "HIGH"]
+      },
+      {
+        "title_en": "Screen Space Reflections",
+        "title_ru": "Отражения в экранном пространстве",
+        "type": "select",
+        "default": "LOW",
+        "options": ["OFF", "LOW", "HIGH"]
+      },
+      {
+        "title_en": "Post Process Quality",
+        "title_ru": "Качество постобработки",
+        "type": "select",
+        "default": "LOW",
+        "options": ["LOW", "MEDIUM", "HIGH"]
+      },
+      {
+        "title_en": "Screen Space AO & GI",
+        "title_ru": "AO и GI в экранном пространстве",
+        "type": "select",
+        "default": "GTAO LOW",
+        "options": ["OFF", "SSAO", "GTAO LOW", "GTAO HIGH"]
+      },
+      {
+        "title_en": "High Fidelity Objects Amount",
+        "title_ru": "Количество высокодетализированных объектов",
+        "type": "select",
+        "default": "MEDIUM",
+        "options": ["LOW", "MEDIUM", "HIGH"]
+      }
+    ]
+  },
+  {
+    "category": "graphics",
+    "section": "GRAPHICS",
+    "title_en": "World Brightness",
+    "title_ru": "Яркость мира",
+    "type": "slider",
+    "default": 50
+  },
+  {
+    "category": "graphics",
+    "section": "GRAPHICS",
+    "title_en": "UI Brightness",
+    "title_ru": "Яркость интерфейса",
+    "type": "slider",
+    "default": 50
+  },
+  {
+    "category": "graphics",
+    "section": "GRAPHICS",
+    "title_en": "Sharpness",
+    "title_ru": "Резкость",
+    "type": "slider",
+    "default": 50
+  },
+  {
+    "category": "graphics",
+    "section": "GRAPHICS",
+    "title_en": "Advanced",
+    "title_ru": "Дополнительно",
+    "type": "button",
+    "default": "",
+    "subsettings": [
+      {
+        "title_en": "Fixed Resolution Scale",
+        "title_ru": "Фиксированный масштаб разрешения",
+        "type": "slider",
+        "default": 100
+      },
+      {
+        "title_en": "Frame Rate Limiter",
+        "title_ru": "Ограничитель частоты кадров",
+        "type": "toggle",
+        "default": false
+      },
+      {
+        "title_en": "Dynamic Resolution Scale",
+        "title_ru": "Динамический масштаб разрешения",
+        "type": "toggle",
+        "default": false
+      },
+      {
+        "title_en": "NVIDIA Reflex Low Latency",
+        "title_ru": "NVIDIA Reflex (низкая задержка)",
+        "type": "select",
+        "default": "ENABLED + BOOST",
+        "options": ["DISABLED", "ENABLED", "ENABLED + BOOST"]
+      },
+      {
+        "title_en": "Anti-Aliasing",
+        "title_ru": "Сглаживание",
+        "type": "select",
+        "default": "TAA",
+        "options": ["OFF", "SMAA", "TAA"]
+      },
+      {
+        "title_en": "Upscaling Technique",
+        "title_ru": "Технология масштабирования",
+        "type": "select",
+        "default": "OFF",
+        "options": ["OFF", "FSR", "NIS", "DLSS"]
+      },
+      {
+        "title_en": "NVIDIA Frame Generation",
+        "title_ru": "Генерация кадров NVIDIA",
+        "type": "toggle",
+        "default": false
+      },
+      {
+        "title_en": "Future Frame Rendering",
+        "title_ru": "Рендеринг будущих кадров",
+        "type": "toggle",
+        "default": false
+      },
+      {
+        "title_en": "Performance Overlay",
+        "title_ru": "Оверлей производительности",
+        "type": "select",
+        "default": "OFF",
+        "options": ["OFF", "FPS", "FULL"]
+      }
+    ]
+  }
+]
