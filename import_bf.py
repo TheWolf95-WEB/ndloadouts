@@ -6,7 +6,7 @@ from database_bf_settings import (
     add_bf_setting
 )
 
-JSON_PATH = Path("data/bf/audio.json")
+JSON_PATH = Path("data/bf/graphics.json")
 
 
 def normalize_type(t: str) -> str:
