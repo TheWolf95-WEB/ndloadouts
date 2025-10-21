@@ -34,7 +34,7 @@ def init_bf_settings_table():
                 title_en TEXT NOT NULL,
                 title_ru TEXT,
                 type TEXT CHECK(type IN (
-                    'toggle','slider','number','select','button','color','text'
+                    'toggle','slider','number','select','button','color','text','bind'
                 )) NOT NULL DEFAULT 'toggle',
                 default_value TEXT,
                 options_json TEXT DEFAULT '[]',
