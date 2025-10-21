@@ -6,7 +6,7 @@
     "title_ru": "Пресет производительности",
     "type": "select",
     "default": "CUSTOM",
-    "options": ["AUTO (BALANCDED)", "AUTO (PERFOMANCE)", "CUSTOM"]
+    "options": ["AUTO (BALANCED)", "AUTO (PERFORMANCE)", "CUSTOM"]
   },
   {
     "category": "graphics",
@@ -26,6 +26,7 @@
     "default": "",
     "subsettings": [
       {
+        "section": "QUALITY",
         "title_en": "Graphics Quality",
         "title_ru": "Качество графики",
         "type": "select",
@@ -326,7 +327,7 @@
     "title_en": "Show HUD",
     "title_ru": "Показывать интерфейс (HUD)",
     "type": "toggle",
-    "default": true,
+    "default": "true",
     "options": []
   },
   {
@@ -335,7 +336,7 @@
     "title_en": "Infantry HUD Motion",
     "title_ru": "Движение HUD при передвижении (пехота)",
     "type": "toggle",
-    "default": true,
+    "default": "true",
     "options": []
   },
   {
@@ -344,7 +345,7 @@
     "title_en": "Vehicle HUD Motion",
     "title_ru": "Движение HUD при передвижении (техника)",
     "type": "toggle",
-    "default": true,
+    "default": "true",
     "options": []
   },
   {
@@ -353,7 +354,7 @@
     "title_en": "Show Soldier Overlays",
     "title_ru": "Показывать оверлеи солдат",
     "type": "toggle",
-    "default": true,
+    "default": "true",
     "options": []
   },
   {
@@ -362,7 +363,7 @@
     "title_en": "Show Vehicle Overlays",
     "title_ru": "Показывать оверлеи техники",
     "type": "toggle",
-    "default": true,
+    "default": "true",
     "options": []
   },
   {
@@ -371,7 +372,7 @@
     "title_en": "Show Outlines on Friendly Targeted Soldiers",
     "title_ru": "Отображать контуры союзников",
     "type": "toggle",
-    "default": true,
+    "default": "true",
     "options": []
   },
   {
@@ -380,7 +381,7 @@
     "title_en": "SOVIS Filter",
     "title_ru": "Фильтр SOVIS",
     "type": "toggle",
-    "default": true,
+    "default": "true",
     "options": []
   },
   {
@@ -416,7 +417,7 @@
         "title_en": "Kill Feed Icons",
         "title_ru": "Иконки в ленте убийств",
         "type": "toggle",
-        "default": true,
+        "default": "true",
         "options": []
       },
       {
@@ -425,7 +426,7 @@
         "title_en": "Ping Notifications",
         "title_ru": "Уведомления о пингах",
         "type": "toggle",
-        "default": false,
+        "default": "false",
         "options": []
       },
       {
@@ -470,7 +471,7 @@
         "title_en": "View Rotation",
         "title_ru": "Поворот камеры",
         "type": "toggle",
-        "default": true,
+        "default": "true",
         "options": []
       },
       {
@@ -479,7 +480,7 @@
         "title_en": "Interior Zoom",
         "title_ru": "Увеличение в помещении",
         "type": "toggle",
-        "default": false,
+        "default": "false",
         "options": []
       },
       {
@@ -524,7 +525,7 @@
         "title_en": "Show Resources",
         "title_ru": "Показывать ресурсы",
         "type": "toggle",
-        "default": false,
+        "default": "false",
         "options": []
       },
       {
@@ -533,7 +534,7 @@
         "title_en": "Show Loot",
         "title_ru": "Показывать лут",
         "type": "toggle",
-        "default": true,
+        "default": "true",
         "options": []
       },
       {
@@ -542,7 +543,7 @@
         "title_en": "Show Game Mode Events",
         "title_ru": "События режима игры",
         "type": "toggle",
-        "default": true,
+        "default": "true",
         "options": []
       },
       {
@@ -551,7 +552,7 @@
         "title_en": "Simplified Squad List",
         "title_ru": "Упрощённый список отряда",
         "type": "toggle",
-        "default": false,
+        "default": "false",
         "options": []
       },
       {
@@ -560,7 +561,7 @@
         "title_en": "Show Compass Multiplayer",
         "title_ru": "Показывать компас в мультиплеере",
         "type": "toggle",
-        "default": true,
+        "default": "true",
         "options": []
       },
       {
@@ -578,7 +579,7 @@
         "title_en": "Display Spotted Enemies",
         "title_ru": "Отображать обнаруженных врагов",
         "type": "toggle",
-        "default": true,
+        "default": "true",
         "options": []
       },
       {
@@ -614,7 +615,7 @@
         "title_en": "Show HUD Prompts",
         "title_ru": "Показывать подсказки HUD",
         "type": "toggle",
-        "default": true,
+        "default": "true",
         "options": []
       },
       {
@@ -623,7 +624,7 @@
         "title_en": "Vehicle Control Hints",
         "title_ru": "Подсказки управления техникой",
         "type": "toggle",
-        "default": true,
+        "default": "true",
         "options": []
       },
       {
@@ -641,7 +642,7 @@
         "title_en": "Action Prompts",
         "title_ru": "Подсказки действий",
         "type": "toggle",
-        "default": true,
+        "default": "true",
         "options": []
       }
     ]
@@ -670,7 +671,7 @@
         "title_en": "Ping Hints",
         "title_ru": "Подсказки пинга",
         "type": "toggle",
-        "default": true,
+        "default": "true",
         "options": []
       },
       {
@@ -1023,7 +1024,7 @@
         "title_en": "Infantry Crosshair Projection",
         "title_ru": "Проекция прицела пехоты",
         "type": "toggle",
-        "default": true,
+        "default": "true",
         "options": []
       },
       {
@@ -1095,7 +1096,7 @@
         "title_en": "Armor Broken Hit Indicator",
         "title_ru": "Показатель пробития брони",
         "type": "toggle",
-        "default": true,
+        "default": "true",
         "options": []
       },
       {
@@ -1104,7 +1105,7 @@
         "title_en": "Hit Indicator Number Enabled",
         "title_ru": "Показ чисел урона",
         "type": "toggle",
-        "default": true,
+        "default": "true",
         "options": []
       },
       {
@@ -1166,29 +1167,27 @@
   {
     "category": "graphics",
     "section": "CHAT",
-    "title_en": "Chat",
-    "title_ru": "Чат",
+    "title_en": "Chat Visibility",
+    "title_ru": "Видимость чата",
+    "type": "select",
+    "default": "HIDE",
+    "options": ["HIDE", "SHOW", "WHEN ACTIVE"]
+  },
+  {
+    "category": "graphics",
+    "section": "CHAT",
+    "title_en": "Chat Settings",
+    "title_ru": "Настройки чата",
     "type": "button",
     "default": "",
     "options": [],
     "subsettings": [
       {
-        "category": "graphics",
-        "section": "CHAT",
         "title_en": "Chat Visibility",
         "title_ru": "Видимость чата",
         "type": "select",
         "default": "HIDE",
-        "options": ["HIDE"]
-      },
-      {
-        "category": "graphics",
-        "section": "CHAT",
-        "title_en": "Chat Settings",
-        "title_ru": "Настройки чата",
-        "type": "button",
-        "default": "",
-        "options": []
+        "options": ["HIDE", "SHOW", "WHEN ACTIVE"]
       }
     ]
   }
