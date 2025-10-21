@@ -309,45 +309,53 @@ function openSubsettings(title_en, title_ru, subsettings) {
 // === УЛУЧШЕННЫЙ РЕНДЕР ПОДНАСТРОЕК ===
 function renderSubsettings(subsettings) {
   const list = document.getElementById('bf-subsettings-list');
-  
-  // Очищаем контейнер
   list.innerHTML = '';
-  
+
   const items = Array.isArray(subsettings) ? subsettings : [];
-  
-  if (items.length === 0) {
+  if (!items.length) {
     list.innerHTML = `
       <div class="empty-state">
         <div style="font-size: 48px; margin-bottom: 16px;">🔧</div>
-        <div style="font-size: 16px; margin-bottom: 8px;">Нет доступных настроек</div>
+        <div style="font-size: 16px; margin-bottom: 8px;">Нет доступных параметров</div>
         <div style="font-size: 14px; opacity: 0.7;">Дополнительные параметры отсутствуют</div>
       </div>
     `;
     return;
   }
-  
-  // Создаем фрагмент для эффективного рендеринга
-  const fragment = document.createDocumentFragment();
-  
+
+  let currentSection = null;
+
   items.forEach((item, index) => {
-    try {
-      const row = createSubsettingRow(item, index);
-      if (row) {
-        fragment.appendChild(row);
-      }
-    } catch (error) {
-      console.error('❌ Ошибка создания строки настройки:', error, item);
-      fragment.appendChild(createErrorRow(item, error));
+
+    // === Рендер заголовков секций (как на главном) ===
+    if (item.section && item.section !== currentSection) {
+      currentSection = item.section;
+      const sec = document.createElement('div');
+      sec.className = 'bf-section-title';
+
+      // поддержка формата "EN — RU" если мы потом добавим перевод
+      const parts = String(item.section).split(" — ");
+      const en = parts[0] || "";
+      const ru = parts[1] || "";
+
+      sec.innerHTML = `
+        <div class="section-header">
+          <span class="section-en">${en}</span>
+          ${ru ? `<span class="section-ru">— ${ru}</span>` : ''}
+        </div>
+      `;
+      list.appendChild(sec);
     }
-  });
-  
-  list.appendChild(fragment);
-  
-  // Гарантируем что скролл в начале
-  requestAnimationFrame(() => {
-    list.scrollTop = 0;
+
+    // === ВАЖНО: внутри subsettings не должно быть кнопок ===
+    if (item.type === "button") return;
+
+    // === Обычные строки настроек ===
+    const row = createSubsettingRow(item, index);
+    list.appendChild(row);
   });
 }
+
 
 // СОЗДАНИЕ ОДНОЙ СТРОКИ НАСТРОЙКИ
 function createSubsettingRow(item, index) {
