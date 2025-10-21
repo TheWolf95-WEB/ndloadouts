@@ -6,7 +6,7 @@
     "title_ru": "Пресет производительности",
     "type": "select",
     "default": "CUSTOM",
-    "options": ["LOW", "MEDIUM", "HIGH", "ULTRA", "CUSTOM"]
+    "options": ["AUTO (BALANCDED)", "AUTO (PERFOMANCE)", "CUSTOM"]
   },
   {
     "category": "graphics",
@@ -15,7 +15,7 @@
     "title_ru": "Качество графики",
     "type": "select",
     "default": "AUTO",
-    "options": ["LOW", "MEDIUM", "HIGH", "ULTRA", "AUTO"]
+    "options": ["LOW", "MEDIUM", "HIGH", "ULTRA", "OVERKILL", "AUTO"]
   },
   {
     "category": "graphics",
@@ -30,84 +30,84 @@
         "title_ru": "Качество графики",
         "type": "select",
         "default": "AUTO",
-        "options": ["LOW", "MEDIUM", "HIGH", "ULTRA", "AUTO"]
+        "options": ["LOW", "MEDIUM", "HIGH", "ULTRA", "OVERKILL", "AUTO"]
       },
       {
         "title_en": "Texture Quality",
         "title_ru": "Качество текстур",
         "type": "select",
         "default": "HIGH",
-        "options": ["LOW", "MEDIUM", "HIGH"]
+        "options": ["LOW", "HIGH", "ULTRA", "OVERKILL"]
       },
       {
         "title_en": "Texture Filtering",
         "title_ru": "Фильтрация текстур",
         "type": "select",
         "default": "HIGH",
-        "options": ["LOW", "MEDIUM", "HIGH"]
+        "options": ["LOW", "HIGH", "ULTRA", "OVERKILL"]
       },
       {
         "title_en": "Mesh Quality",
         "title_ru": "Качество моделей",
         "type": "select",
         "default": "MEDIUM",
-        "options": ["LOW", "MEDIUM", "HIGH"]
+        "options": ["LOW", "HIGH", "ULTRA", "OVERKILL"]
       },
       {
         "title_en": "Terrain Quality",
         "title_ru": "Качество ландшафта",
         "type": "select",
         "default": "MEDIUM",
-        "options": ["LOW", "MEDIUM", "HIGH"]
+        "options": ["LOW", "MEDIUM", "HIGH" ]
       },
       {
         "title_en": "Undergrowth Quality",
         "title_ru": "Качество растительности",
         "type": "select",
         "default": "MEDIUM",
-        "options": ["LOW", "MEDIUM", "HIGH"]
+        "options": ["LOW", "MEDIUM", "HIGH" ]
       },
       {
         "title_en": "Effects Quality",
         "title_ru": "Качество эффектов",
         "type": "select",
         "default": "LOW",
-        "options": ["LOW", "MEDIUM", "HIGH"]
+        "options": ["LOW", "HIGH"]
       },
       {
         "title_en": "Volumetric Quality",
         "title_ru": "Качество объемных эффектов",
         "type": "select",
         "default": "LOW",
-        "options": ["LOW", "MEDIUM", "HIGH"]
+        "options": ["LOW", "HIGH", "ULTRA"]
       },
       {
         "title_en": "Lighting Quality",
         "title_ru": "Качество освещения",
         "type": "select",
         "default": "HIGH",
-        "options": ["LOW", "MEDIUM", "HIGH"]
+        "options": ["LOW", "HIGH"]
       },
       {
         "title_en": "Local Light & Shadow Quality",
         "title_ru": "Качество локального света и теней",
         "type": "select",
         "default": "HIGH",
-        "options": ["LOW", "MEDIUM", "HIGH"]
+        "options": ["LOW", "HIGH", "ULTRA", "OVERKILL"]
       },
       {
         "title_en": "Sun Shadow Quality",
         "title_ru": "Качество теней от солнца",
         "type": "select",
         "default": "MEDIUM",
-        "options": ["LOW", "MEDIUM", "HIGH"]
+        "options": ["LOW", "HIGH", "OVERKILL"]
       },
       {
         "title_en": "Shadow Filtering",
         "title_ru": "Фильтрация теней",
         "type": "select",
-        "default": "PCF",
-        "options": ["PCF", "VSM", "ESM"]
+        "default": "PCSS",
+        "options": ["PCSS", "PCS"]
       },
       {
         "title_en": "Reflection Quality",
@@ -128,7 +128,7 @@
         "title_ru": "Качество постобработки",
         "type": "select",
         "default": "LOW",
-        "options": ["LOW", "MEDIUM", "HIGH"]
+        "options": ["LOW", "HIGH", "OFF"]
       },
       {
         "title_en": "Screen Space AO & GI",
@@ -142,7 +142,7 @@
         "title_ru": "Количество высокодетализированных объектов",
         "type": "select",
         "default": "MEDIUM",
-        "options": ["LOW", "MEDIUM", "HIGH"]
+        "options": ["LOW", "HIGH", "ULTRA"]
       }
     ]
   },
@@ -208,14 +208,14 @@
         "title_ru": "Сглаживание",
         "type": "select",
         "default": "TAA",
-        "options": ["OFF", "SMAA", "TAA"]
+        "options": ["OFF", "DLAA", "FSR", "XESS"]
       },
       {
         "title_en": "Upscaling Technique",
         "title_ru": "Технология масштабирования",
         "type": "select",
         "default": "OFF",
-        "options": ["OFF", "FSR", "NIS", "DLSS"]
+        "options": ["OFF", "FSR", "XESS", "DLSS"]
       },
       {
         "title_en": "NVIDIA Frame Generation",
@@ -234,7 +234,961 @@
         "title_ru": "Оверлей производительности",
         "type": "select",
         "default": "OFF",
-        "options": ["OFF", "FPS", "FULL"]
+        "options": ["OFF","SIMPLE","EXTRA","ADVANCED" ]
+      }
+    ]
+  },
+  {
+      "category": "graphics",
+      "section": "CAMERA SETTINGS",
+      "title_en": "Field of View",
+      "title_ru": "Поле зрения",
+      "type": "slider",
+      "default": 120
+    },
+    {
+      "category": "graphics",
+      "section": "CAMERA SETTINGS",
+      "title_en": "Vehicle 3rd Person Field of View",
+      "title_ru": "Поле зрения от 3-го лица (техника)",
+      "type": "slider",
+      "default": 80
+    },
+    {
+      "category": "graphics",
+      "section": "CAMERA SETTINGS",
+      "title_en": "Weapon Field Of View",
+      "title_ru": "Поле зрения оружия",
+      "type": "select",
+      "default": "WIDE",
+      "options": ["NARROW", "WIDE"]
+    },
+    {
+      "category": "graphics",
+      "section": "CAMERA SETTINGS",
+      "title_en": "Weapon Motion Blur",
+      "title_ru": "Размытие оружия при движении",
+      "type": "slider",
+      "default": 50
+    },
+    {
+      "category": "graphics",
+      "section": "CAMERA SETTINGS",
+      "title_en": "World Motion Blur",
+      "title_ru": "Размытие мира при движении",
+      "type": "slider",
+      "default": 50
+    },
+    {
+      "category": "graphics",
+      "section": "CAMERA SETTINGS",
+      "title_en": "Camera Shake Amount",
+      "title_ru": "Сила тряски камеры",
+      "type": "slider",
+      "default": 100
+    },
+    {
+      "category": "graphics",
+      "section": "CAMERA SETTINGS",
+      "title_en": "Reduce Sprint Camera Bobbing",
+      "title_ru": "Уменьшить качание камеры при беге",
+      "type": "toggle",
+      "default": false
+    },
+    {
+      "category": "graphics",
+      "section": "CAMERA SETTINGS",
+      "title_en": "Chromatic Aberration",
+      "title_ru": "Хроматическая аберрация",
+      "type": "toggle",
+      "default": true
+    },
+    {
+      "category": "graphics",
+      "section": "CAMERA SETTINGS",
+      "title_en": "Vignette",
+      "title_ru": "Виньетка",
+      "type": "toggle",
+      "default": true
+    },
+    {
+      "category": "graphics",
+      "section": "CAMERA SETTINGS",
+      "title_en": "Film Grain",
+      "title_ru": "Зернистость пленки",
+      "type": "toggle",
+      "default": true
+    },
+
+  {
+    "category": "graphics",
+    "section": "INTERFACE AND HUD",
+    "title_en": "Show HUD",
+    "title_ru": "Показывать интерфейс (HUD)",
+    "type": "toggle",
+    "default": true,
+    "options": []
+  },
+  {
+    "category": "graphics",
+    "section": "INTERFACE AND HUD",
+    "title_en": "Infantry HUD Motion",
+    "title_ru": "Движение HUD при передвижении (пехота)",
+    "type": "toggle",
+    "default": true,
+    "options": []
+  },
+  {
+    "category": "graphics",
+    "section": "INTERFACE AND HUD",
+    "title_en": "Vehicle HUD Motion",
+    "title_ru": "Движение HUD при передвижении (техника)",
+    "type": "toggle",
+    "default": true,
+    "options": []
+  },
+  {
+    "category": "graphics",
+    "section": "INTERFACE AND HUD",
+    "title_en": "Show Soldier Overlays",
+    "title_ru": "Показывать оверлеи солдат",
+    "type": "toggle",
+    "default": true,
+    "options": []
+  },
+  {
+    "category": "graphics",
+    "section": "INTERFACE AND HUD",
+    "title_en": "Show Vehicle Overlays",
+    "title_ru": "Показывать оверлеи техники",
+    "type": "toggle",
+    "default": true,
+    "options": []
+  },
+  {
+    "category": "graphics",
+    "section": "INTERFACE AND HUD",
+    "title_en": "Show Outlines on Friendly Targeted Soldiers",
+    "title_ru": "Отображать контуры союзников",
+    "type": "toggle",
+    "default": true,
+    "options": []
+  },
+  {
+    "category": "graphics",
+    "section": "INTERFACE AND HUD",
+    "title_en": "SOVIS Filter",
+    "title_ru": "Фильтр SOVIS",
+    "type": "toggle",
+    "default": true,
+    "options": []
+  },
+  {
+    "category": "graphics",
+    "section": "INTERFACE AND HUD",
+    "title_en": "Advanced HUD Settings",
+    "title_ru": "Расширенные настройки HUD",
+    "type": "button",
+    "default": "",
+    "options": [],
+    "subsettings": [
+      {
+        "category": "graphics",
+        "section": "GENERAL",
+        "title_en": "Horizontal HUD Padding",
+        "title_ru": "Горизонтальный отступ интерфейса",
+        "type": "slider",
+        "default": 0,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "KILL FEED",
+        "title_en": "Show Kills Made by",
+        "title_ru": "Отображение убийств",
+        "type": "select",
+        "default": "SQUAD AND NEARBY",
+        "options": ["YOU", "SQUAD", "SQUAD AND NEARBY", "ALL"]
+      },
+      {
+        "category": "graphics",
+        "section": "KILL FEED",
+        "title_en": "Kill Feed Icons",
+        "title_ru": "Иконки в ленте убийств",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "KILL FEED",
+        "title_en": "Ping Notifications",
+        "title_ru": "Уведомления о пингах",
+        "type": "toggle",
+        "default": false,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "MINIMAP",
+        "title_en": "Minimap Size",
+        "title_ru": "Размер мини-карты",
+        "type": "select",
+        "default": "SMALL",
+        "options": ["SMALL", "MEDIUM", "LARGE"]
+      },
+      {
+        "category": "graphics",
+        "section": "MINIMAP",
+        "title_en": "Minimap Background Opacity",
+        "title_ru": "Прозрачность фона мини-карты",
+        "type": "slider",
+        "default": 90,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "MINIMAP",
+        "title_en": "Cone Opacity",
+        "title_ru": "Прозрачность конуса",
+        "type": "slider",
+        "default": 15,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "MINIMAP",
+        "title_en": "Cone Edge Opacity",
+        "title_ru": "Прозрачность края конуса",
+        "type": "slider",
+        "default": 40,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "MINIMAP",
+        "title_en": "View Rotation",
+        "title_ru": "Поворот камеры",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "MINIMAP",
+        "title_en": "Interior Zoom",
+        "title_ru": "Увеличение в помещении",
+        "type": "toggle",
+        "default": false,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "MINIMAP",
+        "title_en": "View Distance On Foot",
+        "title_ru": "Дальность обзора пешком",
+        "type": "slider",
+        "default": 160,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "MINIMAP",
+        "title_en": "View Distance In Ground Vehicle",
+        "title_ru": "Дальность обзора в технике",
+        "type": "slider",
+        "default": 250,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "MINIMAP",
+        "title_en": "View Distance In Air",
+        "title_ru": "Дальность обзора в воздухе",
+        "type": "slider",
+        "default": 300,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "BIGMAP",
+        "title_en": "Bigmap Opacity",
+        "title_ru": "Прозрачность большой карты",
+        "type": "slider",
+        "default": 85,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "WORLD LOG",
+        "title_en": "Show Resources",
+        "title_ru": "Показывать ресурсы",
+        "type": "toggle",
+        "default": false,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "WORLD LOG",
+        "title_en": "Show Loot",
+        "title_ru": "Показывать лут",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "WORLD LOG",
+        "title_en": "Show Game Mode Events",
+        "title_ru": "События режима игры",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "SQUAD LIST",
+        "title_en": "Simplified Squad List",
+        "title_ru": "Упрощённый список отряда",
+        "type": "toggle",
+        "default": false,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "INFANTRY COMPASS",
+        "title_en": "Show Compass Multiplayer",
+        "title_ru": "Показывать компас в мультиплеере",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "INFANTRY COMPASS",
+        "title_en": "Compass Opacity",
+        "title_ru": "Прозрачность компаса",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "INFANTRY COMPASS",
+        "title_en": "Display Spotted Enemies",
+        "title_ru": "Отображать обнаруженных врагов",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "VEHICLE HUD",
+        "title_en": "Tank HUD Color",
+        "title_ru": "Цвет HUD танка",
+        "type": "color",
+        "default": "#fca250",
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "VEHICLE HUD",
+        "title_en": "Jet HUD Color",
+        "title_ru": "Цвет HUD истребителя",
+        "type": "color",
+        "default": "#84ffa4",
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "VEHICLE HUD",
+        "title_en": "Helicopter HUD Color",
+        "title_ru": "Цвет HUD вертолета",
+        "type": "color",
+        "default": "#fcfdb0",
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "HINTS",
+        "title_en": "Show HUD Prompts",
+        "title_ru": "Показывать подсказки HUD",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "HINTS",
+        "title_en": "Vehicle Control Hints",
+        "title_ru": "Подсказки управления техникой",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "HINTS",
+        "title_en": "Vehicle Control Hints Size",
+        "title_ru": "Размер подсказок управления техникой",
+        "type": "select",
+        "default": "MEDIUM",
+        "options": ["SMALL", "MEDIUM", "LARGE"]
+      },
+      {
+        "category": "graphics",
+        "section": "HINTS",
+        "title_en": "Action Prompts",
+        "title_ru": "Подсказки действий",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      }
+    ]
+  },
+  {
+    "category": "graphics",
+    "section": "ICONS & INDICATORS",
+    "title_en": "Icon Intensity",
+    "title_ru": "Интенсивность иконок",
+    "type": "slider",
+    "default": 60,
+    "options": []
+  },
+  {
+    "category": "graphics",
+    "section": "ICONS & INDICATORS",
+    "title_en": "HUD Icons",
+    "title_ru": "Иконки HUD",
+    "type": "button",
+    "default": "",
+    "options": [],
+    "subsettings": [
+      {
+        "category": "graphics",
+        "section": "GENERAL",
+        "title_en": "Ping Hints",
+        "title_ru": "Подсказки пинга",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "AIM–BASED ICONS OPACITY",
+        "title_en": "Icons Opacity Peripheral Zone Size",
+        "title_ru": "Размер периферийной зоны иконок",
+        "type": "slider",
+        "default": 50,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "AIM–BASED ICONS OPACITY",
+        "title_en": "Icons Opacity Scaling Center Scale",
+        "title_ru": "Масштаб центральной области иконок",
+        "type": "slider",
+        "default": 10,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "AIM–BASED ICONS OPACITY",
+        "title_en": "Icons Opacity Peripheral",
+        "title_ru": "Прозрачность периферийных иконок",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "AIM–BASED ICONS OPACITY",
+        "title_en": "Icons Opacity Central",
+        "title_ru": "Прозрачность центральных иконок",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "AIM–BASED ICONS OPACITY",
+        "title_en": "Icons Opacity Peripheral Zone Size (Zoomed)",
+        "title_ru": "Зона периферийных иконок (приближено)",
+        "type": "slider",
+        "default": 50,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "AIM–BASED ICONS OPACITY",
+        "title_en": "Icons Opacity Scaling Center Scale (Zoomed)",
+        "title_ru": "Масштаб центра иконок (приближено)",
+        "type": "slider",
+        "default": 10,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "AIM–BASED ICONS OPACITY",
+        "title_en": "Icons Opacity Peripheral (Zoomed)",
+        "title_ru": "Прозрачность периферийных иконок (приближено)",
+        "type": "slider",
+        "default": 67,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "AIM–BASED ICONS OPACITY",
+        "title_en": "Icons Opacity Central (Zoomed)",
+        "title_ru": "Прозрачность центральных иконок (приближено)",
+        "type": "slider",
+        "default": 20,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "OBJECTIVE ICONS",
+        "title_en": "Objective Icons Scale",
+        "title_ru": "Масштаб иконок целей",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "OBJECTIVE ICONS",
+        "title_en": "Objective Icons Opacity",
+        "title_ru": "Прозрачность иконок целей",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "OBJECTIVE ICONS",
+        "title_en": "Objective Icons Opacity (Zoomed)",
+        "title_ru": "Прозрачность иконок целей (приближено)",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "OBJECTIVE ICONS",
+        "title_en": "Objective Icons Opacity (Occluded)",
+        "title_ru": "Прозрачность иконок (закрыто)",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "FRIENDLY ICONS",
+        "title_en": "Friendly Icons Scale",
+        "title_ru": "Масштаб дружественных иконок",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "FRIENDLY ICONS",
+        "title_en": "Friendly Icons Opacity",
+        "title_ru": "Прозрачность дружественных иконок",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "FRIENDLY ICONS",
+        "title_en": "Friendly Icons Opacity (Zoomed)",
+        "title_ru": "Прозрачность дружественных иконок (приближено)",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "FRIENDLY ICONS",
+        "title_en": "Friendly Revive Icons Scale",
+        "title_ru": "Масштаб иконок возрождения (друзья)",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "FRIENDLY ICONS",
+        "title_en": "Friendly Revive Icons Opacity",
+        "title_ru": "Прозрачность иконок возрождения (друзья)",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "FRIENDLY ICONS",
+        "title_en": "Friendly Revive Icons Opacity (Zoomed)",
+        "title_ru": "Прозрачность возрождения (приближено)",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "SQUAD ICONS",
+        "title_en": "Squad Icons Scale",
+        "title_ru": "Масштаб иконок отряда",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "SQUAD ICONS",
+        "title_en": "Squad Icons Opacity",
+        "title_ru": "Прозрачность иконок отряда",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "SQUAD ICONS",
+        "title_en": "Squad Icons Opacity (Zoomed)",
+        "title_ru": "Прозрачность отряда (приближено)",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "SQUAD ICONS",
+        "title_en": "Squad Revive Icons Scale",
+        "title_ru": "Масштаб иконок возрождения отряда",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "SQUAD ICONS",
+        "title_en": "Squad Revive Icons Opacity",
+        "title_ru": "Прозрачность иконок возрождения отряда",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "SQUAD ICONS",
+        "title_en": "Squad Revive Icons Opacity (Zoomed)",
+        "title_ru": "Прозрачность возрождения отряда (приближено)",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "ENEMY ICONS",
+        "title_en": "Enemy Icons Scale",
+        "title_ru": "Масштаб иконок врага",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "ENEMY ICONS",
+        "title_en": "Enemy Icons Opacity",
+        "title_ru": "Прозрачность иконок врага",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "ENEMY ICONS",
+        "title_en": "Enemy Icons Opacity (Zoomed)",
+        "title_ru": "Прозрачность врага (приближено)",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "NEUTRAL ICONS",
+        "title_en": "Neutral Icons Scale",
+        "title_ru": "Масштаб нейтральных иконок",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "NEUTRAL ICONS",
+        "title_en": "Neutral Icons Opacity",
+        "title_ru": "Прозрачность нейтральных иконок",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "NEUTRAL ICONS",
+        "title_en": "Neutral Icons Opacity (Zoomed)",
+        "title_ru": "Прозрачность нейтральных иконок (приближено)",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "PING MARKER ICONS",
+        "title_en": "Ping Marker Icons Scale",
+        "title_ru": "Масштаб иконок пинга",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "PING MARKER ICONS",
+        "title_en": "Ping Marker Icons Opacity",
+        "title_ru": "Прозрачность иконок пинга",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "PING MARKER ICONS",
+        "title_en": "Ping Marker Icons Opacity (Zoomed)",
+        "title_ru": "Прозрачность иконок пинга (приближено)",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      }
+    ]
+  },
+  {
+    "category": "graphics",
+    "section": "ICONS & INDICATORS",
+    "title_en": "Crosshairs and Indicators",
+    "title_ru": "Прицелы и индикаторы",
+    "type": "button",
+    "default": "",
+    "options": [],
+    "subsettings": [
+      {
+        "category": "graphics",
+        "section": "CROSSHAIR",
+        "title_en": "Crosshair Opacity",
+        "title_ru": "Прозрачность прицела",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "CROSSHAIR",
+        "title_en": "Crosshair Intensity",
+        "title_ru": "Интенсивность прицела",
+        "type": "slider",
+        "default": 60,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "CROSSHAIR",
+        "title_en": "Crosshair Color",
+        "title_ru": "Цвет прицела",
+        "type": "color",
+        "default": "#FFFFFF",
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "CROSSHAIR",
+        "title_en": "Crosshair Thickness",
+        "title_ru": "Толщина прицела",
+        "type": "select",
+        "default": "DEFAULT",
+        "options": ["THIN", "DEFAULT", "THICK"]
+      },
+      {
+        "category": "graphics",
+        "section": "CROSSHAIR",
+        "title_en": "Infantry Crosshair Projection",
+        "title_ru": "Проекция прицела пехоты",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "HIT INDICATOR",
+        "title_en": "Hit Indicator Opacity",
+        "title_ru": "Прозрачность индикатора попадания",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "HIT INDICATOR",
+        "title_en": "Hit Indicator Intensity",
+        "title_ru": "Интенсивность индикатора попадания",
+        "type": "slider",
+        "default": 60,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "HIT INDICATOR",
+        "title_en": "Hit Color",
+        "title_ru": "Цвет попадания",
+        "type": "color",
+        "default": "#FFFFFF",
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "HIT INDICATOR",
+        "title_en": "Headshot Color",
+        "title_ru": "Цвет хэдшота",
+        "type": "color",
+        "default": "#FFFFFF",
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "HIT INDICATOR",
+        "title_en": "Kill Color",
+        "title_ru": "Цвет убийства",
+        "type": "color",
+        "default": "#FF5533",
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "HIT INDICATOR",
+        "title_en": "Armor Soft Hit Color",
+        "title_ru": "Цвет лёгкого урона по броне",
+        "type": "color",
+        "default": "#66CCFF",
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "HIT INDICATOR",
+        "title_en": "Armor Hard Hit Color",
+        "title_ru": "Цвет сильного урона по броне",
+        "type": "color",
+        "default": "#9933FF",
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "HIT INDICATOR",
+        "title_en": "Armor Broken Hit Indicator",
+        "title_ru": "Показатель пробития брони",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "HIT INDICATOR NUMBERS",
+        "title_en": "Hit Indicator Number Enabled",
+        "title_ru": "Показ чисел урона",
+        "type": "toggle",
+        "default": true,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "HIT INDICATOR NUMBERS",
+        "title_en": "Hit Indicator Number Opacity",
+        "title_ru": "Прозрачность чисел урона",
+        "type": "slider",
+        "default": 100,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "HIT INDICATOR NUMBERS",
+        "title_en": "Hit Indicator Number Size",
+        "title_ru": "Размер чисел урона",
+        "type": "select",
+        "default": "SMALL",
+        "options": ["SMALL", "MEDIUM", "LARGE"]
+      },
+      {
+        "category": "graphics",
+        "section": "HIT INDICATOR NUMBERS",
+        "title_en": "Hit Indicator Number Horizontal Offset",
+        "title_ru": "Горизонтальный сдвиг чисел урона",
+        "type": "slider",
+        "default": 10,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "HIT INDICATOR NUMBERS",
+        "title_en": "Hit Indicator Number Vertical Offset",
+        "title_ru": "Вертикальный сдвиг чисел урона",
+        "type": "slider",
+        "default": 50,
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "DAMAGE INDICATOR",
+        "title_en": "Infantry Damage Color",
+        "title_ru": "Цвет урона пехоты",
+        "type": "color",
+        "default": "#AA0000",
+        "options": []
+      },
+      {
+        "category": "graphics",
+        "section": "DAMAGE INDICATOR",
+        "title_en": "Vehicle Damage Color",
+        "title_ru": "Цвет урона технике",
+        "type": "color",
+        "default": "#BBBBBB",
+        "options": []
+      }
+    ]
+  },
+  {
+    "category": "graphics",
+    "section": "CHAT",
+    "title_en": "Chat",
+    "title_ru": "Чат",
+    "type": "button",
+    "default": "",
+    "options": [],
+    "subsettings": [
+      {
+        "category": "graphics",
+        "section": "CHAT",
+        "title_en": "Chat Visibility",
+        "title_ru": "Видимость чата",
+        "type": "select",
+        "default": "HIDE",
+        "options": ["HIDE"]
+      },
+      {
+        "category": "graphics",
+        "section": "CHAT",
+        "title_en": "Chat Settings",
+        "title_ru": "Настройки чата",
+        "type": "button",
+        "default": "",
+        "options": []
       }
     ]
   }
