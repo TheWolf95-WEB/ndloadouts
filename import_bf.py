@@ -10,9 +10,8 @@ JSON_PATH = Path("data/bf/graphics.json")
 
 
 def normalize_type(t: str) -> str:
-    allowed = {"toggle", "slider", "number", "select", "button", "color", "text"}
+    allowed = {"toggle", "slider", "number", "select", "button", "color", "text", "bind"}
     return t if t in allowed else "toggle"
-
 
 def import_bf_settings():
     if not JSON_PATH.exists():
