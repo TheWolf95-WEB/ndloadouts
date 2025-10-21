@@ -419,13 +419,21 @@ function renderControlBasedOnType(container, item) {
     case 'number':
       renderNumberControl(container, value);
       break;
+    case 'bind': {
+      const span = document.createElement('span');
+      span.textContent = item.default || 'Назначить';
+      span.style.opacity = '0.8';
+      container.appendChild(span);
+      break;
+    }
     case 'button':
-      // renderButtonControl(container, item);
+      // кнопок внутри subsettings нет
       break;
     default:
       renderTextControl(container, value);
   }
 }
+
 
 
 function renderSliderControl(container, value) {
