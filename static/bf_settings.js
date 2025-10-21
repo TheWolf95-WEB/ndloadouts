@@ -420,7 +420,7 @@ function renderControlBasedOnType(container, item) {
       renderNumberControl(container, value);
       break;
     case 'button':
-      renderButtonControl(container, item);
+      // renderButtonControl(container, item);
       break;
     default:
       renderTextControl(container, value);
