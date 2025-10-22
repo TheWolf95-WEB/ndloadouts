@@ -277,7 +277,7 @@ document.getElementById('back-to-main')?.addEventListener('click', () => {
 document.getElementById('back-from-builds')?.addEventListener('click', () => showScreen('screen-warzone-main'));
 
 document.getElementById('help-btn')?.addEventListener('click', () => {
-  tg.openLink('https://t.me/ndzone_admin');
+  tg.openLink('https://t.me/ndhq_admin');
   Analytics.trackEvent('click_button', { 
   button: 'help',
   time: new Date().toISOString()
