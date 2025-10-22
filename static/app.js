@@ -277,7 +277,8 @@ document.getElementById('back-to-main')?.addEventListener('click', () => {
 document.getElementById('back-from-builds')?.addEventListener('click', () => showScreen('screen-warzone-main'));
 
 document.getElementById('help-btn')?.addEventListener('click', () => {
-  tg.openTelegramLink("tg://user?id=7947798684&text=Привет%2C%20нужна%20помощь%20по%20NDHQ");
+  const message = encodeURIComponent("Привет! Нужна помощь по NDHQ");
+  tg.openTelegramLink(`https://t.me/ndhq_admin?text=${message}`);
   Analytics.trackEvent('click_button', { 
     button: 'help',
     time: new Date().toISOString()
