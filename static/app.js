@@ -277,12 +277,13 @@ document.getElementById('back-to-main')?.addEventListener('click', () => {
 document.getElementById('back-from-builds')?.addEventListener('click', () => showScreen('screen-warzone-main'));
 
 document.getElementById('help-btn')?.addEventListener('click', () => {
-  tg.openLink('https://t.me/ndhq_admin'); // Открывает чат в Telegram
+  tg.openTelegramLink("tg://user?id=7947798684&text=Привет%2C%20нужна%20помощь%20по%20NDHQ");
   Analytics.trackEvent('click_button', { 
     button: 'help',
     time: new Date().toISOString()
   });
 });
+
 
 
 
