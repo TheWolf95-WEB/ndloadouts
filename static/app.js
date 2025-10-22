@@ -289,6 +289,7 @@ document.getElementById('help-btn')?.addEventListener('click', () => {
 
 
 
+
 document.getElementById('edit-builds-btn')?.addEventListener('click', async () => {
   if (!window.userInfo?.is_admin) {
     alert("🚫 У вас нет прав доступа к редактированию.");
