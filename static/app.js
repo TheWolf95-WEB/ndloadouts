@@ -277,11 +277,7 @@ document.getElementById('back-to-main')?.addEventListener('click', () => {
 document.getElementById('back-from-builds')?.addEventListener('click', () => showScreen('screen-warzone-main'));
 
 document.getElementById('help-btn')?.addEventListener('click', () => {
-  // Если в Telegram WebApp – откроется чат
-  tg.openLink('tg://resolve?domain=ndhq_admin');
-  // Фолбек для браузера
-  setTimeout(() => tg.openLink('https://t.me/ndhq_admin'), 400);
-  
+  tg.openLink('https://t.me/ndhq_admin'); // Открывает чат в Telegram
   Analytics.trackEvent('click_button', { 
     button: 'help',
     time: new Date().toISOString()
