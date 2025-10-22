@@ -1017,18 +1017,9 @@ function prioritySort(a, b) {
         .map(mod => {
           const text = mod.trim();
           const { bg, color, weight } = pickTopBg(text);
-          return `<span class="loadout__top" style="
-            background:${bg};
-            color:${color};
-            font-weight:${weight};
-            text-transform:uppercase;
-            border-radius:6px;
-            padding:3px 8px;
-            margin-right:4px;
-            font-size:0.8rem;
-            letter-spacing:0.5px;
-            display:inline-block;
-          ">${text}</span>`;
+          return `<span class="loadout__top" style="background:${bg};color:${color};font-weight:${weight};">
+            ${text}
+          </span>`;
         })
         .join('');
 
