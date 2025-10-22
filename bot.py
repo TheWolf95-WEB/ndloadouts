@@ -115,7 +115,7 @@ async def grant_access(callback: CallbackQuery):
     )
     keyboard = InlineKeyboardMarkup(inline_keyboard=[[ 
         InlineKeyboardButton(text="🔗 Открыть", web_app=WebAppInfo(url=WEBAPP_URL)),
-        InlineKeyboardButton(text="💬 Связаться", url="https://t.me/ndzone_admin")
+        InlineKeyboardButton(text="💬 Связаться", url="https://t.me/ndhq_admin")
     ]])
     await safe_edit(callback.message, text, keyboard)
 
@@ -140,7 +140,7 @@ async def start_handler(message: Message):
     if subscribed:
         keyboard = InlineKeyboardMarkup(inline_keyboard=[[ 
             InlineKeyboardButton(text="🔗 Открыть", web_app=WebAppInfo(url=WEBAPP_URL)),
-            InlineKeyboardButton(text="💬 Связаться", url="https://t.me/ndzone_admin")
+            InlineKeyboardButton(text="💬 Связаться", url="https://t.me/ndhq_admin")
         ]])
         await message.answer("✅ Личность подтверждена.\n\n🪂 Добро пожаловать в NDHQ.", reply_markup=keyboard)
     else:
@@ -189,7 +189,7 @@ async def recheck_subscription(callback: CallbackQuery):
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="📅 Подписаться", url="https://t.me/callofdutynd")],
             [InlineKeyboardButton(text="🔁 Проверить снова", callback_data="recheck_sub")],
-            [InlineKeyboardButton(text="🧑‍✈️ Связаться", url="https://t.me/ndzone_admin")]
+            [InlineKeyboardButton(text="🧑‍✈️ Связаться", url="https://t.me/ndhq_admin")]
         ])
         await safe_edit(
             callback.message,
