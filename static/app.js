@@ -904,36 +904,46 @@ function renderUserBuilds(buildsToRender) {
     return t || 0;
   }
 
-  function prioritySort(a, b) {
-    const normalizeCats = (cats = []) => cats.map(c => {
-      switch (c.toLowerCase()) {
-        case 'new': return 'Новинки';
-        case 'popular': return 'Популярное';
-        case 'meta': return 'Мета';
-        case 'topmeta': return 'Топ мета';
-        default: return c;
-      }
-    });
-
-    const A = normalizeCats(a.categories || []);
-    const B = normalizeCats(b.categories || []);
-
-    const getPriority = (cats) => {
-      if (cats.includes("Новинки")) return 1;
-      if (cats.includes("Топ мета")) return 2;
-      if (cats.includes("Мета")) return 3;
-      return 4;
-    };
-
-    const pa = getPriority(A);
-    const pb = getPriority(B);
-
-    if (pa !== pb) return pa - pb;
-
-    const ta = getTime(a);
-    const tb = getTime(b);
-    return tb - ta;
+function prioritySort(a, b) {
+  // --- приоритет по TOP ---
+  function extractTopNum(build) {
+    const tops = [build.top1, build.top2, build.top3]
+      .map(t => {
+        const match = String(t || '').match(/#?(\d+)/);
+        return match ? parseInt(match[1], 10) : Infinity;
+      })
+      .filter(n => !isNaN(n));
+    return tops.length ? Math.min(...tops) : Infinity;
   }
+
+  const topA = extractTopNum(a);
+  const topB = extractTopNum(b);
+  if (topA !== topB) return topA - topB; // #1 выше #2 и т.д.
+
+  // --- приоритет по категории ---
+  function categoryWeight(build) {
+    const cats = (build.categories || []).map(c => c.toLowerCase());
+    if (cats.includes('new') || cats.includes('новинки')) return 1;
+    if (cats.includes('topmeta') || cats.includes('топ мета')) return 2;
+    if (cats.includes('meta') || cats.includes('мета')) return 3;
+    return 4;
+  }
+  const catA = categoryWeight(a);
+  const catB = categoryWeight(b);
+  if (catA !== catB) return catA - catB;
+
+  // --- по дате (новые выше) ---
+  function getTime(b) {
+    let t = b.created_at ? Date.parse(b.created_at) : NaN;
+    if (Number.isNaN(t)) {
+      const dt = parseRuDate(b.date);
+      t = dt ? dt.getTime() : 0;
+    }
+    return t;
+  }
+  return getTime(b) - getTime(a);
+}
+
 
   const sorted = [...buildsToRender].sort(prioritySort);
   cachedBuilds = sorted;
