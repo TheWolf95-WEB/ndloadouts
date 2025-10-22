@@ -277,12 +277,13 @@ document.getElementById('back-to-main')?.addEventListener('click', () => {
 document.getElementById('back-from-builds')?.addEventListener('click', () => showScreen('screen-warzone-main'));
 
 document.getElementById('help-btn')?.addEventListener('click', () => {
-  tg.openLink('https://t.me/ndhq_admin');
+  tg.openLink('tg://resolve?domain=ndhq_admin'); // сразу открывает чат
   Analytics.trackEvent('click_button', { 
-  button: 'help',
-  time: new Date().toISOString()
+    button: 'help',
+    time: new Date().toISOString()
+  });
 });
-});
+
 
 
 document.getElementById('edit-builds-btn')?.addEventListener('click', async () => {
