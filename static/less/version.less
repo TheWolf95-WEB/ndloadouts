@@ -168,19 +168,25 @@
 }
 
 /* --- Full text --- */
-/* Плавное раскрытие версии */
+/* --- Full text плавное раскрытие версии --- */
 .version-content-full {
   overflow: hidden;
   max-height: 0;
   opacity: 0;
-  transition: max-height 0.45s ease, opacity 0.45s ease; /* ← Сделал плавнее */
+  padding-top: 0;
+  margin-top: 0;
+  transition: max-height 0.55s ease, opacity 0.45s ease, padding 0.35s ease, margin 0.35s ease;
   will-change: max-height, opacity;
 }
 
+/* Когда открыт */
 .version-content-full.open {
-  max-height: 800px;  /* больше, чтобы точно влез любой текст */
+  max-height: 1000px; /* запас для больших описаний */
   opacity: 1;
+  padding-top: 8px;
+  margin-top: 5px;
 }
+
 
 /* --- Admin Actions --- */
 .version-actions {
