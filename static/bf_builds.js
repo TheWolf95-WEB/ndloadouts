@@ -1315,7 +1315,7 @@ document.querySelectorAll('.js-loadout-toggle').forEach(header => {
       content.style.maxHeight = content.scrollHeight + 'px';
     }
   });
-};
+});
 
 
 /* ===============================
