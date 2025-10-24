@@ -78,27 +78,16 @@
 
 <!-- 📦 Список сборок -->
 <div id="screen-bf-builds" class="screen" style="display:none;">
-  <div class="filters-row">
-    <div class="form-section" style="width:50%;">
-      <select id="bf-weapon-filter" class="form-input">
-        <option value="all">Все типы</option>
-        <option value="assault">Штурмовые</option>
-        <option value="smg">ПП</option>
-        <option value="sniper">Снайперские</option>
-        <option value="support">Поддержка</option>
-        <option value="shotgun">Дробовики</option>
-      </select>
+  <!-- Режимы игры -->
+  <div class="bf-modes">
+    <div class="bf-mode-card" id="bf-mode-mp">
+      <img src="/static/images/setevaya.png" alt="Сетевая игра">
     </div>
-    <div class="form-section" style="width:50%;">
-      <select id="bf-category-filter" class="form-input">
-        <option value="all">Все категории</option>
-        <option value="popular">Популярное</option>
-        <option value="new">Новинки</option>
-        <option value="topmeta">Топ мета</option>
-        <option value="meta">Мета</option>
-      </select>
+    <div class="bf-mode-card" id="bf-mode-br">
+      <img src="/static/images/battleroyale_bf.png" alt="Королевская битва">
     </div>
   </div>
+
 
   <div class="search-section">
     <input type="text" id="bf-builds-search" class="form-input" placeholder="Поиск по названию , модулям....">
@@ -113,6 +102,10 @@
     <p>Загрузка сборок...</p>
   </div>
   <p id="bf-no-results-message" style="display:none;text-align:center;margin-top:20px;">Ничего не найдено</p>
+
+  <p id="bf-br-placeholder" style="display:none;text-align:center;margin-top:20px;opacity:0.6;">
+    Сборки появятся с выходом 1 сезона.
+  </p>  
 </div>
 
 
