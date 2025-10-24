@@ -855,18 +855,21 @@ def init_bf_tables():
 # === Получить все сборки ===
 @app.get("/api/bf/builds")
 async def bf_get_builds(mode: str = Query("all")):
-    builds = get_all_bf_builds()
+    try:
+        builds = get_all_bf_builds()
 
-    # ✅ показываем все если mode=all
-    if mode != "all":
-        builds = [b for b in builds if b.get("mode", "mp") == mode]
+        # ✅ фильтрация по режиму (mp, br), если указано
+        if mode != "all":
+            builds = [b for b in builds if b.get("mode", "mp") == mode]
 
         formatted = []
         for b in builds:
+            # защита, если запись пришла как tuple
             if isinstance(b, (list, tuple)):
                 keys = ["id", "title", "weapon_type", "top1", "top2", "top3", "date", "tabs", "categories", "mode"]
                 b = dict(zip(keys, b[:len(keys)]))
 
+            # tabs и categories из строки в JSON
             if isinstance(b.get("tabs"), str):
                 try:
                     b["tabs"] = json.loads(b["tabs"])
@@ -883,10 +886,10 @@ async def bf_get_builds(mode: str = Query("all")):
             formatted.append(b)
 
         return JSONResponse(formatted)
-
     except Exception as e:
         print(f"BF builds error: {e}")
         return JSONResponse({"error": str(e)}, status_code=500)
+
 
 
 
