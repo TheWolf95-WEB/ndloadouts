@@ -953,7 +953,13 @@ async function bfRenderBuilds(builds) {
   if (!list) return;
   list.innerHTML = "";
   
-  noResults.style.display = builds.length ? "none" : "block";
+     // Скрываем "ничего не найдено" для BR
+   if (currentBFMode === "br") {
+     noResults.style.display = "none";
+   } else {
+     noResults.style.display = builds.length ? "none" : "block";
+   }
+
 
   if (!Array.isArray(builds) || builds.length === 0) {
      // ✅ Если режим BR — показываем заглушку
