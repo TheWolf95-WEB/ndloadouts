@@ -1375,6 +1375,7 @@ async function bfLoadBuildsTable() {
       card.className = "bf-build-card";
       card.setAttribute('data-weapon-type', b.weapon_type);
       card.setAttribute('data-title', b.title.toLowerCase());
+      card.setAttribute('data-mode', b.mode || 'mp');
       
       card.innerHTML = `
         <div class="bf-card-header">
@@ -1388,6 +1389,19 @@ async function bfLoadBuildsTable() {
         <div class="bf-weapon-type">
           ${weaponLabel}
         </div>
+
+      <div class="bf-mode-label" style="
+        margin-top: 6px;
+        display: inline-block;
+        font-size: 13px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        background: ${b.mode === 'br' ? '#8b0000' : '#0057b8'};
+        color: white;
+      ">
+        ${b.mode === 'br' ? 'КБ' : 'Сетевая'}
+      </div>
+  
         
         <div class="bf-card-footer">
           <button class="btn btn-edit" title="Редактировать">✏</button>
