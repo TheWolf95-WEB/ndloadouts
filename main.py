@@ -854,34 +854,37 @@ def init_bf_tables():
 
 # === Получить все сборки ===
 @app.get("/api/bf/builds")
-async def bf_get_builds():
+async def bf_get_builds(mode: str = Query("mp")):
+    """
+    Получить сборки Battlefield по режиму:
+    - mp = Сетевая игра
+    - br = Королевская битва
+    """
     try:
         builds = get_all_bf_builds()
 
+        # ✅ Фильтрация по режиму
+        builds = [b for b in builds if b.get("mode", "mp") == mode]
+
         formatted = []
         for b in builds:
-            # если строка — просто оставляем как есть
             if isinstance(b, (list, tuple)):
                 keys = ["id", "title", "weapon_type", "top1", "top2", "top3", "date", "tabs", "categories", "mode"]
                 b = dict(zip(keys, b[:len(keys)]))
 
-            # tabs → JSON
             if isinstance(b.get("tabs"), str):
                 try:
                     b["tabs"] = json.loads(b["tabs"])
                 except:
                     b["tabs"] = []
 
-            # categories → массив
             if isinstance(b.get("categories"), str):
                 try:
                     b["categories"] = json.loads(b["categories"])
                 except:
                     b["categories"] = []
 
-            # ✅ если mode не указан — ставим mp по умолчанию
             b["mode"] = b.get("mode", "mp")
-
             formatted.append(b)
 
         return JSONResponse(formatted)
@@ -889,6 +892,7 @@ async def bf_get_builds():
     except Exception as e:
         print(f"BF builds error: {e}")
         return JSONResponse({"error": str(e)}, status_code=500)
+
 
 
 
