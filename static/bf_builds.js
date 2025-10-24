@@ -1317,11 +1317,10 @@ document.querySelectorAll('.js-loadout-toggle').forEach(header => {
   });
 });
 
-
+// ← тут сразу начинается следующий раздел (ФИЛЬТРЫ) и это ошибка
 /* ===============================
    🧩 ФИЛЬТРЫ И ПОИСК
    =============================== */
-
 document.getElementById("bf-builds-search")?.addEventListener("input", () => {
   bfFilterBuilds();
 });
