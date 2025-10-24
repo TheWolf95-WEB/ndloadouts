@@ -74,6 +74,8 @@ from database_versions import (
     add_version, get_versions, update_version, delete_version, set_version_status
 )
 
+from fastapi import Depends
+
 # =====================================================
 # 🌍 GLOBAL CONFIG
 # =====================================================
@@ -979,12 +981,13 @@ def api_version_published():
 
 
 @app.get("/api/version/all")
-def api_version_all(data: dict = Body(...)):
+def api_version_all(request: Request):
     """
     ✅ Получить все версии (черновики + опубликованные)
     Только для админов
     """
-    _, is_admin, _ = extract_user_roles(data.get("initData", ""))
+    init_data = request.query_params.get("initData", "")
+    _, is_admin, _ = extract_user_roles(init_data)
     if not is_admin:
         raise HTTPException(status_code=403, detail="Недостаточно прав")
 
@@ -1001,6 +1004,7 @@ def api_version_all(data: dict = Body(...)):
         }
         for v in versions
     ]
+
 
 
 @app.post("/api/version")
