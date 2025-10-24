@@ -42,20 +42,6 @@ function bfShowScreen(id) {
     bfHasUnsavedChanges = false;
   }
 
-     document.getElementById("bf-mode-mp").addEventListener("click", () => {
-     currentBFMode = "mp";
-     document.getElementById("bf-builds-list").style.display = "block";
-     document.getElementById("bf-br-placeholder").style.display = "none";
-     bfRenderBuilds(bfCachedBuilds.filter(b => b.mode === "mp"));
-   });
-   
-   document.getElementById("bf-mode-br").addEventListener("click", () => {
-     currentBFMode = "br";
-     document.getElementById("bf-builds-list").style.display = "none";
-     document.getElementById("bf-br-placeholder").style.display = "block";
-   });
- 
-
   const current = document.querySelector(".screen.active")?.id;
   if (current && current !== id) bfScreenHistory.push(current);
 
@@ -898,6 +884,25 @@ document.getElementById("bf-back-from-edit")?.addEventListener("click", () =>
   bfShowScreen("screen-battlefield-main")
 );
 
+
+// === Переключатель режима (Сетевая / КБ) ===
+document.getElementById("bf-mode-mp")?.addEventListener("click", () => {
+  currentBFMode = "mp";
+  document.getElementById("bf-builds-title").textContent = "📦 Сборки — Сетевая";
+  document.getElementById("bf-builds-list").style.display = "block";
+  document.getElementById("bf-br-placeholder").style.display = "none";
+  bfRenderBuilds(bfCachedBuilds.filter(b => b.mode === "mp"));
+});
+
+document.getElementById("bf-mode-br")?.addEventListener("click", () => {
+  currentBFMode = "br";
+  document.getElementById("bf-builds-title").textContent = "📦 Сборки — КБ";
+  document.getElementById("bf-builds-list").style.display = "none";
+  document.getElementById("bf-br-placeholder").style.display = "block";
+});
+
+
+   
 // === Загрузка сборок для пользователей ===
 async function bfLoadBuilds() {
   try {
