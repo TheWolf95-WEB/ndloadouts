@@ -1,5 +1,5 @@
 // ===============================
-// 📦 VERSION HISTORY LOGIC (обновлено + TOAST + DATE)
+// 📦 VERSION HISTORY LOGIC (BF style TOAST + DATE)
 // ===============================
 console.log("version.js loaded");
 
@@ -8,7 +8,7 @@ let isAdminVersion = false;
 let currentFilter = "published"; // вкладка по умолчанию
 
 // ===============================
-// 🍞 TOASTS (NDHQ dark, emoji, auto-hide)
+// 🍞 TOASTS — Battlefield soft cyber glow (emoji, auto-hide)
 // ===============================
 function initToastContainer() {
   let tc = document.getElementById("toast-container");
@@ -17,7 +17,6 @@ function initToastContainer() {
     tc.id = "toast-container";
     document.body.appendChild(tc);
   }
-  // Базовые стили контейнера (на случай, если CSS ещё не подключён)
   Object.assign(tc.style, {
     position: "fixed",
     left: "50%",
@@ -27,7 +26,7 @@ function initToastContainer() {
     flexDirection: "column-reverse", // новые сверху
     gap: "10px",
     zIndex: 9999,
-    pointerEvents: "none", // клики проходят
+    pointerEvents: "none",
   });
 }
 
@@ -35,36 +34,56 @@ function showToast(type = "info", message = "", duration = 5000) {
   initToastContainer();
   const tc = document.getElementById("toast-container");
 
+  // BF palette: мягкий тёмный фон + цветной glow
   const palette = {
-    success: { emoji: "✅", bg: "rgba(40,40,40,0.92)", text: "#e7f8ea", border: "#4CAF50" },
-    info:    { emoji: "ℹ️", bg: "rgba(40,40,40,0.92)", text: "#e8f2ff", border: "#2196F3" },
-    warning: { emoji: "⚠️", bg: "rgba(40,40,40,0.92)", text: "#fff7e0", border: "#FFC107" },
-    error:   { emoji: "❌", bg: "rgba(40,40,40,0.92)", text: "#ffeaea", border: "#F44336" }
+    success: {
+      emoji: "✅",
+      bg: "linear-gradient(135deg, #0f231b 0%, #143629 100%)",
+      border: "#2ecc71",
+      glow: "0 10px 28px rgba(46, 204, 113, .22), 0 2px 10px rgba(46, 204, 113, .18)"
+    },
+    info: {
+      emoji: "ℹ️",
+      bg: "linear-gradient(135deg, #0e1e2c 0%, #14324a 100%)",
+      border: "#2ea6ff",
+      glow: "0 10px 28px rgba(46, 166, 255, .22), 0 2px 10px rgba(46, 166, 255, .18)"
+    },
+    warning: {
+      emoji: "⚠️",
+      bg: "linear-gradient(135deg, #2f2311 0%, #4a3515 100%)",
+      border: "#ffc107",
+      glow: "0 10px 28px rgba(255, 193, 7, .22), 0 2px 10px rgba(255, 193, 7, .18)"
+    },
+    error: {
+      emoji: "❌",
+      bg: "linear-gradient(135deg, #2b1517 0%, #472025 100%)",
+      border: "#ff4c4c",
+      glow: "0 10px 28px rgba(255, 76, 76, .22), 0 2px 10px rgba(255, 76, 76, .18)"
+    }
   };
   const p = palette[type] || palette.info;
 
   const toast = document.createElement("div");
   toast.setAttribute("role", "status");
   toast.setAttribute("aria-live", "polite");
-  toast.style.pointerEvents = "auto"; // чтобы свайп/клик работал при необходимости
+  toast.style.pointerEvents = "auto";
 
-  // Стили тоста (мягкий тёмный Telegram+)
   Object.assign(toast.style, {
     minWidth: "min(92vw, 540px)",
     maxWidth: "min(92vw, 540px)",
-    color: p.text,
+    color: "#e9edf1",
     background: p.bg,
     border: `1px solid ${p.border}`,
     borderLeft: `4px solid ${p.border}`,
-    borderRadius: "10px",
+    borderRadius: "12px",
     padding: "12px 14px",
-    boxShadow: "0 8px 24px rgba(0,0,0,.35)",
+    boxShadow: p.glow,
     display: "flex",
     alignItems: "center",
     gap: "10px",
     fontSize: "14px",
     lineHeight: "1.35",
-    backdropFilter: "blur(4px)",
+    backdropFilter: "blur(5px)",
     transform: "translateY(30px)",
     opacity: "0",
     transition: "opacity .25s ease, transform .25s ease",
@@ -82,24 +101,18 @@ function showToast(type = "info", message = "", duration = 5000) {
 
   toast.appendChild(iconEl);
   toast.appendChild(textEl);
-
   tc.appendChild(toast);
 
-  // Появление
   requestAnimationFrame(() => {
     toast.style.opacity = "1";
     toast.style.transform = "translateY(0)";
   });
 
-  // Автоисчезание
   const hide = () => {
     toast.style.opacity = "0";
     toast.style.transform = "translateY(30px)";
-    setTimeout(() => {
-      if (toast && toast.parentNode) toast.parentNode.removeChild(toast);
-    }, 250);
+    setTimeout(() => toast.remove(), 250);
   };
-
   setTimeout(hide, duration);
 }
 
@@ -113,7 +126,7 @@ function formatDatePretty(dateStr) {
     "июля", "августа", "сентября", "октября", "ноября", "декабря"
   ];
   const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return dateStr; // защита на случай нестандарта
+  if (isNaN(d.getTime())) return dateStr;
   const day = d.getDate();
   const month = months[d.getMonth()];
   const year = d.getFullYear();
@@ -124,16 +137,14 @@ function formatDatePretty(dateStr) {
 // 🚀 Инициализация
 // ===============================
 document.addEventListener("DOMContentLoaded", async () => {
-  // Проверяем пользователя
   try {
     const me = await fetch("/api/me", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ initData: tg.initData })
     }).then(r => r.json());
-
     isAdminVersion = !!me.is_admin;
-  } catch (e) {
+  } catch {
     showToast("error", "Не удалось загрузить профиль пользователя");
   }
 
@@ -144,26 +155,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (tabs) tabs.style.display = "flex";
   }
 
-  // Инициализируем редактор Quill
   try {
     quillVersion = new Quill("#version-quill", {
       theme: "snow",
       placeholder: "Описание изменений..."
     });
-  } catch (e) {
+  } catch {
     showToast("error", "Ошибка инициализации редактора");
   }
 
-  // Устанавливаем дату по умолчанию
   const dateInput = document.getElementById("version-date-input");
   if (dateInput) {
     dateInput.value = new Date().toISOString().split("T")[0];
   }
 
-  // Загружаем версии
   await loadVersions();
 
-  // Переключение вкладок
   document.querySelectorAll(".version-tab").forEach(tab => {
     tab.addEventListener("click", () => {
       document.querySelectorAll(".version-tab").forEach(t => t.classList.remove("active"));
@@ -173,7 +180,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  // Открытие / закрытие редактора
   const toggleBtn = document.getElementById("version-admin-toggle");
   if (toggleBtn) {
     toggleBtn.addEventListener("click", () => {
@@ -184,7 +190,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Кнопки действий
   const publishBtn = document.getElementById("version-publish-btn");
   const draftBtn = document.getElementById("version-draft-btn");
   const updateBtn = document.getElementById("version-update-btn");
@@ -226,14 +231,13 @@ async function loadVersions() {
       .filter(v => !isAdminVersion || v.status === currentFilter)
       .forEach(v => list.appendChild(renderVersionCard(v)));
 
-    // Если пусто — дружелюбное сообщение
     if (!list.children.length) {
       const empty = document.createElement("div");
       empty.textContent = currentFilter === "draft" ? "Черновиков пока нет" : "Опубликованных версий пока нет";
       empty.style.opacity = "0.7";
       list.appendChild(empty);
     }
-  } catch (e) {
+  } catch {
     list.innerHTML = "";
     showToast("error", "Ошибка загрузки списка версий");
   }
@@ -246,7 +250,7 @@ function renderVersionCard(v) {
   const card = document.createElement("div");
   card.className = "version-card";
 
-  const textContent = v.content.replace(/<[^>]*>/g, "");
+  const textContent = (v.content || "").replace(/<[^>]*>/g, "");
   const shortText = textContent.substring(0, 250);
   const isLong = textContent.length > 250;
 
@@ -255,7 +259,7 @@ function renderVersionCard(v) {
     <div class="version-date">🗓 ${formatDatePretty(v.date) || formatDatePretty(v.created_at)}</div>
     <div class="version-content-preview">${shortText}${isLong ? "..." : ""}</div>
     ${isLong ? `<button class="version-toggle">Читать полностью</button>` : ""}
-    <div class="version-content-full" style="display:none;">${v.content}</div>
+    <div class="version-content-full" style="display:none;">${v.content || ""}</div>
     ${isAdminVersion ? `
       <div class="version-actions">
         <button class="edit"
@@ -263,12 +267,11 @@ function renderVersionCard(v) {
           data-version="${v.version}"
           data-title="${v.title}"
           data-date="${v.date}"
-          data-content='${encodeURIComponent(v.content)}'>✏ Редактировать</button>
+          data-content='${encodeURIComponent(v.content || "")}'>✏ Редактировать</button>
         <button class="delete" data-id="${v.id}">🗑 Удалить</button>
       </div>` : ""}
   `;
 
-  // Показать полностью
   const toggle = card.querySelector(".version-toggle");
   if (toggle) {
     toggle.addEventListener("click", () => {
@@ -281,7 +284,6 @@ function renderVersionCard(v) {
     });
   }
 
-  // Редактирование / удаление (только админ)
   if (isAdminVersion) {
     card.querySelector(".edit").addEventListener("click", (e) => {
       const btn = e.target;
@@ -340,7 +342,7 @@ async function saveVersion(status) {
     } else {
       showToast("error", res.detail || "Ошибка сохранения версии");
     }
-  } catch (e) {
+  } catch {
     showToast("error", "Сеть/сервер недоступны при сохранении версии");
   }
 }
@@ -374,7 +376,7 @@ async function updateVersion() {
     } else {
       showToast("error", res.detail || "Ошибка обновления версии");
     }
-  } catch (e) {
+  } catch {
     showToast("error", "Сеть/сервер недоступны при обновлении версии");
   }
 }
@@ -396,7 +398,7 @@ async function deleteVersion(id) {
     } else {
       showToast("error", res.detail || "Ошибка удаления версии");
     }
-  } catch (e) {
+  } catch {
     showToast("error", "Сеть/сервер недоступны при удалении версии");
   }
 }
