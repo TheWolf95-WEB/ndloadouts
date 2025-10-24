@@ -145,10 +145,17 @@
   margin-bottom: 6px;
 }
 .version-content-preview {
-  font-size: 14px;
-  color: #d6deee;
-  margin-bottom: 5px;
+  line-height: 1.5;              /* Больше воздуха */
+  max-height: 4.5em;             /* 3 строки (1.5 * 3 = 4.5em) */
+  overflow: hidden;              /* Скрыть лишний текст */
+  display: -webkit-box;          /* многолинейное обрезание */
+  -webkit-line-clamp: 3;         /* Оставить 3 строки */
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;       /* троеточие */
+  margin-top: 6px;
+  opacity: 0.9;
 }
+
 .version-toggle {
   background: none;
   border: none;
