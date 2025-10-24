@@ -689,7 +689,7 @@ async function bfHandleSubmitBuild() {
     top3,
     tabs,
     categories: selectedCategories,
-    mode: currentBFMode
+    mode: document.querySelector('input[name="bf-mode"]:checked')?.value || "mp"
   };
 
   const method = bfCurrentEditId ? "PUT" : "POST";
