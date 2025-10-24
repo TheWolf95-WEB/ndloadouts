@@ -913,33 +913,33 @@ document.getElementById("bf-back-from-edit")?.addEventListener("click", () =>
 
 
 // === Переключатель режима (Сетевая / КБ) ===
-document.getElementById("bf-mode-mp")?.addEventListener("click", () => {
+document.getElementById("bf-mode-mp")?.addEventListener("click", async () => {
   currentBFMode = "mp";
   document.getElementById("bf-builds-title").textContent = "📦 Сборки — Сетевая";
   document.getElementById("bf-builds-list").style.display = "block";
   document.getElementById("bf-br-placeholder").style.display = "none";
-  bfRenderBuilds(bfCachedBuilds.filter(b => b.mode === "mp"));
+  await bfLoadBuilds();
 });
 
-document.getElementById("bf-mode-br")?.addEventListener("click", () => {
+
+document.getElementById("bf-mode-br")?.addEventListener("click", async () => {
   currentBFMode = "br";
   document.getElementById("bf-builds-title").textContent = "📦 Сборки — КБ";
-  document.getElementById("bf-builds-list").style.display = "none";
-  document.getElementById("bf-br-placeholder").style.display = "block";
+  await bfLoadBuilds();
 });
-
 
    
 // === Загрузка сборок для пользователей ===
 async function bfLoadBuilds() {
   try {
-    const res = await fetch("/api/bf/builds");
+    const res = await fetch(`/api/bf/builds?mode=${currentBFMode}`);
     bfCachedBuilds = await res.json();
-    await bfRenderBuilds(bfCachedBuilds.filter(b => b.mode === "mp"));
+    await bfRenderBuilds(bfCachedBuilds);
   } catch (e) {
     console.error("BF load builds error:", e);
   }
 }
+
 
 // === Отображение сборок (аккордеон) ===
 // === Отображение сборок (аккордеон в стиле Warzone) ===
@@ -1320,7 +1320,7 @@ function bfFilterBuilds() {
 
 async function bfLoadBuildsTable() {
   try {
-    const res = await fetch("/api/bf/builds");
+    const res = await fetch(`/api/bf/builds?mode=${currentBFMode}`);
     const builds = await res.json();
     const grid = document.getElementById("bf-edit-builds-grid");
     const countEl = document.getElementById("bf-builds-count");
