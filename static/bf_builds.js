@@ -16,6 +16,8 @@
   let bfScreenHistory = [];
   let bfHasUnsavedChanges = false;
 
+  let currentBFMode = "mp";
+
   // === Инициализация ===
   document.addEventListener("DOMContentLoaded", async () => {
     try {
@@ -40,7 +42,19 @@ function bfShowScreen(id) {
     bfHasUnsavedChanges = false;
   }
 
-
+     document.getElementById("bf-mode-mp").addEventListener("click", () => {
+     currentBFMode = "mp";
+     document.getElementById("bf-builds-list").style.display = "block";
+     document.getElementById("bf-br-placeholder").style.display = "none";
+     bfRenderBuilds(bfCachedBuilds.filter(b => b.mode === "mp"));
+   });
+   
+   document.getElementById("bf-mode-br").addEventListener("click", () => {
+     currentBFMode = "br";
+     document.getElementById("bf-builds-list").style.display = "none";
+     document.getElementById("bf-br-placeholder").style.display = "block";
+   });
+ 
 
   const current = document.querySelector(".screen.active")?.id;
   if (current && current !== id) bfScreenHistory.push(current);
@@ -689,6 +703,7 @@ async function bfHandleSubmitBuild() {
     top3,
     tabs,
     categories: selectedCategories,
+    mode: currentBFMode
   };
 
   const method = bfCurrentEditId ? "PUT" : "POST";
@@ -888,7 +903,7 @@ async function bfLoadBuilds() {
   try {
     const res = await fetch("/api/bf/builds");
     bfCachedBuilds = await res.json();
-    await bfRenderBuilds(bfCachedBuilds);
+    await bfRenderBuilds(bfCachedBuilds.filter(b => b.mode === "mp"));
   } catch (e) {
     console.error("BF load builds error:", e);
   }
