@@ -53,6 +53,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("version-update-btn").addEventListener("click", updateVersion);
 });
 
+// Автоматически добавляем "v" если удалили
+const versionInput = document.getElementById("version-input");
+versionInput.addEventListener("input", () => {
+  if (!versionInput.value.startsWith("v")) {
+    versionInput.value = "v" + versionInput.value.replace(/[^0-9.]/g, "");
+  }
+});
+
+
+
 // Загрузка версий
 async function loadVersions() {
   const list = document.getElementById("version-list");
