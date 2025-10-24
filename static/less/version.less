@@ -1,155 +1,201 @@
 /* =========================
-   📦 Version History Styles (NDHQ)
+   📦 VERSION HISTORY SCREEN
    ========================= */
+
 #screen-version-history {
-  padding: 15px;
+  padding: 16px;
+  background: var(--wz-bg, #0b111d);
   color: #fff;
 }
 
-/* ===== Заголовок ===== */
-#screen-version-history .screen-header h2 {
-  color: #00b4ff;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-/* ===== Кнопка админки ===== */
-#version-admin-panel .btn-accent {
-  background: linear-gradient(90deg, #0077ff, #00c6ff);
-  border: none;
-  color: #fff;
-  font-weight: 600;
-  border-radius: 8px;
-  padding: 12px;
-  width: 100%;
-  transition: .2s;
-}
-#version-admin-panel .btn-accent:hover {
-  opacity: 0.9;
-  transform: translateY(-2px);
-}
-
-/* ===== Панель редактора ===== */
-#version-editor {
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(0, 180, 255, 0.15);
-  border-radius: 10px;
-  padding: 15px;
-  margin-top: 10px;
-  backdrop-filter: blur(6px);
-}
-
-#version-editor .form-input {
-  background: rgba(0, 0, 0, 0.45);
-  border: 1px solid rgba(0, 180, 255, 0.2);
-  color: #fff;
-  margin-bottom: 8px;
-}
-
-/* ===== Quill dark fix ===== */
-.ql-toolbar {
-  background: rgba(0,0,0,0.35);
-  border: 1px solid rgba(255,255,255,0.1) !important;
-}
-.ql-container {
-  background: rgba(0,0,0,0.45);
-  color: #fff;
-  border: 1px solid rgba(0,180,255,0.15) !important;
-}
-
-/* ===== Save button ===== */
-#version-save-btn {
-  width: 100%;
-  background: #009b3a;
-  color: white;
-  padding: 10px;
-  font-weight: 600;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: .2s;
-}
-#version-save-btn:hover {
-  background: #00b945;
-  transform: translateY(-2px);
-}
-
-/* ===== Cards ===== */
-.version-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+/* Заголовки секций */
+.version-section-title {
   margin-top: 20px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--wz-accent, #00aaff);
 }
 
-.version-card {
-  background: #101820;
-  border: 1px solid rgba(0, 180, 255, 0.15);
-  box-shadow: 0px 0px 12px rgba(0, 200, 255, 0.05);
-  padding: 15px;
+/* Панель админки */
+.version-admin-panel {
+  margin-bottom: 20px;
+}
+
+#version-admin-toggle {
+  width: 100%;
+  background: var(--wz-accent, #007bff);
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  padding: 10px;
   border-radius: 8px;
-  transition: .2s;
-}
-.version-card:hover {
-  border-color: rgba(0, 200, 255, 0.35);
+  cursor: pointer;
+  transition: 0.25s;
 }
 
-/* ===== Title / Date ===== */
-.version-title {
-  font-size: 15px;
-  color: #00c6ff;
-  font-weight: bold;
-  margin-bottom: 6px;
+#version-admin-toggle:hover {
+  opacity: 0.9;
 }
-.version-date {
-  font-size: 12px;
-  color: #6f8597;
+
+/* Редактор версии */
+.version-editor {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  margin-top: 10px;
+  padding: 15px;
+}
+
+.version-editor h3 {
   margin-bottom: 10px;
 }
 
-/* ===== Content ===== */
-.version-content-preview {
-  color: #d9e5f6;
-  opacity: 0.9;
+.version-input,
+.version-title-input {
+  width: 100%;
+  background: #182232;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #fff;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
 }
+
+/* Quill редактор */
+.version-quill {
+  height: 160px;
+  background: #fff;
+  color: #000;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* Кнопки редактора */
+.version-editor-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.btn-secondary {
+  flex: 1;
+  background: #2b394f;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.btn-secondary:hover {
+  background: #35475f;
+}
+
+.btn-success {
+  flex: 1;
+  background: #00c853;
+  border: none;
+  color: #fff;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.btn-success:hover {
+  background: #00e060;
+}
+
+/* Список версий */
+.version-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Карточки */
+.version-card {
+  background: #131b29;
+  border: 1px solid rgba(0, 153, 255, 0.2);
+  border-radius: 10px;
+  padding: 14px;
+  transition: 0.25s;
+}
+
+.version-card:hover {
+  background: #182232;
+}
+
+.version-title {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.version-date {
+  font-size: 13px;
+  color: #8fa2c1;
+  margin-bottom: 8px;
+}
+
+.version-content-preview {
+  font-size: 14px;
+  color: #d6deee;
+  opacity: 0.85;
+  margin-bottom: 5px;
+}
+
+.version-toggle {
+  background: none;
+  border: none;
+  color: var(--wz-accent, #00aaff);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+}
+
+/* Полное содержимое */
 .version-content-full {
   display: none;
   margin-top: 10px;
   color: #fff;
-  line-height: 1.45;
+  line-height: 1.5;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255,255,255,0.05);
 }
 
-/* ===== Toggle button ===== */
-.version-toggle {
-  background: none;
-  color: #00c6ff;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  margin-top: 8px;
-}
-
-/* ===== Admin actions ===== */
+/* Кнопки админов */
 .version-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 14px;
+  gap: 8px;
+  margin-top: 12px;
 }
+
+.version-actions button {
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
 .version-actions .edit {
-  background: #ffe100;
-  border: none;
+  background: #ffc400;
   color: #000;
-  font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 6px;
 }
+
 .version-actions .delete {
-  background: #b80000;
-  border: none;
+  background: #d62828;
   color: #fff;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-weight: 600;
+}
+
+.version-actions .publish {
+  background: #00c853;
+  color: #fff;
+}
+
+.version-actions .draft {
+  background: #2b394f;
+  color: #fff;
 }
