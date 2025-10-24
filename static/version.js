@@ -192,23 +192,28 @@ function renderVersionCard(v) {
     const toggle = card.querySelector(".version-toggle");
     if (toggle) {
       toggle.innerHTML = `Читать полностью <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>`;
-      toggle.addEventListener("click", () => {
-        const full = card.querySelector(".version-content-full");
-        const preview = card.querySelector(".version-content-preview");
-        const expanded = full.style.display === "block";
+      const full = card.querySelector(".version-content-full");
+      const preview = card.querySelector(".version-content-preview");
     
-        full.style.display = expanded ? "none" : "block";
-        preview.style.display = expanded ? "block" : "none";
+      toggle.addEventListener("click", () => {
+        const expanded = full.classList.contains("open");
     
         if (expanded) {
+          // Скрываем
+          full.classList.remove("open");
+          preview.style.display = "block";
           toggle.classList.remove("open");
           toggle.innerHTML = `Читать полностью <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>`;
         } else {
+          // Показываем
+          full.classList.add("open");
+          preview.style.display = "none";
           toggle.classList.add("open");
           toggle.innerHTML = `Скрыть <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>`;
         }
       });
     }
+
 
 
   if (isAdminVersion) {
