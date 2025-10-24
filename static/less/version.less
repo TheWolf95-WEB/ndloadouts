@@ -33,6 +33,15 @@
   transition: 0.25s;
 }
 
+.ql-toolbar.ql-snow {
+    font-family: 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 10px;
+    background: #fff
+       border:none;
+}
+
 /* --- Tabs --- */
 .version-tabs {
   display: flex;
@@ -171,14 +180,7 @@
   cursor: pointer;
   font-size: 14px;
 }
-// .version-actions .edit {
-//   background: #ffc400;
-//   color: #000;
-// }
-// .version-actions .delete {
-//   background: #d62828;
-//   color: #fff;
-// }
+
 
 .version-actions .edit {
   background: linear-gradient(135deg, #ffc400, #ffaa00);
@@ -189,19 +191,6 @@
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(255, 196, 0, 0.3);
-}
-
-.version-actions .edit:hover {
-  background: linear-gradient(135deg, #ffaa00, #ff9500);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(255, 196, 0, 0.4);
-}
-
-.version-actions .edit:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(255, 196, 0, 0.3);
 }
 
 .version-actions .delete {
@@ -213,21 +202,7 @@
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(214, 40, 40, 0.3);
 }
-
-.version-actions .delete:hover {
-  background: linear-gradient(135deg, #c1121f, #a4161a);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(214, 40, 40, 0.4);
-}
-
-.version-actions .delete:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(214, 40, 40, 0.3);
-}
-
 
 
 .version-actions .publish {
