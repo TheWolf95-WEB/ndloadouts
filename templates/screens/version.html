@@ -9,24 +9,29 @@
     <h2>📦 История версий</h2>
   </div>
 
-  <!-- Админка версий -->
+  <!-- Панель администратора -->
   <div id="version-admin-panel" style="display:none; margin-bottom: 20px;">
     <button id="version-admin-toggle" class="btn btn-accent">⚙ Админка версий</button>
 
-    <!-- Редактор -->
-    <div id="version-editor" class="card" style="margin-top: 15px; display:none; padding: 15px;">
+      <!-- Вкладки списка версий -->
+   <div class="version-tabs" style="display:none;">
+     <button class="version-tab active" data-filter="published">✅ Опубликованные</button>
+     <button class="version-tab" data-filter="draft">💾 Черновики</button>
+   </div>   
 
+    <!-- Редактор версии -->
+    <div id="version-editor" class="card version-editor" style="display:none;">
       <input id="version-input" class="form-input" placeholder="Версия, например v1.0">
       <input id="version-title-input" class="form-input" placeholder="Заголовок обновления">
-      <div id="version-quill" style="height:150px; background:#fff; color:#000;"></div>
+      <div id="version-quill"></div>
 
-      <!-- Кнопки создания -->
-      <div id="version-create-buttons" style="margin-top: 10px; display:flex; gap:10px;">
+      <!-- Кнопки создания новой версии -->
+      <div id="version-create-buttons" class="version-buttons">
         <button id="version-publish-btn" class="btn btn-success">✅ Опубликовать</button>
         <button id="version-draft-btn" class="btn btn-secondary">💾 Черновик</button>
       </div>
 
-      <!-- Кнопка обновления -->
+      <!-- Кнопка обновления существующей -->
       <button id="version-update-btn" class="btn btn-warning" style="display:none;">
         💾 Сохранить изменения
       </button>
