@@ -7,6 +7,19 @@ let quillVersion;
 let isAdminVersion = false;
 let currentFilter = "published"; // вкладка по умолчанию
 
+function formatDatePretty(dateStr) {
+  if (!dateStr) return "";
+  const months = [
+    "января", "февраля", "марта", "апреля", "мая", "июня",
+    "июля", "августа", "сентября", "октября", "ноября", "декабря"
+  ];
+  const d = new Date(dateStr);
+  const day = d.getDate();
+  const month = months[d.getMonth()];
+  const year = d.getFullYear();
+  return `${day} ${month} ${year}`;
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   // Проверяем пользователя
   const me = await fetch("/api/me", {
@@ -93,7 +106,7 @@ function renderVersionCard(v) {
 
   card.innerHTML = `
     <div class="version-title">${v.version} – ${v.title}</div>
-    <div class="version-date">🗓 ${v.date || v.created_at}</div>
+    <div class="version-date">🗓 ${formatDatePretty(v.date) || formatDatePretty(v.created_at)}</div>
     <div class="version-content-preview">${shortText}${isLong ? "..." : ""}</div>
     ${isLong ? `<button class="version-toggle">Читать полностью</button>` : ""}
     <div class="version-content-full" style="display:none;">${v.content}</div>
