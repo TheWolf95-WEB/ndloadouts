@@ -866,6 +866,12 @@ async function bfEditBuild(build) {
 document.getElementById("bf-show-builds-btn")?.addEventListener("click", async () => {
   bfShowScreen("screen-bf-builds");
   await bfLoadBuilds();
+
+  // ✅ По умолчанию включаем режим "Сетевая"
+  currentBFMode = "mp";
+  document.getElementById("bf-builds-title").textContent = "📦 Сборки — Сетевая";
+  document.getElementById("bf-builds-list").style.display = "block";
+  document.getElementById("bf-br-placeholder").style.display = "none";
 });
 
 // Кнопка "База сборок" (админ)
