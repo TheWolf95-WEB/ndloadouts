@@ -9,50 +9,38 @@
     <h2>📦 История версий</h2>
   </div>
 
-  <!-- Панель администратора -->
+  <!-- Панель администратора (только для админов) -->
   <div id="version-admin-panel" style="display:none; margin-bottom: 20px;">
     <button id="version-admin-toggle" class="btn btn-accent">⚙ Админка версий</button>
 
-      <!-- Вкладки списка версий -->
-   <div class="version-tabs" style="display:none;">
-     <button class="version-tab active" data-filter="published">✅ Опубликованные</button>
-     <button class="version-tab" data-filter="draft">💾 Черновики</button>
-   </div>   
+    <!-- Вкладки только для админов -->
+    <div class="version-tabs" style="display:none;">
+      <button class="version-tab active" data-filter="published">✅ Опубликованные</button>
+      <button class="version-tab" data-filter="draft">💾 Черновики</button>
+    </div>
 
     <!-- Редактор версии -->
-     <!-- Редактор версии -->
-     <div id="version-editor" class="card version-editor" style="display:none;">
-       <input id="version-input" class="form-input" value="v" placeholder="Версия, например v1.0">
-       <input id="version-title-input" class="form-input" placeholder="Заголовок обновления">
-     
-       <!-- 📅 Новое поле даты -->
-       <input id="version-date-input" type="date" class="form-input">
-     
-       <div id="version-quill"></div>
-     
-       <!-- Кнопки создания новой версии -->
-       <div id="version-create-buttons" class="version-buttons">
-         <button id="version-publish-btn" class="btn btn-success">✅ Опубликовать</button>
-         <button id="version-draft-btn" class="btn btn-secondary">💾 Черновик</button>
-       </div>
-     
-       <!-- Кнопка обновления существующей -->
-       <button id="version-update-btn" class="btn btn-warning" style="display:none;">
-         💾 Сохранить изменения
-       </button>
-     </div>
+    <div id="version-editor" class="card version-editor" style="display:none;">
+      <input id="version-input" class="form-input" value="v" placeholder="Версия, например v1.0">
+      <input id="version-title-input" class="form-input" placeholder="Заголовок обновления">
+      <input id="version-date-input" type="date" class="form-input">
+      <div id="version-quill"></div>
 
+      <div id="version-create-buttons" class="version-buttons">
+        <button id="version-publish-btn" class="btn btn-success">✅ Опубликовать</button>
+        <button id="version-draft-btn" class="btn btn-secondary">💾 Черновик</button>
+      </div>
 
-       <!-- Список версий -->
-       <div id="version-list" class="version-list"></div>
-     </div>
+      <button id="version-update-btn" class="btn btn-warning" style="display:none;">
+        💾 Сохранить изменения
+      </button>
+    </div>
+  </div>
 
+  <!-- ✅ Список версий доступен всем -->
+  <div id="version-list" class="version-list"></div>
 
-          <!-- Toast Container -->
-     <div id="toast-container"></div>
-
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
 
 </div>
-     
-
-     
