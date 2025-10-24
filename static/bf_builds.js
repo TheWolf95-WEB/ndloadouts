@@ -1316,14 +1316,16 @@ document.querySelectorAll('.js-loadout-toggle').forEach(header => {
     }
   });
 });
+}   // ✅ ← вот ЭТУ строку нужно ДОБАВИТЬ, чтобы закрылась bfRenderBuilds()
 
-// ← тут сразу начинается следующий раздел (ФИЛЬТРЫ) и это ошибка
+
 /* ===============================
    🧩 ФИЛЬТРЫ И ПОИСК
    =============================== */
 document.getElementById("bf-builds-search")?.addEventListener("input", () => {
   bfFilterBuilds();
 });
+
 
 function bfFilterBuilds() {
   const q = document.getElementById("bf-builds-search").value.toLowerCase();
