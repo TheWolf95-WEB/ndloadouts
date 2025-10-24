@@ -8,7 +8,7 @@ let isAdminVersion = false;
 let currentFilter = "published"; // вкладка по умолчанию
 
 // ===============================
-// 🍞 TOASTS — Battlefield soft cyber glow (emoji, auto-hide)
+// 🍞 TOASTS — classes, auto-hide
 // ===============================
 function initToastContainer() {
   let tc = document.getElementById("toast-container");
@@ -17,107 +17,30 @@ function initToastContainer() {
     tc.id = "toast-container";
     document.body.appendChild(tc);
   }
-  Object.assign(tc.style, {
-    position: "fixed",
-    left: "50%",
-    bottom: "18px",
-    transform: "translateX(-50%)",
-    display: "flex",
-    flexDirection: "column-reverse", // новые сверху
-    gap: "10px",
-    zIndex: 9999,
-    pointerEvents: "none",
-  });
 }
 
 function showToast(type = "info", message = "", duration = 5000) {
   initToastContainer();
   const tc = document.getElementById("toast-container");
-
-  // BF palette: мягкий тёмный фон + цветной glow
-  const palette = {
-    success: {
-      emoji: "✅",
-      bg: "linear-gradient(135deg, #0f231b 0%, #143629 100%)",
-      border: "#2ecc71",
-      glow: "0 10px 28px rgba(46, 204, 113, .22), 0 2px 10px rgba(46, 204, 113, .18)"
-    },
-    info: {
-      emoji: "ℹ️",
-      bg: "linear-gradient(135deg, #0e1e2c 0%, #14324a 100%)",
-      border: "#2ea6ff",
-      glow: "0 10px 28px rgba(46, 166, 255, .22), 0 2px 10px rgba(46, 166, 255, .18)"
-    },
-    warning: {
-      emoji: "⚠️",
-      bg: "linear-gradient(135deg, #2f2311 0%, #4a3515 100%)",
-      border: "#ffc107",
-      glow: "0 10px 28px rgba(255, 193, 7, .22), 0 2px 10px rgba(255, 193, 7, .18)"
-    },
-    error: {
-      emoji: "❌",
-      bg: "linear-gradient(135deg, #2b1517 0%, #472025 100%)",
-      border: "#ff4c4c",
-      glow: "0 10px 28px rgba(255, 76, 76, .22), 0 2px 10px rgba(255, 76, 76, .18)"
-    }
-  };
-  const p = palette[type] || palette.info;
+  if (!tc) return;
 
   const toast = document.createElement("div");
-  toast.setAttribute("role", "status");
-  toast.setAttribute("aria-live", "polite");
-  toast.style.pointerEvents = "auto";
-
-  Object.assign(toast.style, {
-    minWidth: "min(92vw, 540px)",
-    maxWidth: "min(92vw, 540px)",
-    color: "#e9edf1",
-    background: p.bg,
-    border: `1px solid ${p.border}`,
-    borderLeft: `4px solid ${p.border}`,
-    borderRadius: "12px",
-    padding: "12px 14px",
-    boxShadow: p.glow,
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    fontSize: "14px",
-    lineHeight: "1.35",
-    backdropFilter: "blur(5px)",
-    transform: "translateY(30px)",
-    opacity: "0",
-    transition: "opacity .25s ease, transform .25s ease",
-  });
-
-  const iconEl = document.createElement("span");
-  iconEl.textContent = p.emoji;
-  iconEl.style.fontSize = "16px";
-  iconEl.style.flex = "0 0 auto";
-
-  const textEl = document.createElement("div");
-  textEl.style.flex = "1 1 auto";
-  textEl.style.wordBreak = "break-word";
-  textEl.textContent = message;
-
-  toast.appendChild(iconEl);
-  toast.appendChild(textEl);
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `<span class="toast-icon"></span><div class="toast-message">${message}</div>`;
   tc.appendChild(toast);
 
-  requestAnimationFrame(() => {
-    toast.style.opacity = "1";
-    toast.style.transform = "translateY(0)";
-  });
+  // Появление
+  requestAnimationFrame(() => toast.classList.add("show"));
 
-  const hide = () => {
-    toast.style.opacity = "0";
-    toast.style.transform = "translateY(30px)";
-    setTimeout(() => toast.remove(), 250);
-  };
-  setTimeout(hide, duration);
+  // Автоисчезание
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
 }
 
 // ===============================
-// 🕒 Дата — красивый формат для карточек
+// 🕒 Дата — красивый формат
 // ===============================
 function formatDatePretty(dateStr) {
   if (!dateStr) return "";
@@ -127,16 +50,14 @@ function formatDatePretty(dateStr) {
   ];
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return dateStr;
-  const day = d.getDate();
-  const month = months[d.getMonth()];
-  const year = d.getFullYear();
-  return `${day} ${month} ${year}`;
+  return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
 }
 
 // ===============================
 // 🚀 Инициализация
 // ===============================
 document.addEventListener("DOMContentLoaded", async () => {
+  // Проверяем пользователя
   try {
     const me = await fetch("/api/me", {
       method: "POST",
@@ -155,6 +76,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (tabs) tabs.style.display = "flex";
   }
 
+  // Quill
   try {
     quillVersion = new Quill("#version-quill", {
       theme: "snow",
@@ -164,13 +86,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     showToast("error", "Ошибка инициализации редактора");
   }
 
+  // Дата по умолчанию
   const dateInput = document.getElementById("version-date-input");
   if (dateInput) {
     dateInput.value = new Date().toISOString().split("T")[0];
   }
 
+  // Стартовая загрузка
   await loadVersions();
 
+  // Табы
   document.querySelectorAll(".version-tab").forEach(tab => {
     tab.addEventListener("click", () => {
       document.querySelectorAll(".version-tab").forEach(t => t.classList.remove("active"));
@@ -180,16 +105,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
-  const toggleBtn = document.getElementById("version-admin-toggle");
-  if (toggleBtn) {
-    toggleBtn.addEventListener("click", () => {
-      const editor = document.getElementById("version-editor");
-      if (!editor) return;
-      const isHidden = editor.style.display === "none" || !editor.style.display;
-      editor.style.display = isHidden ? "block" : "none";
-    });
-  }
-
+  // Кнопки действий
   const publishBtn = document.getElementById("version-publish-btn");
   const draftBtn = document.getElementById("version-draft-btn");
   const updateBtn = document.getElementById("version-update-btn");
@@ -291,7 +207,6 @@ function renderVersionCard(v) {
       document.getElementById("version-input").value = btn.dataset.version || "v";
       document.getElementById("version-title-input").value = btn.dataset.title || "";
 
-      // safe date → yyyy-MM-dd
       let safeDate = btn.dataset.date;
       if (!safeDate || safeDate === "null" || safeDate === "undefined") {
         safeDate = new Date().toISOString().split("T")[0];
@@ -335,6 +250,7 @@ async function saveVersion(status) {
     }).then(r => r.json());
 
     if (res.status === "ok") {
+      // published → зелёный, draft → синий
       showToast(status === "published" ? "success" : "info",
         status === "published" ? "Версия опубликована" : "Сохранено в черновики");
       loadVersions();
@@ -370,7 +286,8 @@ async function updateVersion() {
     }).then(r => r.json());
 
     if (res.status === "ok") {
-      showToast("success", "Версия обновлена");
+      // обновление → оранжевый
+      showToast("warning", "Версия обновлена");
       loadVersions();
       resetEditor();
     } else {
@@ -393,7 +310,8 @@ async function deleteVersion(id) {
     }).then(r => r.json());
 
     if (res.status === "ok") {
-      showToast("success", "Версия удалена");
+      // удаление → красный
+      showToast("error", "Версия удалена");
       loadVersions();
     } else {
       showToast("error", res.detail || "Ошибка удаления версии");
