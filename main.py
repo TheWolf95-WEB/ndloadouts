@@ -1,56 +1,115 @@
-from fastapi import FastAPI
-from fastapi import Query
-from fastapi import Request, Body, BackgroundTasks
+# =====================================================
+# ✅ ND LOADOUTS — MAIN FASTAPI APP (single-file)
+# Аккуратно структурирован, без добавления новых фич.
+# Комментарии и единый стиль для поддержки.
+# =====================================================
+
+# -------------------------------
+# 🧱 SYSTEM IMPORTS
+# -------------------------------
+import os
+import json
+import hmac
+import hashlib
+import sqlite3
+import asyncio
+import subprocess
+from pathlib import Path
+from typing import List
+from urllib.parse import parse_qs, unquote
+from datetime import datetime, timezone, timedelta
+
+import requests
+from dotenv import load_dotenv, set_key, dotenv_values
+
+# -------------------------------
+# ⚙️ FASTAPI IMPORTS
+# -------------------------------
+from fastapi import (
+    FastAPI, Request, Body, BackgroundTasks,
+    HTTPException, Query, APIRouter
+)
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from dotenv import load_dotenv, set_key, dotenv_values
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi import HTTPException
-import json
-import os
-import hmac
-import hashlib
-import requests
-import subprocess
-import sqlite3
-import asyncio
-from typing import List
-from pathlib import Path
-from urllib.parse import parse_qs, unquote
-from datetime import datetime, timezone, timedelta
+
+# -------------------------------
+# 📦 LOCAL MODULES (Warzone DB / Versions DB)
+# -------------------------------
 from database import (
     init_db, get_all_builds, add_build, delete_build_by_id, get_all_users,
     save_user, update_build_by_id, modules_grouped_by_category,
     module_add_or_update, module_update, module_delete,
 )
+from database_versions import (
+    init_versions_table,
+    add_version,
+    get_versions,
+    delete_version
+)
 
+# -------------------------------
+# 📦 LOCAL MODULES (Battlefield DB)
+# -------------------------------
+from database_bf import (
+    init_bf_builds_table,
+    get_all_bf_builds,
+    add_bf_build,
+    update_bf_build,
+    delete_bf_build,
+    get_bf_weapon_types,
+    add_bf_weapon_type,
+    delete_bf_weapon_type,
+    get_bf_modules_by_type,
+    add_bf_module,
+    delete_bf_module,
+    init_bf_db, get_bf_conn,
+    get_all_categories, add_category, delete_category,
+    add_challenge, update_challenge, delete_challenge
+)
+from database_bf_settings import (
+    init_bf_settings_table,
+    ensure_section_column,
+    get_bf_settings,
+)
 
+# =====================================================
+# 🌍 GLOBAL CONFIG
+# =====================================================
 load_dotenv()
 
 ANALYTICS_DB = Path("/opt/ndloadouts_storage/analytics.db")
-
 WEBAPP_URL = os.getenv("WEBAPP_URL")
 GITHUB_SECRET = os.getenv("WEBHOOK_SECRET", "")
 
-app = FastAPI()
+# =====================================================
+# 🚀 APP INIT
+# =====================================================
+app = FastAPI(title="ND Loadouts API", version="1.0")
 
+# CORS (WebApp / админка)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Разрешаем все для тестирования
+    allow_origins=["*"],  # В проде ограничить доменами
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# Статика и шаблоны
+app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/data", StaticFiles(directory="data"), name="data")
+templates = Jinja2Templates(directory="templates")
 
-@app.get("/")
-async def index(request: Request):
-    version = int(datetime.utcnow().timestamp())  # каждая загрузка — новый timestamp
-    return templates.TemplateResponse("index.html", {"request": request, "version": version})
-
-# --- Утилита для проверки прав ---
+# =====================================================
+# 🧰 UTILS
+# =====================================================
 def extract_user_roles(init_data_str: str):
+    """
+    Извлекает user_id и роли из Telegram initData.
+    Возвращает: (user_id, is_admin, is_super_admin)
+    """
     try:
         if not init_data_str:
             return None, False, False
@@ -60,7 +119,6 @@ def extract_user_roles(init_data_str: str):
         if not user_data:
             return None, False, False
 
-        # Декодируем строку
         user_json = json.loads(unquote(user_data))
         user_id = str(user_json.get("id"))
 
@@ -76,51 +134,141 @@ def extract_user_roles(init_data_str: str):
         print(f"[extract_user_roles ERROR] {e}")
         return None, False, False
 
+
+def ensure_admin_from_init(init_data_str: str):
+    """
+    Бросает 403, если пользователь не админ.
+    """
+    uid, is_admin, _ = extract_user_roles(init_data_str or "")
+    if not is_admin:
+        raise HTTPException(status_code=403, detail="Недостаточно прав")
+    return uid
+
+
 def prettify_time(ts: str):
+    """
+    Форматирует ISO-дату в dd.mm.yyyy HH:MM:SS (Europe/Moscow, UTC+3).
+    """
     if not ts:
         return "-"
     try:
-        # парсим как UTC
-        dt = datetime.fromisoformat(ts.replace("Z", "+00:00")).astimezone(timezone(timedelta(hours=3)))  
+        dt = datetime.fromisoformat(ts.replace("Z", "+00:00")).astimezone(timezone(timedelta(hours=3)))
         return dt.strftime("%d.%m.%Y %H:%M:%S")
     except Exception:
         return ts
 
-# --- GitHub Webhook ---
+# =====================================================
+# 🔐 STARTUP (инициализация таблиц/БД)
+# =====================================================
+def init_analytics_db():
+    """
+    Создание таблиц аналитики/профилей пользователей.
+    """
+    try:
+        ANALYTICS_DB.parent.mkdir(parents=True, exist_ok=True)
+        conn = sqlite3.connect(ANALYTICS_DB)
+        cur = conn.cursor()
+
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS analytics (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT,
+            action TEXT,
+            details TEXT,
+            timestamp TEXT
+        )""")
+
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS errors (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT,
+            error TEXT,
+            details TEXT,
+            timestamp TEXT
+        )""")
+
+        cur.execute("""
+        CREATE TABLE IF NOT EXISTS user_profiles (
+            user_id TEXT PRIMARY KEY,
+            first_name TEXT,
+            username TEXT,
+            last_seen TEXT,
+            platform TEXT,
+            total_actions INTEGER DEFAULT 0,
+            first_seen TEXT,
+            last_action TEXT
+        )""")
+
+        conn.commit()
+        conn.close()
+        print("✅ Analytics DB initialized")
+    except Exception as e:
+        print(f"❌ Analytics DB error: {e}")
+
+
+@app.on_event("startup")
+def startup_all():
+    """
+    Единая точка инициализации всех БД/таблиц.
+    """
+    try:
+        init_db()
+        init_versions_table()
+        init_analytics_db()
+
+        init_bf_builds_table()
+        init_bf_db()
+        init_bf_settings_table()
+        ensure_section_column()
+
+        print("✅ Startup init complete")
+    except Exception as e:
+        print(f"⚠️ Startup init error: {e}")
+
+# =====================================================
+# 🏠 ROOT + GITHUB WEBHOOK
+# =====================================================
+@app.get("/", response_class=HTMLResponse)
+async def index(request: Request):
+    """
+    Главная страница WebApp (скармливаем fresh version для кеш-бастинга статики).
+    """
+    version = int(datetime.utcnow().timestamp())
+    return templates.TemplateResponse("index.html", {"request": request, "version": version})
+
+
 @app.post("/webhook")
 async def webhook(request: Request, background_tasks: BackgroundTasks):
+    """
+    GitHub Webhook для автодеплоя. Проверка HMAC подписи.
+    """
     body = await request.body()
     signature = request.headers.get("X-Hub-Signature-256")
 
-    if not signature or not hmac.compare_digest(
-        signature,
-        "sha256=" + hmac.new(GITHUB_SECRET.encode(), body, hashlib.sha256).hexdigest()
-    ):
+    expected = "sha256=" + hmac.new(GITHUB_SECRET.encode(), body, hashlib.sha256).hexdigest()
+    if not signature or not hmac.compare_digest(signature, expected):
         return JSONResponse(status_code=403, content={"error": "Invalid signature"})
 
+    # Выполняем деплой неблокирующе
     background_tasks.add_task(subprocess.call, ["/bin/bash", "/opt/ndloadouts/deploy.sh"])
     return {"status": "ok"}
 
-app.mount("/static", StaticFiles(directory="static"), name="static")
-app.mount("/data", StaticFiles(directory="data"), name="data")
-templates = Jinja2Templates(directory="templates")
-
-init_db()
-
-def ensure_admin_from_init(init_data_str: str):
-    uid, is_admin, _ = extract_user_roles(init_data_str or "")
-    if not is_admin:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=403, detail="Недостаточно прав")
-
-# ====== MODULES DICT API ======
-
+# =====================================================
+# ⚔️ WARZONE — MODULES DICT API
+# =====================================================
 @app.get("/api/modules/{weapon_type}")
 def api_modules_list(weapon_type: str):
+    """
+    Получить словарь модулей по типу оружия, сгруппированный по категориям.
+    """
     return modules_grouped_by_category(weapon_type)
+
 
 @app.post("/api/modules")
 async def api_modules_add(payload: dict = Body(...)):
+    """
+    Добавление или обновление конкретного модуля (только админы).
+    """
     ensure_admin_from_init(payload.get("initData", ""))
     module_add_or_update(
         weapon_type=payload["weapon_type"],
@@ -131,8 +279,12 @@ async def api_modules_add(payload: dict = Body(...)):
     )
     return {"status": "ok"}
 
+
 @app.put("/api/modules/{module_id}")
 async def api_modules_update(module_id: int, payload: dict = Body(...)):
+    """
+    Обновление полей модуля (только админы).
+    """
     ensure_admin_from_init(payload.get("initData", ""))
     module_update(
         module_id,
@@ -143,18 +295,29 @@ async def api_modules_update(module_id: int, payload: dict = Body(...)):
     )
     return {"status": "ok"}
 
+
 @app.delete("/api/modules/{module_id}")
 async def api_modules_delete(module_id: int, payload: dict = Body(...)):
+    """
+    Удаление модуля по ID (только админы).
+    """
     ensure_admin_from_init(payload.get("initData", ""))
     module_delete(module_id)
     return {"status": "ok"}
 
 
-    # Открываем соединение с БД
+@app.delete("/api/modules/{weapon_type}/{category}")
+async def api_modules_delete_category(weapon_type: str, category: str, payload: dict = Body(...)):
+    """
+    Удаление ВСЕХ модулей категории для weapon_type (только админы).
+    Это оформленный вариант «сырого» блока из исходника.
+    """
+    ensure_admin_from_init(payload.get("initData", ""))
+
     conn = sqlite3.connect("/opt/ndloadouts_storage/builds.db")
     cur = conn.cursor()
 
-    # Проверяем, есть ли такая категория
+    # Проверяем наличие категории
     cur.execute("""
         SELECT id FROM modules 
         WHERE weapon_type = ? AND category = ?
@@ -175,13 +338,17 @@ async def api_modules_delete(module_id: int, payload: dict = Body(...)):
 
     return {"status": "ok", "message": f"Категория '{category}' удалена"}
 
-
-@app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
-
+# =====================================================
+# ⚔️ WARZONE — BUILDS API
+# =====================================================
 @app.get("/api/builds")
 async def api_builds(category: str = Query("all")):
+    """
+    Получение списка сборок с сортировкой:
+    1) top1/top2/top3 приоритет
+    2) свежесть даты (по убыванию)
+    Фильтрация по категории (если не 'all').
+    """
     try:
         builds = get_all_builds()
 
@@ -210,15 +377,18 @@ async def api_builds(category: str = Query("all")):
         return JSONResponse({"error": str(e)}, status_code=500)
 
 
-
 @app.post("/api/builds")
 async def create_build(request: Request, data: dict = Body(...)):
-    user_id, is_admin, _ = extract_user_roles(data.get("initData", ""))
+    """
+    Создание сборки (только админы).
+    Обеспечивает уникальность категорий «Новинки» и «Популярное».
+    """
+    _, is_admin, _ = extract_user_roles(data.get("initData", ""))
     if not is_admin:
         return JSONResponse({"error": "Недостаточно прав"}, status_code=403)
 
     try:
-        # === Уникальные категории: снимаем с других сборок "Новинки" и "Популярное" ===
+        # Снимаем уникальные категории с других сборок
         conn = sqlite3.connect("/opt/ndloadouts_storage/builds.db")
         cursor = conn.cursor()
 
@@ -238,7 +408,7 @@ async def create_build(request: Request, data: dict = Body(...)):
         conn.commit()
         conn.close()
 
-        # === Сохраняем сборку ===
+        # Сохраняем сборку
         add_build(data)
         return JSONResponse({"status": "ok"})
     except Exception as e:
@@ -247,13 +417,16 @@ async def create_build(request: Request, data: dict = Body(...)):
 
 @app.put("/api/builds/{build_id}")
 async def update_build(build_id: str, request: Request):
+    """
+    Обновление сборки (только админы).
+    Также поддерживает уникальность категорий «Новинки» / «Популярное».
+    """
     body = await request.json()
-    user_id, is_admin, _ = extract_user_roles(body.get("initData", ""))
+    _, is_admin, _ = extract_user_roles(body.get("initData", ""))
     if not is_admin:
         return JSONResponse({"error": "Недостаточно прав"}, status_code=403)
 
     try:
-        # === Уникальные категории: снимаем с других сборок "Новинки" и "Популярное" ===
         conn = sqlite3.connect("/opt/ndloadouts_storage/builds.db")
         cursor = conn.cursor()
 
@@ -273,7 +446,6 @@ async def update_build(build_id: str, request: Request):
         conn.commit()
         conn.close()
 
-        # === Обновляем сборку ===
         update_build_by_id(build_id, body)
         return JSONResponse({"status": "ok"})
     except Exception as e:
@@ -282,8 +454,11 @@ async def update_build(build_id: str, request: Request):
 
 @app.delete("/api/builds/{build_id}")
 async def delete_build(build_id: str, request: Request):
+    """
+    Удаление сборки (только админы).
+    """
     body = await request.json()
-    user_id, is_admin, _ = extract_user_roles(body.get("initData", ""))
+    _, is_admin, _ = extract_user_roles(body.get("initData", ""))
     if not is_admin:
         return JSONResponse({"error": "Недостаточно прав"}, status_code=403)
 
@@ -293,21 +468,29 @@ async def delete_build(build_id: str, request: Request):
     except Exception as e:
         return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
 
+# -----------------------------------------------------
+# Вспомогательные API для Warzone (типы, админы, /me)
+# -----------------------------------------------------
 @app.get("/api/types")
 def get_weapon_types():
+    """
+    Отдать типы оружия из data/types.json (Warzone).
+    """
     with open("data/types.json", "r", encoding="utf-8") as f:
         types = json.load(f)
     return JSONResponse(types)
 
+
 @app.post("/api/me")
 async def get_me(data: dict = Body(...)):
-    import datetime
+    """
+    Сохранить пользователя в БД и вернуть его роли.
+    """
     init_data = data.get("initData", "")
     parsed = parse_qs(init_data)
     user_data = parsed.get("user", [None])[0]
 
     if not user_data:
-        print(f"[{datetime.datetime.now()}] [API /me] ❌ Нет user_data в initData")
         return JSONResponse({"error": "No user info"}, status_code=400)
 
     try:
@@ -325,13 +508,6 @@ async def get_me(data: dict = Body(...)):
         is_super_admin = user_id in admin_ids
         is_admin = is_super_admin or user_id in admin_dop
 
-        # 🧩 Логируем
-        print(
-            f"[{datetime.datetime.now()}] [API /me] "
-            f"user_id={user_id} ({first_name}) | username=@{username or '-'} | "
-            f"is_admin={is_admin} | is_super_admin={is_super_admin}"
-        )
-
         return JSONResponse({
             "user_id": user_id,
             "first_name": first_name,
@@ -340,12 +516,14 @@ async def get_me(data: dict = Body(...)):
         })
 
     except Exception as e:
-        print(f"[{datetime.datetime.now()}] [API /me] ⚠️ Ошибка: {e}")
         return JSONResponse({"error": "Invalid user data", "detail": str(e)}, status_code=400)
 
 
 @app.get("/api/admins")
 async def get_admins():
+    """
+    Список главных и доп. админов с именами из user_profiles.
+    """
     users = get_all_users()
     admin_ids = set(map(str.strip, os.getenv("ADMIN_IDS", "").split(",")))
     admin_dop = set(map(str.strip, os.getenv("ADMIN_DOP", "").split(",")))
@@ -355,12 +533,16 @@ async def get_admins():
         return user["first_name"] if user else "Без имени"
 
     return {
-        "main_admins": [{"id": uid, "name": get_name(uid)} for uid in admin_ids],
-        "dop_admins": [{"id": uid, "name": get_name(uid)} for uid in admin_dop]
+        "main_admins": [{"id": uid, "name": get_name(uid)} for uid in admin_ids if uid],
+        "dop_admins": [{"id": uid, "name": get_name(uid)} for uid in admin_dop if uid]
     }
+
 
 @app.post("/api/assign-admin")
 async def assign_admin(data: dict = Body(...)):
+    """
+    Назначить доп. админа (только главный админ).
+    """
     requester_id = str(data.get("requesterId", "")).strip()
     user_id = str(data.get("userId", "")).strip()
 
@@ -396,8 +578,12 @@ async def assign_admin(data: dict = Body(...)):
 
     return JSONResponse({"status": "ok", "message": f"Пользователь {user_id} назначен админом."})
 
+
 @app.post("/api/remove-admin")
 async def remove_admin(data: dict = Body(...)):
+    """
+    Удалить доп. админа (только главный админ).
+    """
     requester_id = str(data.get("requesterId", "")).strip()
     target_id = str(data.get("userId", "")).strip()
 
@@ -416,186 +602,43 @@ async def remove_admin(data: dict = Body(...)):
 
     return JSONResponse({"status": "ok", "message": f"Пользователь {target_id} удалён из админов."})
 
-
-### РАССЫЛКА
-
-
-# Эндпоинты для рассылки
-@app.get("/api/analytics/broadcast-users")
-async def get_broadcast_users():
-    """Получить всех пользователей для рассылки"""
-    try:
-        conn = sqlite3.connect(ANALYTICS_DB)
-        cur = conn.cursor()
-        
-        cur.execute("""
-            SELECT user_id, first_name, username 
-            FROM user_profiles 
-            WHERE user_id != 'anonymous'
-            ORDER BY last_seen DESC
-        """)
-        users = cur.fetchall()
-        conn.close()
-        
-        formatted_users = []
-        for user_id, first_name, username in users:
-            formatted_users.append({
-                "id": user_id,
-                "name": f"{first_name or 'Пользователь'}" + (f" (@{username})" if username else ""),
-                "username": username
-            })
-        
-        return {"users": formatted_users}
-        
-    except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=500)
-
-@app.post("/api/analytics/broadcast")
-async def send_broadcast(data: dict = Body(...)):
-    """Отправить рассылку пользователям"""
-    try:
-        message = data.get("message", "").strip()
-        user_ids = data.get("user_ids", [])
-        
-        if not message:
-            return JSONResponse({"error": "Сообщение не может быть пустым"}, status_code=400)
-        
-        if not user_ids:
-            return JSONResponse({"error": "Не выбраны пользователи"}, status_code=400)
-        
-        # Отправка сообщений через бота
-        bot_token = os.getenv("TOKEN")
-        if not bot_token:
-            return JSONResponse({"error": "Токен бота не настроен"}, status_code=500)
-        
-        success_count = 0
-        failed_count = 0
-        results = []
-        
-        for target_user_id in user_ids:
-            try:
-                # Отправляем сообщение через Telegram Bot API
-                response = requests.post(
-                    f"https://api.telegram.org/bot{bot_token}/sendMessage",
-                    json={
-                        "chat_id": target_user_id,
-                        "text": f"📢 Рассылка от NDHQ:\n\n{message}",
-                        "parse_mode": "HTML"
-                    },
-                    timeout=10
-                )
-                
-                if response.status_code == 200:
-                    success_count += 1
-                    results.append({"user_id": target_user_id, "status": "success"})
-                else:
-                    failed_count += 1
-                    results.append({"user_id": target_user_id, "status": "failed", "error": response.text})
-                
-                # Небольшая задержка чтобы не превысить лимиты Telegram
-                await asyncio.sleep(0.1)
-                
-            except Exception as e:
-                failed_count += 1
-                results.append({"user_id": target_user_id, "status": "failed", "error": str(e)})
-        
-        return {
-            "status": "ok",
-            "message": f"Рассылка отправлена: {success_count} успешно, {failed_count} с ошибками",
-            "success_count": success_count,
-            "failed_count": failed_count,
-            "results": results
-        }
-        
-    except Exception as e:
-        return JSONResponse({"error": str(e)}, status_code=500)
-
-
-# АНАЛИТИКА - УЛУЧШЕННАЯ ВЕРСИЯ
-
-def init_analytics_db():
-    try:
-        ANALYTICS_DB.parent.mkdir(parents=True, exist_ok=True)
-        
-        conn = sqlite3.connect(ANALYTICS_DB)
-        cur = conn.cursor()
-        
-        cur.execute("""
-        CREATE TABLE IF NOT EXISTS analytics (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id TEXT,
-            action TEXT,
-            details TEXT,
-            timestamp TEXT
-        )
-        """)
-        
-        cur.execute("""
-        CREATE TABLE IF NOT EXISTS errors (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id TEXT,
-            error TEXT,
-            details TEXT,
-            timestamp TEXT
-        )
-        """)
-        
-        cur.execute("""
-        CREATE TABLE IF NOT EXISTS user_profiles (
-            user_id TEXT PRIMARY KEY,
-            first_name TEXT,
-            username TEXT,
-            last_seen TEXT,
-            platform TEXT,
-            total_actions INTEGER DEFAULT 0,
-            first_seen TEXT,
-            last_action TEXT
-        )
-        """)
-        
-        conn.commit()
-        conn.close()
-        print("✅ Analytics DB initialized")
-    except Exception as e:
-        print(f"❌ Analytics DB error: {e}")
-
-init_analytics_db()
-
+# =====================================================
+# 📊 ANALYTICS (с рассылкой)
+# =====================================================
 @app.post("/api/analytics")
 async def save_analytics(data: dict = Body(...)):
+    """
+    Быстрое логирование событий аналитики + апдейт профиля пользователя.
+    """
     try:
         user_id = data.get("user_id", "anonymous")
         action = data.get("action", "unknown")
         details = data.get("details", {})
         timestamp = data.get("timestamp")
-        
+
         if user_id == "anonymous" or not user_id:
             return {"status": "ok"}
-            
+
         details_json = json.dumps(details, ensure_ascii=False) if details else "{}"
-        
         conn = sqlite3.connect(ANALYTICS_DB)
         cur = conn.cursor()
-        
-        # Быстрое сохранение события
+
         cur.execute(
             "INSERT INTO analytics (user_id, action, details, timestamp) VALUES (?, ?, ?, ?)",
             (str(user_id), action, details_json, timestamp)
         )
-        
-        # Быстрое обновление профиля пользователя
+
         platform = details.get("platform", "unknown")
         now_iso = datetime.now().isoformat()
-        
-        # Получаем данные пользователя из Telegram
+
+        # Обновляем профиль (with Telegram-профилем, если есть)
         user_info = {}
         try:
-            if user_id and user_id != "anonymous":
-                users = get_all_users()
-                user_info = next((u for u in users if str(u["id"]) == str(user_id)), {})
+            users = get_all_users()
+            user_info = next((u for u in users if str(u["id"]) == str(user_id)), {})
         except:
             user_info = {}
-        
+
         cur.execute("""
             INSERT INTO user_profiles (user_id, first_name, username, last_seen, platform, total_actions, first_seen, last_action)
             VALUES (?, ?, ?, ?, ?, 1, ?, ?)
@@ -605,15 +648,15 @@ async def save_analytics(data: dict = Body(...)):
                 total_actions = total_actions + 1,
                 last_action = excluded.last_action
         """, (
-            str(user_id), 
+            str(user_id),
             user_info.get('first_name', ''),
             user_info.get('username', ''),
-            timestamp, 
-            platform, 
-            now_iso, 
+            timestamp,
+            platform,
+            now_iso,
             action
         ))
-        
+
         conn.commit()
         conn.close()
         return {"status": "ok"}
@@ -621,28 +664,29 @@ async def save_analytics(data: dict = Body(...)):
         print(f"❌ Analytics save error: {e}")
         return JSONResponse({"status": "error", "detail": str(e)}, status_code=500)
 
+
 @app.get("/api/analytics/dashboard")
 async def get_analytics_dashboard():
+    """
+    Сводная панель: счетчики, популярные действия, пользователи, последние события.
+    """
     try:
         conn = sqlite3.connect(ANALYTICS_DB)
         cur = conn.cursor()
-        
-        # Общая статистика
+
         cur.execute("SELECT COUNT(*) FROM user_profiles")
         total_users = cur.fetchone()[0]
-        
-        # Онлайн (активны последние 2 минуты - быстрее обновление!)
+
         two_min_ago = (datetime.now() - timedelta(minutes=2)).isoformat()
         cur.execute("SELECT COUNT(*) FROM user_profiles WHERE last_seen > ?", (two_min_ago,))
         online_users = cur.fetchone()[0]
-        
+
         cur.execute("SELECT COUNT(*) FROM analytics")
         total_actions = cur.fetchone()[0]
-        
+
         cur.execute("SELECT COUNT(*) FROM errors")
         total_errors = cur.fetchone()[0]
-        
-        # Популярные действия
+
         cur.execute("""
             SELECT action, COUNT(*) as count 
             FROM analytics 
@@ -652,8 +696,7 @@ async def get_analytics_dashboard():
             LIMIT 8
         """)
         popular_actions = cur.fetchall()
-        
-        # Все пользователи за все время
+
         cur.execute("""
             SELECT 
                 user_id, first_name, username, last_seen, platform, 
@@ -662,8 +705,7 @@ async def get_analytics_dashboard():
             ORDER BY last_seen DESC
         """)
         users_data = cur.fetchall()
-        
-        # Последние действия (быстрая выборка)
+
         cur.execute("""
             SELECT a.user_id, a.action, a.details, a.timestamp,
                    u.first_name, u.username, u.platform
@@ -674,10 +716,9 @@ async def get_analytics_dashboard():
             LIMIT 30
         """)
         actions_data = cur.fetchall()
-        
+
         conn.close()
 
-        # Форматируем популярные действия
         formatted_popular_actions = []
         for action, count in popular_actions:
             action_name = {
@@ -689,27 +730,24 @@ async def get_analytics_dashboard():
             }.get(action, action)
             formatted_popular_actions.append({"action": action_name, "count": count})
 
-        # Форматируем пользователей
         formatted_users = []
         for user_id, first_name, username, last_seen, platform, total_actions, first_seen, last_action in users_data:
-            # Определяем статус (2 минуты для онлайн)
+            # Онлайн, если активен последние 2 минуты
             if last_seen:
                 try:
                     last_seen_dt = datetime.fromisoformat(last_seen.replace('Z', '+00:00'))
                     time_diff = datetime.now(timezone.utc) - last_seen_dt
-                    is_online = time_diff.total_seconds() < 120  # 2 минуты
+                    is_online = time_diff.total_seconds() < 120
                 except:
                     is_online = False
             else:
                 is_online = False
-            
-            # Форматируем имя пользователя с ID
+
             user_display = f"{first_name or 'Пользователь'}"
             if username:
                 user_display += f" (@{username})"
             user_display += f" | ID: {user_id}"
-            
-            # Форматируем последнее действие
+
             last_action_text = {
                 'session_start': '🟢 Вошел в бот',
                 'view_build': '🔫 Смотрел сборку',
@@ -718,7 +756,7 @@ async def get_analytics_dashboard():
                 'click_button': '🖱️ Кликнул',
                 'switch_category': '📂 Сменил категорию'
             }.get(last_action, last_action)
-            
+
             formatted_users.append({
                 "id": user_id,
                 "name": user_display,
@@ -732,15 +770,13 @@ async def get_analytics_dashboard():
                 "last_action": last_action_text
             })
 
-        # Форматируем действия
         formatted_actions = []
         for user_id, action, details, timestamp, first_name, username, platform in actions_data:
             user_display = f"{first_name or 'Пользователь'}"
             if username:
                 user_display += f" (@{username})"
             user_display += f" | ID: {user_id}"
-            
-            # Детали действия
+
             action_details = ""
             try:
                 details_obj = json.loads(details) if details else {}
@@ -759,17 +795,17 @@ async def get_analytics_dashboard():
                     action_details = button
             except:
                 pass
-            
+
             action_text = {
                 'session_start': '🟢 Вошел в бот',
-                'session_end': '🔴 Вышел из бота', 
+                'session_end': '🔴 Вышел из бота',
                 'view_build': f'🔫 Просмотр {action_details}',
                 'search': f'🔍 Поиск {action_details}',
                 'open_screen': f'📱 Открыл {action_details}',
                 'switch_category': f'📂 Сменил категорию {action_details}',
                 'click_button': f'🖱️ Кликнул {action_details}'
             }.get(action, action)
-            
+
             formatted_actions.append({
                 "user": user_display,
                 "user_id": user_id,
@@ -790,7 +826,7 @@ async def get_analytics_dashboard():
             "users": formatted_users,
             "recent_activity": formatted_actions
         }
-        
+
     except Exception as e:
         print(f"❌ Dashboard error: {e}")
         return {
@@ -800,20 +836,20 @@ async def get_analytics_dashboard():
             "recent_activity": []
         }
 
+
 @app.delete("/api/analytics/clear")
 async def clear_analytics():
-    """Очистка всей статистики"""
+    """
+    Очистка всей статистики (analytics/errors/user_profiles).
+    """
     try:
         conn = sqlite3.connect(ANALYTICS_DB)
         cur = conn.cursor()
-        
         cur.execute("DELETE FROM analytics")
         cur.execute("DELETE FROM errors")
         cur.execute("DELETE FROM user_profiles")
-        
         conn.commit()
         conn.close()
-        
         return {"status": "ok", "message": "Вся статистика очищена"}
     except Exception as e:
         return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
@@ -821,55 +857,175 @@ async def clear_analytics():
 
 @app.get("/analytics", response_class=HTMLResponse)
 async def analytics_page(request: Request):
+    """
+    Страница с дашбордом аналитики (templates/analytics.html).
+    """
     return templates.TemplateResponse("analytics.html", {"request": request})
 
 
-
-# =====================================================
-# ⚔️ BATTLEFIELD BUILDS API
-# =====================================================
-from database_bf import (
-    init_bf_builds_table,
-    get_all_bf_builds,
-    add_bf_build,
-    update_bf_build,
-    delete_bf_build,
-    get_bf_weapon_types,
-    add_bf_weapon_type,
-    delete_bf_weapon_type,
-    get_bf_modules_by_type,
-    add_bf_module,
-    delete_bf_module
-)
-
-# Инициализация таблиц при старте
-@app.on_event("startup")
-def init_bf_tables():
+# === Рассылка через бота (использует таблицу user_profiles) ===
+@app.get("/api/analytics/broadcast-users")
+async def get_broadcast_users():
+    """
+    Список пользователей для рассылки (не anonymous).
+    """
     try:
-        init_bf_builds_table()
-        print("✅ Battlefield tables ready: bf_builds / bf_weapon_types / bf_modules")
+        conn = sqlite3.connect(ANALYTICS_DB)
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT user_id, first_name, username 
+            FROM user_profiles 
+            WHERE user_id != 'anonymous'
+            ORDER BY last_seen DESC
+        """)
+        users = cur.fetchall()
+        conn.close()
+
+        formatted_users = []
+        for user_id, first_name, username in users:
+            formatted_users.append({
+                "id": user_id,
+                "name": f"{first_name or 'Пользователь'}" + (f" (@{username})" if username else ""),
+                "username": username
+            })
+        return {"users": formatted_users}
     except Exception as e:
-        print(f"⚠️ BF init error: {e}")
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 
-# === Получить все сборки ===
+@app.post("/api/analytics/broadcast")
+async def send_broadcast(data: dict = Body(...)):
+    """
+    Отправка рассылки выбранным пользователям через Telegram Bot API.
+    """
+    try:
+        message = data.get("message", "").strip()
+        user_ids = data.get("user_ids", [])
+
+        if not message:
+            return JSONResponse({"error": "Сообщение не может быть пустым"}, status_code=400)
+        if not user_ids:
+            return JSONResponse({"error": "Не выбраны пользователи"}, status_code=400)
+
+        bot_token = os.getenv("TOKEN")
+        if not bot_token:
+            return JSONResponse({"error": "Токен бота не настроен"}, status_code=500)
+
+        success_count, failed_count = 0, 0
+        results = []
+
+        for target_user_id in user_ids:
+            try:
+                response = requests.post(
+                    f"https://api.telegram.org/bot{bot_token}/sendMessage",
+                    json={
+                        "chat_id": target_user_id,
+                        "text": f"📢 Рассылка от NDHQ:\n\n{message}",
+                        "parse_mode": "HTML"
+                    },
+                    timeout=10
+                )
+                if response.status_code == 200:
+                    success_count += 1
+                    results.append({"user_id": target_user_id, "status": "success"})
+                else:
+                    failed_count += 1
+                    results.append({"user_id": target_user_id, "status": "failed", "error": response.text})
+
+                await asyncio.sleep(0.1)  # anti-spam
+            except Exception as e:
+                failed_count += 1
+                results.append({"user_id": target_user_id, "status": "failed", "error": str(e)})
+
+        return {
+            "status": "ok",
+            "message": f"Рассылка отправлена: {success_count} успешно, {failed_count} с ошибками",
+            "success_count": success_count,
+            "failed_count": failed_count,
+            "results": results
+        }
+
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
+
+# =====================================================
+# 🧾 VERSION HISTORY API
+# =====================================================
+@app.get("/api/version")
+def api_get_versions():
+    """
+    Получить список версий (для страницы версий).
+    """
+    try:
+        versions = get_versions()
+        formatted = [
+            {
+                "id": v[0],
+                "version": v[1],
+                "title": v[2],
+                "content": v[3],
+                "created_at": prettify_time(v[4])
+            }
+            for v in versions
+        ]
+        return formatted
+    except Exception as e:
+        print("Version get error:", e)
+        raise HTTPException(status_code=500, detail="Ошибка загрузки версий")
+
+
+@app.post("/api/version")
+def api_add_version(data: dict = Body(...)):
+    """
+    Добавить новую версию (только админы).
+    """
+    _, is_admin, _ = extract_user_roles(data.get("initData", ""))
+    if not is_admin:
+        raise HTTPException(status_code=403, detail="Недостаточно прав")
+
+    version = data.get("version", "").strip()
+    title = data.get("title", "").strip()
+    content = data.get("content", "").strip()
+
+    if not version or not title or not content:
+        raise HTTPException(status_code=400, detail="Все поля обязательны")
+
+    add_version(version, title, content)
+    return {"status": "ok", "message": "Версия добавлена"}
+
+
+@app.delete("/api/version/{version_id}")
+def api_delete_version(version_id: int, data: dict = Body(...)):
+    """
+    Удалить версию (только супер-админ).
+    """
+    _, _, is_super_admin = extract_user_roles(data.get("initData", ""))
+    if not is_super_admin:
+        raise HTTPException(status_code=403, detail="Удалять версии может только главный админ")
+    delete_version(version_id)
+    return {"status": "ok", "message": "Версия удалена"}
+
+# =====================================================
+# 🪖 BATTLEFIELD — BUILDS API
+# =====================================================
 @app.get("/api/bf/builds")
 async def bf_get_builds(mode: str = Query("all")):
+    """
+    Получить все BF-сборки (фильтр по mode: 'mp', 'br' или 'all').
+    tabs/categories приводятся к JSON-массивам.
+    """
     try:
         builds = get_all_bf_builds()
 
-        # ✅ фильтрация по режиму (mp, br), если указано
         if mode != "all":
             builds = [b for b in builds if b.get("mode", "mp") == mode]
 
         formatted = []
         for b in builds:
-            # защита, если запись пришла как tuple
             if isinstance(b, (list, tuple)):
                 keys = ["id", "title", "weapon_type", "top1", "top2", "top3", "date", "tabs", "categories", "mode"]
                 b = dict(zip(keys, b[:len(keys)]))
 
-            # tabs и categories из строки в JSON
             if isinstance(b.get("tabs"), str):
                 try:
                     b["tabs"] = json.loads(b["tabs"])
@@ -891,13 +1047,11 @@ async def bf_get_builds(mode: str = Query("all")):
         return JSONResponse({"error": str(e)}, status_code=500)
 
 
-
-
-
-
-# === Добавить новую сборку ===
 @app.post("/api/bf/builds")
 async def bf_add_build(request: Request):
+    """
+    Добавить BF-сборку.
+    """
     data = await request.json()
     try:
         add_bf_build(data)
@@ -906,9 +1060,11 @@ async def bf_add_build(request: Request):
         return JSONResponse({"error": str(e)}, status_code=500)
 
 
-# === Обновить сборку ===
 @app.put("/api/bf/builds/{build_id}")
 async def bf_update_build(build_id: int, request: Request):
+    """
+    Обновить BF-сборку по ID.
+    """
     data = await request.json()
     try:
         update_bf_build(build_id, data)
@@ -917,21 +1073,25 @@ async def bf_update_build(build_id: int, request: Request):
         return JSONResponse({"error": str(e)}, status_code=500)
 
 
-# === Удалить сборку ===
 @app.delete("/api/bf/builds/{build_id}")
 async def bf_delete_build(build_id: int):
+    """
+    Удалить BF-сборку по ID.
+    """
     try:
         delete_bf_build(build_id)
         return {"status": "ok", "message": "Build deleted"}
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
-
 # =====================================================
-# ⚙️ BATTLEFIELD TYPES API
+# ⚙️ BATTLEFIELD — TYPES API
 # =====================================================
 @app.get("/api/bf/types")
 async def bf_get_types():
+    """
+    Получить список типов BF-оружия.
+    """
     try:
         return get_bf_weapon_types()
     except Exception as e:
@@ -940,6 +1100,9 @@ async def bf_get_types():
 
 @app.post("/api/bf/types")
 async def bf_add_type(request: Request):
+    """
+    Добавить тип BF-оружия.
+    """
     data = await request.json()
     try:
         add_bf_weapon_type(data)
@@ -950,18 +1113,23 @@ async def bf_add_type(request: Request):
 
 @app.delete("/api/bf/types/{type_id}")
 async def bf_delete_type(type_id: int):
+    """
+    Удалить тип BF-оружия.
+    """
     try:
         delete_bf_weapon_type(type_id)
         return {"status": "ok", "message": "Type deleted"}
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
-
 # =====================================================
-# 🧩 BATTLEFIELD MODULES API
+# 🧩 BATTLEFIELD — MODULES API
 # =====================================================
 @app.get("/api/bf/modules/{weapon_type}")
 async def bf_get_modules(weapon_type: str):
+    """
+    Получить модули BF по типу оружия.
+    """
     try:
         return get_bf_modules_by_type(weapon_type)
     except Exception as e:
@@ -970,54 +1138,37 @@ async def bf_get_modules(weapon_type: str):
 
 @app.post("/api/bf/modules")
 async def bf_add_module(request: Request):
+    """
+    Добавить модуль BF.
+    Если weapon_type не указан — пишем в 'shv' (shared/общие).
+    """
     data = await request.json()
     try:
-        # если модуль добавляется не для конкретного типа — сохраняем в общие (shv)
         if not data.get("weapon_type"):
             data["weapon_type"] = "shv"
-
-        # гарантируем, что при добавлении ничего не перезаписывается
         add_bf_module(data)
-
         return {"status": "ok", "message": "Module added"}
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
 
-
 @app.delete("/api/bf/modules/{module_id}")
 async def bf_delete_module(module_id: int):
+    """
+    Удалить модуль BF.
+    """
     try:
         delete_bf_module(module_id)
         return {"status": "ok", "message": "Module deleted"}
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
 
-
-
-
-
-
-
-# =========================
-# 🪖 BATTLEFIELD CHALLENGES API (персональный прогресс)
-# =========================
-from fastapi import HTTPException, Request, Body
-import sqlite3, os
-from database_bf import (
-    init_bf_db, get_bf_conn,
-    get_all_categories, add_category, delete_category,
-    add_challenge, update_challenge, delete_challenge
-)
-from datetime import datetime
-
-# --- Инициализация базы данных ---
-init_bf_db()
-
-# --- Проверка прав администратора ---
+# =====================================================
+# 🎯 BATTLEFIELD — CHALLENGES (персональный прогресс)
+# =====================================================
 def ensure_bf_admin(request: Request, data: dict | None = None):
     """
-    Проверяет права администратора через initData (как в ND Loadouts)
+    Проверка прав BF-админа через initData (как в Warzone).
     """
     init_data = ""
     if data and "initData" in data:
@@ -1028,18 +1179,22 @@ def ensure_bf_admin(request: Request, data: dict | None = None):
     user_id, is_admin, _ = extract_user_roles(init_data or "")
     if not is_admin:
         raise HTTPException(status_code=403, detail="Access denied")
-
     return user_id
 
 
-# === Категории ===
 @app.get("/api/bf/categories")
 def bf_get_categories():
+    """
+    Список категорий испытаний.
+    """
     return get_all_categories()
 
 
 @app.post("/api/bf/categories")
-def bf_add_category(data: dict, request: Request):
+def bf_add_category_api(data: dict = Body(...), request: Request = None):
+    """
+    Добавить категорию испытаний (только админ).
+    """
     ensure_bf_admin(request, data)
     name = data.get("name", "").strip()
     if not name:
@@ -1048,7 +1203,10 @@ def bf_add_category(data: dict, request: Request):
 
 
 @app.put("/api/bf/categories/{category_id}")
-def bf_update_category(category_id: int, data: dict, request: Request):
+def bf_update_category(category_id: int, data: dict = Body(...), request: Request = None):
+    """
+    Переименовать категорию испытаний (только админ).
+    """
     ensure_bf_admin(request, data)
     name = data.get("name", "").strip()
     if not name:
@@ -1059,19 +1217,19 @@ def bf_update_category(category_id: int, data: dict, request: Request):
 
 
 @app.delete("/api/bf/categories/{category_id}")
-def bf_delete_category(category_id: int, request: Request, data: dict | None = None):
+def bf_delete_category_api(category_id: int, request: Request, data: dict | None = None):
+    """
+    Удалить категорию испытаний (только админ).
+    """
     ensure_bf_admin(request, data)
     delete_category(category_id)
     return {"status": "deleted"}
 
 
-# === Испытания ===
-# === Испытания ===
-
 @app.post("/api/bf/challenges/list")
 def bf_get_challenges(data: dict = Body(...)):
     """
-    Получает список испытаний с прогрессом для конкретного пользователя
+    Получает список испытаний с прогрессом по user_id из initData.
     """
     initData = data.get("initData", "")
     user_id, _, _ = extract_user_roles(initData or "")
@@ -1091,9 +1249,9 @@ def bf_get_challenges(data: dict = Body(...)):
 
 
 @app.post("/api/bf/challenges")
-def bf_add_challenge(data: dict, request: Request):
+def bf_add_challenge_api(data: dict = Body(...), request: Request = None):
     """
-    Добавление нового испытания (только для админов)
+    Добавление испытания (только админ).
     """
     ensure_bf_admin(request, data)
     if not all(k in data for k in ("title_en", "title_ru", "category_id")):
@@ -1102,26 +1260,30 @@ def bf_add_challenge(data: dict, request: Request):
     return {"status": "added"}
 
 
-
 @app.put("/api/bf/challenges/{challenge_id}")
-def bf_update_challenge(challenge_id: int, data: dict, request: Request):
+def bf_update_challenge_api(challenge_id: int, data: dict = Body(...), request: Request = None):
+    """
+    Обновление испытания (только админ).
+    """
     ensure_bf_admin(request, data)
     update_challenge(challenge_id, data)
     return {"status": "updated"}
 
 
 @app.delete("/api/bf/challenges/{challenge_id}")
-def bf_delete_challenge(challenge_id: int, request: Request, data: dict | None = None):
+def bf_delete_challenge_api(challenge_id: int, request: Request, data: dict | None = None):
+    """
+    Удаление испытания (только админ).
+    """
     ensure_bf_admin(request, data)
     delete_challenge(challenge_id)
     return {"status": "deleted"}
 
 
-# === Battlefield: персональный прогресс ===
 @app.patch("/api/bf/challenges/{challenge_id}/progress")
 def bf_update_progress(challenge_id: int, data: dict = Body(...)):
     """
-    Обновление прогресса испытания для конкретного пользователя (+1 / -1)
+    Обновление прогресса пользователя по испытанию (+/-).
     """
     delta = int(data.get("delta", 0))
     init_data = data.get("initData", "")
@@ -1131,7 +1293,6 @@ def bf_update_progress(challenge_id: int, data: dict = Body(...)):
         raise HTTPException(status_code=400, detail="User ID missing")
 
     with get_bf_conn() as conn:
-        # Проверяем, существует ли испытание
         challenge = conn.execute(
             "SELECT goal FROM challenges WHERE id = ?", (challenge_id,)
         ).fetchone()
@@ -1140,26 +1301,22 @@ def bf_update_progress(challenge_id: int, data: dict = Body(...)):
 
         goal = int(challenge[0])
 
-        # Создаём запись прогресса, если нет
         conn.execute("""
             INSERT OR IGNORE INTO user_challenges (user_id, challenge_id, current)
             VALUES (?, ?, 0)
         """, (user_id, challenge_id))
 
-        # Обновляем прогресс с ограничениями (0...goal)
         conn.execute("""
             UPDATE user_challenges
             SET current = MAX(0, MIN(?, current + ?))
             WHERE user_id = ? AND challenge_id = ?
         """, (goal, delta, user_id, challenge_id))
 
-        # Получаем обновлённое значение
         row = conn.execute("""
             SELECT current FROM user_challenges 
             WHERE user_id = ? AND challenge_id = ?
         """, (user_id, challenge_id)).fetchone()
 
-        # Если завершено — фиксируем время завершения
         if row and row[0] >= goal:
             conn.execute("""
                 UPDATE user_challenges 
@@ -1169,28 +1326,16 @@ def bf_update_progress(challenge_id: int, data: dict = Body(...)):
 
     return {"id": challenge_id, "current": row[0], "goal": goal}
 
-
-# НАСТРОЙКИ ИГРЫ
-
-from fastapi import APIRouter, HTTPException, Query
-from database_bf_settings import (
-    init_bf_settings_table,
-    ensure_section_column,
-    get_bf_settings,
-)
-
-# === ROUTER: Battlefield Settings ===
+# =====================================================
+# 🛠 BATTLEFIELD SETTINGS (JSON-хранилище в БД)
+# =====================================================
 router_bf_settings = APIRouter(prefix="/api/bf/settings", tags=["BF Settings"])
-
-# Инициализация таблицы (на случай если нет)
-init_bf_settings_table()
-ensure_section_column()
 
 @router_bf_settings.get("")
 def api_get_settings(category: str | None = Query(None)):
     """
     Возвращает все настройки Battlefield или конкретной категории.
-    Каждая настройка содержит options[] и subsettings[].
+    Каждая запись содержит options[] и subsettings[].
     """
     try:
         settings = get_bf_settings(category)
@@ -1200,8 +1345,10 @@ def api_get_settings(category: str | None = Query(None)):
 
 app.include_router(router_bf_settings)
 
-
-
+# =====================================================
+# ▶️ RUN (локально)
+# =====================================================
 if __name__ == "__main__":
     import uvicorn
+    # reload=False — как у тебя было; в разработке можно True
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)
