@@ -321,6 +321,18 @@ async function deleteVersion(id) {
   }
 }
 
+// === Открытие/закрытие админ-панели версий ===
+const adminToggleBtn = document.getElementById("version-admin-toggle");
+if (adminToggleBtn) {
+  adminToggleBtn.addEventListener("click", () => {
+    const editor = document.getElementById("version-editor");
+    if (!editor) return;
+    editor.style.display = (editor.style.display === "block") ? "none" : "block";
+  });
+}
+
+
+
 // ===============================
 // 🧽 Сброс формы
 // ===============================
