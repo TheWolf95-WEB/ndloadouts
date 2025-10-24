@@ -1,0 +1,97 @@
+/* =========================
+   📦 Version History Styles
+   ========================= */
+#screen-version-history {
+  padding: 15px;
+}
+
+#version-admin-panel .btn-accent {
+  background: linear-gradient(90deg, #0077ff, #00b4ff);
+  border: none;
+  color: #fff;
+  font-weight: bold;
+  width: 100%;
+  text-align: center;
+}
+
+#version-editor {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+}
+
+.version-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.version-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  padding: 15px;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+.version-card:hover {
+  background: rgba(255,255,255,0.07);
+}
+
+.version-title {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.version-date {
+  font-size: 12px;
+  color: #aaa;
+  margin-bottom: 8px;
+}
+
+.version-content-preview {
+  color: #ddd;
+  max-height: 45px;
+  overflow: hidden;
+  position: relative;
+}
+
+.version-content-full {
+  display: none;
+  margin-top: 10px;
+  color: #fff;
+  line-height: 1.4;
+}
+
+.version-toggle {
+  color: #00aaff;
+  border: none;
+  background: none;
+  cursor: pointer;
+  margin-top: 5px;
+}
+
+.version-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.version-actions button {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.25);
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.version-actions button.delete {
+  border-color: red;
+  color: red;
+}
+
+.version-actions button.edit {
+  border-color: yellow;
+  color: yellow;
+}
