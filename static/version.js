@@ -188,36 +188,50 @@ function renderVersionCard(v) {
       </div>` : ""}
   `;
 
-    // Показать / скрыть текст
-    const toggle = card.querySelector(".version-toggle");
-    if (toggle) {
-      toggle.innerHTML = `Читать полностью <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>`;
-      const full = card.querySelector(".version-content-full");
-      const preview = card.querySelector(".version-content-preview");
-    
-      toggle.addEventListener("click", () => {
-        const expanded = full.classList.contains("open");
-    
-        if (expanded) {
-          // Скрываем
-          full.classList.remove("open");
-          preview.style.display = "block";
-          toggle.classList.remove("open");
-          toggle.innerHTML = `Читать полностью <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>`;
-        } else {
-          // Показываем
-          full.classList.add("open");
-          preview.style.display = "none";
-          toggle.classList.add("open");
-          toggle.innerHTML = `Скрыть <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>`;
-        }
-      });
+  const full = card.querySelector(".version-content-full");
+  const preview = card.querySelector(".version-content-preview");
+  const toggle = card.querySelector(".version-toggle");
+
+  // === Функция переключения раскрытия ===
+  function toggleExpand() {
+    const expanded = full.classList.contains("open");
+
+    if (expanded) {
+      full.classList.remove("open");
+      preview.style.display = "block";
+      if (toggle) {
+        toggle.classList.remove("open");
+        toggle.innerHTML = `Читать полностью <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>`;
+      }
+    } else {
+      full.classList.add("open");
+      preview.style.display = "none";
+      if (toggle) {
+        toggle.classList.add("open");
+        toggle.innerHTML = `Скрыть <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>`;
+      }
     }
+  }
 
+  // === Клик по кнопке "Читать полностью" ===
+  if (toggle) {
+    toggle.innerHTML = `Читать полностью <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>`;
+    toggle.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleExpand();
+    });
+  }
 
+  // ✅ Клик по всей карточке
+  card.addEventListener("click", (e) => {
+    if (e.target.closest(".version-actions")) return; // не срабатывает на кнопках
+    toggleExpand();
+  });
 
+  // === Админ-экшены ===
   if (isAdminVersion) {
     card.querySelector(".edit").addEventListener("click", (e) => {
+      e.stopPropagation();
       const btn = e.target;
       document.getElementById("version-editor").style.display = "block";
       document.getElementById("version-input").value = btn.dataset.version || "v";
@@ -235,7 +249,8 @@ function renderVersionCard(v) {
       document.getElementById("version-update-btn").dataset.id = btn.dataset.id;
     });
 
-    card.querySelector(".delete").addEventListener("click", async () => {
+    card.querySelector(".delete").addEventListener("click", async (e) => {
+      e.stopPropagation();
       if (!confirm("Удалить версию навсегда?")) return;
       await deleteVersion(v.id);
     });
@@ -243,6 +258,7 @@ function renderVersionCard(v) {
 
   return card;
 }
+
 
 // ===============================
 // 💾 Сохранить новую версию
