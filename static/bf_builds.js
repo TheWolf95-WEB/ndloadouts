@@ -366,6 +366,21 @@ document.getElementById("bf-add-build-btn")?.addEventListener("click", () => {
 });
 
 
+// ✅ Логика выбора режима (Сетевая / КБ)
+document.querySelectorAll('.bf-mode').forEach(modeCheckbox => {
+  modeCheckbox.addEventListener('change', () => {
+    if (modeCheckbox.checked) {
+      document.querySelectorAll('.bf-mode').forEach(cb => {
+        if (cb !== modeCheckbox) cb.checked = false;
+      });
+    } else {
+      // Если обе сняли — возвращаем по умолчанию сетевую
+      document.querySelector('.bf-mode[value="mp"]').checked = true;
+    }
+  });
+});   
+   
+
 // Функция для отслеживания изменений в форме
 function bfTrackFormChanges() {
   const formElements = [
@@ -689,7 +704,7 @@ async function bfHandleSubmitBuild() {
     top3,
     tabs,
     categories: selectedCategories,
-    mode: document.querySelector('input[name="bf-mode"]:checked')?.value || "mp"
+    mode: document.querySelector('.bf-mode:checked')?.value || "mp"
   };
 
   const method = bfCurrentEditId ? "PUT" : "POST";
@@ -755,6 +770,12 @@ async function bfEditBuild(build) {
        ? build.categories.includes(cb.value)
        : false;
    });
+
+   // ✅ Восстановить режим
+   document.querySelectorAll('.bf-mode').forEach(cb => cb.checked = false);
+   const modeInput = document.querySelector(`.bf-mode[value="${build.mode}"]`);
+   if (modeInput) modeInput.checked = true;
+
 
   if (Array.isArray(build.tabs)) {
     build.tabs.forEach((tab) => {
