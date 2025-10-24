@@ -1,18 +1,14 @@
 // ===============================
-// 📦 VERSION HISTORY LOGIC (NEW)
+// 📦 VERSION HISTORY LOGIC (обновлено)
 // ===============================
 console.log("version.js loaded");
 
 let quillVersion;
 let isAdminVersion = false;
-let isEditing = false; // флаг редактирования
-let editingId = null;  // id редактируемой версии
-let unsavedChanges = false;
+let currentFilter = "published"; // вкладка по умолчанию
 
-// ===============================
-// ИНИЦИАЛИЗАЦИЯ
-// ===============================
 document.addEventListener("DOMContentLoaded", async () => {
+  // Проверяем пользователя
   const me = await fetch("/api/me", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -23,55 +19,39 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (isAdminVersion) {
     document.getElementById("version-admin-panel").style.display = "block";
+    document.querySelector(".version-tabs").style.display = "flex";
   }
 
+  // Инициализируем редактор Quill
   quillVersion = new Quill("#version-quill", {
     theme: "snow",
     placeholder: "Описание изменений..."
   });
 
-  quillVersion.on("text-change", () => {
-    unsavedChanges = true;
-  });
-
+  // Загружаем версии
   loadVersions();
 
-  document.getElementById("version-admin-toggle").addEventListener("click", toggleEditor);
+  // Переключение вкладок (Опубликованные / Черновики)
+  document.querySelectorAll(".version-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".version-tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      currentFilter = tab.dataset.filter;
+      loadVersions();
+    });
+  });
+
+  // Открытие / закрытие редактора
+  document.getElementById("version-admin-toggle").addEventListener("click", () => {
+    const editor = document.getElementById("version-editor");
+    editor.style.display = editor.style.display === "none" ? "block" : "none";
+  });
+
+  // Кнопки действий
   document.getElementById("version-publish-btn").addEventListener("click", () => saveVersion("published"));
   document.getElementById("version-draft-btn").addEventListener("click", () => saveVersion("draft"));
   document.getElementById("version-update-btn").addEventListener("click", updateVersion);
 });
-
-// ===============================
-// Открыть/закрыть редактор
-// ===============================
-function toggleEditor() {
-  const editor = document.getElementById("version-editor");
-
-  if (editor.style.display === "block" && unsavedChanges) {
-    if (!confirm("❗ У вас есть несохранённые изменения. Выйти без сохранения?"))
-      return;
-  }
-
-  resetEditor();
-  editor.style.display = editor.style.display === "none" ? "block" : "none";
-}
-
-// ===============================
-// Сброс редактора
-// ===============================
-function resetEditor() {
-  isEditing = false;
-  editingId = null;
-  unsavedChanges = false;
-
-  document.getElementById("version-input").value = "";
-  document.getElementById("version-title-input").value = "";
-  quillVersion.root.innerHTML = "";
-
-  document.getElementById("version-create-buttons").style.display = "flex";
-  document.getElementById("version-update-btn").style.display = "none";
-}
 
 // ===============================
 // Загрузка версий
@@ -80,24 +60,30 @@ async function loadVersions() {
   const list = document.getElementById("version-list");
   list.innerHTML = "Загрузка...";
 
-  const versions = await fetch("/api/version").then(r => r.json());
+  const endpoint = isAdminVersion && currentFilter === "draft" ? "/api/version/all" : "/api/version";
+  const versions = await fetch(endpoint).then(r => r.json());
   list.innerHTML = "";
 
-  versions.forEach(v => list.appendChild(renderVersionCard(v)));
+  versions
+    .filter(v => !isAdminVersion || v.status === currentFilter)
+    .forEach(v => list.appendChild(renderVersionCard(v)));
 }
 
 // ===============================
-// Отрисовка карточки
+// Рендер карточки версии
 // ===============================
 function renderVersionCard(v) {
   const card = document.createElement("div");
   card.className = "version-card";
 
+  const shortText = v.content.replace(/<[^>]*>/g, "").substring(0, 250);
+  const isLong = v.content.replace(/<[^>]*>/g, "").length > 250;
+
   card.innerHTML = `
     <div class="version-title">${v.version} – ${v.title}</div>
     <div class="version-date">🗓 ${v.created_at}</div>
-    <div class="version-content-preview">${v.content.substring(0, 200)}...</div>
-    <button class="version-toggle">Читать полностью</button>
+    <div class="version-content-preview">${shortText}${isLong ? "..." : ""}</div>
+    ${isLong ? `<button class="version-toggle">Читать полностью</button>` : ""}
     <div class="version-content-full" style="display:none;">${v.content}</div>
     ${isAdminVersion ? `
       <div class="version-actions">
@@ -110,38 +96,54 @@ function renderVersionCard(v) {
       </div>` : ""}
   `;
 
-  card.querySelector(".version-toggle").addEventListener("click", () => {
-    card.querySelector(".version-content-full").style.display = "block";
-    card.querySelector(".version-toggle").style.display = "none";
-  });
+  // раскрытие текста
+  const toggle = card.querySelector(".version-toggle");
+  if (toggle) {
+    toggle.addEventListener("click", () => {
+      const full = card.querySelector(".version-content-full");
+      const preview = card.querySelector(".version-content-preview");
 
+      const isExpanded = full.style.display === "block";
+      if (isExpanded) {
+        full.style.display = "none";
+        preview.style.display = "block";
+        toggle.textContent = "Читать полностью";
+      } else {
+        full.style.display = "block";
+        preview.style.display = "none";
+        toggle.textContent = "Скрыть";
+      }
+    });
+  }
+
+  // удалить / редактировать
   if (isAdminVersion) {
     card.querySelector(".delete").addEventListener("click", () => deleteVersion(v.id));
-    card.querySelector(".edit").addEventListener("click", e => startEdit(e, v.id));
+
+    card.querySelector(".edit").addEventListener("click", (e) => {
+      const btn = e.target;
+      const id = btn.dataset.id;
+      const version = btn.dataset.version;
+      const title = btn.dataset.title;
+      const content = decodeURIComponent(btn.dataset.content);
+
+      // Открываем редактор
+      document.getElementById("version-editor").style.display = "block";
+      document.getElementById("version-input").value = version;
+      document.getElementById("version-title-input").value = title;
+      quillVersion.root.innerHTML = content;
+
+      document.getElementById("version-create-buttons").style.display = "none";
+      document.getElementById("version-update-btn").style.display = "block";
+      document.getElementById("version-update-btn").dataset.id = id;
+    });
   }
 
   return card;
 }
 
 // ===============================
-// Начать редактирование версии
-// ===============================
-function startEdit(e, id) {
-  const btn = e.target;
-  isEditing = true;
-  editingId = id;
-
-  document.getElementById("version-editor").style.display = "block";
-  document.getElementById("version-input").value = btn.dataset.version;
-  document.getElementById("version-title-input").value = btn.dataset.title;
-  quillVersion.root.innerHTML = decodeURIComponent(btn.dataset.content);
-
-  document.getElementById("version-create-buttons").style.display = "none";
-  document.getElementById("version-update-btn").style.display = "block";
-}
-
-// ===============================
-// Сохранить версию (черновик / паблик)
+// Сохранить версию
 // ===============================
 async function saveVersion(status) {
   const version = document.getElementById("version-input").value.trim();
@@ -171,11 +173,17 @@ async function saveVersion(status) {
 // Обновить версию
 // ===============================
 async function updateVersion() {
+  const id = document.getElementById("version-update-btn").dataset.id;
   const version = document.getElementById("version-input").value.trim();
   const title = document.getElementById("version-title-input").value.trim();
   const content = quillVersion.root.innerHTML;
 
-  const res = await fetch(`/api/version/${editingId}`, {
+  if (!version || !title || !content) {
+    alert("Все поля обязательны!");
+    return;
+  }
+
+  const res = await fetch(`/api/version/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ version, title, content, initData: tg.initData })
@@ -203,5 +211,19 @@ async function deleteVersion(id) {
 
   if (res.status === "ok") {
     loadVersions();
+  } else {
+    alert("Ошибка: " + res.detail);
   }
+}
+
+// ===============================
+// Сброс редактора
+// ===============================
+function resetEditor() {
+  document.getElementById("version-input").value = "";
+  document.getElementById("version-title-input").value = "";
+  quillVersion.root.innerHTML = "";
+  document.getElementById("version-editor").style.display = "none";
+  document.getElementById("version-create-buttons").style.display = "flex";
+  document.getElementById("version-update-btn").style.display = "none";
 }
