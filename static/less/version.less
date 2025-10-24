@@ -168,19 +168,20 @@
 }
 
 /* --- Full text --- */
+/* Плавное раскрытие версии */
 .version-content-full {
-  max-height: 0;
   overflow: hidden;
+  max-height: 0;
   opacity: 0;
-  transition: max-height 0.35s ease, opacity 0.35s ease;
+  transition: max-height 0.45s ease, opacity 0.45s ease; /* ← Сделал плавнее */
+  will-change: max-height, opacity;
 }
 
-/* Когда открыт */
 .version-content-full.open {
+  max-height: 800px;  /* больше, чтобы точно влез любой текст */
   opacity: 1;
-  max-height: 500px; /* можно увеличить при необходимости */
-  margin-top: 8px;
 }
+
 /* --- Admin Actions --- */
 .version-actions {
   display: flex;
