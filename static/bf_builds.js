@@ -953,13 +953,21 @@ async function bfRenderBuilds(builds) {
   if (!list) return;
   list.innerHTML = "";
   
-  // countEl.textContent = `Всего сборок: ${ builds.length}`;
   noResults.style.display = builds.length ? "none" : "block";
 
   if (!Array.isArray(builds) || builds.length === 0) {
-    list.innerHTML = '<p class="no-results">🔍 Сборок пока нет</p>';
-    return;
-  }
+     // ✅ Если режим BR — показываем заглушку
+     if (currentBFMode === "br") {
+       document.getElementById("bf-br-placeholder").style.display = "block";
+       list.innerHTML = ""; // не показываем "ничего не найдено" в BR
+     } else {
+       // ✅ Сетевая — обычное сообщение
+       list.innerHTML = '<p class="no-results">🔍 Сборок пока нет</p>';
+     }
+     return;
+   }
+
+
      // Загружаем модули для всех типов оружия (ожидаем завершения)
    const uniqueTypes = [...new Set(builds.map(b => b.weapon_type))];
    await Promise.all(uniqueTypes.map(t => bfLoadModules(t)));
