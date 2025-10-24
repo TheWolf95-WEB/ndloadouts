@@ -172,17 +172,13 @@
   max-height: 0;
   overflow: hidden;
   opacity: 0;
-  transform: translateY(-6px);
-  transition:
-    max-height 1s ease,
-    opacity .5s ease,
-    transform .5s ease;
+  transition: max-height .6s cubic-bezier(.25,.8,.25,1),
+              opacity .5s ease-in-out;
 }
 
 .version-content-full.open {
-  max-height: 1000px;
+  max-height: 2000px;
   opacity: 1;
-  transform: translateY(0);
 }
 
 
