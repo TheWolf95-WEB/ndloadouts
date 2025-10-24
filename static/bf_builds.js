@@ -1320,7 +1320,7 @@ function bfFilterBuilds() {
 
 async function bfLoadBuildsTable() {
   try {
-    const res = await fetch(`/api/bf/builds?mode=${currentBFMode}`);
+    const res = await fetch(`/api/bf/builds`);
     const builds = await res.json();
     const grid = document.getElementById("bf-edit-builds-grid");
     const countEl = document.getElementById("bf-builds-count");
