@@ -1273,44 +1273,22 @@ async function bfRenderBuilds(builds) {
 /* ===============================
    🧩 ФИЛЬТРЫ И ПОИСК
    =============================== */
-document.getElementById("bf-category-filter")?.addEventListener("change", () => {
-  bfFilterBuilds();
-});
-
-document.getElementById("bf-weapon-filter")?.addEventListener("change", () => {
-  bfFilterBuilds();
-});
 
 document.getElementById("bf-builds-search")?.addEventListener("input", () => {
   bfFilterBuilds();
 });
 
 function bfFilterBuilds() {
-  const cat = document.getElementById("bf-category-filter").value;
-  const type = document.getElementById("bf-weapon-filter").value;
   const q = document.getElementById("bf-builds-search").value.toLowerCase();
-
-  let filtered = bfCachedBuilds;
-
-  if (cat !== "all") {
-    filtered = filtered.filter((b) => (b.categories || []).includes(cat));
-  }
-
-  if (type !== "all") {
-    filtered = filtered.filter((b) => b.weapon_type === type);
-  }
-
-  if (q) {
-    filtered = filtered.filter((b) => {
-      const text =
-        (b.title || "") +
-        (b.top1 || "") +
-        (b.top2 || "") +
-        (b.top3 || "") +
-        JSON.stringify(b.tabs || []);
-      return text.toLowerCase().includes(q);
-    });
-  }
+  let filtered = bfCachedBuilds.filter((b) => {
+    const text =
+      (b.title || "") +
+      (b.top1 || "") +
+      (b.top2 || "") +
+      (b.top3 || "") +
+      JSON.stringify(b.tabs || []);
+    return text.toLowerCase().includes(q);
+  });
 
   bfRenderBuilds(filtered);
 }
