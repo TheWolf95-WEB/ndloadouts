@@ -175,7 +175,7 @@ function renderVersionCard(v) {
     <div class="version-date">🗓 ${formatDatePretty(v.date) || formatDatePretty(v.created_at)}</div>
     <div class="version-content-preview">${shortText}${isLong ? "..." : ""}</div>
     ${isLong ? `<button class="version-toggle">Читать полностью</button>` : ""}
-    <div class="version-content-full" style="display:none;">${v.content || ""}</div>
+    <div class="version-content-full">${v.content || ""}</div>
     ${isAdminVersion ? `
       <div class="version-actions">
         <button class="edit"
