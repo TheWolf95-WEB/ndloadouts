@@ -1,97 +1,155 @@
 /* =========================
-   📦 Version History Styles
+   📦 Version History Styles (NDHQ)
    ========================= */
 #screen-version-history {
   padding: 15px;
+  color: #fff;
 }
 
+/* ===== Заголовок ===== */
+#screen-version-history .screen-header h2 {
+  color: #00b4ff;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ===== Кнопка админки ===== */
 #version-admin-panel .btn-accent {
-  background: linear-gradient(90deg, #0077ff, #00b4ff);
+  background: linear-gradient(90deg, #0077ff, #00c6ff);
   border: none;
   color: #fff;
-  font-weight: bold;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 12px;
   width: 100%;
-  text-align: center;
+  transition: .2s;
+}
+#version-admin-panel .btn-accent:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
 }
 
+/* ===== Панель редактора ===== */
 #version-editor {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(0, 180, 255, 0.15);
   border-radius: 10px;
+  padding: 15px;
+  margin-top: 10px;
+  backdrop-filter: blur(6px);
 }
 
+#version-editor .form-input {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(0, 180, 255, 0.2);
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+/* ===== Quill dark fix ===== */
+.ql-toolbar {
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.1) !important;
+}
+.ql-container {
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  border: 1px solid rgba(0,180,255,0.15) !important;
+}
+
+/* ===== Save button ===== */
+#version-save-btn {
+  width: 100%;
+  background: #009b3a;
+  color: white;
+  padding: 10px;
+  font-weight: 600;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: .2s;
+}
+#version-save-btn:hover {
+  background: #00b945;
+  transform: translateY(-2px);
+}
+
+/* ===== Cards ===== */
 .version-list {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  margin-top: 20px;
 }
 
 .version-card {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: #101820;
+  border: 1px solid rgba(0, 180, 255, 0.15);
+  box-shadow: 0px 0px 12px rgba(0, 200, 255, 0.05);
   padding: 15px;
   border-radius: 8px;
-  transition: 0.3s;
+  transition: .2s;
 }
-
 .version-card:hover {
-  background: rgba(255,255,255,0.07);
+  border-color: rgba(0, 200, 255, 0.35);
 }
 
+/* ===== Title / Date ===== */
 .version-title {
-  font-size: 16px;
+  font-size: 15px;
+  color: #00c6ff;
   font-weight: bold;
+  margin-bottom: 6px;
 }
-
 .version-date {
   font-size: 12px;
-  color: #aaa;
-  margin-bottom: 8px;
+  color: #6f8597;
+  margin-bottom: 10px;
 }
 
+/* ===== Content ===== */
 .version-content-preview {
-  color: #ddd;
-  max-height: 45px;
-  overflow: hidden;
-  position: relative;
+  color: #d9e5f6;
+  opacity: 0.9;
 }
-
 .version-content-full {
   display: none;
   margin-top: 10px;
   color: #fff;
-  line-height: 1.4;
+  line-height: 1.45;
 }
 
+/* ===== Toggle button ===== */
 .version-toggle {
-  color: #00aaff;
-  border: none;
   background: none;
+  color: #00c6ff;
+  border: none;
   cursor: pointer;
-  margin-top: 5px;
+  padding: 0;
+  margin-top: 8px;
 }
 
+/* ===== Admin actions ===== */
 .version-actions {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 8px;
+  margin-top: 14px;
 }
-
-.version-actions button {
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.25);
-  padding: 5px 10px;
-  border-radius: 5px;
-  cursor: pointer;
+.version-actions .edit {
+  background: #ffe100;
+  border: none;
+  color: #000;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
 }
-
-.version-actions button.delete {
-  border-color: red;
-  color: red;
-}
-
-.version-actions button.edit {
-  border-color: yellow;
-  color: yellow;
+.version-actions .delete {
+  background: #b80000;
+  border: none;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 600;
 }
