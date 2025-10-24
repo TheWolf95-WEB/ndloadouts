@@ -188,17 +188,28 @@ function renderVersionCard(v) {
       </div>` : ""}
   `;
 
-  const toggle = card.querySelector(".version-toggle");
-  if (toggle) {
-    toggle.addEventListener("click", () => {
-      const full = card.querySelector(".version-content-full");
-      const preview = card.querySelector(".version-content-preview");
-      const expanded = full.style.display === "block";
-      full.style.display = expanded ? "none" : "block";
-      preview.style.display = expanded ? "block" : "none";
-      toggle.textContent = expanded ? "Читать полностью" : "Скрыть";
-    });
-  }
+    // Показать / скрыть текст
+    const toggle = card.querySelector(".version-toggle");
+    if (toggle) {
+      toggle.innerHTML = `Читать полностью <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>`;
+      toggle.addEventListener("click", () => {
+        const full = card.querySelector(".version-content-full");
+        const preview = card.querySelector(".version-content-preview");
+        const expanded = full.style.display === "block";
+    
+        full.style.display = expanded ? "none" : "block";
+        preview.style.display = expanded ? "block" : "none";
+    
+        if (expanded) {
+          toggle.classList.remove("open");
+          toggle.innerHTML = `Читать полностью <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>`;
+        } else {
+          toggle.classList.add("open");
+          toggle.innerHTML = `Скрыть <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></svg>`;
+        }
+      });
+    }
+
 
   if (isAdminVersion) {
     card.querySelector(".edit").addEventListener("click", (e) => {
