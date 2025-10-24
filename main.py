@@ -854,16 +854,11 @@ def init_bf_tables():
 
 # === Получить все сборки ===
 @app.get("/api/bf/builds")
-async def bf_get_builds(mode: str = Query("mp")):
-    """
-    Получить сборки Battlefield по режиму:
-    - mp = Сетевая игра
-    - br = Королевская битва
-    """
-    try:
-        builds = get_all_bf_builds()
+async def bf_get_builds(mode: str = Query("all")):
+    builds = get_all_bf_builds()
 
-        # ✅ Фильтрация по режиму
+    # ✅ показываем все если mode=all
+    if mode != "all":
         builds = [b for b in builds if b.get("mode", "mp") == mode]
 
         formatted = []
