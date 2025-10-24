@@ -53,21 +53,28 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("version-update-btn").addEventListener("click", updateVersion);
 });
 
-// ===============================
 // Загрузка версий
-// ===============================
 async function loadVersions() {
   const list = document.getElementById("version-list");
   list.innerHTML = "Загрузка...";
 
-  const endpoint = isAdminVersion && currentFilter === "draft" ? "/api/version/all" : "/api/version";
-  const versions = await fetch(endpoint).then(r => r.json());
+  let versions = [];
+  if (isAdminVersion && currentFilter === "draft") {
+    // Админ хочет видеть черновики → нужен initData
+    versions = await fetch(`/api/version/all?initData=${encodeURIComponent(tg.initData)}`)
+      .then(r => r.json());
+  } else {
+    // Обычные пользователи видят только опубликованные
+    versions = await fetch("/api/version").then(r => r.json());
+  }
+
   list.innerHTML = "";
 
   versions
     .filter(v => !isAdminVersion || v.status === currentFilter)
     .forEach(v => list.appendChild(renderVersionCard(v)));
 }
+
 
 // ===============================
 // Рендер карточки версии
