@@ -912,7 +912,7 @@ document.getElementById("bf-back-from-edit")?.addEventListener("click", () =>
 );
 
 
-// === Переключатель режима (Сетевая / КБ) ===
+// ✅ Сетевая
 document.getElementById("bf-mode-mp")?.addEventListener("click", async () => {
   currentBFMode = "mp";
   document.getElementById("bf-builds-title").textContent = "📦 Сборки — Сетевая";
@@ -921,10 +921,10 @@ document.getElementById("bf-mode-mp")?.addEventListener("click", async () => {
   await bfLoadBuilds();
 });
 
-
-document.getElementById("bf-mode-mp")?.addEventListener("click", async () => {
-  currentBFMode = "mp";
-  document.getElementById("bf-builds-title").textContent = "📦 Сборки — Сетевая";
+// ✅ КБ (Battle Royale)
+document.getElementById("bf-mode-br")?.addEventListener("click", async () => {
+  currentBFMode = "br";
+  document.getElementById("bf-builds-title").textContent = "📦 Сборки — КБ";
   document.getElementById("bf-builds-list").style.display = "block";
   document.getElementById("bf-br-placeholder").style.display = "none";
   await bfLoadBuilds();
