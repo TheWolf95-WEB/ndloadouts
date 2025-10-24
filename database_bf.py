@@ -221,7 +221,8 @@ def init_bf_builds_table():
             top3 TEXT,
             date TEXT,
             tabs TEXT,
-            categories TEXT
+            categories TEXT,
+            mode TEXT DEFAULT 'mp'  -- ✅ добавлено
         )
         """)
 
@@ -354,12 +355,18 @@ def get_all_bf_builds():
 def add_bf_build(data):
     with get_connection() as conn:
         conn.execute("""
-            INSERT INTO bf_builds (title, weapon_type, top1, top2, top3, date, tabs, categories)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO bf_builds (title, weapon_type, top1, top2, top3, date, tabs, categories, mode)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-            data.get("title"), data.get("weapon_type"),
-            data.get("top1"), data.get("top2"), data.get("top3"),
-            data.get("date"), str(data.get("tabs")), str(data.get("categories"))
+            data.get("title"),
+            data.get("weapon_type"),
+            data.get("top1"),
+            data.get("top2"),
+            data.get("top3"),
+            data.get("date"),
+            str(data.get("tabs")),
+            str(data.get("categories")),
+            data.get("mode", "mp")  # ✅ default mp
         ))
         conn.commit()
 
@@ -367,12 +374,18 @@ def update_bf_build(build_id, data):
     with get_connection() as conn:
         conn.execute("""
             UPDATE bf_builds
-            SET title=?, weapon_type=?, top1=?, top2=?, top3=?, date=?, tabs=?, categories=?
+            SET title=?, weapon_type=?, top1=?, top2=?, top3=?, date=?, tabs=?, categories=?, mode=?
             WHERE id=?
         """, (
-            data.get("title"), data.get("weapon_type"),
-            data.get("top1"), data.get("top2"), data.get("top3"),
-            data.get("date"), str(data.get("tabs")), str(data.get("categories")),
+            data.get("title"),
+            data.get("weapon_type"),
+            data.get("top1"),
+            data.get("top2"),
+            data.get("top3"),
+            data.get("date"),
+            str(data.get("tabs")),
+            str(data.get("categories")),
+            data.get("mode", "mp"),  # ✅ сохраняем режим
             build_id
         ))
         conn.commit()
