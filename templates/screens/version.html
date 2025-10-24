@@ -1,1 +1,29 @@
-<!--  -->
+<!-- =========================
+     📦 История версий (screen)
+     ========================= -->
+<div id="screen-version-history" class="screen" style="display:none;">
+
+  <!-- Header -->
+  <div class="screen-header">
+    <button class="btn btn-back" onclick="showScreen('screen-home')">⬅ Назад</button>
+    <h2>📦 История версий</h2>
+  </div>
+
+  <!-- Админка версий (кнопка только для админов, скрыта по умолчанию) -->
+  <div id="version-admin-panel" style="display:none; margin-bottom: 20px;">
+    <button id="version-admin-toggle" class="btn btn-accent">⚙ Админка версий</button>
+
+    <!-- Панель создания версии (скрыта по умолчанию) -->
+    <div id="version-editor" class="card" style="margin-top: 15px; display:none; padding: 15px;">
+      <input id="version-input" class="form-input" placeholder="Версия, например v1.0">
+      <input id="version-title-input" class="form-input" placeholder="Заголовок обновления">
+      <div id="version-quill" style="height:150px; background:#fff; color:#000;"></div>
+      <button id="version-save-btn" class="btn btn-success" style="margin-top: 10px;">✅ Сохранить версию</button>
+    </div>
+  </div>
+
+  <!-- Список версий -->
+  <div id="version-list" class="version-list">
+    <!-- Карточки версий будут подгружены через JS -->
+  </div>
+</div>
