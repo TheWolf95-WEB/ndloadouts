@@ -858,22 +858,30 @@ async def bf_get_builds():
     try:
         builds = get_all_bf_builds()
 
-        # Преобразуем записи в обычные словари
         formatted = []
         for b in builds:
+            # если строка — просто оставляем как есть
             if isinstance(b, (list, tuple)):
-                keys = ["id", "title", "weapon_type", "categories", "tabs", "top1", "top2", "top3", "date"]
+                keys = ["id", "title", "weapon_type", "top1", "top2", "top3", "date", "tabs", "categories", "mode"]
                 b = dict(zip(keys, b[:len(keys)]))
+
+            # tabs → JSON
             if isinstance(b.get("tabs"), str):
                 try:
                     b["tabs"] = json.loads(b["tabs"])
                 except:
                     b["tabs"] = []
+
+            # categories → массив
             if isinstance(b.get("categories"), str):
                 try:
-                    b["categories"] = eval(b["categories"])
+                    b["categories"] = json.loads(b["categories"])
                 except:
                     b["categories"] = []
+
+            # ✅ если mode не указан — ставим mp по умолчанию
+            b["mode"] = b.get("mode", "mp")
+
             formatted.append(b)
 
         return JSONResponse(formatted)
@@ -881,6 +889,7 @@ async def bf_get_builds():
     except Exception as e:
         print(f"BF builds error: {e}")
         return JSONResponse({"error": str(e)}, status_code=500)
+
 
 
 
