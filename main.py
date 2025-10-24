@@ -43,11 +43,6 @@ from database import (
     module_add_or_update, module_update, module_delete,
 )
 
-from database_versions import (
-    add_version, get_versions, update_version, delete_version, set_version_status
-)
-
-
 # -------------------------------
 # 📦 LOCAL MODULES (Battlefield DB)
 # -------------------------------
@@ -71,6 +66,12 @@ from database_bf_settings import (
     init_bf_settings_table,
     ensure_section_column,
     get_bf_settings,
+)
+
+
+from database_versions import (
+    init_versions_table,
+    add_version, get_versions, update_version, delete_version, set_version_status
 )
 
 # =====================================================
@@ -953,9 +954,6 @@ async def send_broadcast(data: dict = Body(...)):
 # =====================================================
 # 🧾 VERSION HISTORY API (NEW)
 # =====================================================
-from database_versions import (
-    add_version, get_versions, update_version, delete_version, set_version_status
-)
 
 @app.get("/api/version")
 def api_version_published():
