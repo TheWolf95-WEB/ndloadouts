@@ -1,5 +1,5 @@
 // ===============================
-// 📦 VERSION HISTORY LOGIC (обновлено)
+// 📦 VERSION HISTORY LOGIC (обновлено + ALERTS)
 // ===============================
 console.log("version.js loaded");
 
@@ -8,6 +8,7 @@ let isAdminVersion = false;
 let currentFilter = "published"; // вкладка по умолчанию
 
 document.addEventListener("DOMContentLoaded", async () => {
+  // Проверяем пользователя
   const me = await fetch("/api/me", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -21,13 +22,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.querySelector(".version-tabs").style.display = "flex";
   }
 
+  // Инициализируем редактор Quill
   quillVersion = new Quill("#version-quill", {
     theme: "snow",
     placeholder: "Описание изменений..."
   });
 
+  // Загружаем версии
   loadVersions();
 
+  // Переключение вкладок
   document.querySelectorAll(".version-tab").forEach(tab => {
     tab.addEventListener("click", () => {
       document.querySelectorAll(".version-tab").forEach(t => t.classList.remove("active"));
@@ -37,17 +41,19 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   });
 
+  // Открытие / закрытие редактора
   document.getElementById("version-admin-toggle").addEventListener("click", () => {
     const editor = document.getElementById("version-editor");
     editor.style.display = editor.style.display === "none" ? "block" : "none";
   });
 
+  // Кнопки действий
   document.getElementById("version-publish-btn").addEventListener("click", () => saveVersion("published"));
   document.getElementById("version-draft-btn").addEventListener("click", () => saveVersion("draft"));
   document.getElementById("version-update-btn").addEventListener("click", updateVersion);
 });
 
-// Авто-"v" в начале версии
+// Автодобавление "v"
 const versionInput = document.getElementById("version-input");
 versionInput.addEventListener("input", () => {
   if (!versionInput.value.startsWith("v")) {
@@ -55,25 +61,19 @@ versionInput.addEventListener("input", () => {
   }
 });
 
-// Загрузка списка версий
+// Загрузка версий
 async function loadVersions() {
   const list = document.getElementById("version-list");
   list.innerHTML = "Загрузка...";
 
   let versions = [];
-  try {
-    if (isAdminVersion && currentFilter === "draft") {
-      versions = await fetch(`/api/version/all?initData=${encodeURIComponent(tg.initData)}`).then(r => r.json());
-    } else {
-      versions = await fetch("/api/version").then(r => r.json());
-    }
-  } catch {
-    list.innerHTML = "Ошибка загрузки версий";
-    return;
+  if (isAdminVersion && currentFilter === "draft") {
+    versions = await fetch(`/api/version/all?initData=${encodeURIComponent(tg.initData)}`).then(r => r.json());
+  } else {
+    versions = await fetch("/api/version").then(r => r.json());
   }
 
   list.innerHTML = "";
-
   versions
     .filter(v => !isAdminVersion || v.status === currentFilter)
     .forEach(v => list.appendChild(renderVersionCard(v)));
@@ -95,24 +95,31 @@ function renderVersionCard(v) {
     <div class="version-content-full" style="display:none;">${v.content}</div>
     ${isAdminVersion ? `
       <div class="version-actions">
-        <button class="edit" data-id="${v.id}" data-version="${v.version}" data-title="${v.title}" data-content='${encodeURIComponent(v.content)}'>✏ Редактировать</button>
+        <button class="edit"
+          data-id="${v.id}"
+          data-version="${v.version}"
+          data-title="${v.title}"
+          data-content='${encodeURIComponent(v.content)}'>✏ Редактировать</button>
         <button class="delete" data-id="${v.id}">🗑 Удалить</button>
       </div>` : ""}
   `;
 
-  if (isLong) {
-    card.querySelector(".version-toggle").addEventListener("click", () => {
+  // Чтение полностью
+  const toggle = card.querySelector(".version-toggle");
+  if (toggle) {
+    toggle.addEventListener("click", () => {
       const full = card.querySelector(".version-content-full");
       const preview = card.querySelector(".version-content-preview");
-      const isExpanded = full.style.display === "block";
-      full.style.display = isExpanded ? "none" : "block";
-      preview.style.display = isExpanded ? "block" : "none";
+      const expanded = full.style.display === "block";
+      full.style.display = expanded ? "none" : "block";
+      preview.style.display = expanded ? "block" : "none";
+      toggle.textContent = expanded ? "Читать полностью" : "Скрыть";
     });
   }
 
+  // Редактирование
   if (isAdminVersion) {
-    card.querySelector(".delete").addEventListener("click", () => deleteVersion(v.id));
-    card.querySelector(".edit").addEventListener("click", e => {
+    card.querySelector(".edit").addEventListener("click", (e) => {
       const btn = e.target;
       document.getElementById("version-editor").style.display = "block";
       document.getElementById("version-input").value = btn.dataset.version;
@@ -122,18 +129,24 @@ function renderVersionCard(v) {
       document.getElementById("version-update-btn").style.display = "block";
       document.getElementById("version-update-btn").dataset.id = btn.dataset.id;
     });
+
+    // Удаление
+    card.querySelector(".delete").addEventListener("click", () => deleteVersion(v.id));
   }
 
   return card;
 }
 
-// Добавление версии
+// Сохранить версию
 async function saveVersion(status) {
   const version = document.getElementById("version-input").value.trim();
   const title = document.getElementById("version-title-input").value.trim();
   const content = quillVersion.root.innerHTML;
 
-  if (!version || !title || !content) return alert("❗ Заполни все поля");
+  if (!version || !title || !content) {
+    alert("Все поля обязательны!");
+    return;
+  }
 
   const res = await fetch("/api/version", {
     method: "POST",
@@ -142,7 +155,7 @@ async function saveVersion(status) {
   }).then(r => r.json());
 
   if (res.status === "ok") {
-    alert(status === "published" ? "✅ Версия опубликована!" : "💾 Сохранено в черновики");
+    alert(status === "published" ? "✅ Версия опубликована!" : "💾 Сохранено в черновики!");
     loadVersions();
     resetEditor();
   } else {
@@ -150,14 +163,17 @@ async function saveVersion(status) {
   }
 }
 
-// Обновление версии
+// Обновить версию
 async function updateVersion() {
   const id = document.getElementById("version-update-btn").dataset.id;
   const version = document.getElementById("version-input").value.trim();
   const title = document.getElementById("version-title-input").value.trim();
   const content = quillVersion.root.innerHTML;
 
-  if (!version || !title || !content) return alert("❗ Заполни все поля");
+  if (!version || !title || !content) {
+    alert("Все поля обязательны!");
+    return;
+  }
 
   const res = await fetch(`/api/version/${id}`, {
     method: "PUT",
@@ -166,7 +182,7 @@ async function updateVersion() {
   }).then(r => r.json());
 
   if (res.status === "ok") {
-    alert("✅ Изменения сохранены");
+    alert("✏ Версия обновлена!");
     loadVersions();
     resetEditor();
   } else {
@@ -174,7 +190,7 @@ async function updateVersion() {
   }
 }
 
-// Удаление версии
+// Удалить версию
 async function deleteVersion(id) {
   if (!confirm("Удалить версию навсегда?")) return;
 
@@ -185,14 +201,14 @@ async function deleteVersion(id) {
   }).then(r => r.json());
 
   if (res.status === "ok") {
-    alert("🗑 Версия удалена");
+    alert("🗑 Версия удалена!");
     loadVersions();
   } else {
     alert("❌ Ошибка: " + res.detail);
   }
 }
 
-// Очистка формы
+// Сброс редактора
 function resetEditor() {
   document.getElementById("version-input").value = "";
   document.getElementById("version-title-input").value = "";
