@@ -20,23 +20,28 @@
    </div>   
 
     <!-- Редактор версии -->
-    <div id="version-editor" class="card version-editor" style="display:none;">
-      <input id="version-input" class="form-input" value="v" placeholder="Версия, например v1.0">
-      <input id="version-title-input" class="form-input" placeholder="Заголовок обновления">
-      <div id="version-quill"></div>
+     <!-- Редактор версии -->
+     <div id="version-editor" class="card version-editor" style="display:none;">
+       <input id="version-input" class="form-input" value="v" placeholder="Версия, например v1.0">
+       <input id="version-title-input" class="form-input" placeholder="Заголовок обновления">
+     
+       <!-- 📅 Новое поле даты -->
+       <input id="version-date-input" type="date" class="form-input">
+     
+       <div id="version-quill"></div>
+     
+       <!-- Кнопки создания новой версии -->
+       <div id="version-create-buttons" class="version-buttons">
+         <button id="version-publish-btn" class="btn btn-success">✅ Опубликовать</button>
+         <button id="version-draft-btn" class="btn btn-secondary">💾 Черновик</button>
+       </div>
+     
+       <!-- Кнопка обновления существующей -->
+       <button id="version-update-btn" class="btn btn-warning" style="display:none;">
+         💾 Сохранить изменения
+       </button>
+     </div>
 
-      <!-- Кнопки создания новой версии -->
-      <div id="version-create-buttons" class="version-buttons">
-        <button id="version-publish-btn" class="btn btn-success">✅ Опубликовать</button>
-        <button id="version-draft-btn" class="btn btn-secondary">💾 Черновик</button>
-      </div>
-
-      <!-- Кнопка обновления существующей -->
-      <button id="version-update-btn" class="btn btn-warning" style="display:none;">
-        💾 Сохранить изменения
-      </button>
-    </div>
-  </div>
 
   <!-- Список версий -->
   <div id="version-list" class="version-list"></div>
