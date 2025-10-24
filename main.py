@@ -42,12 +42,11 @@ from database import (
     save_user, update_build_by_id, modules_grouped_by_category,
     module_add_or_update, module_update, module_delete,
 )
+
 from database_versions import (
-    init_versions_table,
-    add_version,
-    get_versions,
-    delete_version
+    add_version, get_versions, update_version, delete_version, set_version_status
 )
+
 
 # -------------------------------
 # 📦 LOCAL MODULES (Battlefield DB)
@@ -951,33 +950,94 @@ async def send_broadcast(data: dict = Body(...)):
 # =====================================================
 # 🧾 VERSION HISTORY API
 # =====================================================
+# =====================================================
+# 🧾 VERSION HISTORY API (NEW)
+# =====================================================
+from database_versions import (
+    add_version, get_versions, update_version, delete_version, set_version_status
+)
+
 @app.get("/api/version")
-def api_get_versions():
+def api_version_published():
     """
-    Получить список версий (для страницы версий).
+    ✅ Получить только опубликованные версии
     """
     try:
-        versions = get_versions()
-        formatted = [
+        versions = get_versions(published_only=True)
+        return [
             {
                 "id": v[0],
                 "version": v[1],
                 "title": v[2],
                 "content": v[3],
-                "created_at": prettify_time(v[4])
+                "status": v[4],
+                "created_at": prettify_time(v[5]),
+                "updated_at": prettify_time(v[6]),
             }
             for v in versions
         ]
-        return formatted
     except Exception as e:
-        print("Version get error:", e)
-        raise HTTPException(status_code=500, detail="Ошибка загрузки версий")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/version/all")
+def api_version_all(data: dict = Body(...)):
+    """
+    ✅ Получить все версии (черновики + опубликованные)
+    Только для админов
+    """
+    _, is_admin, _ = extract_user_roles(data.get("initData", ""))
+    if not is_admin:
+        raise HTTPException(status_code=403, detail="Недостаточно прав")
+
+    versions = get_versions(published_only=False)
+    return [
+        {
+            "id": v[0],
+            "version": v[1],
+            "title": v[2],
+            "content": v[3],
+            "status": v[4],
+            "created_at": prettify_time(v[5]),
+            "updated_at": prettify_time(v[6]),
+        }
+        for v in versions
+    ]
 
 
 @app.post("/api/version")
-def api_add_version(data: dict = Body(...)):
+def api_version_add(data: dict = Body(...)):
     """
-    Добавить новую версию (только админы).
+    ✅ Добавить новую версию
+    status: draft или published
+    """
+    _, is_admin, _ = extract_user_roles(data.get("initData", ""))
+    if not is_admin:
+        raise HTTPException(status_code=403, detail="Недостаточно прав")
+
+    version = data.get("version", "").strip()
+    title = data.get("title", "").strip()
+    content = data.get("content", "").strip()
+    status = data.get("status", "draft")
+
+    if not version or not title or not content:
+        raise HTTPException(status_code=400, detail="Все поля обязательны")
+
+    if status not in ("draft", "published"):
+        raise HTTPException(status_code=400, detail="Некорректный статус версии")
+
+    try:
+        add_version(version, title, content, status)
+    except sqlite3.IntegrityError:
+        raise HTTPException(status_code=400, detail=f"Версия {version} уже существует")
+
+    return {"status": "ok", "message": "Версия добавлена"}
+
+
+@app.put("/api/version/{version_id}")
+def api_version_update(version_id: int, data: dict = Body(...)):
+    """
+    ✏ Обновить существующую версию
     """
     _, is_admin, _ = extract_user_roles(data.get("initData", ""))
     if not is_admin:
@@ -990,52 +1050,48 @@ def api_add_version(data: dict = Body(...)):
     if not version or not title or not content:
         raise HTTPException(status_code=400, detail="Все поля обязательны")
 
-    add_version(version, title, content)
-    return {"status": "ok", "message": "Версия добавлена"}
+    update_version(version_id, version, title, content)
+    return {"status": "ok", "message": "Версия обновлена"}
 
 
-@app.delete("/api/version/{version_id}")
-def api_delete_version(version_id: int, data: dict = Body(...)):
+@app.put("/api/version/{version_id}/publish")
+def api_version_publish(version_id: int, data: dict = Body(...)):
     """
-    Удалить версию (только супер-админ).
+    🚀 Опубликовать версию
     """
-    _, _, is_super_admin = extract_user_roles(data.get("initData", ""))
-    if not is_super_admin:
-        raise HTTPException(status_code=403, detail="Удалять версии может только главный админ")
-    delete_version(version_id)
-    return {"status": "ok", "message": "Версия удалена"}
-
-
-@app.put("/api/version/{version_id}")
-def api_update_version(version_id: int, data: dict = Body(...)):
-    """
-    Обновить существующую версию (только админы).
-    """
-    user_id, is_admin, _ = extract_user_roles(data.get("initData", ""))
+    _, is_admin, _ = extract_user_roles(data.get("initData", ""))
     if not is_admin:
         raise HTTPException(status_code=403, detail="Недостаточно прав")
 
-    version = data.get("version", "").strip()
-    title = data.get("title", "").strip()
-    content = data.get("content", "").strip()
+    set_version_status(version_id, "published")
+    return {"status": "ok", "message": "Версия опубликована"}
 
-    if not version or not title or not content:
-        raise HTTPException(status_code=400, detail="Все поля обязательны")
 
-    # Обновляем версию в БД
-    try:
-        conn = sqlite3.connect("version_history.db")
-        cur = conn.cursor()
-        cur.execute("""
-            UPDATE version_history
-            SET version = ?, title = ?, content = ?
-            WHERE id = ?
-        """, (version, title, content, version_id))
-        conn.commit()
-        conn.close()
-        return {"status": "ok", "message": "Версия обновлена"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Ошибка обновления версии: {e}")
+@app.put("/api/version/{version_id}/draft")
+def api_version_draft(version_id: int, data: dict = Body(...)):
+    """
+    📥 Убрать версию обратно в черновики
+    """
+    _, is_admin, _ = extract_user_roles(data.get("initData", ""))
+    if not is_admin:
+        raise HTTPException(status_code=403, detail="Недостаточно прав")
+
+    set_version_status(version_id, "draft")
+    return {"status": "ok", "message": "Версия скрыта (черновик)"}
+
+
+@app.delete("/api/version/{version_id}")
+def api_version_delete(version_id: int, data: dict = Body(...)):
+    """
+    🗑 Удалить версию (любой админ)
+    """
+    _, is_admin, _ = extract_user_roles(data.get("initData", ""))
+    if not is_admin:
+        raise HTTPException(status_code=403, detail="Недостаточно прав")
+
+    delete_version(version_id)
+    return {"status": "ok", "message": "Версия удалена"}
+
 
 
 
