@@ -1296,16 +1296,27 @@ async function bfRenderBuilds(builds) {
     });
   });
 
-  // === Просмотр сборки (аккордеон) ===
-  document.querySelectorAll('.js-loadout-toggle').forEach(header => {
-    header.addEventListener('click', () => {
-      const loadout = header.closest('.js-loadout');
-      const content = loadout.querySelector('.bf-loadout__content');
-      loadout.classList.toggle('is-open');
-      content.style.maxHeight = loadout.classList.contains('is-open') ? content.scrollHeight + 'px' : '0';
+// === Просмотр сборки (аккордеон: только одна открыта) ===
+document.querySelectorAll('.js-loadout-toggle').forEach(header => {
+  header.addEventListener('click', () => {
+    const current = header.closest('.js-loadout');
+    const isOpen = current.classList.contains('is-open');
+
+    // Закрываем все
+    document.querySelectorAll('.js-loadout').forEach(item => {
+      item.classList.remove('is-open');
+      item.querySelector('.bf-loadout__content').style.maxHeight = '0';
     });
+
+    // Если текущий был закрыт — открываем его
+    if (!isOpen) {
+      current.classList.add('is-open');
+      const content = current.querySelector('.bf-loadout__content');
+      content.style.maxHeight = content.scrollHeight + 'px';
+    }
   });
-}
+});
+
 
 /* ===============================
    🧩 ФИЛЬТРЫ И ПОИСК
