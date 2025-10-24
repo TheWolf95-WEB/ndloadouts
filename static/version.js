@@ -129,7 +129,14 @@ function renderVersionCard(v) {
       document.getElementById("version-editor").style.display = "block";
       document.getElementById("version-input").value = btn.dataset.version;
       document.getElementById("version-title-input").value = btn.dataset.title;
-      document.getElementById("version-date-input").value = btn.dataset.date || new Date().toISOString().split("T")[0];
+      
+      // ✅ Фикс null/undefined/пустой строки
+      let safeDate = btn.dataset.date;
+      if (!safeDate || safeDate === "null" || safeDate === "undefined") {
+        safeDate = new Date().toISOString().split("T")[0];
+      }
+      document.getElementById("version-date-input").value = safeDate;
+
       quillVersion.root.innerHTML = decodeURIComponent(btn.dataset.content);
       document.getElementById("version-create-buttons").style.display = "none";
       document.getElementById("version-update-btn").style.display = "block";
