@@ -1005,6 +1005,40 @@ def api_delete_version(version_id: int, data: dict = Body(...)):
     delete_version(version_id)
     return {"status": "ok", "message": "Версия удалена"}
 
+
+@app.put("/api/version/{version_id}")
+def api_update_version(version_id: int, data: dict = Body(...)):
+    """
+    Обновить существующую версию (только админы).
+    """
+    user_id, is_admin, _ = extract_user_roles(data.get("initData", ""))
+    if not is_admin:
+        raise HTTPException(status_code=403, detail="Недостаточно прав")
+
+    version = data.get("version", "").strip()
+    title = data.get("title", "").strip()
+    content = data.get("content", "").strip()
+
+    if not version or not title or not content:
+        raise HTTPException(status_code=400, detail="Все поля обязательны")
+
+    # Обновляем версию в БД
+    try:
+        conn = sqlite3.connect("version_history.db")
+        cur = conn.cursor()
+        cur.execute("""
+            UPDATE version_history
+            SET version = ?, title = ?, content = ?
+            WHERE id = ?
+        """, (version, title, content, version_id))
+        conn.commit()
+        conn.close()
+        return {"status": "ok", "message": "Версия обновлена"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Ошибка обновления версии: {e}")
+
+
+
 # =====================================================
 # 🪖 BATTLEFIELD — BUILDS API
 # =====================================================
