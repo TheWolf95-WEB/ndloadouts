@@ -9,21 +9,35 @@
     <h2>📦 История версий</h2>
   </div>
 
-  <!-- Админка версий (кнопка только для админов, скрыта по умолчанию) -->
-  <div id="version-admin-panel" style="display:none; margin-bottom: 20px;">
-    <button id="version-admin-toggle" class="btn btn-accent">⚙ АДМИНКА ВЕРСИЙ</button>
+  <!-- 🔧 Панель администратора -->
+  <div id="version-admin-panel" class="version-admin-panel" style="display:none;">
+    <button id="version-admin-toggle" class="btn btn-accent">⚙ Управление версиями</button>
 
-    <!-- Панель создания версии (скрыта по умолчанию) -->
-    <div id="version-editor" class="card" style="margin-top: 15px; display:none; padding: 15px;">
-      <input id="version-input" class="form-input" placeholder="Версия, например v1.0">
-      <input id="version-title-input" class="form-input" placeholder="Заголовок обновления">
-      <div id="version-quill" style="height:150px; background:#fff; color:#000;"></div>
-      <button id="version-save-btn" class="btn btn-success" style="margin-top: 10px;">✅ Сохранить версию</button>
+    <!-- ✏️ Форма создания/редактирования -->
+    <div id="version-editor" class="version-editor card" style="display:none;">
+      <h3 id="version-editor-title">Добавить новую версию</h3>
+
+      <input id="version-input" class="form-input version-input" placeholder="Версия, например v1.0">
+      <input id="version-title-input" class="form-input version-title-input" placeholder="Заголовок обновления">
+
+      <!-- WYSIWYG -->
+      <div id="version-quill" class="version-quill"></div>
+
+      <!-- Кнопки действий -->
+      <div class="version-editor-actions">
+        <button id="version-save-draft" class="btn btn-secondary">💾 Сохранить в черновик</button>
+        <button id="version-save-publish" class="btn btn-success">🚀 Опубликовать</button>
+      </div>
     </div>
   </div>
 
-  <!-- Список версий -->
-  <div id="version-list" class="version-list">
-    <!-- Карточки версий будут подгружены через JS -->
+  <!-- ✅ Опубликованные версии -->
+  <h3 class="version-section-title">✅ Опубликованные</h3>
+  <div id="version-list" class="version-list"></div>
+
+  <!-- 📝 Черновики (только админ видит) -->
+  <div id="version-drafts-block" style="display:none;">
+    <h3 class="version-section-title">📝 Черновики</h3>
+    <div id="version-draft-list" class="version-list"></div>
   </div>
 </div>
