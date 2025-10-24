@@ -18,7 +18,6 @@ from pathlib import Path
 from typing import List
 from urllib.parse import parse_qs, unquote
 from datetime import datetime, timezone, timedelta
-
 import requests
 from dotenv import load_dotenv, set_key, dotenv_values
 
@@ -953,8 +952,9 @@ async def send_broadcast(data: dict = Body(...)):
 # =====================================================
 # 🧾 VERSION HISTORY API
 # =====================================================
+
 # =====================================================
-# 🧾 VERSION HISTORY API (NEW)
+# 🧾 VERSION HISTORY API (UPDATED WITH DATE)
 # =====================================================
 
 @app.get("/api/version")
@@ -966,13 +966,14 @@ def api_version_published():
         versions = get_versions(published_only=True)
         return [
             {
-                "id": v[0],
-                "version": v[1],
-                "title": v[2],
-                "content": v[3],
-                "status": v[4],
-                "created_at": prettify_time(v[5]),
-                "updated_at": prettify_time(v[6]),
+                "id": v.get("id"),
+                "version": v.get("version"),
+                "title": v.get("title"),
+                "content": v.get("content"),
+                "status": v.get("status"),
+                "date": v.get("date"),  # ✅ новая дата
+                "created_at": prettify_time(v.get("created_at")),
+                "updated_at": prettify_time(v.get("updated_at")),
             }
             for v in versions
         ]
@@ -994,17 +995,17 @@ def api_version_all(request: Request):
     versions = get_versions(published_only=False)
     return [
         {
-            "id": v[0],
-            "version": v[1],
-            "title": v[2],
-            "content": v[3],
-            "status": v[4],
-            "created_at": prettify_time(v[5]),
-            "updated_at": prettify_time(v[6]),
+            "id": v.get("id"),
+            "version": v.get("version"),
+            "title": v.get("title"),
+            "content": v.get("content"),
+            "status": v.get("status"),
+            "date": v.get("date"),  # ✅ добавили дату
+            "created_at": prettify_time(v.get("created_at")),
+            "updated_at": prettify_time(v.get("updated_at")),
         }
         for v in versions
     ]
-
 
 
 @app.post("/api/version")
@@ -1020,16 +1021,17 @@ def api_version_add(data: dict = Body(...)):
     version = data.get("version", "").strip()
     title = data.get("title", "").strip()
     content = data.get("content", "").strip()
+    date = data.get("date", "").strip()  # ✅ новая дата
     status = data.get("status", "draft")
 
-    if not version or not title or not content:
+    if not version or not title or not content or not date:
         raise HTTPException(status_code=400, detail="Все поля обязательны")
 
     if status not in ("draft", "published"):
         raise HTTPException(status_code=400, detail="Некорректный статус версии")
 
     try:
-        add_version(version, title, content, status)
+        add_version(version, title, content, status, date)
     except sqlite3.IntegrityError:
         raise HTTPException(status_code=400, detail=f"Версия {version} уже существует")
 
@@ -1048,11 +1050,12 @@ def api_version_update(version_id: int, data: dict = Body(...)):
     version = data.get("version", "").strip()
     title = data.get("title", "").strip()
     content = data.get("content", "").strip()
+    date = data.get("date", "").strip()  # ✅ обновляем дату
 
-    if not version or not title or not content:
+    if not version or not title or not content or not date:
         raise HTTPException(status_code=400, detail="Все поля обязательны")
 
-    update_version(version_id, version, title, content)
+    update_version(version_id, version, title, content, date)
     return {"status": "ok", "message": "Версия обновлена"}
 
 
@@ -1093,8 +1096,6 @@ def api_version_delete(version_id: int, data: dict = Body(...)):
 
     delete_version(version_id)
     return {"status": "ok", "message": "Версия удалена"}
-
-
 
 
 # =====================================================
