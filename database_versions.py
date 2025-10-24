@@ -13,6 +13,8 @@ def init_versions_table():
 
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
+
+    # Создаём таблицу если нет
     c.execute("""
     CREATE TABLE IF NOT EXISTS version_history (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -20,35 +22,43 @@ def init_versions_table():
         title TEXT NOT NULL,
         content TEXT NOT NULL,
         status TEXT NOT NULL DEFAULT 'draft',  -- draft | published
+        date TEXT,                             -- ✅ Новое поле даты
         created_at TEXT NOT NULL,
         updated_at TEXT
     )
     """)
+
+    # ✅ Добавляем поле date если таблица уже есть без него
+    columns = [row[1] for row in c.execute("PRAGMA table_info(version_history)")]
+    if "date" not in columns:
+        c.execute("ALTER TABLE version_history ADD COLUMN date TEXT")
+
     conn.commit()
     conn.close()
 
 
 # === ДОБАВИТЬ НОВУЮ ВЕРСИЮ ==============================================
-def add_version(version: str, title: str, content: str, status: str = "draft"):
+def add_version(version: str, title: str, content: str, status: str, date: str):
+    now = datetime.utcnow().isoformat()
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     c.execute("""
-        INSERT INTO version_history (version, title, content, status, created_at)
-        VALUES (?, ?, ?, ?, ?)
-    """, (version, title, content, status, datetime.utcnow().isoformat()))
+        INSERT INTO version_history (version, title, content, status, date, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (version, title, content, status, date, now))
     conn.commit()
     conn.close()
 
 
 # === ОБНОВИТЬ ВЕРСИЮ ====================================================
-def update_version(version_id: int, version: str, title: str, content: str):
+def update_version(version_id: int, version: str, title: str, content: str, date: str):
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     c.execute("""
         UPDATE version_history
-        SET version = ?, title = ?, content = ?, updated_at = ?
+        SET version = ?, title = ?, content = ?, date = ?, updated_at = ?
         WHERE id = ?
-    """, (version, title, content, datetime.utcnow().isoformat(), version_id))
+    """, (version, title, content, date, datetime.utcnow().isoformat(), version_id))
     conn.commit()
     conn.close()
 
@@ -69,12 +79,15 @@ def set_version_status(version_id: int, status: str):
 # === ПОЛУЧИТЬ СПИСОК ВЕРСИЙ ============================================
 def get_versions(published_only=True):
     conn = sqlite3.connect(DB_FILE)
+    conn.row_factory = sqlite3.Row  # ✅ Чтобы удобно превращать в dict
     c = conn.cursor()
+
     if published_only:
         c.execute("SELECT * FROM version_history WHERE status='published' ORDER BY id DESC")
     else:
         c.execute("SELECT * FROM version_history ORDER BY id DESC")
-    rows = c.fetchall()
+
+    rows = [dict(row) for row in c.fetchall()]
     conn.close()
     return rows
 
