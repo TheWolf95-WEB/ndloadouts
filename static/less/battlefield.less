@@ -1364,225 +1364,136 @@ body.warzone-theme .card-btn:hover {
    🎯 BATTLEFIELD BUILDS STYLES (Admin)
    =========================== */
 
-/* ================================
-   ✅ Карточки в БАЗЕ СБОРКОВ (ADMIN)
-   ================================ */
-#screen-bf-edit-builds .bf-builds-grid {
+/* ====== GRID ====== */
+.bf-builds-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
+  gap: 16px;
+  padding: 10px 0;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-/* Карточка */
+
+/* ====== CARD ====== */
 .bf-build-card {
-  background: linear-gradient(145deg, #1b2634, #111923);
-  border: 1px solid rgba(70, 106, 148, 0.2);
+  border: 1px solid #2a3a5a;
   border-radius: 10px;
   padding: 14px;
+  color: #e0e6ee;
+  position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  min-height: 155px; /* одинаковая высота */
+  min-height: 180px; /* ✅ фиксированная высота */
+  background: rgba(18, 27, 38, 0.85); /* ✅ чуть темнее и ровнее */
   transition: all 0.25s ease;
 }
 
 .bf-build-card:hover {
-  border-color: rgba(70, 106, 148, 0.6);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+  border-color: #3a7bd5;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.4);
   transform: translateY(-2px);
 }
 
-/* Заголовок */
-.bf-build-card .bf-card-header h3 {
-  margin: 0 0 6px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #fff;
+.bf-build-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3a7bd5, #00d2ff);
 }
 
-/* Категории */
-.bf-build-card .bf-categories {
+
+/* ===== HEADER ===== */
+.bf-card-header {
+  margin-bottom: 10px;
+}
+
+.bf-card-header h3 {
+  margin: 0 0 6px 0;
+  font-size: 1.1rem; /* ✅ компактнее */
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.25;
+}
+
+
+/* ===== META ===== */
+.bf-card-meta {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  margin-bottom: 6px;
+  gap: 6px;
+  margin-bottom: 10px;
 }
 
+
+/* ===== CATEGORY BADGES ===== */
 .bf-cat {
-  padding: 2px 6px;
+  font-size: 0.75rem;
+  padding: 4px 8px;
   border-radius: 6px;
-  font-size: 12px;
-  line-height: 1;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.1);
   display: inline-block;
 }
 
-.bf-cat-new { background:#4F46E5; color:white; }
-.bf-cat-topmeta { background:#0083b0; color:white; }
-.bf-cat-meta { background:#00b894; color:white; }
-.bf-cat-popular { background:#2b5876; color:white; }
-.bf-cat-default { background:#444; color:#ccc; }
 
-/* Тип оружия */
-.bf-build-card .bf-weapon-type {
-  font-size: 13px;
+/* ===== WEAPON TYPE ===== */
+.bf-weapon-type {
+  display: inline-block;
+  background: rgba(58, 123, 213, 0.15);
   color: #9cc9ff;
-  margin-bottom: 6px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  border: 1px solid rgba(58, 123, 213, 0.2);
+  margin-top: 6px;
+  margin-bottom: auto; /* ✅ толкаем вниз кнопки */
+  font-weight: 600;
+  text-transform: capitalize;
 }
 
-/* Buttons bottom */
-.bf-build-card .bf-card-footer {
-  margin-top: auto;
+
+/* ===== FOOTER ===== */
+.bf-card-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 6px;
+  border-top: 1px solid #2a3a5a;
+  padding-top: 10px;
+  margin-top: 12px;
 }
 
-.bf-build-card button.btn {
+.bf-card-footer .btn {
   padding: 6px 10px;
-  font-size: 14px;
+  font-size: 0.85rem;
   border-radius: 6px;
-}
-
-.bf-build-card button.btn-edit {
-  background: #1f6feb;
-  color: white;
-}
-
-.bf-build-card button.btn-delete {
-  background: #b52222;
-  color: white;
+  font-weight: 600;
+  min-width: 36px;
 }
 
 
-
-// .bf-builds-grid {
-//   display: grid;
-//   grid-template-columns: repeat(2, 1fr);
-//   gap: 16px;
-//   padding: 10px 0;
-//   max-width: 1200px;
-//   margin: 0 auto;
-// }
-
-// .bf-build-card {
-//   border: 1px solid #2a3a5a;
-//   border-radius: 10px;
-//   padding: 10px;
-//   color: #e0e6ee;
-//   transition: all 0.3s ease;
-//   position: relative;
-//   overflow: hidden;
-//   display: flex;
-//   flex-direction: column;
-//   height: fit-content;
-// }
-
-// .bf-build-card::before {
-//   content: '';
-//   position: absolute;
-//   top: 0;
-//   left: 0;
-//   right: 0;
-//   height: 3px;
-//   background: linear-gradient(90deg, #3a7bd5, #00d2ff);
-// }
-
-// .bf-card-header {
-//   margin-bottom: 12px;
-// }
-
-// .bf-card-header h3 {
-//   margin: 0 0 8px 0;
-//   font-size: 1.3rem;
-//   font-weight: 700;
-//   color: #ffffff;
-//   line-height: 1.3;
-// }
-
-// .bf-card-meta {
-//   display: flex;
-//   flex-wrap: wrap;
-//   gap: 8px;
-//   margin-bottom: 12px;
-//   align-items: center;
-// }
-
-// .bf-cat {
-//   font-size: 0.7rem;
-//   padding: 5px 10px;
-//   border-radius: 5px;
-//   font-weight: 600;
-//   text-shadow: 0 1px 1px rgba(0,0,0,0.4);
-//   border: 1px solid rgba(255,255,255,0.15);
-//   display: inline-block;
-// }
+/* ===== FILTERS ===== */
+.bf-filter-select {
+  background: rgba(42, 58, 90, 0.6);
+  border: 1px solid #3a4a6a;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #e0e6ee;
+  font-size: 14px;
+  min-width: 120px;
+}
 
 
+/* ===== ANIMATION ===== */
+@keyframes bfCardAppear {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
-// .bf-weapon-type {
-//   display: inline-block;
-//   background: rgba(58, 123, 213, 0.15);
-//   color: #9cc9ff;
-//   padding: 6px 12px;
-//   border-radius: 8px;
-//   font-size: 0.85rem;
-//   border: 1px solid rgba(58, 123, 213, 0.3);
-//   margin: 15px 0;
-//   text-transform: capitalize;
-//   font-weight: 600;
-// }
-
-// .bf-card-footer {
-//   display: flex;
-//   justify-content: flex-end;
-//   gap: 8px;
-//   border-top: 1px solid #2a3a5a;
-//   padding-top: 16px;
-//   margin-top: auto;
-// }
-
-// .bf-card-footer .btn {
-//   padding: 8px 12px;
-//   font-size: 0.9rem;
-//   border-radius: 8px;
-//   transition: all 0.2s ease;
-//   font-weight: 600;
-//   min-width: 44px;
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-// }
+.bf-build-card { animation: bfCardAppear 0.3s ease-out; }
 
 
-
-// /* Стили фильтров */
-// .bf-filter-select {
-//   background: rgba(42, 58, 90, 0.6);
-//   border: 1px solid #3a4a6a;
-//   border-radius: 8px;
-//   padding: 8px 12px;
-//   color: #e0e6ee;
-//   font-size: 14px;
-//   min-width: 120px;
-// }
-
-
-
-// /* Анимация появления */
-// @keyframes bfCardAppear {
-//   from {
-//     opacity: 0;
-//     transform: translateY(10px);
-//   }
-//   to {
-//     opacity: 1;
-//     transform: translateY(0);
-//   }
-// }
-
-// .bf-build-card {
-//   animation: bfCardAppear 0.3s ease-out;
-// }
 /* === Справочник модулей - выбор типа === */
 #screen-bf-modules-types {
   padding: 20px;
