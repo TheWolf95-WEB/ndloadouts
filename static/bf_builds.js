@@ -922,9 +922,11 @@ document.getElementById("bf-mode-mp")?.addEventListener("click", async () => {
 });
 
 
-document.getElementById("bf-mode-br")?.addEventListener("click", async () => {
-  currentBFMode = "br";
-  document.getElementById("bf-builds-title").textContent = "📦 Сборки — КБ";
+document.getElementById("bf-mode-mp")?.addEventListener("click", async () => {
+  currentBFMode = "mp";
+  document.getElementById("bf-builds-title").textContent = "📦 Сборки — Сетевая";
+  document.getElementById("bf-builds-list").style.display = "block";
+  document.getElementById("bf-br-placeholder").style.display = "none";
   await bfLoadBuilds();
 });
 
